@@ -1,0 +1,27 @@
+package com.cryptodept.domain.model
+
+data class TechnicalIndicators(
+    val rsi: Float,
+    val macd: MACDData,
+    val bollingerBands: BollingerBandsData,
+    val emas: Map<Int, Double>,
+    val trend: TrendSignal,
+    val supportLevels: List<Double>,
+    val resistanceLevels: List<Double>
+)
+
+data class MACDData(
+    val macdLine: Float,
+    val signalLine: Float,
+    val histogram: Float
+)
+
+data class BollingerBandsData(
+    val upper: Double,
+    val middle: Double,
+    val lower: Double
+)
+
+enum class TrendSignal {
+    STRONG_BULLISH, BULLISH, NEUTRAL, BEARISH, STRONG_BEARISH
+}

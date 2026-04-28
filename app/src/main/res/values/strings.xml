@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">CryptoDept</string>
+    <string name="notification_channel_live_name">CryptoDept Live</string>
+    <string name="notification_channel_live_description">Current cryptocurrency prices monitoring</string>
+    <string name="notification_channel_alerts_name">Price Alerts</string>
+    <string name="notification_channel_alerts_description">Notifications when price targets are reached</string>
+    <string name="notification_title_live">Market Monitoring Active</string>
+    <string name="notification_content_live">Tracking live crypto prices...</string>
+    <string name="alert_notification_title">Price Alert: %1$s</string>
+    <string name="alert_notification_content">%1$s reached %2$s!</string>
+</resources>

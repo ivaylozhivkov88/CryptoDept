@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<defaultsMap>
+    <entry>
+        <key>refresh_interval_ms</key>
+        <value>30000</value>
+    </entry>
+    <entry>
+        <key>enable_advanced_analysis</key>
+        <value>true</value>
+    </entry>
+</defaultsMap>
