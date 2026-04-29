@@ -122,5 +122,68 @@ object NetworkModule {
             .create(EtherscanApi::class.java)
 
     @Provides @Singleton
+    fun provideBinanceFuturesApi(@Named("binance_futures") retrofit: Retrofit): BinanceFuturesApi =
+        retrofit.create(BinanceFuturesApi::class.java)
+
+    @Provides @Singleton @Named("binance_futures")
+    fun provideBinanceFuturesRetrofit(@Named("PublicClient") okHttpClient: OkHttpClient): Retrofit =
+        Retrofit.Builder()
+            .baseUrl("https://fapi.binance.com/")
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+    // Coinglass (с API key header)
+    @Provides @Singleton @Named("coinglass")
+    fun provideCoinglassOkHttp(@Named("PublicClient") base: OkHttpClient): OkHttpClient =
+        base.newBuilder()
+            .addInterceptor { chain ->
+                chain.proceed(
+                    chain.request().newBuilder()
+                        .addHeader("CG-API-KEY", BuildConfig.COINGLASS_API_KEY)
+                        .build()
+                )
+            }
+            .build()
+
+    @Provides @Singleton @Named("coinglass")
+    fun provideCoinglassRetrofit(@Named("coinglass") client: OkHttpClient): Retrofit =
+        Retrofit.Builder()
+            .baseUrl("https://open-api.coinglass.com/")
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+    @Provides @Singleton
+    fun provideCoinglassApi(@Named("coinglass") retrofit: Retrofit): CoinglassApi =
+        retrofit.create(CoinglassApi::class.java)
+
+    // Alpha Vantage
+    @Provides @Singleton @Named("alphavantage")
+    fun provideAlphaVantageRetrofit(@Named("PublicClient") okHttpClient: OkHttpClient): Retrofit =
+        Retrofit.Builder()
+            .baseUrl("https://www.alphavantage.co/")
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+    @Provides @Singleton
+    fun provideAlphaVantageApi(@Named("alphavantage") retrofit: Retrofit): AlphaVantageApi =
+        retrofit.create(AlphaVantageApi::class.java)
+
+    // CoinMarketCal
+    @Provides @Singleton @Named("coinmarketcal")
+    fun provideCoinMarketCalRetrofit(@Named("PublicClient") okHttpClient: OkHttpClient): Retrofit =
+        Retrofit.Builder()
+            .baseUrl("https://developers.coinmarketcal.com/")
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+    @Provides @Singleton
+    fun provideCoinMarketCalApi(@Named("coinmarketcal") retrofit: Retrofit): CoinMarketCalApi =
+        retrofit.create(CoinMarketCalApi::class.java)
+
+    @Provides @Singleton
     fun provideGson(): Gson = Gson()
 }

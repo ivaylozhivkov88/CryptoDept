@@ -20,4 +20,13 @@ sealed class Screen(val route: String, val label: String = "", val icon: String 
     object CoinDetail : Screen("coin_detail/{coinId}") {
         fun createRoute(coinId: String) = "coin_detail/$coinId"
     }
+    
+    // БЛОК C: НОВИ ЕКРАНИ
+    object Risk : Screen("risk", "RISK", "⚠")
+    object Briefing : Screen("briefing", "BRIEFING", "📋")
+    object Derivatives : Screen("derivatives", "DERIVATIVES", "⛓")
+    object Whales : Screen("whales", "WHALES", "🐋")
+    object Journal : Screen("journal", "JOURNAL", "📓")
+    object Calendar : Screen("calendar", "CALENDAR", "📅")
+    object Macro : Screen("macro", "MACRO", "🌍")
 }

@@ -30,28 +30,29 @@ class CryptoRepositoryImpl @Inject constructor(
     private val RATE_LIMIT_MS = 10_000L
 
     init {
+        // Свързваме се с WebSocket услугите при инициализация
         binanceWS.connect()
         startPriceSubscriptions()
     }
 
     private fun startPriceSubscriptions() {
-        // Binance WS
+        // Binance WebSocket Stream
         repositoryScope.launch {
             binanceWS.observeTickerStream().collect { ticker ->
                 val coinId = when(ticker.symbol) {
                     "BTCUSDT" -> "bitcoin"
                     "ETHUSDT" -> "ethereum"
                     "XRPUSDT" -> "ripple"
+                    "SOLUSDT" -> "solana"
                     else -> null
                 }
-                coinId?.let { 
-                    Log.d("CryptoDept_WS", "📡 Price update: $it = $${ticker.lastPrice}")
-                    updateConsensusPrice(it, "binance", ticker.lastPrice.toDouble()) 
+                coinId?.let {
+                    updateConsensusPrice(it, "binance", ticker.lastPrice.toDouble())
                 }
             }
         }
 
-        // Kraken WS
+        // Kraken WebSocket Stream
         repositoryScope.launch {
             krakenWS.observeTickerStream().collect { (coinId, price) ->
                 updateConsensusPrice(coinId, "kraken", price)
@@ -60,7 +61,10 @@ class CryptoRepositoryImpl @Inject constructor(
     }
 
     private suspend fun updateConsensusPrice(coinId: String, source: String, price: Double) {
+        // Актуализираме агрегатора и вземаме консенсусната цена
         val aggPrice = aggregator.updatePriceFromWS(coinId, source, price)
+
+        // Записваме в базата само ако имаме реална промяна или нов консенсус
         coinDao.updatePrice(
             id = coinId,
             newPrice = aggPrice.consensusPrice,
@@ -72,32 +76,30 @@ class CryptoRepositoryImpl @Inject constructor(
 
     override fun getTrackedCoinPrices(): Flow<List<CoinPrice>> {
         return coinDao.getTrackedCoins().map { entities ->
-            Log.d("CryptoDept_CACHE", "💾 Cache hit: ${entities.size} coins")
             entities.map { it.toDomainPrice() }
         }
     }
 
     override suspend fun refreshPrices(): Result<Unit> = coroutineScope {
         try {
+            // Проверка за Rate Limit (CoinGecko Free API е силно ограничено)
             if (System.currentTimeMillis() - lastFetchTime < RATE_LIMIT_MS) {
                 return@coroutineScope Result.success(Unit)
             }
 
-            val trackedCoins = listOf(
-                "bitcoin", "ethereum", "ripple", "cardano", "solana", 
+            val trackedIds = listOf(
+                "bitcoin", "ethereum", "ripple", "cardano", "solana",
                 "polkadot", "dogecoin", "chainlink", "shiba-inu", "litecoin",
                 "avalanche-2", "tron", "matic-network", "stellar", "cosmos"
-            )
-            val ids = trackedCoins.joinToString(",")
-            
-            Log.d("CryptoDept_API", "🌐 Fetching CoinGecko prices...")
-            val marketResponse = api.getCoinMarkets(ids = ids)
+            ).joinToString(",")
+
+            val marketResponse = api.getCoinMarkets(ids = trackedIds)
             lastFetchTime = System.currentTimeMillis()
-            Log.d("CryptoDept_API", "✅ CoinGecko prices loaded: ${marketResponse.size} coins")
-            
+
             val entities = marketResponse.map { res ->
+                // Първоначална агрегация с цената от CoinGecko
                 val aggPrice = aggregator.fetchAggregatedPrice(res.id, res.current_price)
-                
+
                 CoinEntity(
                     id = res.id,
                     symbol = res.symbol,
@@ -118,40 +120,46 @@ class CryptoRepositoryImpl @Inject constructor(
             coinDao.insertCoins(entities)
             Result.success(Unit)
         } catch (e: HttpException) {
-            Log.e("CryptoDept_API", "❌ CoinGecko error ${e.code()}: ${e.message()}")
+            Log.e("CryptoRepository", "HTTP Error ${e.code()}")
             Result.failure(e)
         } catch (e: Exception) {
-            Log.e("CryptoDept_API", "❌ CoinGecko unknown error: ${e.message}")
+            Log.e("CryptoRepository", "Refresh failed: ${e.message}")
             Result.failure(e)
         }
     }
 
     override fun getCoinPrice(coinId: String): Flow<CoinPrice?> {
-        return coinDao.getTrackedCoins().map { entities ->
-            entities.find { it.id == coinId }?.toDomainPrice()
-        }
+        return coinDao.getCoinPriceFlow(coinId).map { it?.toDomainPrice() }
     }
 
-    override suspend fun getOHLCData(coinId: String, days: Int): List<com.cryptodept.domain.model.OHLCData> {
+    override suspend fun getOHLCData(coinId: String, days: Int): List<OHLCData> {
         return try {
-            val response = api.getCoinOHLC(coinId, "usd", days.toString())
-            response.map {
-                com.cryptodept.domain.model.OHLCData(
-                    timestamp = it[0].toLong(),
-                    open = it[1],
-                    high = it[2],
-                    low = it[3],
-                    close = it[4],
-                    volume = 0.0 // CoinGecko OHLC endpoint doesn't return volume
-                )
+            // Важно: Подаваме "usd" като валута
+            val response = api.getCoinOHLC(id = coinId, vsCurrency = "usd", days = days.toString())
+            response.mapNotNull { item ->
+                if (item.size >= 5) {
+                    OHLCData(
+                        timestamp = item[0].toLong(),
+                        open = item[1],
+                        high = item[2],
+                        low = item[3],
+                        close = item[4],
+                        volume = 0.0
+                    )
+                } else null
             }
         } catch (e: Exception) {
+            Log.e("CryptoRepository", "OHLC error: ${e.message}")
             emptyList()
         }
     }
 
     override suspend fun getCachedPrice(coinId: String): Double {
         return coinDao.getCoinById(coinId)?.currentPrice ?: 0.0
+    }
+
+    override suspend fun getCachedChange24h(coinId: String): Double {
+        return coinDao.getCoinById(coinId)?.priceChangePercentage24h ?: 0.0
     }
 
     override suspend fun getCoinDetail(coinId: String): Result<CoinDetail> {
@@ -176,7 +184,7 @@ class CryptoRepositoryImpl @Inject constructor(
                         pair = "${it.base}/${it.target}",
                         price = it.last,
                         volume = it.volume,
-                        tradeUrl = it.tradeUrl
+                        tradeUrl = it.tradeUrl ?: ""
                     )
                 } ?: emptyList()
             )
@@ -188,7 +196,8 @@ class CryptoRepositoryImpl @Inject constructor(
 
     override suspend fun getGlobalMarketData(): Result<GlobalMarketData> {
         return try {
-            val res = api.getGlobalData().data
+            val response = api.getGlobalData()
+            val res = response.data
             val data = GlobalMarketData(
                 activeCoins = res.activeCryptocurrencies,
                 totalMarketCap = res.totalMarketCap["usd"] ?: 0.0,

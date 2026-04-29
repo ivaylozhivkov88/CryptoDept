@@ -20,6 +20,9 @@ interface CoinDao {
     @Query("SELECT * FROM coins WHERE id = :coinId")
     suspend fun getCoinById(coinId: String): CoinEntity?
 
+    @Query("SELECT * FROM coins WHERE id = :coinId")
+    fun getCoinPriceFlow(coinId: String): Flow<CoinEntity?>
+
     @Query("UPDATE coins SET currentPrice = :newPrice, sourcesCount = :sourcesCount, maxDeviation = :deviation, lastUpdated = :timestamp WHERE id = :id")
     suspend fun updatePrice(id: String, newPrice: Double, sourcesCount: Int, deviation: Double, timestamp: Long)
 }

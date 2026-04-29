@@ -21,11 +21,17 @@ import com.cryptodept.ui.indicators.IndicatorsScreen
 import com.cryptodept.ui.coindetail.CoinDetailScreen
 import com.cryptodept.ui.news.NewsScreen
 import com.cryptodept.ui.news.NewsViewModel
+import com.cryptodept.ui.risk.RiskScoreScreen
+import com.cryptodept.ui.briefing.DailyBriefingScreen
+import com.cryptodept.ui.derivatives.DerivativesScreen
+import com.cryptodept.ui.journal.TradeJournalScreen
+import com.cryptodept.ui.calendar.CalendarScreen
+import com.cryptodept.ui.macro.MacroScreen
 
 @Composable
 fun NavGraph(
     navController: NavHostController,
-    preferencesManager: PreferencesManager // Hilt ще го подаде тук, но не ни трябва за SettingsScreen вече
+    preferencesManager: PreferencesManager
 ) {
     NavHost(
         navController = navController,
@@ -76,7 +82,6 @@ fun NavGraph(
             AlertsScreen()
         }
 
-        // КОРИГИРАНО: Премахнат параметър prefs, SettingsScreen сам си взема ViewModel
         composable(Screen.Settings.route) {
             SettingsScreen(
                 onBack = { navController.popBackStack() }
@@ -102,6 +107,32 @@ fun NavGraph(
         composable(Screen.News.route) {
             val viewModel: NewsViewModel = hiltViewModel()
             NewsScreen(viewModel)
+        }
+
+        composable(Screen.Risk.route) {
+            RiskScoreScreen()
+        }
+
+        composable(Screen.Briefing.route) {
+            DailyBriefingScreen()
+        }
+
+        composable(Screen.Derivatives.route) {
+            DerivativesScreen()
+        }
+
+        // WhaleTrackerScreen е премахнат от тук
+
+        composable(Screen.Journal.route) {
+            TradeJournalScreen()
+        }
+
+        composable(Screen.Calendar.route) {
+            CalendarScreen()
+        }
+
+        composable(Screen.Macro.route) {
+            MacroScreen()
         }
     }
 }

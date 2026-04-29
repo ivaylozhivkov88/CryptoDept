@@ -8,7 +8,19 @@ data class TechnicalIndicators(
     val trend: TrendSignal,
     val supportLevels: List<Double>,
     val resistanceLevels: List<Double>
-)
+) {
+    companion object {
+        fun default() = TechnicalIndicators(
+            rsi = 50f,
+            macd = MACDData(0f, 0f, 0f),
+            bollingerBands = BollingerBandsData(0.0, 0.0, 0.0),
+            emas = emptyMap(),
+            trend = TrendSignal.NEUTRAL,
+            supportLevels = emptyList(),
+            resistanceLevels = emptyList()
+        )
+    }
+}
 
 data class MACDData(
     val macdLine: Float,

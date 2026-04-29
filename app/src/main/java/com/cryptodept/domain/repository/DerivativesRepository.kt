@@ -1,0 +1,14 @@
+package com.cryptodept.domain.repository
+
+import com.cryptodept.domain.model.FundingRateData
+import com.cryptodept.domain.model.LiquidationData
+import com.cryptodept.domain.model.OpenInterestData
+import kotlinx.coroutines.flow.Flow
+
+interface DerivativesRepository {
+    suspend fun getFundingRate(symbol: String): Result<FundingRateData>
+    suspend fun getOpenInterest(symbol: String): Result<OpenInterestData>
+    suspend fun getLiquidationData(symbol: String): Result<LiquidationData>
+    suspend fun getLongShortRatio(symbol: String): Result<Pair<Double, Double>>
+    fun getLiquidationHeatmap(symbol: String): Flow<LiquidationData>
+}

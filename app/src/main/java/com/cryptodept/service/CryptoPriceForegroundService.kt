@@ -1,8 +1,3 @@
-// STEP 8: Foreground Service for real-time monitoring
-// Created: 2024-05-23
-// Dependencies: Hilt, BinanceWebSocketManager, AlertsRepository, CryptoRepository
-// Used by: Android System
-
 package com.cryptodept.service
 
 import android.app.*
@@ -10,13 +5,18 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
-import androidx.core.app.NotificationCompat
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import com.cryptodept.MainActivity
 import com.cryptodept.R
 import com.cryptodept.data.api.BinanceWebSocketManager
+import com.cryptodept.data.api.FearGreedApi
 import com.cryptodept.domain.repository.AlertsRepository
 import com.cryptodept.domain.repository.CryptoRepository
+import com.cryptodept.domain.repository.DerivativesRepository // Важен импорт
+import com.cryptodept.domain.usecase.ConfluenceAlertDetector
+import com.cryptodept.domain.usecase.RiskScoreEngine
+import com.cryptodept.domain.usecase.TechnicalAnalysisEngine
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
@@ -36,8 +36,24 @@ class CryptoPriceForegroundService : Service() {
     @Inject
     lateinit var alertsRepository: AlertsRepository
 
+    @Inject
+    lateinit var derivativesRepository: DerivativesRepository
+
+    @Inject
+    lateinit var riskEngine: RiskScoreEngine
+
+    @Inject
+    lateinit var confluenceDetector: ConfluenceAlertDetector
+
+    @Inject
+    lateinit var taEngine: TechnicalAnalysisEngine
+
+    @Inject
+    lateinit var fearGreedApi: FearGreedApi
+
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var notificationManager: NotificationManager? = null
+    private var refreshCount = 0
 
     companion object {
         const val CHANNEL_LIVE_ID = "cryptodept_live"
@@ -60,11 +76,11 @@ class CryptoPriceForegroundService : Service() {
 
     private fun startForegroundService() {
         val notification = createLiveNotification("Starting monitoring...")
-        
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(
-                NOTIFICATION_ID, 
-                notification, 
+                NOTIFICATION_ID,
+                notification,
                 ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
             )
         } else {
@@ -97,7 +113,7 @@ class CryptoPriceForegroundService : Service() {
     private fun createLiveNotification(content: String): Notification {
         val intent = Intent(this, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(
-            this, 0, intent, 
+            this, 0, intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
@@ -117,7 +133,7 @@ class CryptoPriceForegroundService : Service() {
                     Log.e("CryptoDept_FS", "WebSocket Stream failed (attempt $attempt): ${cause.message}")
                     val delayTime = minOf(1000L * (2.0.pow(attempt.toDouble())).toLong(), 30000L)
                     delay(delayTime)
-                    true // Always retry
+                    true
                 }
                 .collectLatest { ticker ->
                     val coinId = when (ticker.symbol.lowercase()) {
@@ -126,21 +142,110 @@ class CryptoPriceForegroundService : Service() {
                         "xrpusdt" -> "ripple"
                         else -> ticker.symbol.lowercase()
                     }
-                    
+
                     val price = ticker.lastPrice.toDoubleOrNull() ?: 0.0
-                    
-                    // Update notification
+
                     updateNotification(ticker.symbol, price)
-                    
-                    // Check alerts
                     alertsRepository.checkAlerts(coinId, price)
+
+                    if (ticker.symbol.lowercase() == "btcusdt") {
+                        // Анализ на всеки ~300 тика (приблизително на всеки 5-10 минути според волатилността)
+                        if (refreshCount % 300 == 0) {
+                            analyzeMarket(price)
+                        }
+                        refreshCount++
+                    }
                 }
         }
     }
 
+    private fun analyzeMarket(currentPrice: Double) {
+        serviceScope.launch {
+            try {
+                val btcOHLC = cryptoRepository.getOHLCData("bitcoin", 30)
+                val btcPrices = btcOHLC.map { it.close }
+
+                if (btcPrices.size >= 14) {
+                    val rsi = taEngine.calculateRSI(btcPrices)
+                    val macdResult = taEngine.calculateMACD(btcPrices)
+                    val fundingResult = derivativesRepository.getFundingRate("BTC")
+                    val funding = fundingResult.getOrNull()
+
+                    val fearGreedResponse = fearGreedApi.getFearGreedIndex()
+                    val fearGreed = fearGreedResponse.data.firstOrNull()?.value?.toIntOrNull() ?: 50
+                    val btcChange24h = cryptoRepository.getCachedChange24h("bitcoin")
+
+                    if (funding != null) {
+                        // 1. Изчисляване на Риск Скорост
+                        val riskScore = riskEngine.calculate(
+                            rsi = rsi,
+                            fundingRate = funding.binanceRate,
+                            longShortRatio = 1.5, // По подразбиране, ако нямаме API за това
+                            fearGreedIndex = fearGreed,
+                            exchangeInflowChange = 0.0,
+                            openInterestChange = 0.0,
+                            priceChange24h = btcChange24h
+                        )
+
+                        if (riskScore.overall > 75) {
+                            showRiskAlert(riskScore)
+                        }
+
+                        // 2. Търсене на Конфлуенс (Сигнали)
+                        val ema50 = taEngine.calculateEMA(btcPrices, 50).lastOrNull() ?: 0.0
+                        val ema200 = taEngine.calculateEMA(btcPrices, 200).lastOrNull() ?: 0.0
+
+                        val confluence = confluenceDetector.detect(
+                            coin = "BTC",
+                            price = currentPrice,
+                            rsi = rsi,
+                            macdBullish = (macdResult.histogram.lastOrNull() ?: 0.0) > 0,
+                            priceAboveEma50 = currentPrice > ema50,
+                            priceAboveEma200 = currentPrice > ema200,
+                            fundingRate = funding.binanceRate,
+                            fearGreedIndex = fearGreed,
+                            bollingerPosition = 0.5, // Неутрално, ако липсва детайлно изчисление
+                            exchangeInflowChange = 0.0
+                        )
+
+                        confluence?.let {
+                            if (it.type.label.contains("STRONG") || it.type.label.contains("EXTREME")) {
+                                showConfluenceAlert(it)
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("CryptoDept_Service", "Market Analysis Error: ${e.message}")
+            }
+        }
+    }
+
     private fun updateNotification(symbol: String, price: Double) {
-        val content = "$symbol: $$price"
+        val content = "$symbol: $${String.format("%.2f", price)}"
         notificationManager?.notify(NOTIFICATION_ID, createLiveNotification(content))
+    }
+
+    private fun showRiskAlert(riskScore: RiskScoreEngine.RiskScore) {
+        val notification = NotificationCompat.Builder(this, CHANNEL_ALERTS_ID)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentTitle("⚠️ HIGH MARKET RISK: ${riskScore.overall}/100")
+            .setContentText(riskScore.recommendation)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .build()
+        notificationManager?.notify(2001, notification)
+    }
+
+    private fun showConfluenceAlert(confluence: ConfluenceAlertDetector.ConfluenceAlert) {
+        val notification = NotificationCompat.Builder(this, CHANNEL_ALERTS_ID)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentTitle("🔥 ${confluence.type.label}")
+            .setContentText("${confluence.direction} signal for ${confluence.coin}: ${confluence.suggestedAction}")
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .build()
+        notificationManager?.notify(2002, notification)
     }
 
     override fun onDestroy() {

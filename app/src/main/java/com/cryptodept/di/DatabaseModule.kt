@@ -6,6 +6,7 @@ import com.cryptodept.data.db.AlertDao
 import com.cryptodept.data.db.CoinDao
 import com.cryptodept.data.db.CryptoDatabase
 import com.cryptodept.data.db.PriceHistoryDao
+import com.cryptodept.data.db.TradeJournalDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,7 +25,9 @@ object DatabaseModule {
             context,
             CryptoDatabase::class.java,
             CryptoDatabase.DATABASE_NAME
-        ).build()
+        )
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     @Provides
@@ -35,4 +38,7 @@ object DatabaseModule {
 
     @Provides
     fun provideAlertDao(db: CryptoDatabase): AlertDao = db.alertDao
+
+    @Provides
+    fun provideTradeJournalDao(db: CryptoDatabase): TradeJournalDao = db.tradeJournalDao
 }

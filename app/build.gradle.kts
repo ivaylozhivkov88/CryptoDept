@@ -31,6 +31,9 @@ android {
         buildConfigField("String", "COINGECKO_API_KEY", "\"${properties.getProperty("COINGECKO_API_KEY")}\"")
         buildConfigField("String", "ETHERSCAN_API_KEY", "\"${properties.getProperty("Etherscan_API_KEY")}\"")
         buildConfigField("String", "CRYPTOPANIC_API_KEY", "\"${properties.getProperty("CRYPTOPANIC_API_KEY") ?: ""}\"")
+        buildConfigField("String", "COINGLASS_API_KEY", "\"${properties.getProperty("COINGLASS_API_KEY") ?: ""}\"")
+        buildConfigField("String", "ALPHA_VANTAGE_API_KEY", "\"${properties.getProperty("ALPHA_VANTAGE_API_KEY") ?: ""}\"")
+        buildConfigField("String", "COINMARKETCAL_API_KEY", "\"${properties.getProperty("COINMARKETCAL_API_KEY") ?: ""}\"")
     }
 
     buildTypes {

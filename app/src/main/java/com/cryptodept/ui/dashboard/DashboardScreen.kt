@@ -39,7 +39,6 @@ fun DashboardScreen(
     val networkHealth by viewModel.networkHealth.collectAsState()
     var showHelp by remember { mutableStateOf(false) }
 
-    // Вземаме текущите цветове от темата
     val colors = LocalTerminalColors.current
 
     val glitchTrigger = remember(uiState is DashboardUiState.Success) {
@@ -96,7 +95,7 @@ fun DashboardScreen(
                 )
                 Text(
                     text = "SOURCES: MULTI-API",
-                    color = AmberPrimary, // Използваме директно Amber за акцент
+                    color = AmberPrimary,
                     fontFamily = FontFamily.Monospace,
                     fontSize = 12.sp
                 )
@@ -116,6 +115,9 @@ fun DashboardScreen(
                 MiniHeatmap(prices)
                 HorizontalDivider(color = colors.grid, thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
             }
+
+            QuickAccessPanel(navController)
+            HorizontalDivider(color = colors.grid, thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
 
             Box(modifier = Modifier.weight(1f)) {
                 when (val state = uiState) {
@@ -156,10 +158,58 @@ fun DashboardScreen(
                         "SETTINGS" -> navController.navigate(Screen.Settings.route)
                         "CHART" -> if (parts.size > 1) navController.navigate(Screen.Charts.createRoute(parts[1].lowercase()))
                         "ANALYSIS" -> if (parts.size > 1) navController.navigate(Screen.Analysis.createRoute(parts[1].lowercase()))
+                        "RISK" -> navController.navigate(Screen.Risk.route)
+                        "BRIEF" -> navController.navigate(Screen.Briefing.route)
+                        "JOURNAL" -> navController.navigate(Screen.Journal.route)
                     }
                 }
             )
         }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun QuickAccessPanel(navController: NavController) {
+    val colors = LocalTerminalColors.current
+    Column(modifier = Modifier.fillMaxWidth().padding(4.dp)) {
+        Text(
+            text = ">>> QUICK ACCESS ENGINE",
+            color = colors.dimText,
+            fontSize = 10.sp,
+            fontFamily = FontFamily.Monospace,
+            fontWeight = FontWeight.Bold
+        )
+        FlowRow(
+            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            QuickAccessButton("RISK", Screen.Risk.route, navController)
+            QuickAccessButton("BRIEF", Screen.Briefing.route, navController)
+            QuickAccessButton("DERIVS", Screen.Derivatives.route, navController)
+            QuickAccessButton("JOURNAL", Screen.Journal.route, navController)
+            QuickAccessButton("CAL", Screen.Calendar.route, navController)
+            QuickAccessButton("MACRO", Screen.Macro.route, navController)
+        }
+    }
+}
+
+@Composable
+fun QuickAccessButton(label: String, route: String, navController: NavController) {
+    val colors = LocalTerminalColors.current
+    Box(
+        modifier = Modifier
+            .border(1.dp, colors.primary, RectangleShape)
+            .clickable { navController.navigate(route) }
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+    ) {
+        Text(
+            text = "[$label]",
+            color = colors.primary,
+            fontSize = 11.sp,
+            fontFamily = FontFamily.Monospace
+        )
     }
 }
 

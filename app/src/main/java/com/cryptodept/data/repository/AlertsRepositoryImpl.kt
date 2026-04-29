@@ -1,11 +1,9 @@
 package com.cryptodept.data.repository
 
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.os.Build
-import androidx.core.app.NotificationCompat
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import com.cryptodept.R
 import com.cryptodept.data.db.AlertDao
 import com.cryptodept.data.db.AlertEntity
@@ -44,9 +42,9 @@ class AlertsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun checkAlerts(coinId: String, currentPrice: Double) {
+        // Вземаме само активните алерти от базата
         val activeAlerts = alertDao.getActiveAlerts()
-        Log.d("CryptoDept_Alerts", "Checking ${activeAlerts.size} alerts for $coinId. Current: $currentPrice")
-        
+
         activeAlerts.filter { it.coinId == coinId }.forEach { alert ->
             val triggered = when (alert.direction) {
                 AlertDirection.ABOVE -> currentPrice >= alert.targetPrice
@@ -54,7 +52,8 @@ class AlertsRepositoryImpl @Inject constructor(
             }
 
             if (triggered) {
-                Log.i("CryptoDept_Alerts", "TRIGGERED: $coinId reached ${alert.targetPrice}")
+                Log.i("AlertsRepository", "Triggered: ${alert.coinSymbol} at $currentPrice")
+                // Маркираме в БД, че е задействан, за да не спами
                 alertDao.markAsTriggered(alert.id)
                 showNotification(alert, currentPrice)
             }
@@ -63,12 +62,14 @@ class AlertsRepositoryImpl @Inject constructor(
 
     private fun showNotification(alert: AlertEntity, currentPrice: Double) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val channelId = CryptoPriceForegroundService.CHANNEL_ALERTS_ID
+
+        // Използваме ID-то от твоя сървиз. Увери се, че CHANNEL_ALERTS_ID съществува там.
+        val channelId = "crypto_alerts_channel"
 
         val notification = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle(context.getString(R.string.alert_notification_title, alert.coinSymbol))
-            .setContentText(context.getString(R.string.alert_notification_content, alert.coinSymbol, currentPrice.toString()))
+            .setSmallIcon(R.drawable.ic_launcher_foreground) // Увери се, че този ресурс съществува
+            .setContentTitle("Price Alert: ${alert.coinSymbol}")
+            .setContentText("Target reached: $currentPrice")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .build()
