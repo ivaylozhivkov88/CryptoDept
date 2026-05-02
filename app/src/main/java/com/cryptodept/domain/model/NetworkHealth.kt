@@ -5,5 +5,7 @@ data class NetworkHealth(
     val btcMempool: String,
     val ethGas: String,
     val fearGreedIndex: Int,
-    val fearGreedLabel: String
+    val fearGreedLabel: String,
+    val socialPulse: Int = 50,
+    val socialPulseLabel: String = "NEUTRAL"
 )

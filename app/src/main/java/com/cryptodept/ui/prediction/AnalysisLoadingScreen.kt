@@ -86,7 +86,7 @@ fun TerminalLogLine(text: String, isCurrent: Boolean) {
         displayedText = ""
         text.forEach { char ->
             displayedText += char
-            delay(40) // Скорост на буквите
+            delay(10) // По-бързо
         }
     }
 

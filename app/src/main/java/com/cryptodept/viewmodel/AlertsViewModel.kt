@@ -11,6 +11,7 @@ import com.cryptodept.domain.model.Alert
 import com.cryptodept.domain.usecase.AddAlertUseCase
 import com.cryptodept.domain.usecase.GetAlertsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -25,15 +26,17 @@ class AlertsViewModel @Inject constructor(
     val alerts: StateFlow<List<Alert>> = _alerts.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            getAlertsUseCase().collect {
-                _alerts.value = it
-            }
+        viewModelScope.launch(Dispatchers.IO) {
+            getAlertsUseCase()
+                .catch { emit(emptyList()) }
+                .collect {
+                    _alerts.value = it
+                }
         }
     }
 
     fun addAlert(coinId: String, coinSymbol: String, targetPrice: Double, direction: com.cryptodept.domain.model.AlertDirection) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val alert = Alert(
                 coinId = coinId,
                 coinSymbol = coinSymbol,

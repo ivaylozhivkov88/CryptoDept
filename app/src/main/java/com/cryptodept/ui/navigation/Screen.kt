@@ -4,8 +4,8 @@ sealed class Screen(val route: String, val label: String = "", val icon: String 
     object Boot : Screen("boot")
     object Dashboard : Screen("dashboard", "DASHBOARD", "🖥️")
     object Markets : Screen("markets", "MARKETS", "📊")
-    object Analysis : Screen("analysis/{coinId}", "ANALYSIS", "📈") {
-        fun createRoute(coinId: String) = "analysis/$coinId"
+    object Analysis : Screen("analysis", "ANALYSIS", "📈") {
+        fun createRoute(coinId: String) = "analysis?coinId=$coinId"
     }
     object Signals : Screen("signals", "SIGNALS", "⚡")
     object News : Screen("news", "NEWS", "📰")
@@ -29,4 +29,19 @@ sealed class Screen(val route: String, val label: String = "", val icon: String 
     object Journal : Screen("journal", "JOURNAL", "📓")
     object Calendar : Screen("calendar", "CALENDAR", "📅")
     object Macro : Screen("macro", "MACRO", "🌍")
+
+    // БЛОК E: ПРОФЕСИОНАЛНИ ТРЕЙДЪР ИНСТРУМЕНТИ
+    object ToolsHub : Screen("tools_hub", "TOOLS", "🛠️")
+    object PositionSizer : Screen("position_sizer")
+    object MtfAnalysis : Screen("mtf_analysis")
+    object TradePlanner : Screen("trade_planner")
+    object Psychology : Screen("psychology")
+    object EntryAnalysis : Screen("entry_analysis")
+    
+    // БЛОК F: SUPREME MODE
+    object Prediction : Screen("prediction")
+    object Portfolio : Screen("portfolio")
+    object AICoach : Screen("ai_coach")
+    object Onboarding : Screen("onboarding")
+    object Backtester : Screen("backtester")
 }

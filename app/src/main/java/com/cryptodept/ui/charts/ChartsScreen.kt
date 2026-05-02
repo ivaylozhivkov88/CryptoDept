@@ -15,6 +15,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -36,6 +38,7 @@ fun ChartsScreen(
     coinId: String,
     viewModel: ChartsViewModel = hiltViewModel()
 ) {
+    val colors = LocalTerminalColors.current
     var showFibonacci by remember { mutableStateOf(false) }
 
     LaunchedEffect(coinId) {
@@ -47,7 +50,7 @@ fun ChartsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(CRTBlack)
+            .background(colors.background)
             .padding(8.dp)
     ) {
         Row(
@@ -57,7 +60,7 @@ fun ChartsScreen(
         ) {
             Text(
                 text = ">>> TERMINAL CHART: ${coinId.uppercase()}",
-                color = WallStreetGreen,
+                color = colors.primary,
                 fontFamily = FontFamily.Monospace,
                 fontSize = 14.sp
             )
@@ -65,11 +68,11 @@ fun ChartsScreen(
             // Step 55: Fibonacci Toggle
             Text(
                 text = if (showFibonacci) "[FIB: ON]" else "[FIB: OFF]",
-                color = if (showFibonacci) WallStreetAmber else TextGray,
+                color = if (showFibonacci) colors.amber else colors.dimText,
                 fontFamily = FontFamily.Monospace,
                 fontSize = 11.sp,
                 modifier = Modifier
-                    .background(if (showFibonacci) Color(0xFF332200) else Color.Transparent)
+                    .background(if (showFibonacci) colors.amber.copy(alpha = 0.2f) else Color.Transparent)
                     .padding(horizontal = 4.dp)
                     .clickable { showFibonacci = !showFibonacci }
             )
@@ -79,16 +82,12 @@ fun ChartsScreen(
 
         when (val chartState = state) {
             is ChartUiState.Loading -> {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    repeat(5) {
-                        TerminalLoadingSkeleton(Modifier.padding(vertical = 4.dp))
-                    }
-                }
+                com.cryptodept.ui.components.skeletons.ChartsSkeleton()
             }
             is ChartUiState.Success -> {
                 if (chartState.data.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("NO DATA RECEIVED FOR $coinId", color = WallStreetRed, fontFamily = FontFamily.Monospace)
+                        Text("NO DATA RECEIVED FOR $coinId", color = colors.danger, fontFamily = FontFamily.Monospace)
                     }
                 } else {
                     CandleChart(
@@ -114,10 +113,12 @@ fun ChartsScreen(
 
 @Composable
 fun CandleChart(entries: List<CandleEntry>, showFibonacci: Boolean) {
+    val contentDesc = if (showFibonacci) "Candlestick chart with Fibonacci levels" else "Candlestick chart"
     AndroidView(
         modifier = Modifier
             .fillMaxSize()
-            .padding(vertical = 16.dp),
+            .padding(vertical = 16.dp)
+            .semantics { contentDescription = contentDesc },
         factory = { context ->
             CandleStickChart(context).apply {
                 description.isEnabled = false

@@ -10,6 +10,7 @@ data class PricePrediction(
     val prediction7d: PriceTarget,
     val ensembleConsensus: EnsembleConsensus,
     val priceDistribution: PriceDistribution,
+    val mtfConsensus: MTFConsensus? = null, // Добавено
     val modelsAgreement: Float,
     val dataQuality: Float,
     val calculatedAt: Long = System.currentTimeMillis()

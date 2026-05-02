@@ -15,7 +15,11 @@ data class TerminalColorSet(
     val surface: Color,
     val error: Color,
     val dimText: Color,
-    val grid: Color
+    val grid: Color,
+    val amber: Color,
+    val danger: Color,
+    val textPrimary: Color,
+    val isPhosphor: Boolean = true
 )
 
 // Единствени дефиниции на сетовете
@@ -26,7 +30,11 @@ val GreenColorSet = TerminalColorSet(
     surface = Color(0xFF050505),
     error = Color(0xFFFF3B30),
     dimText = Color(0xFF008F11),
-    grid = Color(0xFF003B00)
+    grid = Color(0xFF003B00),
+    amber = Color(0xFFFFB000),
+    danger = Color(0xFFFF3B30),
+    textPrimary = Color(0xFFCCCCCC),
+    isPhosphor = true
 )
 
 val AmberColorSet = TerminalColorSet(
@@ -36,7 +44,11 @@ val AmberColorSet = TerminalColorSet(
     surface = Color(0xFF050505),
     error = Color(0xFFFF3B30),
     dimText = Color(0xFF996600),
-    grid = Color(0xFF332200)
+    grid = Color(0xFF332200),
+    amber = Color(0xFFFFB000),
+    danger = Color(0xFFFF3B30),
+    textPrimary = Color(0xFFCCCCCC),
+    isPhosphor = true
 )
 
 val WhiteColorSet = TerminalColorSet(
@@ -46,7 +58,11 @@ val WhiteColorSet = TerminalColorSet(
     surface = Color(0xFF050505),
     error = Color(0xFFFF3B30),
     dimText = Color(0xFF666666),
-    grid = Color(0xFF222222)
+    grid = Color(0xFF222222),
+    amber = Color(0xFFFFB000),
+    danger = Color(0xFFFF3B30),
+    textPrimary = Color(0xFFFFFFFF),
+    isPhosphor = false
 )
 
 // CompositionLocal - използваме изрично името на класа TerminalColorSet

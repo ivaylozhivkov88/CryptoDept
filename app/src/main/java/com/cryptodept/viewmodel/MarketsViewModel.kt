@@ -5,12 +5,14 @@ import androidx.lifecycle.viewModelScope
 import com.cryptodept.domain.model.CoinPrice
 import com.cryptodept.domain.repository.CryptoRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 sealed class MarketsUiState {
@@ -33,7 +35,7 @@ class MarketsViewModel @Inject constructor(
     }
 
     private fun observePrices() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             cryptoRepository.getTrackedCoinPrices()
                 .catch { e ->
                     _uiState.value = MarketsUiState.Error(e.message ?: "DATABASE ERROR")
@@ -47,7 +49,7 @@ class MarketsViewModel @Inject constructor(
     }
 
     private fun refreshData() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             cryptoRepository.refreshPrices()
                 .onFailure { error ->
                     if (_uiState.value is MarketsUiState.Loading) {

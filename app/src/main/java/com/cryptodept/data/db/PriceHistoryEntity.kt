@@ -3,7 +3,12 @@ package com.cryptodept.data.db
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "price_history")
+import androidx.room.Index
+
+@Entity(
+    tableName = "price_history",
+    indices = [Index(value = ["coinId", "timestamp"])]
+)
 data class PriceHistoryEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val coinId: String,

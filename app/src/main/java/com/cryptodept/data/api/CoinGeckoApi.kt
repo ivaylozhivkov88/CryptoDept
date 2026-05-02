@@ -50,7 +50,23 @@ interface CoinGeckoApi {
 
     @GET("search/trending")
     suspend fun getTrending(): TrendingResponse
+
+    @GET("news")
+    suspend fun getNews(): CoinGeckoNewsResponse
 }
+
+data class CoinGeckoNewsResponse(
+    val data: List<CoinGeckoNewsItem>
+)
+
+data class CoinGeckoNewsItem(
+    val title: String,
+    val description: String,
+    val url: String,
+    @SerializedName("updated_at") val updatedAt: Long,
+    @SerializedName("news_site") val newsSource: String,
+    @SerializedName("thumb_2x") val thumb: String?
+)
 
 data class CoinMarketResponse(
     val id: String,

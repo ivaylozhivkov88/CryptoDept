@@ -7,6 +7,7 @@ import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.StringReader
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -14,7 +15,7 @@ import kotlinx.coroutines.delay
 
 @Singleton
 class RssNewsParser @Inject constructor(
-    private val okHttpClient: OkHttpClient
+    @Named("PublicClient") private val okHttpClient: OkHttpClient
 ) {
     data class RssItem(
         val title: String,
@@ -25,79 +26,83 @@ class RssNewsParser @Inject constructor(
         val category: String = ""
     )
 
+    data class RssSource(val name: String, val url: String, val category: String)
+
     private val RSS_SOURCES = listOf(
         RssSource("CoinTelegraph",  "https://cointelegraph.com/rss",          "General"),
         RssSource("The Block",      "https://www.theblock.co/rss.xml",         "Institutional"),
         RssSource("Decrypt",        "https://decrypt.co/feed",                 "General"),
         RssSource("Bitcoin Mag",    "https://bitcoinmagazine.com/feed",        "Bitcoin"),
         RssSource("CryptoSlate",    "https://cryptoslate.com/feed/",           "General"),
-        RssSource("Blockworks",     "https://blockworks.co/feed",              "Professional"),
-        RssSource("DL News",        "https://www.dlnews.com/arc/outboundfeeds/rss/", "DeFi"),
-        RssSource("CoinDesk",       "https://www.coindesk.com/arc/outboundfeeds/rss/", "General"),
-        RssSource("NewsBTC",        "https://www.newsbtc.com/feed/",           "Technical")
+        RssSource("NewsBTC",       "https://www.newsbtc.com/feed/",           "General"),
+        RssSource("CoinDesk",       "https://www.coindesk.com/arc/outboundfeeds/rss/", "General")
     )
-
-    data class RssSource(val name: String, val url: String, val category: String)
 
     suspend fun fetchAllSources(): List<RssItem> = withContext(Dispatchers.IO) {
         val allItems = mutableListOf<RssItem>()
-
         RSS_SOURCES.forEach { source ->
             try {
                 val items = fetchRssFeed(source)
                 allItems.addAll(items)
-                delay(300L) // Малка пауза между заявките
+                delay(300L) // Малко по-голяма пауза за стабилност
             } catch (e: Exception) {
-                Log.e("CryptoDept_RSS", "Failed to fetch ${source.name}: ${e.message}")
+                Log.e("RSS_ERROR", "Failed ${source.name}: ${e.message}")
             }
         }
-
-        // Сортирай по дата (най-ново първо)
         allItems.sortedByDescending { parseRssDate(it.pubDate) }
     }
 
     private suspend fun fetchRssFeed(source: RssSource): List<RssItem> {
-        val request = Request.Builder().url(source.url).build()
-        val response = okHttpClient.newCall(request).execute()
-        val xml = response.body?.string() ?: return emptyList()
+        val request = Request.Builder()
+            .url(source.url)
+            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+            .build()
 
         val items = mutableListOf<RssItem>()
-        val parser = XmlPullParserFactory.newInstance().newPullParser()
-        parser.setInput(StringReader(xml))
 
-        var title = ""; var link = ""; var pubDate = ""; var description = ""
-        var inItem = false
-        var currentTag = ""
+        try {
+            val response = okHttpClient.newCall(request).execute()
+            val xml = response.body?.string() ?: return emptyList()
+            response.close()
 
-        var eventType = parser.eventType
-        while (eventType != XmlPullParser.END_DOCUMENT) {
-            when (eventType) {
-                XmlPullParser.START_TAG -> {
-                    currentTag = parser.name
-                    if (currentTag == "item") { inItem = true; title = ""; link = ""; pubDate = ""; description = "" }
-                }
-                XmlPullParser.TEXT -> {
-                    if (inItem) {
-                        when (currentTag) {
-                            "title"       -> title = parser.text.trim()
-                            "link"        -> if (link.isEmpty()) link = parser.text.trim()
-                            "pubDate"     -> pubDate = parser.text.trim()
-                            "description" -> if (description.isEmpty()) description = parser.text.trim()
+            val factory = XmlPullParserFactory.newInstance()
+            val parser = factory.newPullParser()
+            parser.setInput(StringReader(xml))
+
+            var currentItem: RssItem? = null
+            var eventType = parser.eventType
+
+            var title = ""; var link = ""; var pubDate = ""; var description = ""
+
+            while (eventType != XmlPullParser.END_DOCUMENT) {
+                val tagName = parser.name
+                when (eventType) {
+                    XmlPullParser.START_TAG -> {
+                        if (tagName == "item") { title = ""; link = ""; pubDate = ""; description = "" }
+                    }
+                    XmlPullParser.END_TAG -> {
+                        if (tagName == "item" && title.isNotEmpty()) {
+                            items.add(RssItem(title, link, pubDate, description, source.name, source.category))
                         }
                     }
+                    XmlPullParser.TEXT -> {} // Не ни трябва тук
                 }
-                XmlPullParser.END_TAG -> {
-                    if (parser.name == "item" && inItem && title.isNotEmpty()) {
-                        items.add(RssItem(title, link, pubDate, description, source.name, source.category))
-                        inItem = false
-                    }
-                    currentTag = ""
-                }
-            }
-            eventType = parser.next()
-        }
 
-        return items.take(10) // Максимум 10 статии от всеки source
+                // Използваме nextText() за сигурност вътре в START_TAG
+                if (eventType == XmlPullParser.START_TAG) {
+                    when (tagName) {
+                        "title" -> title = try { parser.nextText() } catch (e: Exception) { "" }
+                        "link" -> link = try { parser.nextText() } catch (e: Exception) { "" }
+                        "pubDate" -> pubDate = try { parser.nextText() } catch (e: Exception) { "" }
+                        "description" -> description = try { parser.nextText() } catch (e: Exception) { "" }
+                    }
+                }
+                eventType = parser.next()
+            }
+        } catch (e: Exception) {
+            Log.e("RSS_PARSER", "Error ${source.name}: ${e.message}")
+        }
+        return items.take(25)
     }
 
     private fun parseRssDate(dateStr: String): Long {

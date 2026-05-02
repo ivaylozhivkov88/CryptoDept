@@ -14,6 +14,7 @@ import com.cryptodept.domain.usecase.GetPricesUseCase
 import com.cryptodept.domain.usecase.RefreshPricesUseCase
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -23,10 +24,12 @@ import javax.inject.Inject
 class DashboardViewModel @Inject constructor(
     private val getPricesUseCase: GetPricesUseCase,
     private val refreshPricesUseCase: RefreshPricesUseCase,
+    private val sentimentAnalyzer: com.cryptodept.domain.usecase.SentimentAnalyzer,
     private val blockchainApi: BlockchainApi,
     private val etherscanApi: EtherscanApi,
     private val fearGreedApi: FearGreedApi,
-    private val gson: Gson
+    private val gson: Gson,
+    private val analytics: com.cryptodept.util.AnalyticsManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<DashboardUiState>(DashboardUiState.Loading)
@@ -39,12 +42,13 @@ class DashboardViewModel @Inject constructor(
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
     init {
+        analytics.logScreenView("DASHBOARD")
         loadPrices()
         fetchNetworkHealth()
     }
 
     private fun fetchNetworkHealth() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val btcStats = async { blockchainApi.getStats() }
                 val ethGas = async {
@@ -73,20 +77,12 @@ class DashboardViewModel @Inject constructor(
                 if (eth != null) {
                     try {
                         when {
-                            // Etherscan върна успешен резултат като JsonObject
                             eth.status == "1" && eth.result != null && eth.result.isJsonObject -> {
                                 val gasData = gson.fromJson(eth.result, GasOracleResult::class.java)
                                 safeGasPrice = "${gasData.SafeGasPrice} Gwei"
-                                Log.d("CryptoDept_API", "✅ ETH Gas: $safeGasPrice")
                             }
-                            // Etherscan върна грешка като string (rate limit, invalid key и т.н.)
                             eth.result != null && eth.result.isJsonPrimitive -> {
-                                val errorMsg = eth.result.asString
-                                Log.w("CryptoDept_API", "Etherscan error response: $errorMsg")
-                                safeGasPrice = "N/A"
-                            }
-                            else -> {
-                                Log.w("CryptoDept_API", "Etherscan: unexpected response format")
+                                Log.w("CryptoDept_API", "Etherscan error response: ${eth.result.asString}")
                             }
                         }
                     } catch (e: Exception) {
@@ -108,32 +104,31 @@ class DashboardViewModel @Inject constructor(
                     "${btc.mempool_count} TXs"
                 } catch (e: Exception) { "N/A" }
 
+                // --- Social Pulse ---
+                val pulse = sentimentAnalyzer.calculatePulse("BTC")
+                val pulseLabel = sentimentAnalyzer.getPulseLabel(pulse)
+
                 _networkHealth.value = NetworkHealth(
                     btcHashrate = hashrateStr,
                     btcMempool = mempoolStr,
                     ethGas = safeGasPrice,
                     fearGreedIndex = fearGreedIndex,
-                    fearGreedLabel = fearGreedLabel
+                    fearGreedLabel = fearGreedLabel,
+                    socialPulse = pulse,
+                    socialPulseLabel = pulseLabel
                 )
-
-                Log.d("CryptoDept_API", "✅ Network health loaded")
-
             } catch (e: Exception) {
-                Log.e("CryptoDept_API", "❌ fetchNetworkHealth error: ${e.message}", e)
+                Log.e("CryptoDept_API", "fetchNetworkHealth error: ${e.message}")
             }
         }
     }
 
     fun loadPrices() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getPricesUseCase()
                 .onStart { _uiState.value = DashboardUiState.Loading }
-                .catch { e -> _uiState.value = DashboardUiState.Error(e.message ?: "Unknown Error") }
+                .catch { e -> _uiState.value = DashboardUiState.Error(e.message ?: "DATABASE ERROR") }
                 .conflate()
-                .transform { value ->
-                    emit(value)
-                    kotlinx.coroutines.delay(500)
-                }
                 .collect { prices ->
                     _uiState.value = DashboardUiState.Success(prices)
                 }
@@ -141,7 +136,7 @@ class DashboardViewModel @Inject constructor(
     }
 
     fun refresh() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _isRefreshing.value = true
             refreshPricesUseCase()
             fetchNetworkHealth()

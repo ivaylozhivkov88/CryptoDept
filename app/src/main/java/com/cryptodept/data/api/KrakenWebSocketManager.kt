@@ -2,9 +2,12 @@ package com.cryptodept.data.api
 
 import android.util.Log
 import com.google.gson.Gson
-import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import okhttp3.*
 import javax.inject.Inject
 import javax.inject.Named
@@ -15,10 +18,29 @@ class KrakenWebSocketManager @Inject constructor(
     @Named("PublicClient") private val client: OkHttpClient,
     private val gson: Gson
 ) {
-    fun observeTickerStream(): Flow<Pair<String, Double>> = callbackFlow {
-        val request = Request.Builder().url("wss://ws.kraken.com/v2").build()
-        
-        val listener = object : WebSocketListener() {
+    private val _priceUpdates = MutableSharedFlow<Pair<String, Double>>(
+        replay = 1,
+        extraBufferCapacity = 10,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    val priceUpdates: SharedFlow<Pair<String, Double>> = _priceUpdates.asSharedFlow()
+
+    private var webSocket: WebSocket? = null
+    private var reconnectJob: Job? = null
+    private var reconnectDelay = 1000L
+    private val maxReconnectDelay = 30000L
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    private val KRAKEN_WS_URL = "wss://ws.kraken.com/v2"
+
+    fun connect() {
+        if (webSocket != null) return
+        startConnection()
+    }
+
+    private fun startConnection() {
+        val request = Request.Builder().url(KRAKEN_WS_URL).build()
+        webSocket = client.newWebSocket(request, object : WebSocketListener() {
             override fun onOpen(webSocket: WebSocket, response: Response) {
                 val subscribeMsg = """
                     {
@@ -31,6 +53,7 @@ class KrakenWebSocketManager @Inject constructor(
                 """.trimIndent()
                 webSocket.send(subscribeMsg)
                 Log.d("CryptoDept_WS", "Kraken Connected")
+                reconnectDelay = 1000L
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
@@ -50,7 +73,9 @@ class KrakenWebSocketManager @Inject constructor(
                         }
                         
                         if (coinId != null && lastPrice > 0) {
-                            trySend(coinId to lastPrice)
+                            scope.launch {
+                                _priceUpdates.emit(coinId to lastPrice)
+                            }
                         }
                     }
                 } catch (e: Exception) {
@@ -59,14 +84,32 @@ class KrakenWebSocketManager @Inject constructor(
             }
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                close(t)
+                Log.e("CryptoDept_WS", "Kraken failure: ${t.message}")
+                this@KrakenWebSocketManager.webSocket = null
+                scheduleReconnect()
             }
-        }
 
-        val webSocket = client.newWebSocket(request, listener)
+            override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                this@KrakenWebSocketManager.webSocket = null
+                scheduleReconnect()
+            }
+        })
+    }
 
-        awaitClose {
-            webSocket.close(1000, "Flow closed")
+    private fun scheduleReconnect() {
+        reconnectJob?.cancel()
+        reconnectJob = scope.launch {
+            delay(reconnectDelay)
+            reconnectDelay = minOf(reconnectDelay * 2, maxReconnectDelay)
+            startConnection()
         }
     }
+
+    fun disconnect() {
+        reconnectJob?.cancel()
+        webSocket?.close(1000, "User disconnect")
+        webSocket = null
+    }
+
+    fun observeTickerStream(): Flow<Pair<String, Double>> = priceUpdates
 }

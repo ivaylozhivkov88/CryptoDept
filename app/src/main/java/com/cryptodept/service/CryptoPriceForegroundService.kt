@@ -17,6 +17,7 @@ import com.cryptodept.domain.repository.DerivativesRepository // Важен им
 import com.cryptodept.domain.usecase.ConfluenceAlertDetector
 import com.cryptodept.domain.usecase.RiskScoreEngine
 import com.cryptodept.domain.usecase.TechnicalAnalysisEngine
+import com.cryptodept.util.NotificationChannels
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
@@ -56,8 +57,6 @@ class CryptoPriceForegroundService : Service() {
     private var refreshCount = 0
 
     companion object {
-        const val CHANNEL_LIVE_ID = "cryptodept_live"
-        const val CHANNEL_ALERTS_ID = "cryptodept_alerts"
         const val NOTIFICATION_ID = 1001
     }
 
@@ -90,7 +89,7 @@ class CryptoPriceForegroundService : Service() {
 
     private fun createNotificationChannels() {
         val liveChannel = NotificationChannel(
-            CHANNEL_LIVE_ID,
+            NotificationChannels.LIVE_CHANNEL_ID,
             getString(R.string.notification_channel_live_name),
             NotificationManager.IMPORTANCE_LOW
         ).apply {
@@ -98,7 +97,7 @@ class CryptoPriceForegroundService : Service() {
         }
 
         val alertChannel = NotificationChannel(
-            CHANNEL_ALERTS_ID,
+            NotificationChannels.ALERTS_CHANNEL_ID,
             getString(R.string.notification_channel_alerts_name),
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
@@ -117,7 +116,7 @@ class CryptoPriceForegroundService : Service() {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        return NotificationCompat.Builder(this, CHANNEL_LIVE_ID)
+        return NotificationCompat.Builder(this, NotificationChannels.LIVE_CHANNEL_ID)
             .setContentTitle(getString(R.string.notification_title_live))
             .setContentText(content)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
@@ -227,7 +226,7 @@ class CryptoPriceForegroundService : Service() {
     }
 
     private fun showRiskAlert(riskScore: RiskScoreEngine.RiskScore) {
-        val notification = NotificationCompat.Builder(this, CHANNEL_ALERTS_ID)
+        val notification = NotificationCompat.Builder(this, NotificationChannels.ALERTS_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle("⚠️ HIGH MARKET RISK: ${riskScore.overall}/100")
             .setContentText(riskScore.recommendation)
@@ -238,7 +237,7 @@ class CryptoPriceForegroundService : Service() {
     }
 
     private fun showConfluenceAlert(confluence: ConfluenceAlertDetector.ConfluenceAlert) {
-        val notification = NotificationCompat.Builder(this, CHANNEL_ALERTS_ID)
+        val notification = NotificationCompat.Builder(this, NotificationChannels.ALERTS_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle("🔥 ${confluence.type.label}")
             .setContentText("${confluence.direction} signal for ${confluence.coin}: ${confluence.suggestedAction}")

@@ -43,4 +43,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindJournalRepository(impl: JournalRepositoryImpl): JournalRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPortfolioRepository(impl: PortfolioRepositoryImpl): PortfolioRepository
 }

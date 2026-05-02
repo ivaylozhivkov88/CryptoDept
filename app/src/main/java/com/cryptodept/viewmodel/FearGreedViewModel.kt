@@ -5,9 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.cryptodept.data.api.FearGreedApi
 import com.cryptodept.data.api.FearGreedData
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 sealed class FearGreedUiState {
@@ -31,18 +33,20 @@ class FearGreedViewModel @Inject constructor(
     fun loadData() {
         viewModelScope.launch {
             _uiState.value = FearGreedUiState.Loading
-            try {
-                val response = api.getFearGreedIndex(limit = 30)
-                if (response.data.isNotEmpty()) {
-                    _uiState.value = FearGreedUiState.Success(
-                        current = response.data.first(),
-                        history = response.data
-                    )
-                } else {
-                    _uiState.value = FearGreedUiState.Error("NO DATA RECEIVED")
+            withContext(Dispatchers.IO) {
+                try {
+                    val response = api.getFearGreedIndex(limit = 30)
+                    if (response.data.isNotEmpty()) {
+                        _uiState.value = FearGreedUiState.Success(
+                            current = response.data.first(),
+                            history = response.data
+                        )
+                    } else {
+                        _uiState.value = FearGreedUiState.Error("NO DATA RECEIVED")
+                    }
+                } catch (e: Exception) {
+                    _uiState.value = FearGreedUiState.Error(e.message ?: "UNKNOWN ERROR")
                 }
-            } catch (e: Exception) {
-                _uiState.value = FearGreedUiState.Error(e.message ?: "UNKNOWN ERROR")
             }
         }
     }

@@ -1,9 +1,13 @@
 package com.cryptodept.domain.model
 
 data class NewsItem(
+    val id: String,
     val title: String,
-    val source: String,
     val url: String,
-    val publishedAt: String,
-    val sentiment: String? = null
+    val source: String,
+    val publishedAt: Long,
+    val sentiment: NewsSentiment,
+    val currencies: List<String>
 )
+
+enum class NewsSentiment { BULLISH, BEARISH, NEUTRAL }

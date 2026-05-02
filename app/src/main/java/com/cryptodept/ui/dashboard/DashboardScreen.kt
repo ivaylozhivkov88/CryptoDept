@@ -19,11 +19,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cryptodept.domain.model.CoinPrice
-import com.cryptodept.ui.components.TerminalCommandBar
-import com.cryptodept.ui.components.PriceText
-import com.cryptodept.ui.components.TickerTape
-import com.cryptodept.ui.components.TerminalErrorOverlay
-import com.cryptodept.ui.components.TerminalLoadingSkeleton
+import com.cryptodept.ui.components.*
 import com.cryptodept.ui.navigation.Screen
 import com.cryptodept.ui.theme.*
 import com.cryptodept.viewmodel.DashboardUiState
@@ -38,6 +34,7 @@ fun DashboardScreen(
     val uiState by viewModel.uiState.collectAsState()
     val networkHealth by viewModel.networkHealth.collectAsState()
     var showHelp by remember { mutableStateOf(false) }
+    var showVersion by remember { mutableStateOf(false) }
 
     val colors = LocalTerminalColors.current
 
@@ -48,20 +45,48 @@ fun DashboardScreen(
     if (showHelp) {
         AlertDialog(
             onDismissRequest = { showHelp = false },
-            containerColor = Color.Black,
+            containerColor = colors.background,
             modifier = Modifier.border(1.dp, colors.primary),
             title = { Text("TERMINAL COMMANDS", color = colors.primary, fontFamily = FontFamily.Monospace) },
             text = {
                 Column {
                     Text("CHART [SYM] - Open candlestick chart", color = colors.primary, fontFamily = FontFamily.Monospace)
+                    Text("ANALYSIS [SYM] - Deep asset analysis", color = colors.primary, fontFamily = FontFamily.Monospace)
                     Text("NEWS - Global crypto news", color = colors.primary, fontFamily = FontFamily.Monospace)
                     Text("ALERTS - System alerts log", color = colors.primary, fontFamily = FontFamily.Monospace)
+                    Text("RISK - Portfolio risk metrics", color = colors.primary, fontFamily = FontFamily.Monospace)
+                    Text("PORTFOLIO - Manage holdings", color = colors.primary, fontFamily = FontFamily.Monospace)
+                    Text("COACH - AI Trade Mentor", color = colors.primary, fontFamily = FontFamily.Monospace)
+                    Text("TOOLS - Trading toolkit", color = colors.primary, fontFamily = FontFamily.Monospace)
                     Text("SETTINGS - Terminal config", color = colors.primary, fontFamily = FontFamily.Monospace)
+                    Text("VERSION - System info", color = colors.primary, fontFamily = FontFamily.Monospace)
                 }
             },
             confirmButton = {
                 TextButton(onClick = { showHelp = false }) {
                     Text("CLOSE", color = colors.primary, fontFamily = FontFamily.Monospace)
+                }
+            }
+        )
+    }
+
+    if (showVersion) {
+        AlertDialog(
+            onDismissRequest = { showVersion = false },
+            containerColor = colors.background,
+            modifier = Modifier.border(1.dp, colors.primary),
+            title = { Text("SYSTEM VERSION INFO", color = colors.primary, fontFamily = FontFamily.Monospace) },
+            text = {
+                Column {
+                    Text("CRYPTODEPT TERMINAL v3.0.4", color = colors.primary, fontFamily = FontFamily.Monospace)
+                    Text("BUILD: 2026.04.30.SUPREME", color = colors.primary, fontFamily = FontFamily.Monospace)
+                    Text("ENGINE: ENSEMBLE v2.1", color = colors.primary, fontFamily = FontFamily.Monospace)
+                    Text("STATUS: OPTIMIZED", color = colors.primary, fontFamily = FontFamily.Monospace)
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showVersion = false }) {
+                    Text("OK", color = colors.primary, fontFamily = FontFamily.Monospace)
                 }
             }
         )
@@ -87,15 +112,19 @@ fun DashboardScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = ">>> MARKET TERMINAL v2.0",
+                    text = ">>> MARKET TERMINAL v3.0",
                     color = colors.primary,
                     fontFamily = FontFamily.Monospace,
                     fontSize = 14.sp,
-                    modifier = Modifier.clickable { navController.navigate(Screen.News.route) }
+                    modifier = Modifier
+                        .clickable(
+                            onClickLabel = "Open News",
+                            onClick = { navController.navigate(Screen.News.route) }
+                        )
                 )
                 Text(
                     text = "SOURCES: MULTI-API",
-                    color = AmberPrimary,
+                    color = colors.amber,
                     fontFamily = FontFamily.Monospace,
                     fontSize = 12.sp
                 )
@@ -122,11 +151,7 @@ fun DashboardScreen(
             Box(modifier = Modifier.weight(1f)) {
                 when (val state = uiState) {
                     is DashboardUiState.Loading -> {
-                        LazyColumn(modifier = Modifier.fillMaxSize()) {
-                            items(10) {
-                                TerminalLoadingSkeleton(Modifier.padding(vertical = 4.dp))
-                            }
-                        }
+                        com.cryptodept.ui.components.skeletons.DashboardSkeleton()
                     }
                     is DashboardUiState.Success -> {
                         Column {
@@ -156,11 +181,24 @@ fun DashboardScreen(
                         "ALERTS" -> navController.navigate(Screen.Alerts.route)
                         "NEWS" -> navController.navigate(Screen.News.route)
                         "SETTINGS" -> navController.navigate(Screen.Settings.route)
-                        "CHART" -> if (parts.size > 1) navController.navigate(Screen.Charts.createRoute(parts[1].lowercase()))
-                        "ANALYSIS" -> if (parts.size > 1) navController.navigate(Screen.Analysis.createRoute(parts[1].lowercase()))
+                        "CHART" -> if (parts.size > 1) navController.navigate(Screen.Charts.createRoute(parts[1].lowercase())) else navController.navigate(Screen.Charts.createRoute("bitcoin"))
+                        "ANALYSIS" -> if (parts.size > 1) navController.navigate(Screen.Analysis.createRoute(parts[1].lowercase())) else navController.navigate(Screen.Analysis.createRoute("bitcoin"))
                         "RISK" -> navController.navigate(Screen.Risk.route)
                         "BRIEF" -> navController.navigate(Screen.Briefing.route)
                         "JOURNAL" -> navController.navigate(Screen.Journal.route)
+                        "TOOLS" -> navController.navigate(Screen.ToolsHub.route)
+                        "PREDICT" -> navController.navigate(Screen.Prediction.route)
+                        "PORTFOLIO" -> navController.navigate(Screen.Portfolio.route)
+                        "COACH" -> navController.navigate(Screen.AICoach.route)
+                        "BACK" -> navController.popBackStack()
+                        "VERSION" -> showVersion = true
+                        "CLEAR" -> { /* Visually handled by CommandBar clearing input */ }
+                        "SIZER" -> navController.navigate(Screen.PositionSizer.route)
+                        "PLANNER" -> navController.navigate(Screen.TradePlanner.route)
+                        "ENTRY" -> navController.navigate(Screen.EntryAnalysis.route)
+                        "MTF" -> navController.navigate(Screen.MtfAnalysis.route)
+                        "PSYCH" -> navController.navigate(Screen.Psychology.route)
+                        "DERIVS" -> navController.navigate(Screen.Derivatives.route)
                     }
                 }
             )
@@ -185,12 +223,14 @@ fun QuickAccessPanel(navController: NavController) {
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
+            QuickAccessButton("SIZER", Screen.PositionSizer.route, navController)
+            QuickAccessButton("PLANNER", Screen.TradePlanner.route, navController)
+            QuickAccessButton("ENTRY", Screen.EntryAnalysis.route, navController)
+            QuickAccessButton("MTF", Screen.MtfAnalysis.route, navController)
+            QuickAccessButton("PSYCH", Screen.Psychology.route, navController)
             QuickAccessButton("RISK", Screen.Risk.route, navController)
-            QuickAccessButton("BRIEF", Screen.Briefing.route, navController)
             QuickAccessButton("DERIVS", Screen.Derivatives.route, navController)
             QuickAccessButton("JOURNAL", Screen.Journal.route, navController)
-            QuickAccessButton("CAL", Screen.Calendar.route, navController)
-            QuickAccessButton("MACRO", Screen.Macro.route, navController)
         }
     }
 }
@@ -198,11 +238,19 @@ fun QuickAccessPanel(navController: NavController) {
 @Composable
 fun QuickAccessButton(label: String, route: String, navController: NavController) {
     val colors = LocalTerminalColors.current
+    val hapticManager = com.cryptodept.ui.components.LocalHapticManager.current
     Box(
         modifier = Modifier
+            .minimumInteractiveComponentSize() // Ensures 48dp touch target
             .border(1.dp, colors.primary, RectangleShape)
-            .clickable { navController.navigate(route) }
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .clickable(
+                onClickLabel = "Open $label",
+                onClick = { 
+                    hapticManager?.tick()
+                    navController.navigate(route) 
+                }
+            )
+            .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
         Text(
             text = "[$label]",
@@ -234,7 +282,8 @@ fun NetworkHealthPanel(health: com.cryptodept.domain.model.NetworkHealth, onClic
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             NetworkStat("BTC HASHRATE", health.btcHashrate)
             NetworkStat("ETH GAS", health.ethGas)
-            NetworkStat("FEAR/GREED", "${health.fearGreedIndex} (${health.fearGreedLabel.uppercase()})")
+            NetworkStat("FEAR/GREED", "${health.fearGreedIndex}")
+            NetworkStat("SOCIAL PULSE", "${health.socialPulse} (${health.socialPulseLabel.take(4)})")
         }
     }
 }
@@ -254,16 +303,17 @@ fun MarketDominanceBar(prices: List<CoinPrice>) {
         Row(modifier = Modifier
             .fillMaxWidth()
             .height(4.dp)
-            .background(Color(0xFF1A1A1A))) {
-            Box(modifier = Modifier.weight(btcDominance).fillMaxHeight().background(AmberPrimary))
-            Box(modifier = Modifier.weight(ethDominance).fillMaxHeight().background(GreenPrimary))
-            Box(modifier = Modifier.weight((1f - btcDominance - ethDominance).coerceAtLeast(0f)).fillMaxHeight().background(Color.DarkGray))
+            .background(colors.surface)) {
+            Box(modifier = Modifier.weight(btcDominance).fillMaxHeight().background(colors.amber))
+            Box(modifier = Modifier.weight(ethDominance).fillMaxHeight().background(colors.primary))
+            Box(modifier = Modifier.weight((1f - btcDominance - ethDominance).coerceAtLeast(0f)).fillMaxHeight().background(colors.grid))
         }
     }
 }
 
 @Composable
 fun MiniHeatmap(prices: List<CoinPrice>) {
+    val colors = LocalTerminalColors.current
     val topPrices = prices.take(10)
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -271,10 +321,10 @@ fun MiniHeatmap(prices: List<CoinPrice>) {
     ) {
         topPrices.forEach { coin ->
             val color = when {
-                coin.priceChangePercentage24h > 5 -> Color(0xFF00FF41)
-                coin.priceChangePercentage24h > 0 -> Color(0xFF008822)
-                coin.priceChangePercentage24h < -5 -> Color(0xFFFF3B30)
-                else -> Color(0xFF880000)
+                coin.priceChangePercentage24h > 5 -> colors.primary
+                coin.priceChangePercentage24h > 0 -> colors.primary.copy(alpha = 0.6f)
+                coin.priceChangePercentage24h < -5 -> colors.danger
+                else -> colors.danger.copy(alpha = 0.6f)
             }
             Box(
                 modifier = Modifier
@@ -321,12 +371,13 @@ fun MarketList(prices: List<CoinPrice>, onCoinClick: (String) -> Unit) {
 @Composable
 fun CoinRow(coin: CoinPrice, onClick: (String) -> Unit) {
     val colors = LocalTerminalColors.current
-    val changeColor = if (coin.priceChangePercentage24h >= 0) GreenPrimary else TerminalRed
+    val hapticManager = com.cryptodept.ui.components.LocalHapticManager.current
+    val changeColor = if (coin.priceChangePercentage24h >= 0) colors.primary else colors.danger
     val changeSign = if (coin.priceChangePercentage24h >= 0) "+" else ""
 
     val discrepancyColor = when {
-        coin.maxDeviation > 2.0 -> TerminalRed
-        coin.maxDeviation > 1.0 -> AmberPrimary
+        coin.maxDeviation > 2.0 -> colors.danger
+        coin.maxDeviation > 1.0 -> colors.amber
         else -> colors.primary.copy(alpha = 0.6f)
     }
 
@@ -334,7 +385,10 @@ fun CoinRow(coin: CoinPrice, onClick: (String) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .border(0.5.dp, colors.grid, RectangleShape)
-            .clickable { onClick(coin.id) }
+            .clickable { 
+                hapticManager?.tick()
+                onClick(coin.id) 
+            }
             .padding(8.dp)
     ) {
         Row(
@@ -343,7 +397,7 @@ fun CoinRow(coin: CoinPrice, onClick: (String) -> Unit) {
         ) {
             Text(
                 text = coin.symbol.uppercase(),
-                color = AmberPrimary,
+                color = colors.amber,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Monospace,
                 modifier = Modifier.weight(1f)

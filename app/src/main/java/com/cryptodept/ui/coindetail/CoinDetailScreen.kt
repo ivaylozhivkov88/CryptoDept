@@ -44,12 +44,29 @@ fun CoinDetailScreen(
             .background(CRTBlack)
             .padding(8.dp)
     ) {
-        Text(
-            text = ">>> ASSET_DOSSIER: ${coinId.uppercase()}",
-            color = WallStreetGreen,
-            fontFamily = FontFamily.Monospace,
-            fontSize = 14.sp
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = ">>> ASSET_DOSSIER: ${coinId.uppercase()}",
+                color = WallStreetGreen,
+                fontFamily = FontFamily.Monospace,
+                fontSize = 14.sp
+            )
+            
+            if (uiState is CoinDetailUiState.Success) {
+                val isTracked = (uiState as CoinDetailUiState.Success).detail.isTracked
+                Text(
+                    text = if (isTracked) "[UNTRACK]" else "[TRACK]",
+                    color = if (isTracked) Color.Gray else WallStreetAmber,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 11.sp,
+                    modifier = Modifier.clickable { viewModel.toggleTracking() }
+                )
+            }
+        }
         HorizontalDivider(color = GridGray, thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
 
         when (val state = uiState) {

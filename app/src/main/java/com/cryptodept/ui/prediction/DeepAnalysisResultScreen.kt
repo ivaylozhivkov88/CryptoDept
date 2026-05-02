@@ -1,16 +1,20 @@
 package com.cryptodept.ui.prediction
 
+import android.content.Intent
 import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -19,50 +23,194 @@ import com.cryptodept.domain.model.*
 import java.util.Locale
 
 @Composable
-fun DeepAnalysisResultScreen(prediction: PricePrediction) {
-    LazyColumn(
+fun DeepAnalysisResultScreen(
+    prediction: PricePrediction,
+    onDismiss: () -> Unit = {}
+) {
+    val context = LocalContext.current
+    
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black)
+                .padding(16.dp)
+        ) {
+            item {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Text("< CLOSE_ANALYSIS", color = Color(0xFF00FF41), modifier = Modifier.clickable { onDismiss() }, fontFamily = FontFamily.Monospace, fontSize = 12.sp)
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                ConsensusHeader(prediction)
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+
+            // NEW: MTF ALIGNMENT SECTION
+            prediction.mtfConsensus?.let { mtf ->
+                item {
+                    Text(
+                        text = ">>> MTF_ALIGNMENT_MATRIX:",
+                        color = Color(0xFF00FF41),
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 14.sp
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    MTFSummaryTable(mtf)
+                    Spacer(modifier = Modifier.height(32.dp))
+                }
+            }
+
+            item {
+                Text(
+                    text = ">>> PROBABILITY_MAP (24H_VOLATILITY):",
+                    color = Color(0xFF00FF41),
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 14.sp
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                ProbabilityScale(prediction)
+                Spacer(modifier = Modifier.height(32.dp))
+            }
+
+            item {
+                Text(
+                    text = ">>> QUANT_MODEL_VOTES:",
+                    color = Color(0xFF00FF41),
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 14.sp
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            val votes = prediction.ensembleConsensus.modelVotes.toList()
+            items(votes) { (model, vote) ->
+                ExpandableModelRow(model.name, vote)
+                HorizontalDivider(color = Color.White.copy(alpha = 0.05f), thickness = 1.dp)
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(32.dp))
+                DataQualityFooter(prediction)
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
+
+        // SHARE BUTTON FOR AI PROMPT
+        FloatingActionButton(
+            onClick = {
+                val prompt = generateAiPrompt(prediction)
+                val sendIntent: Intent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, prompt)
+                    type = "text/plain"
+                }
+                val shareIntent = Intent.createChooser(sendIntent, "Share AI Visualizer Prompt")
+                context.startActivity(shareIntent)
+            },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp),
+            containerColor = Color(0xFF00FF41),
+            contentColor = Color.Black,
+            shape = RoundedCornerShape(4.dp)
+        ) {
+            Icon(Icons.Default.Share, contentDescription = "Share Prompt")
+        }
+    }
+}
+
+private fun generateAiPrompt(prediction: PricePrediction): String {
+    val asset = prediction.coinId.uppercase()
+    val sentiment = prediction.ensembleConsensus.direction
+    
+    // Using descriptive names instead of special characters to avoid AI "hallucinations"
+    val symbolDesc = when (asset) {
+        "BTC", "BITCOIN" -> "the classic orange Bitcoin 'B' logo"
+        "ETH", "ETHEREUM" -> "the blue Ethereum crystal diamond symbol"
+        "XRP", "RIPPLE" -> "the modern white Ripple 'X' logo"
+        "SOL", "SOLANA" -> "the Solana S-shaped logo with gradient colors"
+        "ADA", "CARDANO" -> "the Cardano circular dot constellation logo"
+        "DOGE", "DOGECOIN" -> "the Dogecoin golden 'D' logo"
+        "DOT", "POLKADOT" -> "the Polkadot pink dot circle logo"
+        "MATIC", "POLYGON" -> "the Polygon purple geometric logo"
+        else -> "the futuristic digital logo for $asset"
+    }
+
+    
+    val dateStr = java.text.SimpleDateFormat("MMMM dd, yyyy", java.util.Locale.US).format(java.util.Date())
+    val low = prediction.priceDistribution.percentile10
+    val high = prediction.priceDistribution.percentile90
+
+    val mood = when (sentiment) {
+        Direction.STRONG_UP -> "aggressive bullish energy, golden light"
+        Direction.UP -> "positive growth, green neon skyscraper reflections"
+        Direction.DOWN -> "bearish storm, red lightning"
+        Direction.STRONG_DOWN -> "market crash, red lava"
+        Direction.SIDEWAYS -> "perfect stability, zen digital garden"
+    }
+
+    val verdict = when (sentiment) {
+        Direction.STRONG_UP, Direction.UP -> "BULLISH BREAKOUT"
+        Direction.STRONG_DOWN, Direction.DOWN -> "BEARISH DROP"
+        Direction.SIDEWAYS -> "SIDEWAYS STABLE"
+    }
+
+    // Static-focused prompt to prevent text distortion and AI hallucinations
+    return "COMMAND: Create a 5-second STATIC video with NO camera movement and NO text animation. " +
+            "SCENE: A central, ultra-sharp high-contrast terminal screen. " +
+            "ATMOSPHERE: Still environment with $mood. Only subtle background particles. " +
+            "TEXT INSTRUCTION: The screen MUST remain perfectly still. Display the following text EXACTLY as written: " +
+            "\"SYMBOL: $asset\" " +
+            "\"VERDICT: $verdict\" " +
+            "\"CURRENT: ${String.format(java.util.Locale.US, "$%.2f", prediction.currentPrice)}\" " +
+            "\"LOW: ${String.format(java.util.Locale.US, "$%.2f", low)}\" " +
+            "\"HIGH: ${String.format(java.util.Locale.US, "$%.2f", high)}\" " +
+            "\"DATE: $dateStr\". " +
+            "VISUALS: Place $symbolDesc at the top. Use professional, sharp, bold neon fonts. " +
+            "All text must be in English and perfectly readable. Do not animate the letters."
+}
+
+
+
+
+
+
+
+@Composable
+fun MTFSummaryTable(mtf: MTFConsensus) {
+    Column(
         modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black)
-            .padding(16.dp)
+            .fillMaxWidth()
+            .border(1.dp, Color(0xFF00FF41).copy(alpha = 0.2f))
+            .padding(8.dp)
     ) {
-        item {
-            ConsensusHeader(prediction)
-            Spacer(modifier = Modifier.height(24.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text("PERIOD", color = Color.Gray, fontSize = 10.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.weight(1f))
+            Text("TREND", color = Color.Gray, fontSize = 10.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.weight(1.5f))
+            Text("RSI", color = Color.Gray, fontSize = 10.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.weight(1f))
+            Text("SIGNAL", color = Color.Gray, fontSize = 10.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.weight(1.5f), textAlign = androidx.compose.ui.text.style.TextAlign.End)
         }
-
-        item {
-            Text(
-                text = ">>> PROBABILITY_MAP (24H_VOLATILITY):",
-                color = Color(0xFF00FF41),
-                fontFamily = FontFamily.Monospace,
-                fontSize = 14.sp
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            ProbabilityScale(prediction)
-            Spacer(modifier = Modifier.height(32.dp))
-        }
-
-        item {
-            Text(
-                text = ">>> QUANT_MODEL_VOTES:",
-                color = Color(0xFF00FF41),
-                fontFamily = FontFamily.Monospace,
-                fontSize = 14.sp
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-
-        val votes = prediction.ensembleConsensus.modelVotes.toList()
-        items(votes) { (model, vote) ->
-            ExpandableModelRow(model.name, vote)
-            HorizontalDivider(color = Color.White.copy(alpha = 0.05f), thickness = 1.dp)
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(32.dp))
-            DataQualityFooter(prediction)
-            Spacer(modifier = Modifier.height(16.dp))
+        
+        mtf.timeframes.forEach { tf ->
+            val color = when {
+                tf.overallSignal.name.contains("BUY") -> Color(0xFF00FF41)
+                tf.overallSignal.name.contains("SELL") -> Color.Red
+                else -> Color(0xFFFFB000)
+            }
+            
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(tf.timeframe, color = Color.White, fontSize = 12.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.weight(1f))
+                Text(tf.trend.name, color = color.copy(alpha = 0.8f), fontSize = 11.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.weight(1.5f))
+                Text(String.format(Locale.US, "%.0f", tf.rsi), color = Color.White.copy(alpha = 0.6f), fontSize = 11.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.weight(1f))
+                Text(tf.overallSignal.name.take(6), color = color, fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, modifier = Modifier.weight(1.5f), textAlign = androidx.compose.ui.text.style.TextAlign.End)
+            }
         }
     }
 }
@@ -129,6 +277,14 @@ fun ConsensusHeader(prediction: PricePrediction) {
         else -> Color(0xFFFFB000)
     }
 
+    val verdict = when (direction) {
+        Direction.STRONG_UP -> "System detects high-probability breakout. Momentum indicators are synchronized for upward movement."
+        Direction.UP -> "Bullish bias confirmed. Key resistance levels are weakening."
+        Direction.DOWN -> "Bearish pressure mounting. Liquidity is shifting towards lower support zones."
+        Direction.STRONG_DOWN -> "Critical breakdown imminent. Multiple models signal high risk of further decline."
+        Direction.SIDEWAYS -> "Consolidation phase. Market is searching for clear direction amidst high disagreement."
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -139,11 +295,25 @@ fun ConsensusHeader(prediction: PricePrediction) {
         Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
             Text(">>> OVERALL_MARKET_SENTIMENT", color = color.copy(0.6f), fontSize = 10.sp, fontFamily = FontFamily.Monospace)
             Text(text = direction.name, color = color, fontSize = 26.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = "AGGREGATED_CONFIDENCE: ${(prediction.ensembleConsensus.overallConfidence * 100).toInt()}%", color = Color.White, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Text(
+                text = verdict,
+                color = Color.White.copy(0.8f),
+                fontSize = 12.sp,
+                fontFamily = FontFamily.Monospace,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                lineHeight = 16.sp
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Text(text = "AGGREGATED_CONFIDENCE: ${(prediction.ensembleConsensus.overallConfidence * 100).toInt()}%", color = color, fontSize = 12.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
         }
     }
 }
+
 
 @Composable
 fun ProbabilityScale(prediction: PricePrediction) {

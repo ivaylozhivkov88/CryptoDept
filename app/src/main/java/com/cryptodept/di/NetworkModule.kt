@@ -1,5 +1,6 @@
 package com.cryptodept.di
 
+import android.content.Context
 import com.cryptodept.data.api.*
 import com.cryptodept.BuildConfig
 import com.google.gson.Gson
@@ -7,13 +8,15 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import okhttp3.Interceptor
+import dagger.hilt.android.qualifiers.ApplicationContext
+import okhttp3.Cache
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Named
 import javax.inject.Singleton
+import java.io.File
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -30,6 +33,17 @@ object NetworkModule {
     private const val BLOCKCHAIN_BASE_URL = "https://api.blockchain.info/"
     private const val ETHERSCAN_BASE_URL = "https://api.etherscan.io/"
 
+    private const val CACHE_SIZE_MB = 10L
+
+    @Provides
+    @Singleton
+    fun provideHttpCache(
+        @ApplicationContext context: Context
+    ): Cache {
+        val cacheDir = File(context.cacheDir, "http_cache")
+        return Cache(cacheDir, CACHE_SIZE_MB * 1024 * 1024)
+    }
+
     @Provides
     @Singleton
     fun provideLoggingInterceptor(): HttpLoggingInterceptor {
@@ -40,19 +54,47 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideRetryInterceptor(): RetryInterceptor {
+        return RetryInterceptor(maxRetries = 3, initialDelayMs = 1000)
+    }
+
+    @Provides
+    @Singleton
     @Named("PublicClient")
-    fun providePublicOkHttpClient(loggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
+    fun providePublicOkHttpClient(
+        loggingInterceptor: HttpLoggingInterceptor,
+        retryInterceptor: RetryInterceptor,
+        cache: Cache
+    ): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
+            .addInterceptor(retryInterceptor)
+            .addInterceptor(RateLimitInterceptor())
+            .addNetworkInterceptor { chain ->
+                val response = chain.proceed(chain.request())
+                response.newBuilder()
+                    .header("Cache-Control", "public, max-age=300")
+                    .build()
+            }
+            .cache(cache)
+            .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+            .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+            .retryOnConnectionFailure(true)
             .build()
     }
 
     @Provides
     @Singleton
     @Named("CoinGeckoClient")
-    fun provideCoinGeckoOkHttpClient(loggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
+    fun provideCoinGeckoOkHttpClient(
+        loggingInterceptor: HttpLoggingInterceptor,
+        retryInterceptor: RetryInterceptor,
+        cache: Cache
+    ): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
+            .addInterceptor(retryInterceptor)
+            .addInterceptor(RateLimitInterceptor())
             .addInterceptor { chain ->
                 val request = chain.request().newBuilder()
                     .addHeader("x-cg-demo-api-key", BuildConfig.COINGECKO_API_KEY)
@@ -60,13 +102,18 @@ object NetworkModule {
                     .build()
                 chain.proceed(request)
             }
+            .addNetworkInterceptor { chain ->
+                val response = chain.proceed(chain.request())
+                response.newBuilder()
+                    .header("Cache-Control", "public, max-age=600")  // 10 minutes cache for CoinGecko
+                    .build()
+            }
+            .cache(cache)
             .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
             .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
             .retryOnConnectionFailure(true)
             .build()
     }
-
-    // --- Retrofit Providers ---
 
     private fun createRetrofit(url: String, client: OkHttpClient): Retrofit {
         return Retrofit.Builder()
@@ -101,12 +148,8 @@ object NetworkModule {
         createRetrofit(FEAR_GREED_BASE_URL, client).create(FearGreedApi::class.java)
 
     @Provides @Singleton
-    fun provideCryptoPanicApi(@Named("PublicClient") client: OkHttpClient): CryptoPanicApi =
-        createRetrofit(CRYPTOPANIC_BASE_URL, client).create(CryptoPanicApi::class.java)
-
-    @Provides @Singleton
-    fun provideCryptoNewsApi(@Named("PublicClient") client: OkHttpClient): CryptoNewsApi =
-        createRetrofit(CRYPTONEWS_BASE_URL, client).create(CryptoNewsApi::class.java)
+    fun provideNewsApiService(@Named("PublicClient") client: OkHttpClient): NewsApiService =
+        createRetrofit(CRYPTOPANIC_BASE_URL, client).create(NewsApiService::class.java)
 
     @Provides @Singleton
     fun provideBlockchainApi(@Named("PublicClient") client: OkHttpClient): BlockchainApi =
@@ -133,7 +176,6 @@ object NetworkModule {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-    // Coinglass (с API key header)
     @Provides @Singleton @Named("coinglass")
     fun provideCoinglassOkHttp(@Named("PublicClient") base: OkHttpClient): OkHttpClient =
         base.newBuilder()
@@ -158,7 +200,6 @@ object NetworkModule {
     fun provideCoinglassApi(@Named("coinglass") retrofit: Retrofit): CoinglassApi =
         retrofit.create(CoinglassApi::class.java)
 
-    // Alpha Vantage
     @Provides @Singleton @Named("alphavantage")
     fun provideAlphaVantageRetrofit(@Named("PublicClient") okHttpClient: OkHttpClient): Retrofit =
         Retrofit.Builder()
@@ -171,7 +212,6 @@ object NetworkModule {
     fun provideAlphaVantageApi(@Named("alphavantage") retrofit: Retrofit): AlphaVantageApi =
         retrofit.create(AlphaVantageApi::class.java)
 
-    // CoinMarketCal
     @Provides @Singleton @Named("coinmarketcal")
     fun provideCoinMarketCalRetrofit(@Named("PublicClient") okHttpClient: OkHttpClient): Retrofit =
         Retrofit.Builder()

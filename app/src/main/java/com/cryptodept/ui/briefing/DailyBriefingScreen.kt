@@ -21,11 +21,21 @@ import com.cryptodept.domain.usecase.DailyBriefingGenerator
 import com.cryptodept.viewmodel.BriefingUiState
 import com.cryptodept.viewmodel.BriefingViewModel
 
+import android.content.Intent
+import com.cryptodept.ui.theme.WallStreetAmber
+import com.cryptodept.ui.theme.WallStreetGreen
+import com.cryptodept.ui.theme.WallStreetWhite
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Share
+import java.util.Locale
+
 @Composable
 fun DailyBriefingScreen(
     viewModel: BriefingViewModel = hiltViewModel()
 ) {
     val state by viewModel.briefingState.collectAsState()
+    val context = LocalContext.current
 
     Box(
         modifier = Modifier
@@ -37,7 +47,7 @@ fun DailyBriefingScreen(
             is BriefingUiState.Loading -> {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center),
-                    color = Color(0xFF00FF41)
+                    color = WallStreetGreen
                 )
             }
             is BriefingUiState.Error -> {
@@ -49,12 +59,54 @@ fun DailyBriefingScreen(
                 )
             }
             is BriefingUiState.Success -> {
-                BriefingContent(uiState.briefing) {
-                    viewModel.generateBriefing()
+                Column {
+                    Box(modifier = Modifier.weight(1f)) {
+                        BriefingContent(uiState.briefing) {
+                            viewModel.generateBriefing()
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    Button(
+                        onClick = {
+                            val prompt = generateGlobalAiPrompt(uiState.briefing)
+                            val sendIntent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                putExtra(Intent.EXTRA_TEXT, prompt)
+                                type = "text/plain"
+                            }
+                            context.startActivity(Intent.createChooser(sendIntent, "Share Market Briefing"))
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = WallStreetGreen, contentColor = Color.Black),
+                        shape = RectangleShape
+                    ) {
+                        Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("SHARE GLOBAL VIDEO PROMPT", fontWeight = FontWeight.Bold)
+                    }
                 }
             }
         }
     }
+}
+
+private fun generateGlobalAiPrompt(briefing: DailyBriefingGenerator.DailyBriefing): String {
+    val date = briefing.date
+    val risk = briefing.riskScore.level.label
+    val sentence = briefing.marketSentence
+    
+    return "COMMAND: Create a 5-second STATIC cinematic video with NO camera movement and NO text animation. " +
+            "SCENE: A high-tech global market monitoring terminal. " +
+            "ATMOSPHERE: Cyberpunk data center, neon green and amber lighting. " +
+            "TEXT INSTRUCTION: Display the following text on a central holographic screen EXACTLY as written: " +
+            "\"GLOBAL MARKET STATUS\" " +
+            "\"$date\" " +
+            "\"MARKET RISK: $risk\" " +
+            "\"${sentence.take(100)}...\" " +
+            "\"TRADING BIAS: ${briefing.tradingSuggestion.take(50)}...\". " +
+            "VISUALS: Center the text. Use bold glowing neon fonts. English language only. Perfectly legible and still."
 }
 
 @Composable

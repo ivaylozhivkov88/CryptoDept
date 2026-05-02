@@ -16,6 +16,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import androidx.core.app.NotificationCompat
 import android.app.NotificationManager
+import com.cryptodept.util.NotificationChannels
 
 @HiltWorker
 class DailyBriefingWorker @AssistedInject constructor(
@@ -65,7 +66,7 @@ class DailyBriefingWorker @AssistedInject constructor(
                     as NotificationManager
 
             val notification = NotificationCompat.Builder(
-                applicationContext, "cryptodept_briefing"
+                applicationContext, NotificationChannels.BRIEFING_CHANNEL_ID
             )
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .setContentTitle("📊 DAILY MARKET BRIEFING")

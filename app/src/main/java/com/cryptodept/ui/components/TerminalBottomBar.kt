@@ -23,7 +23,7 @@ fun TerminalBottomBar(navController: NavHostController) {
         Screen.Dashboard,
         Screen.Markets,
         Screen.Analysis,
-        Screen.Indicators,
+        Screen.ToolsHub,
         Screen.News
     )
 
@@ -59,21 +59,23 @@ fun TerminalBottomBar(navController: NavHostController) {
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
-                        .clickable {
-                            if (currentRoute != screen.route) {
-                                val targetRoute = if (screen == Screen.Analysis) {
-                                    Screen.Analysis.createRoute("bitcoin")
-                                } else {
-                                    screen.route
-                                }
+                        .clickable(
+                            onClickLabel = "Navigate to ${screen.label}",
+                            onClick = {
+                                if (currentRoute != screen.route) {
+                                    val targetRoute = if (screen == Screen.Analysis) {
+                                        Screen.Analysis.createRoute("bitcoin")
+                                    } else {
+                                        screen.route
+                                    }
 
-                                navController.navigate(targetRoute) {
-                                    popUpTo(Screen.Dashboard.route) { saveState = true }
-                                    launchSingleTop = true
-                                    restoreState = true
+                                    navController.navigate(targetRoute) {
+                                        popUpTo(Screen.Dashboard.route)
+                                        launchSingleTop = true
+                                    }
                                 }
                             }
-                        }
+                        )
                         .padding(4.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center

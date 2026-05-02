@@ -6,6 +6,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.first
 import java.io.IOException
 
 // Дефиниция на DataStore
@@ -22,6 +23,12 @@ class PreferencesManager(context: Context) {
         val SOUNDS_ENABLED = booleanPreferencesKey("sounds_enabled")
         val SOUNDS_VOLUME = floatPreferencesKey("sounds_volume")
         val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
+        val ONBOARDING_COMPLETE = booleanPreferencesKey("onboarding_complete")
+        val HAPTIC_ENABLED = booleanPreferencesKey("haptic_enabled")
+        val SCREENSAVER_TIMEOUT = intPreferencesKey("screensaver_timeout_min")
+        val IS_PRO = booleanPreferencesKey("is_pro")
+        val LAST_REVIEW_PROMPT_TIME = longPreferencesKey("last_review_prompt_time")
+        val LAUNCH_COUNT = intPreferencesKey("launch_count")
     }
 
     // Flows за четене с вградена защита от грешки
@@ -45,7 +52,39 @@ class PreferencesManager(context: Context) {
         .catch { exception -> if (exception is IOException) emit(emptyPreferences()) else throw exception }
         .map { it[NOTIFICATIONS_ENABLED] ?: true }
 
-    // Методи за запис
+    val isOnboardingComplete: Flow<Boolean> = dataStore.data
+        .catch { exception -> if (exception is IOException) emit(emptyPreferences()) else throw exception }
+        .map { it[ONBOARDING_COMPLETE] ?: false }
+
+    val hapticEnabled: Flow<Boolean> = dataStore.data
+        .catch { exception -> if (exception is IOException) emit(emptyPreferences()) else throw exception }
+        .map { it[HAPTIC_ENABLED] ?: true }
+
+    val screensaverTimeout: Flow<Int> = dataStore.data
+        .catch { exception -> if (exception is IOException) emit(emptyPreferences()) else throw exception }
+        .map { it[SCREENSAVER_TIMEOUT] ?: 5 }
+
+    val isPro: Flow<Boolean> = dataStore.data
+        .catch { exception -> if (exception is IOException) emit(emptyPreferences()) else throw exception }
+        .map { it[IS_PRO] ?: false }
+
+    val launchCount: Flow<Int> = dataStore.data
+        .catch { exception -> if (exception is IOException) emit(emptyPreferences()) else throw exception }
+        .map { it[LAUNCH_COUNT] ?: 0 }
+
+    // ...existing code...
+    suspend fun setOnboardingComplete(complete: Boolean) {
+        dataStore.edit { it[ONBOARDING_COMPLETE] = complete }
+    }
+
+    suspend fun setHapticEnabled(enabled: Boolean) {
+        dataStore.edit { it[HAPTIC_ENABLED] = enabled }
+    }
+
+    suspend fun setScreensaverTimeout(minutes: Int) {
+        dataStore.edit { it[SCREENSAVER_TIMEOUT] = minutes }
+    }
+
     suspend fun setRefreshInterval(seconds: Int) {
         dataStore.edit { it[REFRESH_INTERVAL] = seconds }
     }
@@ -64,5 +103,29 @@ class PreferencesManager(context: Context) {
 
     suspend fun setNotificationsEnabled(enabled: Boolean) {
         dataStore.edit { it[NOTIFICATIONS_ENABLED] = enabled }
+    }
+
+    suspend fun setProStatus(isPro: Boolean) {
+        dataStore.edit { it[IS_PRO] = isPro }
+    }
+
+    suspend fun saveLastReviewPromptTime(timestamp: Long) {
+        dataStore.edit { it[LAST_REVIEW_PROMPT_TIME] = timestamp }
+    }
+
+    suspend fun getLastReviewPromptTime(): Long {
+        val prefs = dataStore.data.catch { emit(emptyPreferences()) }.first()
+        return prefs[LAST_REVIEW_PROMPT_TIME] ?: 0L
+    }
+
+    suspend fun incrementLaunchCount() {
+        val prefs = dataStore.data.catch { emit(emptyPreferences()) }.first()
+        val currentCount = prefs[LAUNCH_COUNT] ?: 0
+        dataStore.edit { it[LAUNCH_COUNT] = currentCount + 1 }
+    }
+
+    suspend fun getLaunchCount(): Int {
+        val prefs = dataStore.data.catch { emit(emptyPreferences()) }.first()
+        return prefs[LAUNCH_COUNT] ?: 0
     }
 }

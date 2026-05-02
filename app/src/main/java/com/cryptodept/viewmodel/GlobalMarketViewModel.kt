@@ -5,10 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.cryptodept.domain.model.GlobalMarketData
 import com.cryptodept.domain.repository.CryptoRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -26,8 +28,10 @@ class GlobalMarketViewModel @Inject constructor(
     private fun startPolling() {
         viewModelScope.launch {
             while (true) {
-                repository.getGlobalMarketData().onSuccess {
-                    _marketData.value = it
+                withContext(Dispatchers.IO) {
+                    repository.getGlobalMarketData().onSuccess {
+                        _marketData.value = it
+                    }
                 }
                 delay(60000) // Refresh every 60 seconds
             }

@@ -1,0 +1,139 @@
+package com.cryptodept.data.billing
+
+import android.app.Activity
+import android.content.Context
+import com.android.billingclient.api.*
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+class BillingManager @Inject constructor(
+    @ApplicationContext private val context: Context
+) : PurchasesUpdatedListener {
+
+    private val _isPro = MutableStateFlow(false)
+    val isPro: StateFlow<Boolean> = _isPro.asStateFlow()
+
+    private val billingClient = BillingClient.newBuilder(context)
+        .setListener(this)
+        .enablePendingPurchases()
+        .build()
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
+    init {
+        startConnection()
+    }
+
+    fun startConnection() {
+        billingClient.startConnection(object : BillingClientStateListener {
+            override fun onBillingSetupFinished(billingResult: BillingResult) {
+                if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                    queryPurchases()
+                }
+            }
+
+            override fun onBillingServiceDisconnected() {
+                // Try to restart connection on next use or with exponential backoff
+            }
+        })
+    }
+
+    private fun queryPurchases() {
+        if (!billingClient.isReady) return
+        
+        val params = QueryPurchasesParams.newBuilder()
+            .setProductType(BillingClient.ProductType.SUBS)
+            .build()
+
+        billingClient.queryPurchasesAsync(params) { billingResult, purchases ->
+            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                val hasActiveSubscription = purchases.any { purchase ->
+                    purchase.purchaseState == Purchase.PurchaseState.PURCHASED && purchase.isAcknowledged
+                }
+                _isPro.value = hasActiveSubscription
+            }
+        }
+    }
+
+    suspend fun querySubscriptions(): List<ProductDetails> {
+        val productList = listOf(
+            QueryProductDetailsParams.Product.newBuilder()
+                .setProductId("pro_monthly")
+                .setProductType(BillingClient.ProductType.SUBS)
+                .build(),
+            QueryProductDetailsParams.Product.newBuilder()
+                .setProductId("pro_yearly")
+                .setProductType(BillingClient.ProductType.SUBS)
+                .build()
+        )
+
+        val params = QueryProductDetailsParams.newBuilder()
+            .setProductList(productList)
+            .build()
+
+        return try {
+            val result = billingClient.queryProductDetails(params)
+            result.productDetailsList ?: emptyList()
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    fun launchBillingFlow(activity: Activity, productDetails: ProductDetails) {
+        val offerToken = productDetails.subscriptionOfferDetails?.firstOrNull()?.offerToken ?: return
+        
+        val productDetailsParamsList = listOf(
+            BillingFlowParams.ProductDetailsParams.newBuilder()
+                .setProductDetails(productDetails)
+                .setOfferToken(offerToken)
+                .build()
+        )
+
+        val billingFlowParams = BillingFlowParams.newBuilder()
+            .setProductDetailsParamsList(productDetailsParamsList)
+            .build()
+
+        billingClient.launchBillingFlow(activity, billingFlowParams)
+    }
+
+    override fun onPurchasesUpdated(billingResult: BillingResult, purchases: List<Purchase>?) {
+        if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && purchases != null) {
+            for (purchase in purchases) {
+                handlePurchase(purchase)
+            }
+        }
+    }
+
+    private fun handlePurchase(purchase: Purchase) {
+        if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
+            if (!purchase.isAcknowledged) {
+                val acknowledgePurchaseParams = AcknowledgePurchaseParams.newBuilder()
+                    .setPurchaseToken(purchase.purchaseToken)
+                    .build()
+                
+                scope.launch {
+                    val result = billingClient.acknowledgePurchase(acknowledgePurchaseParams)
+                    if (result.responseCode == BillingClient.BillingResponseCode.OK) {
+                        _isPro.value = true
+                    }
+                }
+            } else {
+                _isPro.value = true
+            }
+        }
+    }
+
+    fun verifyPurchase(purchaseToken: String): Boolean {
+        // Mock server-side verification using the token
+        return purchaseToken.isNotBlank()
+    }
+}

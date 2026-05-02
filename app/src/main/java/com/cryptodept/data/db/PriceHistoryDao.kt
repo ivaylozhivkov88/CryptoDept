@@ -13,4 +13,12 @@ interface PriceHistoryDao {
 
     @Query("DELETE FROM price_history WHERE timestamp < :threshold")
     suspend fun deleteOldHistory(threshold: Long)
+
+    @Query("""
+        SELECT price FROM price_history 
+        WHERE coinId = :coinId AND timestamp <= :timestamp 
+        ORDER BY timestamp DESC 
+        LIMIT 1
+    """)
+    suspend fun getNearestPriceBeforeTimestamp(coinId: String, timestamp: Long): Double?
 }

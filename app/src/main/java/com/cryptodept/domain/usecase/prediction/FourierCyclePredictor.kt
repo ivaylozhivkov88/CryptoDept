@@ -1,57 +1,62 @@
 package com.cryptodept.domain.usecase.prediction
 
+import android.util.Log
+import com.cryptodept.BuildConfig
 import com.cryptodept.domain.model.Direction
 import com.cryptodept.domain.model.ModelVote
 import com.cryptodept.domain.model.PredictionModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.math.*
 
-/**
- * Най-иновативният модел. Пазарите се движат в цикли.
- * Fourier Transform разлага ценовата серия на съставни цикли.
- * Намираме доминиращите цикли и предвиждаме следващия им пик/дъно.
- */
+@Singleton
 class FourierCyclePredictor @Inject constructor() {
 
+    private data class Complex(val re: Double, val im: Double) {
+        operator fun plus(other: Complex) = Complex(re + other.re, im + other.im)
+        operator fun minus(other: Complex) = Complex(re - other.re, im - other.im)
+        operator fun times(other: Complex) = Complex(
+            re * other.re - im * other.im,
+            re * other.im + im * other.re
+        )
+    }
+
     data class Cycle(
-        val period: Double,    // Период в брой свещи
-        val amplitude: Double, // Сила на цикъла
-        val phase: Double,     // Текуща фаза
-        val nextPeak: Int      // Свещи до следващия връх
+        val period: Double,
+        val amplitude: Double,
+        val phase: Double,
+        val nextPeak: Int
     )
 
-    /**
-     * Предвижда бъдещото движение чрез анализ на доминиращите цикли.
-     */
-    fun predict(prices: List<Double>, periodsAhead: Int): ModelVote {
-        // Изискваме минимум 32 свещи за базов честотен анализ
-        if (prices.size < 32) return neutralVote()
+    private var lastResult: Pair<List<Double>, ModelVote>? = null
 
-        // 1. Премахваме линейния тренд, за да изолираме циклите (Detrending)
+    suspend fun predict(prices: List<Double>, periodsAhead: Int): ModelVote = withContext(Dispatchers.Default) {
+        if (lastResult?.first == prices) {
+            return@withContext lastResult!!.second
+        }
+
+        if (prices.size < 32) return@withContext neutralVote()
+
+        val startTime = System.currentTimeMillis()
         val detrended = removeTrend(prices)
-
-        // 2. Откриваме доминиращите цикли чрез Discrete Fourier Transform (DFT)
         val cycles = detectCycles(detrended)
 
-        if (cycles.isEmpty()) return neutralVote()
+        if (cycles.isEmpty()) return@withContext neutralVote()
 
         val currentPrice = prices.last()
         var predictedChange = 0.0
 
-        // 3. Реконструираме сигнала за бъдещия период
         cycles.forEach { cycle ->
-            // Изчисляваме бъдещата фаза след X периода
             val futurePhase = cycle.phase + (2.0 * PI * periodsAhead.toDouble() / cycle.period)
-            // Добавяме влиянието на този цикъл към общата промяна
             predictedChange += cycle.amplitude * cos(futurePhase)
         }
 
         val predictedPrice = currentPrice + predictedChange
-
-        // Confidence зависи от броя открити значими цикли
         val confidence = (cycles.size * 0.2f + 0.3f).coerceIn(0.4f, 0.85f)
 
-        return ModelVote(
+        val result = ModelVote(
             model = PredictionModel.FOURIER_CYCLES,
             direction = when {
                 predictedPrice > currentPrice * 1.015 -> Direction.UP
@@ -62,43 +67,91 @@ class FourierCyclePredictor @Inject constructor() {
             confidence = confidence,
             weight = PredictionModel.FOURIER_CYCLES.baseWeight
         )
+
+        val elapsed = System.currentTimeMillis() - startTime
+        if (BuildConfig.DEBUG) {
+            Log.d("FFT", "Completed in ${elapsed}ms for ${prices.size} points")
+        }
+
+        lastResult = prices to result
+        result
     }
 
     private fun detectCycles(data: List<Double>): List<Cycle> {
         val n = data.size
+        val m = nextPowerOf2(n)
+        val paddedData = data.map { Complex(it, 0.0) }.toMutableList()
+        while (paddedData.size < m) paddedData.add(Complex(0.0, 0.0))
+
+        val spectrum = fft(paddedData)
         val cycles = mutableListOf<Cycle>()
         val stdDev = data.stdDev()
 
-        // Търсим честоти (k) от 1 до n/2 (Nyquist frequency)
-        for (k in 1 until n / 2) {
-            var realPart = 0.0
-            var imagPart = 0.0
+        for (k in 1 until m / 2) {
+            val re = spectrum[k].re
+            val im = spectrum[k].im
+            val amplitude = sqrt(re * re + im * im) / n
+            val phase = atan2(im, re)
+            val period = m.toDouble() / k
 
-            for (t in 0 until n) {
-                val angle = 2.0 * PI * k * t / n
-                realPart += data[t] * cos(angle)
-                imagPart -= data[t] * sin(angle)
-            }
-
-            val amplitude = sqrt(realPart * realPart + imagPart * imagPart) / n
-            val phase = atan2(imagPart, realPart)
-            val period = n.toDouble() / k
-
-            // Филтрираме само цикли със значима амплитуда спрямо шума
             if (amplitude > stdDev * 0.15) {
                 val nextPeak = calculateNextPeak(phase, period)
                 cycles.add(Cycle(period, amplitude, phase, nextPeak))
             }
         }
 
-        // Вземаме топ 3 най-силни цикъла
         return cycles.sortedByDescending { it.amplitude }.take(3)
+    }
+
+    private fun fft(x: List<Complex>): List<Complex> {
+        val n = x.size
+        val y = x.toMutableList()
+
+        // Bit-reversal permutation
+        var j = 0
+        for (i in 0 until n - 1) {
+            if (i < j) {
+                val temp = y[i]
+                y[i] = y[j]
+                y[j] = temp
+            }
+            var k = n / 2
+            while (k <= j) {
+                j -= k
+                k /= 2
+            }
+            j += k
+        }
+
+        // Iterative butterfly operations
+        var length = 2
+        while (length <= n) {
+            val angle = -2.0 * PI / length
+            val wLen = Complex(cos(angle), sin(angle))
+            for (i in 0 until n step length) {
+                var w = Complex(1.0, 0.0)
+                for (k in 0 until length / 2) {
+                    val u = y[i + k]
+                    val v = y[i + k + length / 2] * w
+                    y[i + k] = u + v
+                    y[i + k + length / 2] = u - v
+                    w *= wLen
+                }
+            }
+            length *= 2
+        }
+        return y
+    }
+
+    private fun nextPowerOf2(n: Int): Int {
+        var m = 1
+        while (m < n) m *= 2
+        return m
     }
 
     private fun removeTrend(prices: List<Double>): List<Double> {
         val n = prices.size
         if (n < 2) return prices
-        // Линейна детрендизация чрез начална и крайна точка
         val slope = (prices.last() - prices.first()) / n.toDouble()
         return prices.mapIndexed { i, p -> p - (prices.first() + slope * i) }
     }

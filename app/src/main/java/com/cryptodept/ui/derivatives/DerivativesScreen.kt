@@ -110,6 +110,13 @@ fun DerivativesContent(
         item {
             SectionHeader("FUNDING RATE")
             Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    "EXPLANATION: Periodic payments between longs and shorts. Positive = Longs pay Shorts (Bullish sentiment). Negative = Shorts pay Longs (Bearish sentiment).",
+                    color = Color.Gray,
+                    fontSize = 10.sp,
+                    fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
                 Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
                     Text("BINANCE:", color = Color.Gray, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)
                     Text(
@@ -159,6 +166,13 @@ fun DerivativesContent(
         item {
             SectionHeader("OPEN INTEREST")
             Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    "EXPLANATION: Total number of outstanding derivative contracts. Rising OI with Rising Price = Strong Bullish Trend. Falling OI = Trend exhaustion.",
+                    color = Color.Gray,
+                    fontSize = 10.sp,
+                    fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
                 if (oi != null) {
                     Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
                         Text("CURRENT OI:", color = Color.Gray, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)
@@ -191,6 +205,13 @@ fun DerivativesContent(
         item {
             SectionHeader("LIQUIDATIONS (24H)")
             Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    "EXPLANATION: Forced closing of leveraged positions. High liquidations often mark local bottoms (Longs) or tops (Shorts).",
+                    color = Color.Gray,
+                    fontSize = 10.sp,
+                    fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
                 if (liq != null) {
                     LiquidationBar("LONGS", liq.longLiquidations24h, Color(0xFFFF3B30))
                     LiquidationBar("SHORTS", liq.shortLiquidations24h, Color(0xFF00FF41))

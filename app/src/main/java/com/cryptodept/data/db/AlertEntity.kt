@@ -5,7 +5,12 @@ import androidx.room.PrimaryKey
 import com.cryptodept.domain.model.Alert
 import com.cryptodept.domain.model.AlertDirection
 
-@Entity(tableName = "alerts")
+import androidx.room.Index
+
+@Entity(
+    tableName = "alerts",
+    indices = [Index(value = ["coinId"])]
+)
 data class AlertEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val coinId: String,

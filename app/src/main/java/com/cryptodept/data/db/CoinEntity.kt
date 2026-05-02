@@ -19,6 +19,7 @@ data class CoinEntity(
     val high24h: Double = 0.0,
     val low24h: Double = 0.0,
     val lastUpdated: Long = 0L,
+    val rank: Int = 0,
     val sourcesCount: Int = 1,
     val maxDeviation: Double = 0.0
 ) {

@@ -16,9 +16,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.cryptodept.ui.theme.WallStreetAmber
-import com.cryptodept.ui.theme.WallStreetGreen
-import com.cryptodept.ui.theme.WallStreetRed
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import com.cryptodept.ui.theme.*
 import com.cryptodept.viewmodel.GlobalMarketViewModel
 import java.util.Locale
 
@@ -27,14 +27,16 @@ fun GlobalMarketBar(
     viewModel: GlobalMarketViewModel = hiltViewModel()
 ) {
     val data by viewModel.marketData.collectAsState()
+    val colors = LocalTerminalColors.current
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(24.dp)
-            .background(Color.Black)
+            .background(colors.background)
             .padding(horizontal = 8.dp)
-            .horizontalScroll(rememberScrollState()),
+            .horizontalScroll(rememberScrollState())
+            .semantics { contentDescription = "Global Market Summary" },
         verticalAlignment = Alignment.CenterVertically
     ) {
         data?.let { market ->
@@ -51,7 +53,7 @@ fun GlobalMarketBar(
         } ?: run {
             Text(
                 "CONNECTING TO GLOBAL MARKET FEED...",
-                color = WallStreetGreen,
+                color = colors.primary,
                 fontSize = 10.sp,
                 fontFamily = FontFamily.Monospace
             )
@@ -61,15 +63,17 @@ fun GlobalMarketBar(
 
 @Composable
 private fun MarketItem(label: String, value: String) {
+    val colors = LocalTerminalColors.current
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(text = "$label: ", color = Color.Gray, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-        Text(text = value, color = WallStreetAmber, fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+        Text(text = "$label: ", color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+        Text(text = value, color = colors.amber, fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
     }
 }
 
 @Composable
 private fun MarketChange(change: Double) {
-    val color = if (change >= 0) WallStreetGreen else WallStreetRed
+    val colors = LocalTerminalColors.current
+    val color = if (change >= 0) colors.primary else colors.danger
     val sign = if (change >= 0) "+" else ""
     Text(
         text = "($sign${String.format(Locale.US, "%.1f", change)}%)",
@@ -82,5 +86,5 @@ private fun MarketChange(change: Double) {
 
 @Composable
 private fun Separator() {
-    Text(text = " | ", color = Color.DarkGray, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+    Text(text = " | ", color = LocalTerminalColors.current.grid, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
 }

@@ -22,5 +22,6 @@ data class TradeJournalEntity(
     val pnlUsd: Double?,                // Реализирана P&L
     val pnlPercent: Double?,
     val riskRewardActual: Double?,      // Реализирано R:R
+    val positionSizeUsd: Double?,       // Добавено за Psychology Analyzer
     val marketConditions: String        // JSON: RSI, funding rate при отваряне
 )

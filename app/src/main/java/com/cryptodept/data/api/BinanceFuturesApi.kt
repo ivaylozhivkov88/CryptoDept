@@ -44,6 +44,13 @@ interface BinanceFuturesApi {
         @Query("symbol") symbol: String? = null,
         @Query("limit") limit: Int = 50
     ): List<LiquidationDto>
+
+    @GET("fapi/v1/klines")
+    suspend fun getKlines(
+        @Query("symbol") symbol: String,
+        @Query("interval") interval: String = "1d",
+        @Query("limit") limit: Int = 100
+    ): List<List<Any>>
 }
 
 // Base URL: "https://fapi.binance.com/"

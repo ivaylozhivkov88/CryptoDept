@@ -1,6 +1,7 @@
 package com.cryptodept.domain.usecase.prediction
 
 import com.cryptodept.domain.model.*
+import com.cryptodept.domain.usecase.MultiTimeframeAnalyzer // Добавено
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -16,7 +17,9 @@ class PredictionEnsembleEngine @Inject constructor(
     private val elliottWave: ElliottWavePredictor,
     private val wyckoff: WyckoffPhaseDetector,
     private val hurstCalc: HurstExponentCalculator,
-    private val fractalAnalyzer: FractalDimensionAnalyzer
+    private val fractalAnalyzer: FractalDimensionAnalyzer,
+    private val mtfAnalyzer: MultiTimeframeAnalyzer, // Добавено
+    private val cache: PredictionCache
 ) {
 
     suspend fun generatePrediction(
@@ -24,11 +27,17 @@ class PredictionEnsembleEngine @Inject constructor(
         closes: List<Double>,
         volumes: List<Double>
     ): PricePrediction = withContext(Dispatchers.Default) {
+        // Проверка в кеша преди изчисление
+        val cached = cache.get(coinId, "main")
+        if (cached != null) return@withContext cached
         val currentPrice = closes.last()
-        val hurst = hurstCalc.calculate(closes) // Връща Float
-        val fractalDim = fractalAnalyzer.calculate(closes) // Връща Float
+        val hurst = hurstCalc.calculate(closes)
+        val fractalDim = fractalAnalyzer.calculate(closes)
         val predictability = fractalAnalyzer.getPredictabilityScore(fractalDim)
         val mcResult = monteCarlo.simulate(closes, 24)
+        
+        // Стартираме MTF анализа паралелно
+        val mtfConsensus = try { mtfAnalyzer.analyze(coinId) } catch (e: Exception) { null }
 
         val rawVotes = listOf(
             linearRegression.predict(closes, 24),
@@ -39,14 +48,13 @@ class PredictionEnsembleEngine @Inject constructor(
             hurstCalc.interpret(hurst, detectSimpleTrend(closes))
         )
 
-        // ФИКС: Подаваме hurst и fractalDim като Float към генерирането на текст
         val votesWithReasoning = rawVotes.map { vote ->
             vote.copy(reasoning = generateDeepReasoning(vote, closes, hurst, fractalDim))
         }
 
         val consensus = calculateWeightedConsensus(votesWithReasoning, predictability)
 
-        PricePrediction(
+        val result = PricePrediction(
             coinId = coinId,
             currentPrice = currentPrice,
             timestamp = System.currentTimeMillis(),
@@ -56,10 +64,15 @@ class PredictionEnsembleEngine @Inject constructor(
             prediction7d = buildTarget(currentPrice, votesWithReasoning, 1.10),
             ensembleConsensus = consensus,
             priceDistribution = mcResult.second,
+            mtfConsensus = mtfConsensus, // Зададено
             modelsAgreement = consensus.agreementScore,
             dataQuality = predictability,
             calculatedAt = System.currentTimeMillis()
         )
+
+        // Запиши в кеш след изчисление
+        cache.put(coinId, "main", result)
+        return@withContext result
     }
 
     /**

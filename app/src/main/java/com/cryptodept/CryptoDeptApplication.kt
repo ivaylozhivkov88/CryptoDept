@@ -5,6 +5,8 @@ import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.*
 import com.cryptodept.data.remoteconfig.RemoteConfigManager
 import com.cryptodept.service.DailyBriefingWorker
+import com.cryptodept.service.SocketLifecycleManager
+import com.cryptodept.util.NotificationChannels
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.appcheck.appCheck
@@ -23,6 +25,9 @@ class CryptoDeptApplication : Application(), Configuration.Provider {
     @Inject
     lateinit var remoteConfigManager: RemoteConfigManager
 
+    @Inject
+    lateinit var socketLifecycleManager: SocketLifecycleManager
+
     override fun onCreate() {
         super.onCreate()
         FirebaseApp.initializeApp(this)
@@ -30,6 +35,7 @@ class CryptoDeptApplication : Application(), Configuration.Provider {
             PlayIntegrityAppCheckProviderFactory.getInstance()
         )
         remoteConfigManager.fetchAndActivate { }
+        socketLifecycleManager.init()
         createNotificationChannels()
         scheduleDailyBriefing()
     }
@@ -73,27 +79,27 @@ class CryptoDeptApplication : Application(), Configuration.Provider {
     private fun createNotificationChannels() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             val liveChannel = android.app.NotificationChannel(
-                "cryptodept_live",
-                "CryptoDept Live",
+                NotificationChannels.LIVE_CHANNEL_ID,
+                NotificationChannels.LIVE_CHANNEL_NAME,
                 android.app.NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "Показва цени в реално време"
+                description = NotificationChannels.LIVE_CHANNEL_DESC
             }
 
             val alertsChannel = android.app.NotificationChannel(
-                "cryptodept_alerts",
-                "Price Alerts",
+                NotificationChannels.ALERTS_CHANNEL_ID,
+                NotificationChannels.ALERTS_CHANNEL_NAME,
                 android.app.NotificationManager.IMPORTANCE_HIGH
             ).apply {
-                description = "Нотификации при достигане на целева цена"
+                description = NotificationChannels.ALERTS_CHANNEL_DESC
             }
 
             val briefingChannel = android.app.NotificationChannel(
-                "cryptodept_briefing",
-                "Daily Briefing",
+                NotificationChannels.BRIEFING_CHANNEL_ID,
+                NotificationChannels.BRIEFING_CHANNEL_NAME,
                 android.app.NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
-                description = "Ежедневен пазарен бюлетин"
+                description = NotificationChannels.BRIEFING_CHANNEL_DESC
             }
 
             val manager = getSystemService(android.app.NotificationManager::class.java)

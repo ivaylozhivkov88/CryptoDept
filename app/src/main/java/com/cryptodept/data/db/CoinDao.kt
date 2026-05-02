@@ -11,6 +11,9 @@ interface CoinDao {
     @Query("SELECT * FROM coins WHERE isTracked = 1")
     fun getTrackedCoins(): Flow<List<CoinEntity>>
 
+    @Query("SELECT COUNT(*) FROM coins WHERE isTracked = 1")
+    suspend fun getTrackedCoinsCount(): Int
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCoins(coins: List<CoinEntity>)
 

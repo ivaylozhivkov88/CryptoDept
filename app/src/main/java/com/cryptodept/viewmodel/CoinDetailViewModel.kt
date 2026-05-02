@@ -43,4 +43,18 @@ class CoinDetailViewModel @Inject constructor(
             )
         }
     }
+
+    fun toggleTracking() {
+        val currentState = _uiState.value
+        if (currentState is CoinDetailUiState.Success) {
+            viewModelScope.launch {
+                val result = repository.toggleTracking(currentState.detail.id)
+                if (result.isSuccess) {
+                    loadCoinDetail(currentState.detail.id)
+                } else {
+                    _uiState.value = CoinDetailUiState.Error(result.exceptionOrNull()?.message ?: "ACTION_FAILED")
+                }
+            }
+        }
+    }
 }

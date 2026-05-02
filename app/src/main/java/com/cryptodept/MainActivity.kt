@@ -22,19 +22,23 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.compose.rememberNavController
-import com.cryptodept.ui.navigation.NavGraph
-import com.cryptodept.ui.components.TerminalBottomBar
-import com.cryptodept.ui.components.GlobalMarketBar
-import com.cryptodept.ui.theme.CryptoDeptTheme
-import com.cryptodept.ui.components.crt.CRTOverlay
-import com.cryptodept.ui.screensaver.MatrixRainScreen
 import com.cryptodept.data.datastore.PreferencesManager
+import com.cryptodept.service.NewsSyncWorker
 import com.cryptodept.service.SoundManager
-import com.cryptodept.ui.theme.LocalSoundManager
-import com.cryptodept.ui.theme.PhosphorMode
-import com.google.firebase.messaging.FirebaseMessaging
+import com.cryptodept.ui.components.GlobalMarketBar
+import com.cryptodept.ui.components.TerminalBottomBar
+import com.cryptodept.ui.components.crt.CRTOverlay
+import com.cryptodept.ui.navigation.NavGraph
+import com.cryptodept.ui.screensaver.MatrixRainScreen
+import com.cryptodept.ui.theme.*
+import com.cryptodept.util.HapticManager
+import com.cryptodept.domain.repository.CryptoRepository
+import com.cryptodept.domain.usecase.RiskScoreEngine
+import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -44,7 +48,22 @@ class MainActivity : ComponentActivity() {
     lateinit var soundManager: SoundManager
 
     @Inject
+    lateinit var hapticManager: HapticManager
+
+    @Inject
+    lateinit var analyticsManager: com.cryptodept.util.AnalyticsManager
+
+    @Inject
     lateinit var preferencesManager: PreferencesManager
+
+    @Inject
+    lateinit var cryptoRepository: CryptoRepository
+
+    @Inject
+    lateinit var riskEngine: RiskScoreEngine
+
+    @Inject
+    lateinit var reviewManager: com.cryptodept.util.ReviewManager
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -53,29 +72,26 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Предотвратява заспиването на екрана по време на работа с терминала
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         enableEdgeToEdge()
         checkNotificationPermission()
 
-        // Логване на FCM Токен за диагностика на известията
-        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                android.util.Log.d("FCM_TOKEN", ">>> CORE_SYSTEM_ID: ${task.result}")
-            }
+        lifecycleScope.launch {
+            preferencesManager.incrementLaunchCount()
         }
 
+        NewsSyncWorker.schedule(this)
+        com.cryptodept.service.AlertWorker.schedule(this)
+
         setContent {
-            // Извличане на системните настройки за визуализация
             val phosphorModeStr by preferencesManager.phosphorMode.collectAsState(initial = "GREEN")
             val mode = when (phosphorModeStr) {
                 "AMBER" -> PhosphorMode.AMBER
-                "WHITE" -> PhosphorMode.CRT // Уверете се, че PhosphorMode има CRT стойност
+                "WHITE" -> PhosphorMode.CRT
                 else -> PhosphorMode.GREEN
             }
 
-            // Управление на състоянието на неактивност (Screensaver)
             var lastInteractionTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
             var isIdle by remember { mutableStateOf(false) }
 
@@ -83,14 +99,19 @@ class MainActivity : ComponentActivity() {
                 WindowCompat.getInsetsController(window, window.decorView)
             }
 
-            // Таймер за автоматично включване на скрийнсейвъра (60 сек)
-            LaunchedEffect(lastInteractionTime) {
+            val screensaverTimeout by preferencesManager.screensaverTimeout.collectAsState(initial = 5)
+            val btcPriceFlow = remember { cryptoRepository.getCoinPrice("bitcoin") }
+            val btcPriceState by btcPriceFlow.collectAsState(initial = null)
+            val riskScoreState by riskEngine.observeRiskScore().collectAsState(initial = 50)
+
+            LaunchedEffect(lastInteractionTime, screensaverTimeout) {
                 isIdle = false
-                delay(60000L)
-                isIdle = true
+                if (screensaverTimeout > 0) {
+                    delay(screensaverTimeout * 60 * 1000L)
+                    isIdle = true
+                }
             }
 
-            // Скриване/Показване на системните ленти (Status & Navigation) при неактивност
             LaunchedEffect(isIdle) {
                 if (isIdle) {
                     windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
@@ -101,7 +122,11 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            CompositionLocalProvider(LocalSoundManager provides soundManager) {
+            CompositionLocalProvider(
+                LocalSoundManager provides soundManager,
+                com.cryptodept.ui.components.LocalHapticManager provides hapticManager,
+                com.cryptodept.ui.components.LocalAnalyticsManager provides analyticsManager
+            ) {
                 CryptoDeptTheme(mode = mode) {
                     val navController = rememberNavController()
 
@@ -109,7 +134,6 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier
                             .fillMaxSize()
                             .pointerInput(Unit) {
-                                // Глобално засичане на докосвания за нулиране на таймера за неактивност
                                 awaitPointerEventScope {
                                     while (true) {
                                         awaitPointerEvent()
@@ -119,38 +143,50 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
                     ) {
-                        // Основна структура на терминала
                         Scaffold(
                             modifier = Modifier.fillMaxSize(),
                             containerColor = androidx.compose.ui.graphics.Color.Black,
                             bottomBar = {
-                                // Скриваме лентата, за да не "свети" под скрийнсейвъра
                                 if (!isIdle) TerminalBottomBar(navController)
                             }
                         ) { innerPadding ->
                             Box(modifier = Modifier.padding(innerPadding)) {
                                 Column(modifier = Modifier.fillMaxSize()) {
                                     GlobalMarketBar()
-
-                                    // ВАЖНО: NavGraph трябва да приема preferencesManager в дефиницията си!
                                     NavGraph(
                                         navController = navController,
                                         preferencesManager = preferencesManager
                                     )
                                 }
-                                CRTOverlay() // Ефект на сканиращи линии (CRT)
+                                CRTOverlay()
                             }
                         }
 
-                        // Пълноекранен Matrix Screensaver
                         if (isIdle) {
-                            MatrixRainScreen(
-                                modifier = Modifier.fillMaxSize(),
-                                onDismiss = {
-                                    isIdle = false
-                                    lastInteractionTime = System.currentTimeMillis()
-                                }
-                            )
+                            val btcDisplay = btcPriceState?.let { 
+                                "$${String.format(java.util.Locale.US, "%,.0f", it.currentPrice)} ${if(it.priceChangePercentage24h >= 0) "▲" else "▼"}${String.format("%.1f", Math.abs(it.priceChangePercentage24h))}%"
+                            } ?: "FETCHING..."
+
+                            val screensaverType = remember { (0..1).random() }
+                            if (screensaverType == 0) {
+                                MatrixRainScreen(
+                                    modifier = Modifier.fillMaxSize(),
+                                    btcPrice = btcDisplay,
+                                    riskScore = riskScoreState,
+                                    onDismiss = {
+                                        isIdle = false
+                                        lastInteractionTime = System.currentTimeMillis()
+                                    }
+                                )
+                            } else {
+                                com.cryptodept.ui.screensaver.BloombergWallScreen(
+                                    modifier = Modifier.fillMaxSize(),
+                                    onDismiss = {
+                                        isIdle = false
+                                        lastInteractionTime = System.currentTimeMillis()
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -158,14 +194,23 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        reviewManager.requestReviewIfAppropriate(this)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        soundManager.release() // Почистване на аудио ресурсите
+        soundManager.release()
     }
 
     private fun checkNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }

@@ -34,6 +34,14 @@ class SettingsViewModel @Inject constructor(
         viewModelScope, SharingStarted.WhileSubscribed(5000), true
     )
 
+    val hapticEnabled = preferencesManager.hapticEnabled.stateIn(
+        viewModelScope, SharingStarted.WhileSubscribed(5000), true
+    )
+
+    val screensaverTimeout = preferencesManager.screensaverTimeout.stateIn(
+        viewModelScope, SharingStarted.WhileSubscribed(5000), 5
+    )
+
     fun setRefreshInterval(seconds: Int) {
         viewModelScope.launch { preferencesManager.setRefreshInterval(seconds) }
     }
@@ -52,5 +60,13 @@ class SettingsViewModel @Inject constructor(
 
     fun setNotificationsEnabled(enabled: Boolean) {
         viewModelScope.launch { preferencesManager.setNotificationsEnabled(enabled) }
+    }
+
+    fun setHapticEnabled(enabled: Boolean) {
+        viewModelScope.launch { preferencesManager.setHapticEnabled(enabled) }
+    }
+
+    fun setScreensaverTimeout(minutes: Int) {
+        viewModelScope.launch { preferencesManager.setScreensaverTimeout(minutes) }
     }
 }

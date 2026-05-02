@@ -1,10 +1,16 @@
 package com.cryptodept.domain.usecase
 
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class RiskScoreEngine @Inject constructor() {
+
+    private val _currentScore = kotlinx.coroutines.flow.MutableStateFlow<Int>(50)
+    val currentScore = _currentScore.asStateFlow()
+
+    fun observeRiskScore() = currentScore
 
     data class RiskScore(
         val overall: Int,                    // 0-100 (0=минимален риск, 100=максимален)
@@ -150,6 +156,8 @@ class RiskScoreEngine @Inject constructor() {
             RiskLevel.EXTREME    -> "EXTREME RISK. Recommend reducing exposure significantly or exiting positions."
         }
 
+        _currentScore.value = overall
         return RiskScore(overall, level, components, dominant, recommendation, System.currentTimeMillis())
     }
 }
+

@@ -10,6 +10,21 @@ import javax.inject.Singleton
 
 @Singleton
 class DailyBriefingGenerator @Inject constructor() {
+    // ... existing data classes ...
+
+    /**
+     * Форматира число като милиони със суфикс "M" (е.g., 15.2M)
+     */
+    private fun formatMillions(value: Double): String {
+        return String.format(Locale.ENGLISH, "%.1f", value) + "M"
+    }
+
+    /**
+     * Форматира цена със хилядиделител (е.g., 43,250.50)
+     */
+    private fun formatPrice(value: Double): String {
+        return String.format(Locale.ENGLISH, "%,.0f", value)
+    }
     data class DailyBriefing(
         val date: String,
         val generatedAt: Long,
@@ -63,7 +78,7 @@ class DailyBriefingGenerator @Inject constructor() {
         // --- Key Metrics ---
         val keyMetrics = listOf(
             BriefingMetric("BTC PRICE",
-                "$${String.format(Locale.ENGLISH, "%,.0f", btcPrice)}",
+                "$$${formatPrice(btcPrice)}",
                 "${if (btcChange24h > 0) "+" else ""}${String.format(Locale.ENGLISH, "%.2f", btcChange24h)}%",
                 if (btcChange24h > 0) "BULLISH" else "BEARISH"),
             BriefingMetric("FUNDING RATE",
@@ -107,10 +122,10 @@ class DailyBriefingGenerator @Inject constructor() {
 
         topLiquidationLevel?.let {
             if (it.isSignificant) {
+                val totalM = (it.longLiquidationUsd + it.shortLiquidationUsd) / 1_000_000
                 alerts.add(BriefingAlert(AlertSeverity.INFO,
                     "LIQUIDATION CLUSTER",
-                    "$${String.format(Locale.ENGLISH, "%,.0f", it.price)} — " +
-                            "$${String.format(Locale.ENGLISH, "%,.0fM", (it.longLiquidationUsd + it.shortLiquidationUsd) / 1_000_000)} in liquidations at this level"))
+                    "$$${formatPrice(it.price)} — ${formatMillions(totalM)} in liquidations at this level"))
             }
         }
 
@@ -130,7 +145,7 @@ class DailyBriefingGenerator @Inject constructor() {
         price: Double, change: Double,
         risk: RiskScoreEngine.RiskScore, fg: Int
     ): String {
-        val priceStr = "$${String.format(Locale.ENGLISH, "%,.0f", price)}"
+        val priceStr = "$$${formatPrice(price)}"
         val changeStr = "${if (change > 0) "+" else ""}${String.format(Locale.ENGLISH, "%.2f", change)}%"
         val sentiment = when {
             risk.overall > 70 -> "showing elevated risk"

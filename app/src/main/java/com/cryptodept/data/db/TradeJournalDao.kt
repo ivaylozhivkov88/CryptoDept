@@ -31,4 +31,10 @@ interface TradeJournalDao {
 
     @Query("SELECT AVG(riskRewardActual) FROM trade_journal WHERE status != 'OPEN' AND riskRewardActual IS NOT NULL")
     suspend fun getAverageRR(): Double?
+
+    @Query("SELECT * FROM trade_journal WHERE entryTime > :since ORDER BY entryTime DESC")
+    suspend fun getAllTradesSince(since: Long): List<TradeJournalEntity>
+
+    @Query("SELECT positionSizeUsd FROM trade_journal ORDER BY entryTime DESC LIMIT 20")
+    suspend fun getRecentSizes(): List<Double>
 }
