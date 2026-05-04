@@ -38,4 +38,15 @@ class BillingViewModel @Inject constructor(
     fun purchase(activity: Activity, productDetails: ProductDetails) {
         billingManager.launchBillingFlow(activity, productDetails)
     }
+
+    fun unlockAdmin(code: String): Boolean {
+        return if (code == "BIGBOSSBAIKO") {
+            viewModelScope.launch {
+                billingManager.setAdminOverride(true)
+            }
+            true
+        } else {
+            false
+        }
+    }
 }

@@ -18,7 +18,8 @@ import javax.inject.Singleton
 @Singleton
 class ReviewManager @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: PreferencesManager,
+    private val journalRepository: com.cryptodept.domain.repository.JournalRepository
 ) {
     private val reviewManager = ReviewManagerFactory.create(context)
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -29,8 +30,12 @@ class ReviewManager @Inject constructor(
             val lastReview = preferencesManager.getLastReviewPromptTime()
             val daysSinceLastReview = (System.currentTimeMillis() - lastReview) / 86_400_000
             
-            // Show after 7+ launches AND 30+ days since last prompt (or never prompted)
-            if (launches >= 7 && (lastReview == 0L || daysSinceLastReview >= 30)) {
+            // Profitability check
+            val statsResult = journalRepository.getStats()
+            val isProfitable = (statsResult.getOrNull()?.averagePnL ?: 0.0) > 0
+            
+            // Show after 7+ launches AND 30+ days since last prompt AND profitable portfolio
+            if (launches >= 7 && (lastReview == 0L || daysSinceLastReview >= 30) && isProfitable) {
                 reviewManager.requestReviewFlow().addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         val reviewInfo = task.result

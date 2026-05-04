@@ -21,7 +21,8 @@ sealed class AnalysisUiState {
         val ohlcData: List<OHLCData>,
         val patterns: List<TechnicalAnalysisEngine.PatternDetection>,
         val fibonacci: Map<String, Double>,
-        val rsiValue: Double
+        val rsiValue: Double,
+        val sentiment: com.cryptodept.domain.usecase.SentimentResult? = null
     ) : AnalysisUiState()
     data class Error(val message: String) : AnalysisUiState()
 }
@@ -32,6 +33,7 @@ class AnalysisViewModel @Inject constructor(
     private val cryptoRepository: CryptoRepository,
     private val chartRepository: ChartRepository,
     private val taEngine: TechnicalAnalysisEngine,
+    private val sentimentAnalyzer: com.cryptodept.domain.usecase.SentimentAnalyzer,
     private val geminiService: com.cryptodept.data.api.GeminiCoachService
 ) : ViewModel() {
 
@@ -119,7 +121,7 @@ class AnalysisViewModel @Inject constructor(
 
                         val totalSignals = (bullish + bearish + neutral).coerceAtLeast(1)
                         val rawConfidence = (bullish.coerceAtLeast(bearish).toFloat() / totalSignals)
-                        
+
                         // Add deterministic "jitter" based on coinId for realism
                         val jitter = (coin.hashCode() % 10) / 100f
                         val confidence = (rawConfidence * 0.7f + 0.2f + jitter).coerceIn(0.42f, 0.96f)
@@ -132,6 +134,10 @@ class AnalysisViewModel @Inject constructor(
                             else -> SignalStrength.NEUTRAL
                         }
 
+                        val sentimentResult = withContext(Dispatchers.IO) {
+                            sentimentAnalyzer.analyzeCoin(coin.uppercase())
+                        }
+
                         AnalysisUiState.Success(
                             coinId = coin.uppercase(),
                             compositeSignal = CompositeSignal(strength, bullish, bearish, neutral, indicators, confidence),
@@ -139,7 +145,8 @@ class AnalysisViewModel @Inject constructor(
                             ohlcData = ohlcData,
                             patterns = patterns,
                             fibonacci = fib,
-                            rsiValue = rsi
+                            rsiValue = rsi,
+                            sentiment = sentimentResult
                         )
                     }
                     emit(result)
@@ -155,7 +162,7 @@ class AnalysisViewModel @Inject constructor(
     }
 
     val trackedCoins: StateFlow<List<String>> = cryptoRepository.getTrackedCoinPrices()
-        .map { prices -> 
+        .map { prices ->
             val symbols = prices.map { it.symbol.uppercase() }
             if (symbols.size < 5) listOf("BTC", "ETH", "SOL", "XRP", "ADA", "DOT", "LINK", "LTC", "AVAX", "TRX", "MATIC", "XLM", "ATOM", "SHIB", "DOGE")
             else symbols
@@ -167,20 +174,53 @@ class AnalysisViewModel @Inject constructor(
 
     fun generateAIReport(state: AnalysisUiState.Success) {
         viewModelScope.launch {
-            _aiReport.value = "GENERATING AI TERMINAL REPORT..."
+            _aiReport.value = "CONNECTING TO CRYPTO_APOSTLES_STREAM..."
             try {
-                val prompt = """
-                    Act as a professional Wall Street trader. Analyze this data for ${state.coinId}:
-                    Price: $${state.currentPrice}
-                    Signal: ${state.compositeSignal.strength} (${state.compositeSignal.confidence * 100}% confidence)
-                    RSI: ${state.rsiValue}
-                    Patterns: ${state.patterns.joinToString { it.pattern.name }}
-                    
-                    Provide a concise, terminal-style technical report (max 200 words). 
-                    Include: 1. Trend analysis, 2. Risk assessment, 3. Entry/Exit suggestion.
-                    Format: UPPERCASE terminal output with ASCII separators.
-                """.trimIndent()
-                
+                val priceStr = String.format(Locale.US, "%.2f", state.currentPrice)
+                val rsiStr = String.format(Locale.US, "%.1f", state.rsiValue)
+                val confidenceInt = (state.compositeSignal.confidence * 100).toInt()
+                val sentimentStr = state.sentiment?.verdict?.name?.replace("_", " ") ?: "NEUTRAL"
+                val bullishVotesStr = state.compositeSignal.bullishCount.toString()
+                val bearishVotesStr = state.compositeSignal.bearishCount.toString()
+                val coinId = state.coinId
+                val targetPrice = String.format(Locale.US, "%.2f", state.currentPrice * 1.15)
+                val stopPrice = String.format(Locale.US, "%.2f", state.currentPrice * 0.95)
+                val signalStr = state.compositeSignal.strength.name.replace("_", " ")
+
+                val prompt = "You are THE CRYPTODEPT APOSTLE — a legendary trader who calls it raw and unfiltered.\n" +
+                        "Generate a VIRAL technical analysis report for $coinId.\n" +
+                        "\n" +
+                        "DATA SNAPSHOT:\n" +
+                        "- PRICE: $$priceStr\n" +
+                        "- SIGNAL: $signalStr ($confidenceInt% confidence)\n" +
+                        "- RSI: $rsiStr\n" +
+                        "- SENTIMENT: $sentimentStr\n" +
+                        "- BULLISH/BEARISH VOTES: $bullishVotesStr/$bearishVotesStr\n" +
+                        "\n" +
+                        "STRUCTURE (CRITICAL):\n" +
+                        "\n" +
+                        "1. LOUD TITLE with 🚀 emoji (e.g., \"🚀 $coinId BREAKOUT INCOMING — HERE'S PROOF\")\n" +
+                        "\n" +
+                        "2. PROVOCATIVE INTRO (2-3 sentences, start with \"Stop scrolling and look at this...\")\n" +
+                        "\n" +
+                        "3. SECTIONED ANALYSIS (use ➡️ emoji before each section):\n" +
+                        "   ➡️ THE BEAR TRAP — Why shorts are getting liquidated\n" +
+                        "   ➡️ THE WALL OF WORRY — Technical resistance & support zones\n" +
+                        "   ➡️ THE RSI REVERSAL SIGNAL — What oscillators are screaming\n" +
+                        "   ➡️ SENTIMENT AMPLIFICATION — Reddit & CryptoPanic align\n" +
+                        "   ➡️ THE SETUP — Entry, target, and risk:reward ratio\n" +
+                        "\n" +
+                        "4. SPECIFIC PREDICTION (provide price levels, timeframe)\n" +
+                        "   Format: \"PREDICTION: $coinId target $$targetPrice in Y days, stop at $$stopPrice\"\n" +
+                        "\n" +
+                        "5. THE CRYPTODEPT VERDICT (1 sentence, ALL CAPS declaration)\n" +
+                        "\n" +
+                        "6. FOOTER:\n" +
+                        "   - Hashtags: #CryptoDept #Trading #$coinId\n" +
+                        "   - Call to Action: \"Drop a 🚀 if BULLISH or 📉 if this is a FAKE-OUT!\"\n" +
+                        "\n" +
+                        "TONE: High-conviction, no hedging, terminal-style confidence."
+
                 var fullResponse = ""
                 geminiService.sendMessage(prompt).collect { chunk ->
                     fullResponse += chunk
@@ -196,20 +236,23 @@ class AnalysisViewModel @Inject constructor(
         viewModelScope.launch {
             _aiReport.value = "CREATING AI VIDEO TEASER SCRIPT..."
             try {
-                val prompt = """
-                    Create a script for a 30-second TikTok/Reels crypto teaser video for ${state.coinId}.
-                    Current Price: $${state.currentPrice}
-                    Market Signal: ${state.compositeSignal.strength}
-                    Confidence: ${state.compositeSignal.confidence * 100}%
-                    
-                    Structure:
-                    0-5s: HOOK (SCARY/EXCITING terminal warning)
-                    5-20s: DATA BREAKDOWN (Fast-paced technicals)
-                    20-30s: CALL TO ACTION (Terminal command suggestion)
-                    
-                    Format: Terminal-style storyboard script.
-                """.trimIndent()
-                
+                val priceStr = state.currentPrice
+                val confidencePercent = state.compositeSignal.confidence * 100
+                val coinId = state.coinId
+                val signalStr = state.compositeSignal.strength.name
+
+                val prompt = "Create a script for a 30-second TikTok/Reels crypto teaser video for $coinId.\n" +
+                        "Current Price: $$priceStr\n" +
+                        "Market Signal: $signalStr\n" +
+                        "Confidence: $confidencePercent%\n" +
+                        "\n" +
+                        "Structure:\n" +
+                        "0-5s: HOOK (SCARY/EXCITING terminal warning)\n" +
+                        "5-20s: DATA BREAKDOWN (Fast-paced technicals)\n" +
+                        "20-30s: CALL TO ACTION (Terminal command suggestion)\n" +
+                        "\n" +
+                        "Format: Terminal-style storyboard script."
+
                 var fullResponse = ""
                 geminiService.sendMessage(prompt).collect { chunk ->
                     fullResponse += chunk

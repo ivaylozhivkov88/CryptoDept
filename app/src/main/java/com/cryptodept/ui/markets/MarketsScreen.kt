@@ -33,6 +33,7 @@ fun MarketsScreen(
     viewModel: MarketsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val sentimentMap by viewModel.sentimentMap.collectAsState()
     val colors = LocalTerminalColors.current // ВЗЕМАМЕ ТЕКУЩИТЕ ЦВЕТОВЕ
 
     Column(
@@ -58,7 +59,7 @@ fun MarketsScreen(
                 }
             }
             is MarketsUiState.Success -> {
-                MarketsList(state.coins) { coinId ->
+                MarketsList(state.coins, sentimentMap) { coinId ->
                     navController.navigate(Screen.CoinDetail.createRoute(coinId))
                 }
             }
@@ -70,7 +71,7 @@ fun MarketsScreen(
 }
 
 @Composable
-fun MarketsList(coins: List<CoinPrice>, onCoinClick: (String) -> Unit) {
+fun MarketsList(coins: List<CoinPrice>, sentimentMap: Map<String, com.cryptodept.domain.usecase.SentimentVerdict>, onCoinClick: (String) -> Unit) {
     val colors = LocalTerminalColors.current
     LazyColumn {
         item {
@@ -84,16 +85,17 @@ fun MarketsList(coins: List<CoinPrice>, onCoinClick: (String) -> Unit) {
                 Text(" ASSET", modifier = Modifier.weight(1f), color = colors.dimText, fontSize = 10.sp)
                 Text("PRICE ", modifier = Modifier.weight(1f), color = colors.dimText, fontSize = 10.sp)
                 Text("24H_CHG ", modifier = Modifier.weight(0.8f), color = colors.dimText, fontSize = 10.sp)
+                Text("SENT ", modifier = Modifier.weight(0.5f), color = colors.dimText, fontSize = 10.sp)
             }
         }
         items(coins) { coin ->
-            MarketRow(coin, onCoinClick)
+            MarketRow(coin, onClick = onCoinClick, sentiment = sentimentMap[coin.id])
         }
     }
 }
 
 @Composable
-fun MarketRow(coin: CoinPrice, onClick: (String) -> Unit) {
+fun MarketRow(coin: CoinPrice, onClick: (String) -> Unit, sentiment: com.cryptodept.domain.usecase.SentimentVerdict? = null) {
     val colors = LocalTerminalColors.current
     Row(
         modifier = Modifier
@@ -121,5 +123,24 @@ fun MarketRow(coin: CoinPrice, onClick: (String) -> Unit) {
             modifier = Modifier.weight(0.8f),
             color = trendColor
         )
+
+        if (sentiment != null) {
+            val sentimentColor = when (sentiment) {
+                com.cryptodept.domain.usecase.SentimentVerdict.STRONGLY_BULLISH,
+                com.cryptodept.domain.usecase.SentimentVerdict.BULLISH -> colors.primary
+                com.cryptodept.domain.usecase.SentimentVerdict.STRONGLY_BEARISH,
+                com.cryptodept.domain.usecase.SentimentVerdict.BEARISH -> colors.error
+                else -> colors.amber
+            }
+            Text(
+                text = sentiment.name.take(4),
+                modifier = Modifier.weight(0.5f),
+                color = sentimentColor,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold
+            )
+        } else {
+            Spacer(modifier = Modifier.weight(0.5f))
+        }
     }
 }

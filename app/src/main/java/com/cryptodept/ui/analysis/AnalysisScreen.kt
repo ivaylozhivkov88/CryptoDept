@@ -59,10 +59,21 @@ fun AnalysisScreen(
             onDismissRequest = { viewModel.dismissAiReport() },
             containerColor = colors.background,
             modifier = Modifier.border(1.dp, colors.primary, RectangleShape),
-            title = { Text(">>> AI TERMINAL ANALYSIS", color = colors.primary, fontFamily = FontFamily.Monospace) },
+            title = { Text(">>> NARRATIVE AI REPORT", color = colors.primary, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold) },
             text = {
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    Text(aiReport!!, color = colors.primary, fontFamily = FontFamily.Monospace, fontSize = 12.sp)
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 500.dp)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    Text(
+                        text = aiReport!!, 
+                        color = colors.textPrimary, 
+                        fontFamily = FontFamily.Monospace, 
+                        fontSize = 13.sp,
+                        lineHeight = 20.sp
+                    )
                 }
             },
             confirmButton = {
@@ -280,6 +291,10 @@ fun AnalysisContentV2(
 
     Spacer(modifier = Modifier.height(16.dp))
 
+    SentimentSection(state.sentiment)
+
+    Spacer(modifier = Modifier.height(16.dp))
+
     if (state.patterns.isNotEmpty()) {
         Text(">>> PATTERN_DETECTED", color = colors.dimText, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
         state.patterns.forEach { pattern ->
@@ -330,6 +345,49 @@ fun AnalysisContentV2(
         colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.primary)
     ) {
         Text("> RUN_DEEP_QUANT_SCAN", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+    }
+}
+
+@Composable
+fun SentimentSection(sentiment: com.cryptodept.domain.usecase.SentimentResult?) {
+    val colors = LocalTerminalColors.current
+    if (sentiment == null) return
+
+    val verdictColor = when (sentiment.verdict) {
+        com.cryptodept.domain.usecase.SentimentVerdict.STRONGLY_BULLISH,
+        com.cryptodept.domain.usecase.SentimentVerdict.BULLISH -> colors.primary
+        com.cryptodept.domain.usecase.SentimentVerdict.STRONGLY_BEARISH,
+        com.cryptodept.domain.usecase.SentimentVerdict.BEARISH -> colors.danger
+        else -> colors.amber
+    }
+
+    Text(">>> MARKET_SENTIMENT (REDDIT/CRYPTO_PANIC)", color = colors.dimText, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+    
+    Box(
+        modifier = Modifier.fillMaxWidth().border(1.dp, colors.grid).padding(12.dp)
+    ) {
+        Column {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("VERDICT:", color = colors.dimText, fontSize = 10.sp)
+                Text(sentiment.verdict.name, color = verdictColor, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Row(modifier = Modifier.fillMaxWidth().height(8.dp).border(0.5.dp, colors.grid)) {
+                Box(modifier = Modifier.weight(sentiment.bullishPercent.toFloat().coerceAtLeast(1f)).fillMaxHeight().background(colors.primary))
+                Box(modifier = Modifier.weight(sentiment.neutralPercent.toFloat().coerceAtLeast(1f)).fillMaxHeight().background(colors.amber))
+                Box(modifier = Modifier.weight(sentiment.bearishPercent.toFloat().coerceAtLeast(1f)).fillMaxHeight().background(colors.danger))
+            }
+            
+            Row(modifier = Modifier.fillMaxWidth().padding(top = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("BULL: ${sentiment.bullishPercent}%", color = colors.primary, fontSize = 9.sp)
+                Text("NEUT: ${sentiment.neutralPercent}%", color = colors.amber, fontSize = 9.sp)
+                Text("BEAR: ${sentiment.bearishPercent}%", color = colors.danger, fontSize = 9.sp)
+            }
+            
+            Text("DATA_POINTS_ANALYZED: ${sentiment.totalAnalyzed}", color = colors.grid, fontSize = 8.sp, modifier = Modifier.padding(top = 4.dp))
+        }
     }
 }
 

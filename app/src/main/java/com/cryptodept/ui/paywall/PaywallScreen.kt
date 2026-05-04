@@ -183,6 +183,50 @@ fun PaywallScreen(
             ) {
                 Text("RESTORE PURCHASES", color = colors.dimText, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
             }
+
+            var showAdminDialog by remember { mutableStateOf(false) }
+            TextButton(
+                onClick = { showAdminDialog = true },
+                modifier = Modifier.padding(top = 4.dp)
+            ) {
+                Text("ADMIN", color = colors.grid, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+            }
+
+            if (showAdminDialog) {
+                var adminCode by remember { mutableStateOf("") }
+                AlertDialog(
+                    onDismissRequest = { showAdminDialog = false },
+                    containerColor = Color.Black,
+                    modifier = Modifier.border(1.dp, colors.primary, RectangleShape),
+                    title = { Text("ADMIN ACCESS", color = colors.primary, fontFamily = FontFamily.Monospace) },
+                    text = {
+                        Column {
+                            Text("ENTER AUTHORIZATION CODE:", color = colors.dimText, fontSize = 10.sp)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            com.cryptodept.ui.components.TerminalInput(
+                                label = "CODE",
+                                value = adminCode,
+                                onValueChange = { adminCode = it }
+                            )
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            if (viewModel.unlockAdmin(adminCode)) {
+                                showAdminDialog = false
+                                onDismiss()
+                            }
+                        }) {
+                            Text("EXECUTE", color = colors.primary, fontFamily = FontFamily.Monospace)
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showAdminDialog = false }) {
+                            Text("CANCEL", color = colors.dimText, fontFamily = FontFamily.Monospace)
+                        }
+                    }
+                )
+            }
         }
         
         Spacer(modifier = Modifier.height(32.dp))

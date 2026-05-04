@@ -62,12 +62,12 @@ fun PositionSizeScreen(
             TerminalInput(
                 label = "PORTFOLIO SIZE (USD)",
                 value = portfolioSize.toString(),
-                onValueChange = { it.toDoubleOrNull()?.let { v -> viewModel.setPortfolioSize(v) } }
+                onValueChange = { viewModel.setPortfolioSize(it) }
             )
             TerminalInput(
                 label = "RISK PER TRADE (%)",
                 value = riskPercent.toString(),
-                onValueChange = { it.toDoubleOrNull()?.let { v -> viewModel.setRiskPercent(v) } }
+                onValueChange = { viewModel.setRiskPercent(it) }
             )
             result?.let {
                 Text(
@@ -86,7 +86,7 @@ fun PositionSizeScreen(
             TerminalInput(
                 label = "ENTRY PRICE",
                 value = entryPrice.toString(),
-                onValueChange = { it.toDoubleOrNull()?.let { v -> viewModel.setEntryPrice(v) } },
+                onValueChange = { viewModel.setEntryPrice(it) },
                 trailingIcon = {
                     TextButton(onClick = { viewModel.useCurrentPrice() }) {
                         Text("[USE CURRENT]", color = colors.primary, fontSize = 10.sp)
@@ -96,12 +96,12 @@ fun PositionSizeScreen(
             TerminalInput(
                 label = "STOP LOSS",
                 value = stopLoss.toString(),
-                onValueChange = { it.toDoubleOrNull()?.let { v -> viewModel.setStopLoss(v) } }
+                onValueChange = { viewModel.setStopLoss(it) }
             )
             TerminalInput(
                 label = "TAKE PROFIT",
                 value = takeProfit.toString(),
-                onValueChange = { it.toDoubleOrNull()?.let { v -> viewModel.setTakeProfit(v) } }
+                onValueChange = { viewModel.setTakeProfit(it) }
             )
         }
 

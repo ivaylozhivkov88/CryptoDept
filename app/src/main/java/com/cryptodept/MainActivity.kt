@@ -167,8 +167,13 @@ class MainActivity : ComponentActivity() {
                                 "$${String.format(java.util.Locale.US, "%,.0f", it.currentPrice)} ${if(it.priceChangePercentage24h >= 0) "▲" else "▼"}${String.format("%.1f", Math.abs(it.priceChangePercentage24h))}%"
                             } ?: "FETCHING..."
 
-                            val screensaverType = remember { (0..1).random() }
-                            if (screensaverType == 0) {
+                            var showMatrix by remember { mutableStateOf(false) }
+                            LaunchedEffect(Unit) {
+                                delay(60_000L)
+                                showMatrix = true
+                            }
+
+                            if (showMatrix) {
                                 MatrixRainScreen(
                                     modifier = Modifier.fillMaxSize(),
                                     btcPrice = btcDisplay,
@@ -196,6 +201,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        volumeControlStream = android.media.AudioManager.STREAM_MUSIC
         reviewManager.requestReviewIfAppropriate(this)
     }
 

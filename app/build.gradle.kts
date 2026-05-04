@@ -38,6 +38,7 @@ android {
         buildConfigField("String", "ALPHA_VANTAGE_API_KEY", "\"${secrets["ALPHA_VANTAGE_API_KEY"] ?: ""}\"")
         buildConfigField("String", "COINMARKETCAL_API_KEY", "\"${secrets["COINMARKETCAL_API_KEY"] ?: ""}\"")
         buildConfigField("String", "GEMINI_API_KEY", "\"${secrets["GEMINI_API_KEY"] ?: ""}\"")
+        buildConfigField("String", "WHALE_ALERT_API_KEY", "\"${secrets["WHALE_ALERT_API_KEY"] ?: ""}\"")
     }
 
     // Enable Room schema export for migration tracking

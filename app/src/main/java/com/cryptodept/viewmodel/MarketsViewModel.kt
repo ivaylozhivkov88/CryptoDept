@@ -23,11 +23,15 @@ sealed class MarketsUiState {
 
 @HiltViewModel
 class MarketsViewModel @Inject constructor(
-    private val cryptoRepository: CryptoRepository
+    private val cryptoRepository: CryptoRepository,
+    private val sentimentAnalyzer: com.cryptodept.domain.usecase.SentimentAnalyzer
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<MarketsUiState>(MarketsUiState.Loading)
     val uiState: StateFlow<MarketsUiState> = _uiState.asStateFlow()
+
+    private val _sentimentMap = MutableStateFlow<Map<String, com.cryptodept.domain.usecase.SentimentVerdict>>(emptyMap())
+    val sentimentMap: StateFlow<Map<String, com.cryptodept.domain.usecase.SentimentVerdict>> = _sentimentMap.asStateFlow()
 
     init {
         observePrices()
@@ -43,8 +47,22 @@ class MarketsViewModel @Inject constructor(
                 .collect { coins ->
                     if (coins.isNotEmpty()) {
                         _uiState.value = MarketsUiState.Success(coins)
+                        fetchQuickSentiment(coins.take(10))
                     }
                 }
+        }
+    }
+
+    private fun fetchQuickSentiment(coins: List<CoinPrice>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val map = mutableMapOf<String, com.cryptodept.domain.usecase.SentimentVerdict>()
+            coins.forEach { coin ->
+                try {
+                    val result = sentimentAnalyzer.analyzeCoin(coin.symbol.uppercase())
+                    map[coin.id] = result.verdict
+                } catch (e: Exception) {}
+            }
+            _sentimentMap.value = map
         }
     }
 

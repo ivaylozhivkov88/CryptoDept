@@ -30,6 +30,7 @@ class CryptoDeptApplication : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+        setupCrashlytics()
         FirebaseApp.initializeApp(this)
         Firebase.appCheck.installAppCheckProviderFactory(
             PlayIntegrityAppCheckProviderFactory.getInstance()
@@ -38,6 +39,14 @@ class CryptoDeptApplication : Application(), Configuration.Provider {
         socketLifecycleManager.init()
         createNotificationChannels()
         scheduleDailyBriefing()
+    }
+
+    private fun setupCrashlytics() {
+        val originalHandler = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+            com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(throwable)
+            originalHandler?.uncaughtException(thread, throwable)
+        }
     }
 
     private fun scheduleDailyBriefing() {

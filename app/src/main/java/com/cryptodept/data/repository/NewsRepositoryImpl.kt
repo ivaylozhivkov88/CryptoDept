@@ -26,7 +26,7 @@ class NewsRepositoryImpl @Inject constructor(
     override suspend fun refreshNews(currencies: String?): Result<Unit> {
         return try {
             val response = if (BuildConfig.CRYPTOPANIC_API_KEY.isNotBlank()) {
-                val query = currencies ?: "BTC,ETH,XRP,SOL,ADA,DOT,LINK,LTC,AVAX,TRX"
+                val query = currencies ?: "BTC,ETH,XRP,SOL,ADA" // Prioritize top 5
                 newsApi.getCryptoPanicNews(currencies = query).results.map { res ->
                     val sentiment = when {
                         res.votes.positive > res.votes.negative -> NewsSentiment.BULLISH

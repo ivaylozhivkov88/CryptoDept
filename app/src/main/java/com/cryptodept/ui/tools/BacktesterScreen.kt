@@ -271,6 +271,10 @@ fun EquityChart(data: List<Pair<Long, Double>>) {
                 setTouchEnabled(false)
                 setBackgroundColor(AndroidColor.TRANSPARENT)
                 
+                // PRICHINA 1: Handle empty data
+                setNoDataText("AWAITING BACKTEST DATA...")
+                setNoDataTextColor(AndroidColor.rgb(0, 255, 65))
+                
                 xAxis.apply {
                     position = XAxis.XAxisPosition.BOTTOM
                     textColor = AndroidColor.LTGRAY
@@ -287,6 +291,12 @@ fun EquityChart(data: List<Pair<Long, Double>>) {
             }
         },
         update = { chart ->
+            if (data.isNullOrEmpty()) {
+                chart.clear()
+                chart.invalidate()
+                return@AndroidView
+            }
+
             val entries = data.mapIndexed { index, pair ->
                 Entry(index.toFloat(), pair.second.toFloat())
             }

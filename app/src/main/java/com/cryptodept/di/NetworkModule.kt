@@ -225,5 +225,9 @@ object NetworkModule {
         retrofit.create(CoinMarketCalApi::class.java)
 
     @Provides @Singleton
+    fun provideWhaleAlertApi(@Named("PublicClient") client: OkHttpClient): WhaleAlertApi =
+        createRetrofit("https://api.whale-alert.io/v1/", client).create(WhaleAlertApi::class.java)
+
+    @Provides @Singleton
     fun provideGson(): Gson = Gson()
 }

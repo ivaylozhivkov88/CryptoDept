@@ -40,7 +40,7 @@ class BacktesterViewModel @Inject constructor(
             try {
                 val config = BacktesterEngine.BacktestConfig(
                     coinId = selectedCoin.value,
-                    startDate = 0, // Simplified for now, or use date picker logic
+                    startDate = 0,
                     endDate = System.currentTimeMillis(),
                     rsiEntryThreshold = rsiEntry.value.toDouble(),
                     rsiExitThreshold = rsiExit.value.toDouble(),
@@ -50,19 +50,22 @@ class BacktesterViewModel @Inject constructor(
                     riskPerTradePercent = riskPerTrade.value.toDouble()
                 )
 
+                // PRICHINA 3: Execution on background dispatcher
                 val history = withContext(Dispatchers.IO) {
-                    repository.getOHLCData(config.coinId, days = 30) // Default 30 days for now
+                    repository.getOHLCData(config.coinId, days = 30)
                 }
 
                 if (history.isEmpty()) {
-                    _uiState.value = BacktestUiState.Error("NO_HISTORICAL_DATA_FOUND")
+                    _uiState.value = BacktestUiState.Error("NO HISTORICAL DATA FOR THIS PERIOD")
                     return@launch
                 }
 
-                val result = backtesterEngine.run(config, history)
+                val result = withContext(Dispatchers.Default) {
+                    backtesterEngine.run(config, history)
+                }
                 _uiState.value = BacktestUiState.Success(result)
             } catch (e: Exception) {
-                _uiState.value = BacktestUiState.Error(e.message ?: "BACKTEST_FAILED")
+                _uiState.value = BacktestUiState.Error("[ERROR] ${e.message ?: "BACKTEST FAILED"}")
             }
         }
     }

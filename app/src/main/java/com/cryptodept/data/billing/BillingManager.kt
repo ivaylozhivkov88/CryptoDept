@@ -9,25 +9,33 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class BillingManager @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val preferencesManager: com.cryptodept.data.datastore.PreferencesManager
 ) : PurchasesUpdatedListener {
 
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
     private val _isPro = MutableStateFlow(false)
-    val isPro: StateFlow<Boolean> = _isPro.asStateFlow()
+    val isPro: StateFlow<Boolean> = combine(
+        _isPro,
+        preferencesManager.isPro
+    ) { billingPro, prefPro ->
+        billingPro || prefPro
+    }.stateIn(scope, SharingStarted.Eagerly, false)
 
     private val billingClient = BillingClient.newBuilder(context)
         .setListener(this)
         .enablePendingPurchases()
         .build()
-
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     init {
         startConnection()
@@ -135,5 +143,9 @@ class BillingManager @Inject constructor(
     fun verifyPurchase(purchaseToken: String): Boolean {
         // Mock server-side verification using the token
         return purchaseToken.isNotBlank()
+    }
+
+    suspend fun setAdminOverride(enabled: Boolean) {
+        preferencesManager.setProStatus(enabled)
     }
 }

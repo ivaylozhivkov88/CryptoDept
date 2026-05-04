@@ -122,19 +122,26 @@ class BacktesterEngine @Inject constructor(
         val totalReturnUsd = currentCapital - config.initialCapital
         val totalReturnPct = (totalReturnUsd / config.initialCapital) * 100.0
         val wins = trades.count { it.pnlUsd > 0 }
-        val winRate = if (trades.isNotEmpty()) (wins.toDouble() / trades.size) * 100.0 else 0.0
+        
+        // PRICHINA 2: Division by zero fixes
+        val winRate = if (trades.isEmpty()) 0.0 
+                      else (wins.toDouble() / trades.size.toDouble()) * 100.0
         
         val grossProfit = trades.filter { it.pnlUsd > 0 }.sumOf { it.pnlUsd }
         val grossLoss = Math.abs(trades.filter { it.pnlUsd < 0 }.sumOf { it.pnlUsd })
-        val profitFactor = if (grossLoss > 0) grossProfit / grossLoss else grossProfit
+        val profitFactor = if (grossLoss <= 0.0) grossProfit 
+                           else grossProfit / grossLoss
         
         // Simple Sharpe Ratio (daily frequency assumed, simplified)
         val returns = trades.map { it.pnlPercent / 100.0 }
         val avgReturn = if (returns.isNotEmpty()) returns.average() else 0.0
         val stdDev = if (returns.size > 1) {
             sqrt(returns.map { (it - avgReturn) * (it - avgReturn) }.average())
-        } else 0.1
-        val sharpeRatio = if (stdDev > 0) (avgReturn / stdDev) * sqrt(252.0) else 0.0 // Annualized
+        } else 0.0
+        
+        val riskFreeRate = 0.02 / 365.0 // Simplified daily risk free rate
+        val sharpeRatio = if (stdDev <= 0.0) 0.0 
+                          else ((avgReturn - riskFreeRate) / stdDev) * sqrt(252.0) // Annualized
 
         BacktestResult(
             totalReturn = totalReturnPct,

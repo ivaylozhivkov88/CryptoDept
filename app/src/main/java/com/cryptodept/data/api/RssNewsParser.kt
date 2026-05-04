@@ -52,6 +52,10 @@ class RssNewsParser @Inject constructor(
         allItems.sortedByDescending { parseRssDate(it.pubDate) }
     }
 
+    suspend fun parseUrl(url: String): List<RssItem> = withContext(Dispatchers.IO) {
+        fetchRssFeed(RssSource("Generic", url, "General"))
+    }
+
     private suspend fun fetchRssFeed(source: RssSource): List<RssItem> {
         val request = Request.Builder()
             .url(source.url)
