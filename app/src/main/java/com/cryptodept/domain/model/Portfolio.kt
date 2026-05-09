@@ -6,7 +6,7 @@ data class PortfolioEntry(
     val symbol: String,
     val quantity: Double,
     val averageEntryPrice: Double,
-    val addedAt: Long
+    val addedAt: Long,
 )
 
 data class PortfolioEntryWithCurrentPrice(
@@ -14,7 +14,7 @@ data class PortfolioEntryWithCurrentPrice(
     val currentPrice: Double,
     val pnlUsd: Double,
     val pnlPercent: Double,
-    val currentValueUsd: Double
+    val currentValueUsd: Double,
 )
 
 data class PortfolioSummary(
@@ -22,5 +22,5 @@ data class PortfolioSummary(
     val totalCostUsd: Double,
     val totalPnlUsd: Double,
     val totalPnlPercent: Double,
-    val entries: List<PortfolioEntryWithCurrentPrice>
+    val entries: List<PortfolioEntryWithCurrentPrice>,
 )

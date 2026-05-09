@@ -6,5 +6,5 @@ data class GlobalMarketData(
     val totalVolume: Double,
     val marketCapChangePercentage24h: Double,
     val btcDominance: Double,
-    val ethDominance: Double
+    val ethDominance: Double,
 )

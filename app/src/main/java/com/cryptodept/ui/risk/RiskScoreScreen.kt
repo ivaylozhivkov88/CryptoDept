@@ -24,22 +24,21 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
-fun RiskScoreScreen(
-    viewModel: RiskViewModel = hiltViewModel()
-) {
+fun RiskScoreScreen(viewModel: RiskViewModel = hiltViewModel()) {
     val state by viewModel.riskState.collectAsState()
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black)
-            .padding(16.dp)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(Color.Black)
+                .padding(16.dp),
     ) {
         when (val uiState = state) {
             is RiskUiState.Loading -> {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center),
-                    color = Color(0xFF00FF41)
+                    color = Color(0xFF00FF41),
                 )
             }
             is RiskUiState.Error -> {
@@ -47,7 +46,7 @@ fun RiskScoreScreen(
                     text = ">>> ERROR: ${uiState.message}",
                     color = Color.Red,
                     fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
-                    modifier = Modifier.align(Alignment.Center)
+                    modifier = Modifier.align(Alignment.Center),
                 )
             }
             is RiskUiState.Success -> {
@@ -63,39 +62,42 @@ fun RiskScoreScreen(
 fun RiskContent(
     score: RiskScoreEngine.RiskScore,
     btcPrice: Double,
-    onRefresh: () -> Unit
+    onRefresh: () -> Unit,
 ) {
     val timeStr = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date(score.calculatedAt))
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .border(1.dp, Color(0xFF00FF41), RectangleShape)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .border(1.dp, Color(0xFF00FF41), RectangleShape),
     ) {
         item {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = ">>> RISK ASSESSMENT ENGINE",
                     color = Color(0xFF00FF41),
                     fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
+                    fontSize = 16.sp,
                 )
                 Button(
                     onClick = onRefresh,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Transparent,
-                        contentColor = Color(0xFF00FF41)
-                    ),
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = Color(0xFF00FF41),
+                        ),
                     shape = RectangleShape,
                     modifier = Modifier.border(1.dp, Color(0xFF00FF41), RectangleShape),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
                 ) {
                     Text("[REFRESH]", fontFamily = com.cryptodept.ui.theme.JetBrainsMono)
                 }
@@ -105,67 +107,70 @@ fun RiskContent(
                 color = Color(0xFF00FF41).copy(alpha = 0.7f),
                 fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
                 fontSize = 12.sp,
-                modifier = Modifier.padding(horizontal = 8.dp)
+                modifier = Modifier.padding(horizontal = 8.dp),
             )
             HorizontalDivider(color = Color(0xFF00FF41), thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
         }
 
         item {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
                     text = "OVERALL RISK SCORE",
                     color = Color.White,
                     fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
-                    fontSize = 18.sp
+                    fontSize = 18.sp,
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 // Progress Bar
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(24.dp)
-                        .border(1.dp, Color.Gray, RectangleShape)
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(24.dp)
+                            .border(1.dp, Color.Gray, RectangleShape),
                 ) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth(score.overall / 100f)
-                            .fillMaxHeight()
-                            .background(Color(score.level.color))
+                        modifier =
+                            Modifier
+                                .fillMaxWidth(score.overall / 100f)
+                                .fillMaxHeight()
+                                .background(Color(score.level.color)),
                     )
                 }
-                
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text("LOW", color = Color.Gray, fontSize = 10.sp, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)
                     Text("MODERATE", color = Color.Gray, fontSize = 10.sp, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)
                     Text("HIGH", color = Color.Gray, fontSize = 10.sp, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)
                     Text("EXTREME", color = Color.Gray, fontSize = 10.sp, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)
                 }
-                
+
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "${score.overall}/100",
                     color = Color(score.level.color),
                     fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
                     fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "⚠ ${score.level.label} — ${score.recommendation}",
                     color = Color(score.level.color),
                     fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
                     fontSize = 14.sp,
-                    modifier = Modifier.padding(horizontal = 8.dp)
+                    modifier = Modifier.padding(horizontal = 8.dp),
                 )
             }
             HorizontalDivider(color = Color(0xFF00FF41), thickness = 1.dp)
@@ -176,7 +181,7 @@ fun RiskContent(
                 text = "COMPONENT BREAKDOWN",
                 color = Color(0xFF00FF41),
                 fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier.padding(8.dp),
             )
         }
 
@@ -190,14 +195,14 @@ fun RiskContent(
                 text = "DOMINANT RISK FACTORS:",
                 color = Color(0xFF00FF41),
                 fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
-                modifier = Modifier.padding(horizontal = 8.dp)
+                modifier = Modifier.padding(horizontal = 8.dp),
             )
             score.dominantFactors.forEach { factor ->
                 Text(
                     text = "> $factor",
                     color = Color.White,
                     fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp),
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -207,42 +212,45 @@ fun RiskContent(
 
 @Composable
 fun RiskComponentRow(component: RiskScoreEngine.RiskComponent) {
-    val barColor = when {
-        component.score < 40 -> Color(0xFF00FF41) // Green
-        component.score < 70 -> Color(0xFFFFB000) // Amber
-        else -> Color(0xFFFF3B30) // Red
-    }
+    val barColor =
+        when {
+            component.score < 40 -> Color(0xFF00FF41) // Green
+            component.score < 70 -> Color(0xFFFFB000) // Amber
+            else -> Color(0xFFFF3B30) // Red
+        }
 
     Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
                 text = component.name.padEnd(16),
                 color = Color.White,
                 fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
-                fontSize = 12.sp
+                fontSize = 12.sp,
             )
             Text(
                 text = if (component.isBearish) "BEARISH" else "NEUTRAL/BULLISH",
                 color = if (component.isBearish) Color(0xFFFF3B30) else Color(0xFF00FF41),
                 fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
-                fontSize = 10.sp
+                fontSize = 10.sp,
             )
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(8.dp)
-                    .border(0.5.dp, Color.Gray, RectangleShape)
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .height(8.dp)
+                        .border(0.5.dp, Color.Gray, RectangleShape),
             ) {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth(component.score / 100f)
-                        .fillMaxHeight()
-                        .background(barColor)
+                    modifier =
+                        Modifier
+                            .fillMaxWidth(component.score / 100f)
+                            .fillMaxHeight()
+                            .background(barColor),
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
@@ -250,14 +258,14 @@ fun RiskComponentRow(component: RiskScoreEngine.RiskComponent) {
                 text = component.score.toString().padStart(3),
                 color = barColor,
                 fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
-                fontSize = 12.sp
+                fontSize = 12.sp,
             )
         }
         Text(
             text = component.signal,
             color = Color.Gray,
             fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
-            fontSize = 10.sp
+            fontSize = 10.sp,
         )
     }
 }

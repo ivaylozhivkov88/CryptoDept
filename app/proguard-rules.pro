@@ -1,81 +1,47 @@
-# CryptoDept - Terminal ProGuard Rules
+# CryptoDept ProGuard Rules
 
-# General Rules
--keepattributes Signature, Exceptions, *Annotation*, EnclosingMethod, InnerClasses
--keepattributes SourceFile, LineNumberTable
+# --- GENERAL ---
+-keepattributes Signature, Annotation, SourceFile, LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# MPAndroidChart
--keep class com.github.mikephil.charting.** { *; }
--dontwarn com.github.mikephil.charting.**
-
-# Play In-App Review
--keep class com.google.android.play.core.review.** { *; }
--dontwarn com.google.android.play.core.review.**
-
-# Play Billing
--keep class com.android.billingclient.** { *; }
--dontwarn com.android.billingclient.**
-
-# Glance AppWidget (Jetpack)
--keep class androidx.glance.** { *; }
--dontwarn androidx.glance.**
-
-# WorkManager
--keep class androidx.work.** { *; }
--dontwarn androidx.work.**
-
-# OkHttp
--keep class okhttp3.** { *; }
--keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
--dontwarn okhttp3.**
--dontwarn okio.**
-
-# Retrofit
--keepattributes Signature, Exceptions, *Annotation*
+# --- RETROFIT / OKHTTP ---
 -keep class retrofit2.** { *; }
--keepclasseswithmembers class * { @retrofit2.http.* <methods>; }
+-keepattributes RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations
 -dontwarn retrofit2.**
+-keepclassmembers,allowobfuscation interface * {
+    @retrofit2.http.* <methods>;
+}
 
-# Gson / JSON
--keepattributes *Annotation*
--keep class com.google.gson.** { *; }
--keep class * implements com.google.gson.TypeAdapterFactory
--keep class * implements com.google.gson.JsonSerializer
--keep class * implements com.google.gson.JsonDeserializer
+# --- GSON / MOSHI (Data Classes) ---
+# Keep all data models used for JSON serialization
+-keep class com.cryptodept.data.api.model.** { *; }
+-keep class com.cryptodept.domain.model.** { *; }
+-keep enum com.cryptodept.domain.model.** { *; }
+-keepclassmembers enum com.cryptodept.domain.model.** { *; }
 -keepclassmembers class * {
     @com.google.gson.annotations.SerializedName <fields>;
 }
 
-# Domain & Data Models (Critical for serialization/Room)
--keep class com.cryptodept.domain.model.** { *; }
--keep class com.cryptodept.data.db.** { *; }
--keep class com.cryptodept.data.api.model.** { *; }
--keep class com.cryptodept.data.billing.** { *; }
--keep class com.cryptodept.data.datastore.** { *; }
+# --- ROOM ---
+-keep class * extends androidx.room.RoomDatabase
+-dontwarn androidx.room.**
 
-# Hilt / Dagger
+# --- HILT ---
 -keep class dagger.hilt.** { *; }
--keep class javax.inject.** { *; }
--keepclasseswithmembers class * { @javax.inject.Inject *; }
--keepclasseswithmembers class * { @dagger.hilt.* *; }
+-keep class com.cryptodept.di.** { *; }
 
-# Coroutines
--keep class kotlinx.coroutines.** { *; }
--dontwarn kotlinx.coroutines.**
+# --- JETPACK COMPOSE ---
+-keep class androidx.compose.** { *; }
+-dontwarn androidx.compose.**
 
-# Firebase
+# --- SQLCIPHER / SQLITE ---
+-keep class net.sqlcipher.** { *; }
+-keep class net.sqlcipher.database.** { *; }
+-dontwarn net.sqlcipher.**
+
+# --- FIREBASE ---
 -keep class com.google.firebase.** { *; }
 -dontwarn com.google.firebase.**
 
-# Gemini AI (Google AI SDK)
--keep class com.google.ai.client.generativeai.** { *; }
--dontwarn com.google.ai.client.generativeai.**
-
-# Room
--keep class * extends androidx.room.RoomDatabase
--keep @androidx.room.Entity class *
--keep @androidx.room.Dao interface *
--keep class * implements androidx.room.TypeConverter
-
-# DataStore / Protobuf
--keepclassmembers class * extends com.google.protobuf.GeneratedMessageLite { *; }
+# --- BUILD CONFIG ---
+-keep class com.cryptodept.BuildConfig { *; }

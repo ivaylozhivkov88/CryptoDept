@@ -14,5 +14,5 @@ data class BlockchainStats(
     val hash_rate: Double,
     val mempool_count: Int,
     val trade_volume_btc: Double,
-    val miners_revenue_usd: Double
+    val miners_revenue_usd: Double,
 )

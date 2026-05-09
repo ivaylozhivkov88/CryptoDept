@@ -6,7 +6,7 @@ data class OHLCData(
     val high: Double,
     val low: Double,
     val close: Double,
-    val volume: Double
+    val volume: Double,
 ) {
     val isGreen: Boolean get() = close >= open
     val bodySize: Double get() = kotlin.math.abs(close - open)

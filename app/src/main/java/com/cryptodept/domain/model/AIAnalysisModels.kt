@@ -15,12 +15,11 @@ data class MarketDataSnapshot(
     val newsSentiment: String,
     val wyckoffPhase: String,
     val elliottWave: String,
-    val whaleActivity: String,
     val riskScore: Int,
     val priceChange24h: Double,
     val btcDominance: Double,
     val sp500Change: Double,
-    val dxyChange: Double
+    val dxyChange: Double,
 )
 
 data class ParsedReport(
@@ -29,14 +28,14 @@ data class ParsedReport(
     val sections: List<ReportSection>,
     val keyLevels: List<String>,
     val watchFor: List<String>,
-    val disclaimer: String
+    val disclaimer: String,
 )
 
 data class ReportSection(
     val title: String,
     val overview: String,
     val whatItMeans: String,
-    val watchFor: String
+    val watchFor: String,
 )
 
 enum class ReportVerdict {
@@ -44,5 +43,5 @@ enum class ReportVerdict {
     BULLISH,
     NEUTRAL,
     BEARISH,
-    STRONG_BEARISH
+    STRONG_BEARISH,
 }

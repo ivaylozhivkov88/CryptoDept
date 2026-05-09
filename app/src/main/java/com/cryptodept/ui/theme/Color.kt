@@ -2,14 +2,14 @@ package com.cryptodept.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Базови цветове
+// Base colors
 val WallStreetGreen = Color(0xFF00FF41)
 val WallStreetAmber = Color(0xFFFFB000)
 val WallStreetRed = Color(0xFFFF3B30)
 val WallStreetWhite = Color(0xFFCCCCCC)
 val WallStreetBlack = Color(0xFF000000)
 
-// СИНОНИМИ - ТУК ДОБАВЯМЕ CRTBlack
+// Aliases - Including CRTBlack
 val CRTBlack = WallStreetBlack
 val TerminalBlack = WallStreetBlack
 

@@ -1,7 +1,11 @@
 package com.cryptodept.domain.model
 
 enum class SignalStrength {
-    STRONG_BUY, BUY, NEUTRAL, SELL, STRONG_SELL
+    STRONG_BUY,
+    BUY,
+    NEUTRAL,
+    SELL,
+    STRONG_SELL,
 }
 
 data class CompositeSignal(
@@ -10,15 +14,17 @@ data class CompositeSignal(
     val bearishCount: Int,
     val neutralCount: Int,
     val indicators: List<IndicatorStatus>,
-    val confidence: Float
+    val confidence: Float,
 )
 
 data class IndicatorStatus(
     val name: String,
     val value: String,
-    val sentiment: Sentiment
+    val sentiment: Sentiment,
 )
 
 enum class Sentiment {
-    BULLISH, BEARISH, NEUTRAL
+    BULLISH,
+    BEARISH,
+    NEUTRAL,
 }

@@ -1,7 +1,8 @@
 package com.cryptodept.di
 
+import com.cryptodept.data.api.AIProviderRouter
 import com.cryptodept.data.repository.*
-import com.cryptodept.domain.repository.* // Глобален импорт на интерфейсите
+import com.cryptodept.domain.repository.* // Global interface import
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -11,6 +12,9 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
+    @Binds
+    @Singleton
+    abstract fun bindAIProvider(impl: AIProviderRouter): AIProvider
 
     @Binds
     @Singleton
@@ -47,4 +51,16 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindPortfolioRepository(impl: PortfolioRepositoryImpl): PortfolioRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSignalRepository(impl: SignalRepositoryImpl): SignalRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindDeFiRepository(impl: DeFiRepositoryImpl): DeFiRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindWhaleRepository(impl: WhaleRepositoryImpl): WhaleRepository
 }

@@ -25,48 +25,50 @@ import kotlinx.coroutines.delay
 @Composable
 fun PsychologyLockOverlay(
     isVisible: Boolean,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     AnimatedVisibility(
         visible = isVisible,
         enter = fadeIn() + expandVertically(),
-        exit = fadeOut() + shrinkVertically()
+        exit = fadeOut() + shrinkVertically(),
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.95f))
-                .padding(24.dp),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.95f))
+                    .padding(24.dp),
+            contentAlignment = Alignment.Center,
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(2.dp, WallStreetAmber)
-                    .padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .border(2.dp, WallStreetAmber)
+                        .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
                     text = ">>> SYSTEM LOCK: EMOTIONAL OVERLOAD",
                     color = WallStreetAmber,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Monospace
+                    fontFamily = FontFamily.Monospace,
                 )
-                
+
                 Spacer(modifier = Modifier.height(24.dp))
-                
+
                 Text(
                     text = "Discipline is the bridge between goals and accomplishment. A clear mind sees opportunity where a tilted mind sees only revenge.",
                     color = WallStreetWhite,
                     fontSize = 14.sp,
                     fontFamily = FontFamily.Monospace,
                     textAlign = TextAlign.Center,
-                    lineHeight = 20.sp
+                    lineHeight = 20.sp,
                 )
-                
+
                 Spacer(modifier = Modifier.height(32.dp))
-                
+
                 var countdown by remember { mutableIntStateOf(10) }
                 LaunchedEffect(isVisible) {
                     if (isVisible) {
@@ -77,30 +79,31 @@ fun PsychologyLockOverlay(
                         }
                     }
                 }
-                
+
                 Text(
                     text = "COOLDOWN ACTIVE: 00:00:${String.format("%02d", countdown)}",
                     color = WallStreetAmber,
                     fontFamily = FontFamily.Monospace,
-                    fontSize = 12.sp
+                    fontSize = 12.sp,
                 )
-                
+
                 Spacer(modifier = Modifier.height(24.dp))
-                
+
                 Button(
                     onClick = onDismiss,
                     enabled = countdown == 0,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (countdown == 0) WallStreetGreen else Color.DarkGray,
-                        contentColor = Color.Black
-                    ),
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor = if (countdown == 0) WallStreetGreen else Color.DarkGray,
+                            contentColor = Color.Black,
+                        ),
                     shape = RectangleShape,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(
                         text = if (countdown > 0) "WAIT FOR CLARITY..." else "RESUME TERMINAL",
                         fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace
+                        fontFamily = FontFamily.Monospace,
                     )
                 }
             }

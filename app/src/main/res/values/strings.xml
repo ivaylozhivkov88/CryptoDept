@@ -8,4 +8,10 @@
     <string name="notification_content_live">Tracking live crypto prices...</string>
     <string name="alert_notification_title">Price Alert: %1$s</string>
     <string name="alert_notification_content">%1$s reached %2$s!</string>
+
+    <!-- Shortcuts -->
+    <string name="shortcut_alerts">Alerts</string>
+    <string name="shortcut_briefing">Daily Briefing</string>
+    <string name="shortcut_whale_tracker">Whale Tracker</string>
+    <string name="shortcut_content_studio">Content Studio</string>
 </resources>

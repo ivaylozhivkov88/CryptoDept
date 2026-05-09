@@ -13,7 +13,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -32,21 +31,22 @@ import java.util.Locale
 @Composable
 fun IndicatorsScreen(
     navController: NavController,
-    viewModel: IndicatorsViewModel = hiltViewModel()
+    viewModel: IndicatorsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(CRTBlack)
-            .padding(16.dp)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(CRTBlack)
+                .padding(16.dp),
     ) {
         Text(
             text = ">>> RSI_MACD_SCANNER_v2.1",
             color = WallStreetGreen,
             fontFamily = FontFamily.Monospace,
-            fontSize = 14.sp
+            fontSize = 14.sp,
         )
         HorizontalDivider(color = GridGray, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
 
@@ -65,7 +65,10 @@ fun IndicatorsScreen(
 }
 
 @Composable
-fun IndicatorsList(results: List<IndicatorScanResult>, navController: NavController) {
+fun IndicatorsList(
+    results: List<IndicatorScanResult>,
+    navController: NavController,
+) {
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         item {
             Row(modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)) {
@@ -84,26 +87,37 @@ fun IndicatorsList(results: List<IndicatorScanResult>, navController: NavControl
 }
 
 @Composable
-fun IndicatorRow(result: IndicatorScanResult, onClick: () -> Unit) {
-    val rsiColor = when (result.rsiStatus) {
-        "OVERSOLD" -> WallStreetGreen
-        "OVERBOUGHT" -> WallStreetRed
-        else -> WallStreetAmber
-    }
-    
+fun IndicatorRow(
+    result: IndicatorScanResult,
+    onClick: () -> Unit,
+) {
+    val rsiColor =
+        when (result.rsiStatus) {
+            "OVERSOLD" -> WallStreetGreen
+            "OVERBOUGHT" -> WallStreetRed
+            else -> WallStreetAmber
+        }
+
     val macdColor = if (result.macdValue > 0) WallStreetGreen else WallStreetRed
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .border(0.5.dp, GridGray)
-            .clickable { onClick() }
-            .padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp)
+                .border(0.5.dp, GridGray)
+                .clickable { onClick() }
+                .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(result.symbol, color = WallStreetAmber, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f), fontFamily = FontFamily.Monospace)
-        
+        Text(
+            result.symbol,
+            color = WallStreetAmber,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.weight(1f),
+            fontFamily = FontFamily.Monospace,
+        )
+
         Column(modifier = Modifier.weight(1.2f)) {
             Text(String.format(Locale.US, "%.1f", result.rsi), color = rsiColor, fontSize = 13.sp, fontFamily = FontFamily.Monospace)
             Text(result.rsiStatus, color = rsiColor.copy(alpha = 0.6f), fontSize = 9.sp, fontFamily = FontFamily.Monospace)

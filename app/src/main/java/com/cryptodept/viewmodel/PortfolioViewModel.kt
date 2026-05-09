@@ -14,43 +14,72 @@ import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
-class PortfolioViewModel @Inject constructor(
-    private val portfolioRepository: PortfolioRepository,
-    private val cryptoRepository: CryptoRepository
-) : ViewModel() {
-
-    val uiState: StateFlow<PortfolioUiState> = portfolioRepository.getPortfolioSummary()
-        .map { summary -> PortfolioUiState.Success(summary) as PortfolioUiState }
-        .catch { emit(PortfolioUiState.Error(it.message ?: "PORTFOLIO_SYNC_FAILED")) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), PortfolioUiState.Loading)
-
-    val trackedCoins = cryptoRepository.getTrackedCoinPrices()
-        .map { list -> list.map { it.id to it.symbol } }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
-    fun addPosition(coinId: String, symbol: String, quantity: Double, price: Double) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val entry = PortfolioEntry(
-                id = UUID.randomUUID().toString(),
-                coinId = coinId,
-                symbol = symbol.uppercase(),
-                quantity = quantity,
-                averageEntryPrice = price,
-                addedAt = System.currentTimeMillis()
+class PortfolioViewModel
+    @Inject
+    constructor(
+        private val portfolioRepository: PortfolioRepository,
+        private val cryptoRepository: CryptoRepository,
+        private val preferencesManager: com.cryptodept.data.datastore.PreferencesManager,
+    ) : ViewModel() {
+        val isAdmin =
+            preferencesManager.isAdmin.stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(5000),
+                false,
             )
-            portfolioRepository.addPosition(entry)
-        }
-    }
 
-    fun removePosition(id: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            portfolioRepository.removePosition(id)
+        val uiState: StateFlow<PortfolioUiState> =
+            portfolioRepository
+                .getPortfolioSummary()
+                .map { summary -> PortfolioUiState.Success(summary) as PortfolioUiState }
+                .catch { emit(PortfolioUiState.Error(it.message ?: "PORTFOLIO_SYNC_FAILED")) }
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), PortfolioUiState.Loading)
+
+        val trackedCoins =
+            cryptoRepository
+                .getTrackedCoinPrices()
+                .map { list -> list.map { it.id to it.symbol } }
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+        fun addPosition(
+            coinId: String,
+            symbol: String,
+            quantity: Double,
+            price: Double,
+        ) {
+            viewModelScope.launch(Dispatchers.IO) {
+                val entry =
+                    PortfolioEntry(
+                        id = UUID.randomUUID().toString(),
+                        coinId = coinId,
+                        symbol = symbol.uppercase(),
+                        quantity = quantity,
+                        averageEntryPrice = price,
+                        addedAt = System.currentTimeMillis(),
+                    )
+                portfolioRepository.addPosition(entry)
+            }
+        }
+
+        fun removePosition(id: String) {
+            viewModelScope.launch(Dispatchers.IO) {
+                portfolioRepository.removePosition(id)
+            }
+        }
+
+        fun setAdminStatus(isAdmin: Boolean) {
+            viewModelScope.launch { preferencesManager.setAdminStatus(isAdmin) }
         }
     }
-}
 
 sealed class PortfolioUiState {
     object Loading : PortfolioUiState()
-    data class Success(val summary: PortfolioSummary) : PortfolioUiState()
-    data class Error(val message: String) : PortfolioUiState()
+
+    data class Success(
+        val summary: PortfolioSummary,
+    ) : PortfolioUiState()
+
+    data class Error(
+        val message: String,
+    ) : PortfolioUiState()
 }

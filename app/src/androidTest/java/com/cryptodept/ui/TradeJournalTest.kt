@@ -11,7 +11,6 @@ import org.junit.Test
 
 @HiltAndroidTest
 class TradeJournalTest {
-
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)
 
@@ -36,13 +35,13 @@ class TradeJournalTest {
 
         // Verify Add Sheet
         composeTestRule.onNodeWithText(">>> NEW TRADE").assertIsDisplayed()
-        
+
         // Fill simple data
         composeTestRule.onAllNodesWithText("Symbol").onFirst().performTextInput("SOL")
-        
+
         // Save
         composeTestRule.onNodeWithText("[SAVE TRADE]").performClick()
-        
+
         // Check if trade list title is back
         composeTestRule.onNodeWithText(">>> TRADE JOURNAL").assertIsDisplayed()
     }

@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.cryptodept.domain.model.Coin
 import com.cryptodept.domain.model.CoinPrice
+import kotlinx.collections.immutable.persistentListOf
 
 @Entity(tableName = "coins")
 data class CoinEntity(
@@ -21,38 +22,42 @@ data class CoinEntity(
     val lastUpdated: Long = 0L,
     val rank: Int = 0,
     val sourcesCount: Int = 1,
-    val maxDeviation: Double = 0.0
+    val maxDeviation: Double = 0.0,
 ) {
-    fun toDomain() = Coin(
-        id = id,
-        symbol = symbol.uppercase(), // CoinGecko връща "btc" → ние показваме "BTC"
-        name = name,
-        isTracked = isTracked
-    )
+    fun toDomain() =
+        Coin(
+            id = id,
+            symbol = symbol.uppercase(), // CoinGecko връща "btc" → ние показваме "BTC"
+            name = name,
+            isTracked = isTracked,
+        )
 
-    fun toDomainPrice() = CoinPrice(
-        id = id,
-        symbol = symbol.uppercase(), // Fix: CoinGecko връща lowercase ("btc", "eth", "xrp")
-        name = name,
-        currentPrice = currentPrice,
-        priceChange24h = priceChange24h,
-        priceChangePercentage24h = priceChangePercentage24h,
-        marketCap = marketCap,
-        totalVolume = totalVolume,
-        high24h = high24h,
-        low24h = low24h,
-        lastUpdated = lastUpdated,
-        sparkline = emptyList(),
-        sourcesCount = sourcesCount,
-        maxDeviation = maxDeviation
-    )
+    fun toDomainPrice() =
+        CoinPrice(
+            id = id,
+            symbol = symbol.uppercase(), // Fix: CoinGecko връща lowercase ("btc", "eth", "xrp")
+            name = name,
+            currentPrice = currentPrice,
+            priceChange24h = priceChange24h,
+            priceChangePercentage24h = priceChangePercentage24h,
+            marketCap = marketCap,
+            totalVolume = totalVolume,
+            high24h = high24h,
+            low24h = low24h,
+            lastUpdated = lastUpdated,
+            isTracked = isTracked,
+            sparkline = persistentListOf<Double>(),
+            sourcesCount = sourcesCount,
+            maxDeviation = maxDeviation,
+        )
 
     companion object {
-        fun fromDomain(coin: Coin) = CoinEntity(
-            id = coin.id,
-            symbol = coin.symbol,
-            name = coin.name,
-            isTracked = coin.isTracked
-        )
+        fun fromDomain(coin: Coin) =
+            CoinEntity(
+                id = coin.id,
+                symbol = coin.symbol,
+                name = coin.name,
+                isTracked = coin.isTracked,
+            )
     }
 }

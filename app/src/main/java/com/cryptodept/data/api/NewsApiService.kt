@@ -11,13 +11,13 @@ interface NewsApiService {
         @Query("auth_token") token: String = BuildConfig.CRYPTOPANIC_API_KEY,
         @Query("public") public: Boolean = true,
         @Query("kind") kind: String = "news",
-        @Query("currencies") currencies: String = "BTC,ETH"
+        @Query("currencies") currencies: String = "BTC,ETH",
     ): CryptoPanicResponse
 }
 
 data class CryptoPanicResponse(
     val count: Int,
-    val results: List<CryptoPanicNewsItem>
+    val results: List<CryptoPanicNewsItem>,
 )
 
 data class CryptoPanicNewsItem(
@@ -28,7 +28,7 @@ data class CryptoPanicNewsItem(
     val url: String,
     @SerializedName("created_at") val createdAt: String,
     val votes: CryptoPanicVotes,
-    val currencies: List<CryptoPanicCurrency>?
+    val currencies: List<CryptoPanicCurrency>?,
 )
 
 data class CryptoPanicVotes(
@@ -36,12 +36,12 @@ data class CryptoPanicVotes(
     val positive: Int,
     val important: Int,
     val liked: Int,
-    val toxic: Int
+    val toxic: Int,
 )
 
 data class CryptoPanicCurrency(
     val code: String,
     val title: String,
     val slug: String,
-    val url: String
+    val url: String,
 )

@@ -8,14 +8,13 @@ import org.junit.Rule
 import org.junit.Test
 
 class OnboardingScreenTest {
-
     @get:Rule
     val composeTestRule = createComposeRule()
 
     @Test
     fun testOnboardingSequence() {
         var completed = false
-        
+
         composeTestRule.setContent {
             CryptoDeptTheme {
                 OnboardingScreen(onOnboardingComplete = { completed = true })

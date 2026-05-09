@@ -25,24 +25,33 @@ import java.util.*
 @Composable
 fun PortfolioScreen(
     navController: androidx.navigation.NavController,
-    viewModel: PortfolioViewModel = hiltViewModel()
+    viewModel: PortfolioViewModel = hiltViewModel(),
 ) {
     val colors = LocalTerminalColors.current
     val uiState by viewModel.uiState.collectAsState()
+    val isAdmin by viewModel.isAdmin.collectAsState()
+
     var showAddDialog by remember { mutableStateOf(false) }
+    var showHelp by remember { mutableStateOf(false) }
+
+    if (showHelp) {
+        com.cryptodept.ui.components
+            .TerminalHelpDialog(onDismiss = { showHelp = false })
+    }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colors.background)
-            .padding(16.dp)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(colors.background)
+                .padding(16.dp),
     ) {
         Text(
             text = ">>> PORTFOLIO TERMINAL",
             color = colors.primary,
             fontFamily = FontFamily.Monospace,
             fontSize = 16.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -56,7 +65,7 @@ fun PortfolioScreen(
             is PortfolioUiState.Success -> {
                 PortfolioContent(
                     summary = state.summary,
-                    onAddClick = { showAddDialog = true }
+                    onAddClick = { showAddDialog = true },
                 )
             }
             is PortfolioUiState.Error -> {
@@ -70,15 +79,22 @@ fun PortfolioScreen(
 
         com.cryptodept.ui.components.TerminalCommandBar(
             onCommandEntered = { cmd ->
-                com.cryptodept.ui.analysis.handleGlobalCommand(cmd, navController)
-            }
+                val parts = cmd.uppercase().split(" ")
+                when (parts[0]) {
+                    "HELP" -> showHelp = true
+                    "LOGOUT" -> viewModel.setAdminStatus(false)
+                    else ->
+                        com.cryptodept.ui.analysis
+                            .handleGlobalCommand(cmd, navController)
+                }
+            },
         )
     }
 
     if (showAddDialog) {
         AddPositionDialog(
             viewModel = viewModel,
-            onDismiss = { showAddDialog = false }
+            onDismiss = { showAddDialog = false },
         )
     }
 }
@@ -86,28 +102,33 @@ fun PortfolioScreen(
 @Composable
 fun PortfolioContent(
     summary: PortfolioSummary,
-    onAddClick: () -> Unit
+    onAddClick: () -> Unit,
 ) {
     val colors = LocalTerminalColors.current
-    
+
     Column(modifier = Modifier.fillMaxSize()) {
         // SUMMARY BOX
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(1.dp, colors.grid, RectangleShape)
-                .padding(16.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, colors.grid, RectangleShape)
+                    .padding(16.dp),
         ) {
             Column {
                 SummaryRow("TOTAL VALUE:", "$${String.format(Locale.US, "%,.2f", summary.totalValueUsd)}", colors.primary)
                 SummaryRow("COST BASIS:", "$${String.format(Locale.US, "%,.2f", summary.totalCostUsd)}", colors.textPrimary)
-                
+
                 val pnlColor = if (summary.totalPnlUsd >= 0) colors.primary else colors.danger
                 val sign = if (summary.totalPnlUsd >= 0) "+" else ""
                 SummaryRow(
                     label = "TOTAL P&L:",
-                    value = "$sign$${String.format(Locale.US, "%,.2f", summary.totalPnlUsd)} ($sign${String.format(Locale.US, "%.2f", summary.totalPnlPercent)}%)",
-                    valueColor = pnlColor
+                    value = "$sign$${String.format(
+                        Locale.US,
+                        "%,.2f",
+                        summary.totalPnlUsd,
+                    )} ($sign${String.format(Locale.US, "%.2f", summary.totalPnlPercent)}%)",
+                    valueColor = pnlColor,
                 )
             }
         }
@@ -122,7 +143,13 @@ fun PortfolioContent(
         // HOLDINGS LIST
         LazyColumn(modifier = Modifier.weight(1f)) {
             item {
-                Text(">>> HOLDINGS", color = colors.dimText, fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp))
+                Text(
+                    ">>> HOLDINGS",
+                    color = colors.dimText,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 8.dp),
+                )
             }
             items(summary.entries) { item ->
                 HoldingRow(item)
@@ -136,7 +163,7 @@ fun PortfolioContent(
             onClick = onAddClick,
             modifier = Modifier.fillMaxWidth(),
             shape = RectangleShape,
-            colors = ButtonDefaults.buttonColors(containerColor = colors.primary, contentColor = colors.background)
+            colors = ButtonDefaults.buttonColors(containerColor = colors.primary, contentColor = colors.background),
         ) {
             Text("[+ ADD POSITION]", fontWeight = FontWeight.Bold)
         }
@@ -144,7 +171,11 @@ fun PortfolioContent(
 }
 
 @Composable
-fun SummaryRow(label: String, value: String, valueColor: Color) {
+fun SummaryRow(
+    label: String,
+    value: String,
+    valueColor: Color,
+) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         Text(label, color = LocalTerminalColors.current.dimText, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
         Text(value, color = valueColor, fontSize = 14.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
@@ -158,19 +189,21 @@ fun AllocationBar(entries: List<PortfolioEntryWithCurrentPrice>) {
     if (totalValue <= 0) return
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(12.dp)
-            .border(1.dp, colors.grid, RectangleShape)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(12.dp)
+                .border(1.dp, colors.grid, RectangleShape),
     ) {
         entries.forEachIndexed { index, item ->
             val weight = (item.currentValueUsd / totalValue).toFloat()
             val brightness = 0.3f + (index % 5) * 0.15f
             Box(
-                modifier = Modifier
-                    .weight(weight.coerceAtLeast(0.01f))
-                    .fillMaxHeight()
-                    .background(colors.primary.copy(alpha = brightness))
+                modifier =
+                    Modifier
+                        .weight(weight.coerceAtLeast(0.01f))
+                        .fillMaxHeight()
+                        .background(colors.primary.copy(alpha = brightness)),
             )
         }
     }
@@ -185,26 +218,41 @@ fun HoldingRow(item: PortfolioEntryWithCurrentPrice) {
     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(
-                text = "${item.entry.symbol}  ${String.format(Locale.US, "%.4f", item.entry.quantity)} @ $${String.format(Locale.US, "%,.2f", item.entry.averageEntryPrice)} avg",
+                text = "${item.entry.symbol}  ${String.format(
+                    Locale.US,
+                    "%.4f",
+                    item.entry.quantity,
+                )} @ $${String.format(Locale.US, "%,.2f", item.entry.averageEntryPrice)} avg",
                 color = colors.textPrimary,
                 fontSize = 12.sp,
-                fontFamily = FontFamily.Monospace
+                fontFamily = FontFamily.Monospace,
             )
             Text(
                 text = "NOW: $${String.format(Locale.US, "%,.2f", item.currentPrice)}",
                 color = colors.amber,
                 fontSize = 12.sp,
-                fontFamily = FontFamily.Monospace
+                fontFamily = FontFamily.Monospace,
             )
         }
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Box(modifier = Modifier.height(2.dp).width(40.dp).background(pnlColor).align(Alignment.CenterVertically))
+            Box(
+                modifier =
+                    Modifier
+                        .height(2.dp)
+                        .width(40.dp)
+                        .background(pnlColor)
+                        .align(Alignment.CenterVertically),
+            )
             Text(
-                text = "P&L: $sign$${String.format(Locale.US, "%,.2f", item.pnlUsd)} ($sign${String.format(Locale.US, "%.2f", item.pnlPercent)}%)",
+                text = "P&L: $sign$${String.format(
+                    Locale.US,
+                    "%,.2f",
+                    item.pnlUsd,
+                )} ($sign${String.format(Locale.US, "%.2f", item.pnlPercent)}%)",
                 color = pnlColor,
                 fontSize = 12.sp,
                 fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
             )
         }
     }
@@ -213,11 +261,11 @@ fun HoldingRow(item: PortfolioEntryWithCurrentPrice) {
 @Composable
 fun AddPositionDialog(
     viewModel: PortfolioViewModel,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     val colors = LocalTerminalColors.current
     val trackedCoins by viewModel.trackedCoins.collectAsState()
-    
+
     var selectedCoinIdx by remember { mutableIntStateOf(0) }
     var quantity by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
@@ -236,42 +284,44 @@ fun AddPositionDialog(
                         containerColor = colors.background,
                         contentColor = colors.primary,
                         edgePadding = 0.dp,
-                        divider = {}
+                        divider = {},
                     ) {
                         trackedCoins.forEachIndexed { index, (id, symbol) ->
                             Tab(
                                 selected = selectedCoinIdx == index,
                                 onClick = { selectedCoinIdx = index },
-                                text = { Text(symbol, fontSize = 10.sp) }
+                                text = { Text(symbol, fontSize = 10.sp) },
                             )
                         }
                     }
                 }
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 OutlinedTextField(
                     value = quantity,
                     onValueChange = { quantity = it },
                     label = { Text("QUANTITY", color = colors.dimText) },
                     textStyle = TextStyle(color = colors.primary, fontFamily = FontFamily.Monospace),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = colors.primary,
-                        unfocusedBorderColor = colors.grid
-                    )
+                    colors =
+                        OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = colors.primary,
+                            unfocusedBorderColor = colors.grid,
+                        ),
                 )
-                
+
                 Spacer(modifier = Modifier.height(8.dp))
-                
+
                 OutlinedTextField(
                     value = price,
                     onValueChange = { price = it },
                     label = { Text("AVG ENTRY PRICE", color = colors.dimText) },
                     textStyle = TextStyle(color = colors.primary, fontFamily = FontFamily.Monospace),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = colors.primary,
-                        unfocusedBorderColor = colors.grid
-                    )
+                    colors =
+                        OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = colors.primary,
+                            unfocusedBorderColor = colors.grid,
+                        ),
                 )
             }
         },
@@ -292,6 +342,6 @@ fun AddPositionDialog(
             TextButton(onClick = onDismiss) {
                 Text("CANCEL", color = colors.dimText, fontFamily = FontFamily.Monospace)
             }
-        }
+        },
     )
 }

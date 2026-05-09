@@ -1,6 +1,6 @@
 package com.cryptodept.ui.theme
 
 import androidx.compose.runtime.staticCompositionLocalOf
-import com.cryptodept.service.SoundManager
+import com.cryptodept.util.TerminalAudioManager
 
-val LocalSoundManager = staticCompositionLocalOf<SoundManager?> { null }
+val LocalTerminalAudioManager = staticCompositionLocalOf<TerminalAudioManager?> { null }

@@ -1,0 +1,1851 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues></ManuallySuppressedIssues>
+  <CurrentIssues>
+    <ID>ComplexCondition:GetNetworkHealthUseCase.kt$GetNetworkHealthUseCase$eth != null &amp;&amp; eth.status == "1" &amp;&amp; eth.result != null &amp;&amp; eth.result.isJsonObject</ID>
+    <ID>ComplexCondition:ReviewService.kt$ReviewService$launches &gt;= 7 &amp;&amp; (lastReview == 0L || daysSinceLastReview &gt;= 30) &amp;&amp; isProfitable</ID>
+    <ID>ComplexCondition:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$!prev.isGreen &amp;&amp; last.isGreen &amp;&amp; last.open &lt;= prev.close &amp;&amp; last.close &gt;= prev.open</ID>
+    <ID>ComplexCondition:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$prev.isGreen &amp;&amp; !last.isGreen &amp;&amp; last.open &gt;= prev.close &amp;&amp; last.close &lt;= prev.open</ID>
+    <ID>ConstructorParameterNaming:BlockchainApi.kt$BlockchainStats$val hash_rate: Double</ID>
+    <ID>ConstructorParameterNaming:BlockchainApi.kt$BlockchainStats$val mempool_count: Int</ID>
+    <ID>ConstructorParameterNaming:BlockchainApi.kt$BlockchainStats$val miners_revenue_usd: Double</ID>
+    <ID>ConstructorParameterNaming:BlockchainApi.kt$BlockchainStats$val trade_volume_btc: Double</ID>
+    <ID>ConstructorParameterNaming:CoinGeckoApi.kt$CoinMarketResponse$val ath_change_percentage: Double</ID>
+    <ID>ConstructorParameterNaming:CoinGeckoApi.kt$CoinMarketResponse$val ath_date: String</ID>
+    <ID>ConstructorParameterNaming:CoinGeckoApi.kt$CoinMarketResponse$val atl_change_percentage: Double</ID>
+    <ID>ConstructorParameterNaming:CoinGeckoApi.kt$CoinMarketResponse$val atl_date: String</ID>
+    <ID>ConstructorParameterNaming:CoinGeckoApi.kt$CoinMarketResponse$val circulating_supply: Double</ID>
+    <ID>ConstructorParameterNaming:CoinGeckoApi.kt$CoinMarketResponse$val current_price: Double</ID>
+    <ID>ConstructorParameterNaming:CoinGeckoApi.kt$CoinMarketResponse$val fully_diluted_valuation: Double?</ID>
+    <ID>ConstructorParameterNaming:CoinGeckoApi.kt$CoinMarketResponse$val high_24h: Double</ID>
+    <ID>ConstructorParameterNaming:CoinGeckoApi.kt$CoinMarketResponse$val last_updated: String</ID>
+    <ID>ConstructorParameterNaming:CoinGeckoApi.kt$CoinMarketResponse$val low_24h: Double</ID>
+    <ID>ConstructorParameterNaming:CoinGeckoApi.kt$CoinMarketResponse$val market_cap: Double</ID>
+    <ID>ConstructorParameterNaming:CoinGeckoApi.kt$CoinMarketResponse$val market_cap_change_24h: Double</ID>
+    <ID>ConstructorParameterNaming:CoinGeckoApi.kt$CoinMarketResponse$val market_cap_change_percentage_24h: Double</ID>
+    <ID>ConstructorParameterNaming:CoinGeckoApi.kt$CoinMarketResponse$val market_cap_rank: Int</ID>
+    <ID>ConstructorParameterNaming:CoinGeckoApi.kt$CoinMarketResponse$val max_supply: Double?</ID>
+    <ID>ConstructorParameterNaming:CoinGeckoApi.kt$CoinMarketResponse$val price_change_24h: Double</ID>
+    <ID>ConstructorParameterNaming:CoinGeckoApi.kt$CoinMarketResponse$val price_change_percentage_24h: Double</ID>
+    <ID>ConstructorParameterNaming:CoinGeckoApi.kt$CoinMarketResponse$val sparkline_in_7d: SparklineResponse?</ID>
+    <ID>ConstructorParameterNaming:CoinGeckoApi.kt$CoinMarketResponse$val total_supply: Double?</ID>
+    <ID>ConstructorParameterNaming:CoinGeckoApi.kt$CoinMarketResponse$val total_volume: Double</ID>
+    <ID>ConstructorParameterNaming:EtherscanApi.kt$GasOracleResult$val FastGasPrice: String</ID>
+    <ID>ConstructorParameterNaming:EtherscanApi.kt$GasOracleResult$val ProposeGasPrice: String</ID>
+    <ID>ConstructorParameterNaming:EtherscanApi.kt$GasOracleResult$val SafeGasPrice: String</ID>
+    <ID>ConstructorParameterNaming:MempoolSpaceApi.kt$TxStatus$val block_hash: String?</ID>
+    <ID>ConstructorParameterNaming:MempoolSpaceApi.kt$TxStatus$val block_height: Int?</ID>
+    <ID>ConstructorParameterNaming:MempoolSpaceApi.kt$TxStatus$val block_time: Long?</ID>
+    <ID>ConstructorParameterNaming:MempoolSpaceApi.kt$Vout$val scriptpubkey_address: String?</ID>
+    <ID>CyclomaticComplexMethod:AnalysisScreen.kt$@Composable fun AnalysisContentV2( state: AnalysisUiState.Success, isPro: Boolean, onRunDeepScan: (String) -&gt; Unit, onShowPaywall: () -&gt; Unit, onShowBreakdown: () -&gt; Unit, )</ID>
+    <ID>CyclomaticComplexMethod:AnalysisScreen.kt$@Composable fun AnalysisScreen( coinId: String, navController: androidx.navigation.NavController, viewModel: AnalysisViewModel = hiltViewModel(), predictionViewModel: PredictionViewModel = hiltViewModel(), )</ID>
+    <ID>CyclomaticComplexMethod:CalculatePerformanceUseCase.kt$CalculatePerformanceUseCase$suspend operator fun invoke(): Result&lt;PerformanceStats&gt;</ID>
+    <ID>CyclomaticComplexMethod:CalculatePositionSizeUseCase.kt$CalculatePositionSizeUseCase$operator fun invoke( portfolioSize: Double, // USD riskPercent: Double, // % от портфолио (препоръчително 1-2%) entryPrice: Double, stopLossPrice: Double, takeProfitPrice: Double, currentRiskScore: Int = 50, // От RiskScoreEngine ): PositionSizeResult</ID>
+    <ID>CyclomaticComplexMethod:ConfluenceAlertDetector.kt$ConfluenceAlertDetector$fun detect( coin: String, price: Double, rsi: Double, macdBullish: Boolean, priceAboveEma50: Boolean, priceAboveEma200: Boolean, fundingRate: Double, fearGreedIndex: Int, bollingerPosition: Double, // -1.0 (at lower) до +1.0 (at upper) exchangeInflowChange: Double, ): ConfluenceAlert?</ID>
+    <ID>CyclomaticComplexMethod:ContentStudioViewModel.kt$ContentStudioViewModel$fun generatePrompt( template: ContentTemplate, audience: AudienceProfile, params: Map&lt;String, Any&gt;, )</ID>
+    <ID>CyclomaticComplexMethod:DailyBriefingGenerator.kt$DailyBriefingGenerator$fun generate( btcPrice: Double, btcChange24h: Double, riskScore: RiskScoreEngine.RiskScore, fundingRate: Double, fearGreedIndex: Int, exchangeInflowChange: Double, upcomingEvents: List&lt;CalendarEvent&gt;, topLiquidationLevel: LiquidationLevel?, ): DailyBriefing</ID>
+    <ID>CyclomaticComplexMethod:DashboardScreen.kt$@Composable fun DashboardScreen( navController: NavController, viewModel: DashboardViewModel = hiltViewModel(), )</ID>
+    <ID>CyclomaticComplexMethod:DeepAnalysisUtils.kt$fun generateAiPrompt(prediction: PricePrediction): String</ID>
+    <ID>CyclomaticComplexMethod:GetCorrelationMatrixUseCase.kt$GetCorrelationMatrixUseCase$private fun normalizeId(symbol: String): String</ID>
+    <ID>CyclomaticComplexMethod:MTFViewModel.kt$MTFViewModel$fun analyze()</ID>
+    <ID>CyclomaticComplexMethod:MainActivity.kt$MainActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
+    <ID>CyclomaticComplexMethod:MatrixRainScreen.kt$@Composable fun MatrixRainScreen( modifier: Modifier = Modifier, btcPrice: String = "$103,450 ▲2.3%", allPrices: List&lt;String&gt; = emptyList(), // Pass list of "BTC $100k", "ETH $3k" etc. riskScore: Int = 45, onDismiss: () -&gt; Unit, )</ID>
+    <ID>CyclomaticComplexMethod:MultiSourcePriceAggregator.kt$MultiSourcePriceAggregator$private fun mapToCoinCap(id: String)</ID>
+    <ID>CyclomaticComplexMethod:MultiSourcePriceAggregator.kt$MultiSourcePriceAggregator$private fun mapToCoinbase(id: String)</ID>
+    <ID>CyclomaticComplexMethod:MultiSourcePriceAggregator.kt$MultiSourcePriceAggregator$private fun mapToKraken(id: String)</ID>
+    <ID>CyclomaticComplexMethod:MultiSourcePriceAggregator.kt$MultiSourcePriceAggregator$private fun mapToPaprika(id: String)</ID>
+    <ID>CyclomaticComplexMethod:MultiTimeframeAnalyzer.kt$MultiTimeframeAnalyzer$private fun buildConsensus(signals: List&lt;TimeframeSignal&gt;): MTFConsensus</ID>
+    <ID>CyclomaticComplexMethod:MultiTimeframeAnalyzer.kt$MultiTimeframeAnalyzer$private fun calculateOverall( trend: TrendDirection, rsi: Double, macd: MTFMacdSignal, ema: EmaSignal, ): OverallSignal</ID>
+    <ID>CyclomaticComplexMethod:OptimalEntryCalculator.kt$OptimalEntryCalculator$suspend fun analyze( coin: String, currentPrice: Double, ohlcData: List&lt;OHLCData&gt;, rsi: Double, bollingerUpper: Double, bollingerLower: Double, bollingerMid: Double, ): EntryAnalysis</ID>
+    <ID>CyclomaticComplexMethod:PaywallScreen.kt$@Composable fun PaywallScreen( viewModel: BillingViewModel = hiltViewModel(), onDismiss: () -&gt; Unit = {}, )</ID>
+    <ID>CyclomaticComplexMethod:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$private fun calculateWeightedConsensus( votes: List&lt;ModelVote&gt;, predictability: Float, ): EnsembleConsensus</ID>
+    <ID>CyclomaticComplexMethod:PsychologyAnalyzer.kt$PsychologyAnalyzer$suspend fun analyzeSession(): SessionStats</ID>
+    <ID>CyclomaticComplexMethod:RetryInterceptor.kt$RetryInterceptor$override fun intercept(chain: Interceptor.Chain): Response</ID>
+    <ID>CyclomaticComplexMethod:RiskScoreEngine.kt$RiskScoreEngine$fun calculate( rsi: Double, fundingRate: Double, // % (e.g. 0.08 = 0.08%) longShortRatio: Double, // &gt; 1.0 = more longs fearGreedIndex: Int, // 0-100 exchangeInflowChange: Double, // % change (positive = more entering exchange) openInterestChange: Double, // % change 24h priceChange24h: Double, // % price change macroRisk: Double = 0.5, // 0.0-1.0 (from DXY + S&amp;P correlation) ): RiskScore</ID>
+    <ID>CyclomaticComplexMethod:RssNewsParser.kt$RssNewsParser$private suspend fun fetchRssFeed(source: RssSource): List&lt;RssItem&gt;</ID>
+    <ID>CyclomaticComplexMethod:RunDeepAnalysisUseCase.kt$RunDeepAnalysisUseCase$suspend fun execute(coinId: String, days: Int): Result&lt;DeepAnalysisResult&gt;</ID>
+    <ID>CyclomaticComplexMethod:SentimentAnalyzer.kt$SentimentAnalyzer$suspend fun analyzeCoin(symbol: String): SentimentResult</ID>
+    <ID>CyclomaticComplexMethod:SignalEvaluationEngine.kt$SignalEvaluationEngine$private fun evaluateCondition( condition: SignalCondition, snapshot: TechnicalSnapshot, ): Boolean</ID>
+    <ID>CyclomaticComplexMethod:SignalsViewModel.kt$SignalsViewModel$fun generateSignals()</ID>
+    <ID>CyclomaticComplexMethod:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$fun detectPatterns(ohlc: List&lt;OHLCData&gt;): List&lt;PatternDetection&gt;</ID>
+    <ID>CyclomaticComplexMethod:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$fun generateTechnicalTrace( rsi: Double, macdHistogram: Double, price: Double, ema50: Double, ema200: Double, volumeMultiplier: Double, ): List&lt;AnalysisTrace&gt;</ID>
+    <ID>CyclomaticComplexMethod:TerminalCommandBar.kt$@Composable fun TerminalCommandBar( onCommandEntered: (String) -&gt; Unit, modifier: Modifier = Modifier, viewModel: TerminalCommandViewModel = hiltViewModel(), )</ID>
+    <ID>CyclomaticComplexMethod:TradePlannerEngine.kt$TradePlannerEngine$suspend fun evaluate( coin: String, direction: TradeDirectionType, entryPrice: Double, stopLoss: Double, takeProfit: Double, currentRsi: Double, fundingRate: Double, fearGreedIndex: Int, riskScore: Int, ): TradeSetup</ID>
+    <ID>CyclomaticComplexMethod:TreemapPartition.kt$TreemapPartition$private fun process( items: List&lt;Pair&lt;TreemapItem, Double&gt;&gt;, w: Float, h: Float, x: Float, y: Float, results: MutableList&lt;TreemapRect&gt;, )</ID>
+    <ID>EmptyCatchBlock:MarketsViewModel.kt$MarketsViewModel${ }</ID>
+    <ID>EmptyFunctionBlock:SpeechManager.kt$SpeechManager.&lt;no name provided&gt;${}</ID>
+    <ID>ForbiddenComment:AlertsScreen.kt$/* TODO: viewModel.deleteCompositeAlert(alert.id) */</ID>
+    <ID>FunctionNaming:AICoachScreen.kt$@Composable fun AICoachScreen(viewModel: AICoachViewModel = hiltViewModel())</ID>
+    <ID>FunctionNaming:AICoachScreen.kt$@Composable fun ChatBubble(msg: ChatMessage)</ID>
+    <ID>FunctionNaming:AICoachScreen.kt$@Composable fun QuickActionButton( label: String, onClick: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:AccuracyBadge.kt$@Composable fun AccuracyBadge( modelName: String, accuracy: Float, // 0.0-1.0 modifier: Modifier = Modifier, )</ID>
+    <ID>FunctionNaming:AchievementsScreen.kt$@Composable fun AchievementsScreen( engine: AchievementEngine, onBack: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:AchievementsScreen.kt$@Composable private fun AchievementItem(achievement: Achievement)</ID>
+    <ID>FunctionNaming:AdminPasswordDialog.kt$@Composable fun AdminPasswordDialog( onDismiss: () -&gt; Unit, onAuthorized: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:AlertsScreen.kt$@Composable fun AlertItem(alert: Alert)</ID>
+    <ID>FunctionNaming:AlertsScreen.kt$@Composable fun AlertsScreen( onNavigateToBuilder: () -&gt; Unit, viewModel: AlertsViewModel = hiltViewModel(), )</ID>
+    <ID>FunctionNaming:AlertsScreen.kt$@Composable fun CompositeAlertItem(alert: com.cryptodept.domain.model.CompositeAlert)</ID>
+    <ID>FunctionNaming:AlertsScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun SwipeToDeleteWrapper( onDelete: () -&gt; Unit, content: @Composable () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:AnalysisLoadingScreen.kt$@Composable fun AnalysisLoadingScreen(state: AnalysisUiState.Loading)</ID>
+    <ID>FunctionNaming:AnalysisLoadingScreen.kt$@Composable fun TerminalLogLine( text: String, isCurrent: Boolean, )</ID>
+    <ID>FunctionNaming:AnalysisScreen.kt$@Composable fun AnalysisContentV2( state: AnalysisUiState.Success, isPro: Boolean, onRunDeepScan: (String) -&gt; Unit, onShowPaywall: () -&gt; Unit, onShowBreakdown: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:AnalysisScreen.kt$@Composable fun AnalysisScreen( coinId: String, navController: androidx.navigation.NavController, viewModel: AnalysisViewModel = hiltViewModel(), predictionViewModel: PredictionViewModel = hiltViewModel(), )</ID>
+    <ID>FunctionNaming:AnalysisScreen.kt$@Composable fun AssetSelector( assets: List&lt;String&gt;, selectedAsset: String, onSelect: (String) -&gt; Unit, )</ID>
+    <ID>FunctionNaming:AnalysisScreen.kt$@Composable fun SentimentSection(sentiment: com.cryptodept.domain.usecase.SentimentResult?)</ID>
+    <ID>FunctionNaming:BacktesterScreen.kt$@Composable fun BacktestForm( trackedCoins: List&lt;String&gt;, selectedCoin: String, onCoinSelected: (String) -&gt; Unit, rsiEntry: Float, onRsiEntryChange: (Float) -&gt; Unit, rsiExit: Float, onRsiExitChange: (Float) -&gt; Unit, stopLoss: Float, onStopLossChange: (Float) -&gt; Unit, takeProfit: Float, onTakeProfitChange: (Float) -&gt; Unit, initialCapital: Float, onCapitalChange: (Float) -&gt; Unit, riskPerTrade: Float, onRiskChange: (Float) -&gt; Unit, isLoading: Boolean, onRun: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:BacktesterScreen.kt$@Composable fun BacktestResultsView(result: com.cryptodept.domain.usecase.BacktesterEngine.BacktestResult)</ID>
+    <ID>FunctionNaming:BacktesterScreen.kt$@Composable fun BacktesterScreen( viewModel: BacktesterViewModel = hiltViewModel(), onBack: () -&gt; Unit = {}, )</ID>
+    <ID>FunctionNaming:BacktesterScreen.kt$@Composable fun EquityChart(data: List&lt;Pair&lt;Long, Double&gt;&gt;)</ID>
+    <ID>FunctionNaming:BacktesterScreen.kt$@Composable fun MetricCard( label: String, value: String, modifier: Modifier = Modifier, )</ID>
+    <ID>FunctionNaming:BacktesterScreen.kt$@Composable fun ParameterSlider( label: String, value: Float, range: ClosedFloatingPointRange&lt;Float&gt;, onValueChange: (Float) -&gt; Unit, )</ID>
+    <ID>FunctionNaming:BacktesterScreen.kt$@Composable fun TradeRow(trade: com.cryptodept.domain.usecase.BacktesterEngine.SimulatedTrade)</ID>
+    <ID>FunctionNaming:BloombergWallScreen.kt$@Composable fun BloombergWallScreen( modifier: Modifier = Modifier, onDismiss: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:BloombergWallScreen.kt$@Composable fun Divider()</ID>
+    <ID>FunctionNaming:BloombergWallScreen.kt$@Composable fun MarketDominanceSection()</ID>
+    <ID>FunctionNaming:BloombergWallScreen.kt$@Composable fun MarketHeadlinesTicker()</ID>
+    <ID>FunctionNaming:BloombergWallScreen.kt$@Composable fun MatrixPricesTicker(priceData: Map&lt;String, Pair&lt;Double, Double&gt;&gt;)</ID>
+    <ID>FunctionNaming:BloombergWallScreen.kt$@Composable fun PriceChartStatus(priceData: Map&lt;String, Pair&lt;Double, Double&gt;&gt;)</ID>
+    <ID>FunctionNaming:BloombergWallScreen.kt$@Composable fun SentimentBar(priceData: Map&lt;String, Pair&lt;Double, Double&gt;&gt;)</ID>
+    <ID>FunctionNaming:BloombergWallScreen.kt$@Composable fun SystemHealth(lastUpdateMillis: Long)</ID>
+    <ID>FunctionNaming:BootSequenceScreen.kt$@Composable fun BlinkingCursor()</ID>
+    <ID>FunctionNaming:BootSequenceScreen.kt$@Composable fun BootSequenceScreen(onBootComplete: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:CRTOverlay.kt$@Composable fun CRTOverlay(modifier: Modifier = Modifier)</ID>
+    <ID>FunctionNaming:CalendarScreen.kt$@Composable fun CalendarEventItem(event: CalendarEvent)</ID>
+    <ID>FunctionNaming:CalendarScreen.kt$@Composable fun CalendarScreen(viewModel: CalendarViewModel = hiltViewModel())</ID>
+    <ID>FunctionNaming:CalendarScreen.kt$@Composable fun HeaderSection(onHotToggle: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:ChartsScreen.kt$@Composable fun CandleChart( entries: List&lt;CandleEntry&gt;, showFibonacci: Boolean, )</ID>
+    <ID>FunctionNaming:ChartsScreen.kt$@Composable fun ChartsScreen( coinId: String, viewModel: ChartsViewModel = hiltViewModel(), )</ID>
+    <ID>FunctionNaming:CoinDetailScreen.kt$@Composable fun AboutTab(detail: CoinDetail)</ID>
+    <ID>FunctionNaming:CoinDetailScreen.kt$@Composable fun CoinDetailContent( detail: CoinDetail, ohlc: List&lt;OHLCData&gt;, )</ID>
+    <ID>FunctionNaming:CoinDetailScreen.kt$@Composable fun CoinDetailScreen( coinId: String, viewModel: CoinDetailViewModel = hiltViewModel(), )</ID>
+    <ID>FunctionNaming:CoinDetailScreen.kt$@Composable fun HistoricalTab(ohlc: List&lt;OHLCData&gt;)</ID>
+    <ID>FunctionNaming:CoinDetailScreen.kt$@Composable fun InfoRow( label: String, value: String, valueColor: Color = WallStreetGreen, )</ID>
+    <ID>FunctionNaming:CoinDetailScreen.kt$@Composable fun MarketsTab(detail: CoinDetail)</ID>
+    <ID>FunctionNaming:CoinDetailScreen.kt$@Composable fun OverviewTab(detail: CoinDetail)</ID>
+    <ID>FunctionNaming:ComparisonScreen.kt$@Composable fun AssetHeader( price: CoinPrice?, modifier: Modifier, )</ID>
+    <ID>FunctionNaming:ComparisonScreen.kt$@Composable fun ComparisonContent(state: ComparisonUiState.Success)</ID>
+    <ID>FunctionNaming:ComparisonScreen.kt$@Composable fun ComparisonRow( label: String, text1: String, text2: String, isTrend: Boolean = false, isRsi: Boolean = false, val1: Double = 0.0, val2: Double = 0.0, )</ID>
+    <ID>FunctionNaming:ComparisonScreen.kt$@Composable fun ComparisonScreen( coin1Id: String, coin2Id: String, onBack: () -&gt; Unit, viewModel: ComparisonViewModel = hiltViewModel(), )</ID>
+    <ID>FunctionNaming:CompositeAlertBuilderScreen.kt$@Composable fun CompositeAlertBuilderScreen( onBack: () -&gt; Unit, viewModel: AlertsViewModel = hiltViewModel(), )</ID>
+    <ID>FunctionNaming:CompositeAlertBuilderScreen.kt$@Composable fun ConditionEditorItem( condition: AlertCondition, onDelete: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:ContentStudioScreen.kt$@Composable fun ContentStudioScreen( viewModel: ContentStudioViewModel = hiltViewModel(), onBack: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:CorrelationScreen.kt$@Composable fun CorrelationHeatMap(matrix: CorrelationMatrix)</ID>
+    <ID>FunctionNaming:CorrelationScreen.kt$@Composable fun CorrelationScreen( viewModel: CorrelationViewModel = hiltViewModel(), onBack: () -&gt; Unit = {}, )</ID>
+    <ID>FunctionNaming:CryptoDeptWidget.kt$CryptoDeptWidget$@Composable private fun CompactListContent( prices: List&lt;CoinPrice&gt;, colors: dynamic, )</ID>
+    <ID>FunctionNaming:CryptoDeptWidget.kt$CryptoDeptWidget$@Composable private fun CryptoDeptWidgetContent( prices: List&lt;CoinPrice&gt;, isPro: Boolean, size: DpSize, )</ID>
+    <ID>FunctionNaming:CryptoDeptWidget.kt$CryptoDeptWidget$@Composable private fun FullDashboardContent( prices: List&lt;CoinPrice&gt;, colors: dynamic, )</ID>
+    <ID>FunctionNaming:CryptoDeptWidget.kt$CryptoDeptWidget$@Composable private fun ProLockedContent(colors: dynamic)</ID>
+    <ID>FunctionNaming:CryptoDeptWidget.kt$CryptoDeptWidget$@Composable private fun SingleCoinContent( coin: CoinPrice?, colors: dynamic, )</ID>
+    <ID>FunctionNaming:CryptoDeptWidget.kt$CryptoDeptWidget$@Composable private fun WidgetContent(coins: List&lt;CoinEntity&gt;)</ID>
+    <ID>FunctionNaming:CryptoDeptWidget.kt$CryptoDeptWidget$@Composable private fun WidgetHeader(colors: dynamic)</ID>
+    <ID>FunctionNaming:CryptoDeptWidget.kt$CryptoDeptWidget$@Composable private fun WidgetRow( symbol: String, price: String, change: String, )</ID>
+    <ID>FunctionNaming:DailyBriefingScreen.kt$@Composable fun BriefingContent( briefing: DailyBriefingGenerator.DailyBriefing, onRefresh: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:DailyBriefingScreen.kt$@Composable fun DailyBriefingScreen(viewModel: BriefingViewModel = hiltViewModel())</ID>
+    <ID>FunctionNaming:DashboardScreen.kt$@Composable fun DashboardScreen( navController: NavController, viewModel: DashboardViewModel = hiltViewModel(), )</ID>
+    <ID>FunctionNaming:DashboardScreen.kt$@Composable fun EventLogRow(event: com.cryptodept.domain.model.SystemEvent)</ID>
+    <ID>FunctionNaming:DashboardScreen.kt$@Composable fun MarketDominanceBar(prices: List&lt;CoinPrice&gt;)</ID>
+    <ID>FunctionNaming:DashboardScreen.kt$@Composable fun MiniHeatmap(prices: List&lt;CoinPrice&gt;)</ID>
+    <ID>FunctionNaming:DashboardScreen.kt$@Composable fun NetworkHealthPanel( health: com.cryptodept.domain.model.NetworkHealth, onClick: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:DashboardScreen.kt$@Composable fun NetworkStat( label: String, value: String, )</ID>
+    <ID>FunctionNaming:DashboardScreen.kt$@Composable fun QuickAccessButton( label: String, route: String, navController: NavController, )</ID>
+    <ID>FunctionNaming:DashboardScreen.kt$@OptIn(ExperimentalLayoutApi::class) @Composable fun QuickAccessPanel(navController: NavController)</ID>
+    <ID>FunctionNaming:DeFiScreen.kt$@Composable fun DeFiContent( protocols: List&lt;DeFiProtocol&gt;, yields: List&lt;DeFiYieldOpportunity&gt;, )</ID>
+    <ID>FunctionNaming:DeFiScreen.kt$@Composable fun DeFiScreen( onBack: () -&gt; Unit, viewModel: DeFiViewModel = hiltViewModel(), )</ID>
+    <ID>FunctionNaming:DeFiScreen.kt$@Composable fun ProtocolRow(protocol: DeFiProtocol)</ID>
+    <ID>FunctionNaming:DeFiScreen.kt$@Composable fun YieldRow(yield: DeFiYieldOpportunity)</ID>
+    <ID>FunctionNaming:DeepAnalysisComponents.kt$@Composable fun ConsensusHeader(prediction: PricePrediction)</ID>
+    <ID>FunctionNaming:DeepAnalysisComponents.kt$@Composable fun DataQualityFooter(prediction: PricePrediction)</ID>
+    <ID>FunctionNaming:DeepAnalysisComponents.kt$@Composable fun ExpandableModelRow( modelName: String, vote: ModelVote, modifier: Modifier = Modifier, )</ID>
+    <ID>FunctionNaming:DeepAnalysisComponents.kt$@Composable fun MTFSummaryTable(mtf: MTFConsensus)</ID>
+    <ID>FunctionNaming:DeepAnalysisComponents.kt$@Composable fun ProbabilityScale(prediction: PricePrediction)</ID>
+    <ID>FunctionNaming:DeepAnalysisResultScreen.kt$@Composable fun DeepAnalysisResultScreen( prediction: PricePrediction, modelVotes: Map&lt;String, ModelVote&gt;, onDismiss: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:DeepAnalysisResultScreen.kt$@Composable fun Toast( message: String, modifier: Modifier = Modifier, )</ID>
+    <ID>FunctionNaming:DerivativesScreen.kt$@Composable fun DerivativesContent( funding: FundingRateData, oi: OpenInterestData?, liq: LiquidationData?, onCoinSelect: (String) -&gt; Unit, )</ID>
+    <ID>FunctionNaming:DerivativesScreen.kt$@Composable fun DerivativesScreen(viewModel: DerivativesViewModel = hiltViewModel())</ID>
+    <ID>FunctionNaming:DerivativesScreen.kt$@Composable fun LiquidationBar( label: String, amount: Double, color: Color, )</ID>
+    <ID>FunctionNaming:DerivativesScreen.kt$@Composable fun SectionHeader(title: String)</ID>
+    <ID>FunctionNaming:EmptyState.kt$@Composable fun EmptyState( modifier: Modifier = Modifier, title: String, description: String, icon: ImageVector? = null, asciiArt: String? = null, actionLabel: String? = null, onAction: (() -&gt; Unit)? = null, )</ID>
+    <ID>FunctionNaming:EntryAnalyzerScreen.kt$@Composable fun ComponentProgressBar( component: AnalysisComponent, colors: TerminalColorSet, )</ID>
+    <ID>FunctionNaming:EntryAnalyzerScreen.kt$@Composable fun EntryAnalyzerContent( state: EntryAnalysisUiState.Success, colors: TerminalColorSet, onUseInPlanner: (String, Double, Double, Double) -&gt; Unit, onRefresh: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:EntryAnalyzerScreen.kt$@Composable fun EntryAnalyzerScreen( viewModel: EntryAnalyzerViewModel = hiltViewModel(), onBack: () -&gt; Unit = {}, onUseInPlanner: (String, Double, Double, Double) -&gt; Unit = { _, _, _, _ -&gt; }, )</ID>
+    <ID>FunctionNaming:EntryAnalyzerScreen.kt$@Composable fun EntryZoneCard(zone: EntryZone)</ID>
+    <ID>FunctionNaming:ErrorState.kt$@Composable fun ErrorState( modifier: Modifier = Modifier, message: String = "SYSTEM_FAILURE: DATA_STREAM_INTERRUPTED", onRetry: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:FearGreedScreen.kt$@Composable fun FearGreedContent( current: FearGreedData, history: List&lt;FearGreedData&gt;, )</ID>
+    <ID>FunctionNaming:FearGreedScreen.kt$@Composable fun FearGreedGauge(value: Int)</ID>
+    <ID>FunctionNaming:FearGreedScreen.kt$@Composable fun FearGreedScreen(viewModel: FearGreedViewModel = hiltViewModel())</ID>
+    <ID>FunctionNaming:FearGreedScreen.kt$@Composable fun HistoryRow(item: FearGreedData)</ID>
+    <ID>FunctionNaming:GlitchEffect.kt$@Composable fun GlitchEffect( trigger: Any?, modifier: Modifier = Modifier, content: @Composable () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:GlobalMarketBar.kt$@Composable fun GlobalMarketBar(viewModel: GlobalMarketViewModel = hiltViewModel())</ID>
+    <ID>FunctionNaming:GlobalMarketBar.kt$@Composable private fun MarketChange(change: Double)</ID>
+    <ID>FunctionNaming:GlobalMarketBar.kt$@Composable private fun MarketItem( label: String, value: String, )</ID>
+    <ID>FunctionNaming:GlobalMarketBar.kt$@Composable private fun Separator()</ID>
+    <ID>FunctionNaming:HeatmapScreensaverScreen.kt$@Composable fun HeatmapScreensaverScreen(items: List&lt;TreemapItem&gt;)</ID>
+    <ID>FunctionNaming:HistoricalTab.kt$@Composable fun HistoricalTab(history: List&lt;PriceHistoryEntity&gt;)</ID>
+    <ID>FunctionNaming:IndicatorsScreen.kt$@Composable fun IndicatorRow( result: IndicatorScanResult, onClick: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:IndicatorsScreen.kt$@Composable fun IndicatorsList( results: List&lt;IndicatorScanResult&gt;, navController: NavController, )</ID>
+    <ID>FunctionNaming:IndicatorsScreen.kt$@Composable fun IndicatorsScreen( navController: NavController, viewModel: IndicatorsViewModel = hiltViewModel(), )</ID>
+    <ID>FunctionNaming:MTFScreen.kt$@Composable fun MTFContent(consensus: MTFConsensus)</ID>
+    <ID>FunctionNaming:MTFScreen.kt$@Composable fun MTFScreen( viewModel: MTFViewModel = hiltViewModel(), onBack: () -&gt; Unit = {}, onGoToDashboard: () -&gt; Unit = {}, )</ID>
+    <ID>FunctionNaming:MTFScreen.kt$@Composable fun SummaryBox(consensus: MTFConsensus)</ID>
+    <ID>FunctionNaming:MTFScreen.kt$@Composable fun TimeframeRow(tf: TimeframeSignal)</ID>
+    <ID>FunctionNaming:MacroScreen.kt$@Composable fun CorrelationRow( label: String, correlation: Double, description: String, )</ID>
+    <ID>FunctionNaming:MacroScreen.kt$@Composable fun MacroAssetRow( label: String, price: Double, change: Double, )</ID>
+    <ID>FunctionNaming:MacroScreen.kt$@Composable fun MacroContent( data: MacroData, correlations: List&lt;MacroCorrelation&gt;, )</ID>
+    <ID>FunctionNaming:MacroScreen.kt$@Composable fun MacroScreen(viewModel: MacroViewModel = hiltViewModel())</ID>
+    <ID>FunctionNaming:MacroScreen.kt$@Composable private fun SectionHeader(title: String)</ID>
+    <ID>FunctionNaming:MarketsScreen.kt$@Composable fun MarketRow( coin: CoinPrice, onClick: (String) -&gt; Unit, onToggleTracking: (String) -&gt; Unit, sentiment: com.cryptodept.domain.usecase.SentimentVerdict? = null, )</ID>
+    <ID>FunctionNaming:MarketsScreen.kt$@Composable fun MarketsList( coins: List&lt;CoinPrice&gt;, sentimentMap: Map&lt;String, com.cryptodept.domain.usecase.SentimentVerdict&gt;, onCoinClick: (String) -&gt; Unit, onToggleTracking: (String) -&gt; Unit, )</ID>
+    <ID>FunctionNaming:MarketsScreen.kt$@Composable fun MarketsScreen( navController: NavHostController, viewModel: MarketsViewModel = hiltViewModel(), )</ID>
+    <ID>FunctionNaming:MatrixRainScreen.kt$@Composable fun MatrixRainScreen( modifier: Modifier = Modifier, btcPrice: String = "$103,450 ▲2.3%", allPrices: List&lt;String&gt; = emptyList(), // Pass list of "BTC $100k", "ETH $3k" etc. riskScore: Int = 45, onDismiss: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:NavGraph.kt$@Composable fun NavGraph( navController: NavHostController, preferencesService: PreferencesService, )</ID>
+    <ID>FunctionNaming:NewsScreen.kt$@Composable fun NewsCard( item: NewsItem, onOpen: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:NewsScreen.kt$@Composable fun NewsScreen(viewModel: NewsViewModel)</ID>
+    <ID>FunctionNaming:OnboardingScreen.kt$@Composable fun BlinkingCursor()</ID>
+    <ID>FunctionNaming:OnboardingScreen.kt$@Composable fun BootSequenceSlide(onComplete: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:OnboardingScreen.kt$@Composable fun FeatureSlide( title: String, items: List&lt;String&gt;, onNext: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:OnboardingScreen.kt$@Composable fun NavigationSlide(onNext: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:OnboardingScreen.kt$@Composable fun NavigationTip( cmd: String, desc: String, )</ID>
+    <ID>FunctionNaming:OnboardingScreen.kt$@Composable fun OnboardingScreen(onOnboardingComplete: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:OnboardingScreen.kt$@Composable fun RiskDisclaimerSlide(onFinish: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:PaywallScreen.kt$@Composable fun PaywallScreen( viewModel: BillingViewModel = hiltViewModel(), onDismiss: () -&gt; Unit = {}, )</ID>
+    <ID>FunctionNaming:PerformanceScreen.kt$@Composable fun MetricRow( label: String, value: String, color: Color = Color.Unspecified, )</ID>
+    <ID>FunctionNaming:PerformanceScreen.kt$@Composable fun PerformanceContent( stats: PerformanceStats, aiInsights: String, )</ID>
+    <ID>FunctionNaming:PerformanceScreen.kt$@Composable fun PerformanceScreen( onBack: () -&gt; Unit, viewModel: PerformanceViewModel = hiltViewModel(), )</ID>
+    <ID>FunctionNaming:PerformanceScreen.kt$@Composable fun StatCard( label: String, value: String, modifier: Modifier, color: Color = Color.Unspecified, )</ID>
+    <ID>FunctionNaming:PortfolioScreen.kt$@Composable fun AddPositionDialog( viewModel: PortfolioViewModel, onDismiss: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:PortfolioScreen.kt$@Composable fun AllocationBar(entries: List&lt;PortfolioEntryWithCurrentPrice&gt;)</ID>
+    <ID>FunctionNaming:PortfolioScreen.kt$@Composable fun HoldingRow(item: PortfolioEntryWithCurrentPrice)</ID>
+    <ID>FunctionNaming:PortfolioScreen.kt$@Composable fun PortfolioContent( summary: PortfolioSummary, onAddClick: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:PortfolioScreen.kt$@Composable fun PortfolioScreen( navController: androidx.navigation.NavController, viewModel: PortfolioViewModel = hiltViewModel(), )</ID>
+    <ID>FunctionNaming:PortfolioScreen.kt$@Composable fun SummaryRow( label: String, value: String, valueColor: Color, )</ID>
+    <ID>FunctionNaming:PositionSizeScreen.kt$@Composable fun CalculationResultView(res: PositionSizeResult)</ID>
+    <ID>FunctionNaming:PositionSizeScreen.kt$@Composable fun ResultRow( label: String, value: String, valueColor: Color? = null, )</ID>
+    <ID>FunctionNaming:PositionSizeScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun PositionSizeScreen( viewModel: PositionSizeViewModel = hiltViewModel(), onBack: () -&gt; Unit = {}, )</ID>
+    <ID>FunctionNaming:PredictionHistoryScreen.kt$@Composable fun PredictionHistoryItem(item: PredictionAccuracyEntity)</ID>
+    <ID>FunctionNaming:PredictionHistoryScreen.kt$@Composable fun PredictionHistoryScreen( viewModel: PredictionViewModel, onBack: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:PredictionScreen.kt$@Composable fun ConsensusSection(consensus: EnsembleConsensus)</ID>
+    <ID>FunctionNaming:PredictionScreen.kt$@Composable fun DistributionBar( label: String, value: Double, max: Double, )</ID>
+    <ID>FunctionNaming:PredictionScreen.kt$@Composable fun DistributionSection(dist: PriceDistribution)</ID>
+    <ID>FunctionNaming:PredictionScreen.kt$@Composable fun Footer()</ID>
+    <ID>FunctionNaming:PredictionScreen.kt$@Composable fun ModelRow( model: PredictionModel, vote: ModelVote, isDissenter: Boolean, )</ID>
+    <ID>FunctionNaming:PredictionScreen.kt$@Composable fun PredictionScreen(prediction: PricePrediction)</ID>
+    <ID>FunctionNaming:PredictionScreen.kt$@Composable fun PriceTargetsSection(p: PricePrediction)</ID>
+    <ID>FunctionNaming:PredictionScreen.kt$@Composable fun SectionHeader(title: String)</ID>
+    <ID>FunctionNaming:PredictionScreen.kt$@Composable fun TargetLine( label: String, target: PriceTarget, current: Double, )</ID>
+    <ID>FunctionNaming:PredictionScreen.kt$@Composable fun TerminalHeader(p: PricePrediction)</ID>
+    <ID>FunctionNaming:PriceText.kt$@Composable fun PriceText( price: String, modifier: Modifier = Modifier, fontSize: TextUnit = 24.sp, color: Color = LocalTerminalColors.current.primary, )</ID>
+    <ID>FunctionNaming:ProGate.kt$@Composable fun ProGate( billingService: BillingService = hiltViewModel&lt;BillingViewModel&gt;().billingService, onLocked: @Composable () -&gt; Unit = { /* Paywall handled in NavGraph or here */ }, content: @Composable () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:PsychologyLockOverlay.kt$@Composable fun PsychologyLockOverlay( isVisible: Boolean, onDismiss: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:PsychologyScreen.kt$@Composable fun PsychologyAlertView(alert: PsychologyAlert)</ID>
+    <ID>FunctionNaming:PsychologyScreen.kt$@Composable fun PsychologyContent( stats: SessionStats, onTakeBreak: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:PsychologyScreen.kt$@Composable fun PsychologyScreen( viewModel: PsychologyViewModel = hiltViewModel(), onBack: () -&gt; Unit = {}, )</ID>
+    <ID>FunctionNaming:RiskScoreScreen.kt$@Composable fun RiskComponentRow(component: RiskScoreEngine.RiskComponent)</ID>
+    <ID>FunctionNaming:RiskScoreScreen.kt$@Composable fun RiskContent( score: RiskScoreEngine.RiskScore, btcPrice: Double, onRefresh: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:RiskScoreScreen.kt$@Composable fun RiskScoreScreen(viewModel: RiskViewModel = hiltViewModel())</ID>
+    <ID>FunctionNaming:SeasonalScreen.kt$@Composable fun HistoricalRow( year: String, label: String, result: String, )</ID>
+    <ID>FunctionNaming:SeasonalScreen.kt$@Composable fun InfoItem( label: String, value: String, )</ID>
+    <ID>FunctionNaming:SeasonalScreen.kt$@Composable fun SeasonalScreen( onBack: () -&gt; Unit, viewModel: SeasonalViewModel = hiltViewModel(), )</ID>
+    <ID>FunctionNaming:SentimentBadge.kt$@Composable fun SentimentBadge( pulse: Int, label: String, modifier: Modifier = Modifier, )</ID>
+    <ID>FunctionNaming:SettingsScreen.kt$@Composable fun SettingRow( label: String, desc: String, checked: Boolean, onCheckedChange: (Boolean) -&gt; Unit, )</ID>
+    <ID>FunctionNaming:SettingsScreen.kt$@Composable fun SettingsScreen( onBack: () -&gt; Unit, viewModel: SettingsViewModel = hiltViewModel(), )</ID>
+    <ID>FunctionNaming:SignalComposerScreen.kt$@Composable fun AddRuleDialog( onDismiss: () -&gt; Unit, onSave: (String, List&lt;CustomSignalCondition&gt;, LogicalOperator, SignalAction) -&gt; Unit, )</ID>
+    <ID>FunctionNaming:SignalComposerScreen.kt$@Composable fun RuleCard( rule: CustomSignalRule, onToggle: (Boolean) -&gt; Unit, onDelete: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:SignalComposerScreen.kt$@Composable fun SignalComposerScreen( onBack: () -&gt; Unit, viewModel: SignalComposerViewModel = hiltViewModel(), )</ID>
+    <ID>FunctionNaming:SignalsScreen.kt$@Composable fun SignalRow(coinSignal: CoinSignal)</ID>
+    <ID>FunctionNaming:SignalsScreen.kt$@Composable fun SignalsScreen(viewModel: SignalsViewModel = hiltViewModel())</ID>
+    <ID>FunctionNaming:SkeletonsAll.kt$@Composable fun AnalysisSkeleton(modifier: Modifier = Modifier)</ID>
+    <ID>FunctionNaming:SkeletonsAll.kt$@Composable fun ChartsSkeleton(modifier: Modifier = Modifier)</ID>
+    <ID>FunctionNaming:SkeletonsAll.kt$@Composable fun DashboardSkeleton(modifier: Modifier = Modifier)</ID>
+    <ID>FunctionNaming:SkeletonsAll.kt$@Composable fun JournalSkeleton(modifier: Modifier = Modifier)</ID>
+    <ID>FunctionNaming:TechnicalBreakdownSheet.kt$@Composable fun TraceItem(trace: AnalysisTrace)</ID>
+    <ID>FunctionNaming:TechnicalBreakdownSheet.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun TechnicalBreakdownSheet( traces: List&lt;AnalysisTrace&gt;, onDismiss: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:TerminalBottomBar.kt$@Composable fun TerminalBottomBar(navController: NavHostController)</ID>
+    <ID>FunctionNaming:TerminalCommandBar.kt$@Composable fun SuggestionChip( text: String, onClick: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:TerminalCommandBar.kt$@Composable fun TerminalCommandBar( onCommandEntered: (String) -&gt; Unit, modifier: Modifier = Modifier, viewModel: TerminalCommandViewModel = hiltViewModel(), )</ID>
+    <ID>FunctionNaming:TerminalComponents.kt$@Composable fun TerminalCard( title: String, content: @Composable ColumnScope.() -&gt; Unit, )</ID>
+    <ID>FunctionNaming:TerminalComponents.kt$@Composable fun TerminalErrorOverlay( message: String, onRetry: (() -&gt; Unit)? = null, modifier: Modifier = Modifier, )</ID>
+    <ID>FunctionNaming:TerminalComponents.kt$@Composable fun TerminalLoadingSkeleton(modifier: Modifier = Modifier)</ID>
+    <ID>FunctionNaming:TerminalComponents.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun TerminalInput( label: String, value: String, onValueChange: (String) -&gt; Unit, trailingIcon: @Composable (() -&gt; Unit)? = null, )</ID>
+    <ID>FunctionNaming:TerminalHelpDialog.kt$@Composable fun TerminalHelpDialog(onDismiss: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:TerminalHelpDialog.kt$@Composable private fun CommandSection( title: String, commands: List&lt;Pair&lt;String, String&gt;&gt;, )</ID>
+    <ID>FunctionNaming:Theme.kt$@Composable fun CryptoDeptTheme( mode: PhosphorMode = PhosphorMode.GREEN, content: @Composable () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:TickerTape.kt$@Composable fun TickerTape( prices: List&lt;CoinPrice&gt;, networkHealth: com.cryptodept.domain.model.NetworkHealth?, modifier: Modifier = Modifier, )</ID>
+    <ID>FunctionNaming:ToolsHubScreen.kt$@Composable fun ToolCard( tool: ToolItem, onClick: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:ToolsHubScreen.kt$@Composable fun ToolsHubScreen(onNavigateToTool: (String) -&gt; Unit)</ID>
+    <ID>FunctionNaming:TradeJournalScreen.kt$@Composable fun HeaderSection()</ID>
+    <ID>FunctionNaming:TradeJournalScreen.kt$@Composable fun SectionDivider(title: String)</ID>
+    <ID>FunctionNaming:TradeJournalScreen.kt$@Composable fun StatRow( label: String, value: String, valueColor: Color = Color.White, )</ID>
+    <ID>FunctionNaming:TradeJournalScreen.kt$@Composable fun StatsSection(stats: JournalStats)</ID>
+    <ID>FunctionNaming:TradeJournalScreen.kt$@Composable fun TradeItem( trade: TradeJournal, onClose: (Double) -&gt; Unit, )</ID>
+    <ID>FunctionNaming:TradeJournalScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun AddTradeBottomSheet( onDismiss: () -&gt; Unit, onSave: (TradeJournal) -&gt; Unit, )</ID>
+    <ID>FunctionNaming:TradeJournalScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun TradeJournalScreen(viewModel: JournalViewModel = hiltViewModel())</ID>
+    <ID>FunctionNaming:TradePlannerScreen.kt$@Composable fun ChecklistView(setup: TradeSetup)</ID>
+    <ID>FunctionNaming:TradePlannerScreen.kt$@Composable fun TradeDirectionToggle( selected: TradeDirectionType, onSelect: (TradeDirectionType) -&gt; Unit, )</ID>
+    <ID>FunctionNaming:TradePlannerScreen.kt$@Composable fun TradePlannerScreen( viewModel: TradePlannerViewModel = hiltViewModel(), onBack: () -&gt; Unit = {}, onSendToSizer: (Double, Double, Double) -&gt; Unit = { _, _, _ -&gt; }, )</ID>
+    <ID>FunctionNaming:TradePlannerScreen.kt$@Composable fun VerdictExplanationDialog( score: Int, maxScore: Int, onDismiss: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:TradePlannerScreen.kt$@Composable fun VerdictRow( score: String, verdict: String, description: String, color: Color, )</ID>
+    <ID>FunctionNaming:TradePlannerScreen.kt$@Composable fun VerdictView(setup: TradeSetup)</ID>
+    <ID>FunctionNaming:WhaleTrackerScreen.kt$@Composable fun WhaleTrackerScreen( onBack: () -&gt; Unit, viewModel: WhaleViewModel = hiltViewModel(), )</ID>
+    <ID>FunctionNaming:WhaleTrackerScreen.kt$@Composable fun WhaleTxCard(tx: WhaleTransaction)</ID>
+    <ID>FunctionNaming:WidgetConfigActivity.kt$@Composable fun WidgetConfigScreen(onConfirm: () -&gt; Unit)</ID>
+    <ID>ImplicitDefaultLocale:AlertNotificationService.kt$AlertNotificationService$String.format("%.2f", currentPrice)</ID>
+    <ID>ImplicitDefaultLocale:CryptoPriceForegroundService.kt$CryptoPriceForegroundService$String.format("%.2f", price)</ID>
+    <ID>ImplicitDefaultLocale:MTFScreen.kt$String.format("%.1f", tf.rsi)</ID>
+    <ID>ImplicitDefaultLocale:PositionSizeScreen.kt$String.format("%.1f", res.distanceToSLPercent)</ID>
+    <ID>ImplicitDefaultLocale:PositionSizeScreen.kt$String.format("%.1f", res.distanceToTPPercent)</ID>
+    <ID>ImplicitDefaultLocale:PositionSizeScreen.kt$String.format("%.1f", res.riskRewardRatio)</ID>
+    <ID>ImplicitDefaultLocale:PositionSizeScreen.kt$String.format("%.1fx", res.leverageNeeded)</ID>
+    <ID>ImplicitDefaultLocale:PredictionAccuracyTracker.kt$PredictionAccuracyTracker$String.format("%.2f", priceChange)</ID>
+    <ID>ImplicitDefaultLocale:PredictionScreen.kt$String.format("%.2f", dist.skewness)</ID>
+    <ID>ImplicitDefaultLocale:PsychologyLockOverlay.kt$String.format("%02d", countdown)</ID>
+    <ID>ImplicitDefaultLocale:SignalsViewModel.kt$SignalsViewModel$String.format("%.1f", rsi)</ID>
+    <ID>InvalidPackageDeclaration:Alertengine.kt$package com.cryptodept.domain.usecase</ID>
+    <ID>LongMethod:AICoachScreen.kt$@Composable fun AICoachScreen(viewModel: AICoachViewModel = hiltViewModel())</ID>
+    <ID>LongMethod:AchievementsScreen.kt$@Composable fun AchievementsScreen( engine: AchievementEngine, onBack: () -&gt; Unit, )</ID>
+    <ID>LongMethod:AlertsScreen.kt$@Composable fun AlertsScreen( onNavigateToBuilder: () -&gt; Unit, viewModel: AlertsViewModel = hiltViewModel(), )</ID>
+    <ID>LongMethod:AnalysisScreen.kt$@Composable fun AnalysisContentV2( state: AnalysisUiState.Success, isPro: Boolean, onRunDeepScan: (String) -&gt; Unit, onShowPaywall: () -&gt; Unit, onShowBreakdown: () -&gt; Unit, )</ID>
+    <ID>LongMethod:AnalysisScreen.kt$@Composable fun AnalysisScreen( coinId: String, navController: androidx.navigation.NavController, viewModel: AnalysisViewModel = hiltViewModel(), predictionViewModel: PredictionViewModel = hiltViewModel(), )</ID>
+    <ID>LongMethod:AnalysisScreen.kt$@Composable fun SentimentSection(sentiment: com.cryptodept.domain.usecase.SentimentResult?)</ID>
+    <ID>LongMethod:BacktesterEngine.kt$BacktesterEngine$suspend fun run( config: BacktestConfig, ohlcData: List&lt;com.cryptodept.domain.model.OHLCData&gt;, ): BacktestResult</ID>
+    <ID>LongMethod:BacktesterScreen.kt$@Composable fun BacktestResultsView(result: com.cryptodept.domain.usecase.BacktesterEngine.BacktestResult)</ID>
+    <ID>LongMethod:BacktesterScreen.kt$@Composable fun BacktesterScreen( viewModel: BacktesterViewModel = hiltViewModel(), onBack: () -&gt; Unit = {}, )</ID>
+    <ID>LongMethod:BloombergWallScreen.kt$@Composable fun MarketDominanceSection()</ID>
+    <ID>LongMethod:BloombergWallScreen.kt$@Composable fun MatrixPricesTicker(priceData: Map&lt;String, Pair&lt;Double, Double&gt;&gt;)</ID>
+    <ID>LongMethod:BootSequenceScreen.kt$@Composable fun BootSequenceScreen(onBootComplete: () -&gt; Unit)</ID>
+    <ID>LongMethod:CRTOverlay.kt$@Composable fun CRTOverlay(modifier: Modifier = Modifier)</ID>
+    <ID>LongMethod:ChartsScreen.kt$@Composable fun ChartsScreen( coinId: String, viewModel: ChartsViewModel = hiltViewModel(), )</ID>
+    <ID>LongMethod:CoinDetailScreen.kt$@Composable fun AboutTab(detail: CoinDetail)</ID>
+    <ID>LongMethod:ComparisonScreen.kt$@Composable fun ComparisonContent(state: ComparisonUiState.Success)</ID>
+    <ID>LongMethod:ComparisonScreen.kt$@Composable fun ComparisonRow( label: String, text1: String, text2: String, isTrend: Boolean = false, isRsi: Boolean = false, val1: Double = 0.0, val2: Double = 0.0, )</ID>
+    <ID>LongMethod:CompositeAlertBuilderScreen.kt$@Composable fun CompositeAlertBuilderScreen( onBack: () -&gt; Unit, viewModel: AlertsViewModel = hiltViewModel(), )</ID>
+    <ID>LongMethod:ConfluenceAlertDetector.kt$ConfluenceAlertDetector$fun detect( coin: String, price: Double, rsi: Double, macdBullish: Boolean, priceAboveEma50: Boolean, priceAboveEma200: Boolean, fundingRate: Double, fearGreedIndex: Int, bollingerPosition: Double, // -1.0 (at lower) до +1.0 (at upper) exchangeInflowChange: Double, ): ConfluenceAlert?</ID>
+    <ID>LongMethod:ContentStudioScreen.kt$@Composable fun ContentStudioScreen( viewModel: ContentStudioViewModel = hiltViewModel(), onBack: () -&gt; Unit, )</ID>
+    <ID>LongMethod:CorrelationScreen.kt$@Composable fun CorrelationHeatMap(matrix: CorrelationMatrix)</ID>
+    <ID>LongMethod:DailyBriefingGenerator.kt$DailyBriefingGenerator$fun generate( btcPrice: Double, btcChange24h: Double, riskScore: RiskScoreEngine.RiskScore, fundingRate: Double, fearGreedIndex: Int, exchangeInflowChange: Double, upcomingEvents: List&lt;CalendarEvent&gt;, topLiquidationLevel: LiquidationLevel?, ): DailyBriefing</ID>
+    <ID>LongMethod:DailyBriefingScreen.kt$@Composable fun BriefingContent( briefing: DailyBriefingGenerator.DailyBriefing, onRefresh: () -&gt; Unit, )</ID>
+    <ID>LongMethod:DashboardScreen.kt$@Composable fun DashboardScreen( navController: NavController, viewModel: DashboardViewModel = hiltViewModel(), )</ID>
+    <ID>LongMethod:DashboardViewModel.kt$DashboardViewModel$private fun fetchNetworkHealth()</ID>
+    <ID>LongMethod:DeepAnalysisComponents.kt$@Composable fun MTFSummaryTable(mtf: MTFConsensus)</ID>
+    <ID>LongMethod:DeepAnalysisResultScreen.kt$@Composable fun DeepAnalysisResultScreen( prediction: PricePrediction, modelVotes: Map&lt;String, ModelVote&gt;, onDismiss: () -&gt; Unit, )</ID>
+    <ID>LongMethod:DerivativesScreen.kt$@Composable fun DerivativesContent( funding: FundingRateData, oi: OpenInterestData?, liq: LiquidationData?, onCoinSelect: (String) -&gt; Unit, )</ID>
+    <ID>LongMethod:EmptyState.kt$@Composable fun EmptyState( modifier: Modifier = Modifier, title: String, description: String, icon: ImageVector? = null, asciiArt: String? = null, actionLabel: String? = null, onAction: (() -&gt; Unit)? = null, )</ID>
+    <ID>LongMethod:EntryAnalyzerScreen.kt$@Composable fun EntryAnalyzerContent( state: EntryAnalysisUiState.Success, colors: TerminalColorSet, onUseInPlanner: (String, Double, Double, Double) -&gt; Unit, onRefresh: () -&gt; Unit, )</ID>
+    <ID>LongMethod:EntryAnalyzerScreen.kt$@Composable fun EntryAnalyzerScreen( viewModel: EntryAnalyzerViewModel = hiltViewModel(), onBack: () -&gt; Unit = {}, onUseInPlanner: (String, Double, Double, Double) -&gt; Unit = { _, _, _, _ -&gt; }, )</ID>
+    <ID>LongMethod:FearGreedScreen.kt$@Composable fun FearGreedGauge(value: Int)</ID>
+    <ID>LongMethod:MTFScreen.kt$@Composable fun MTFScreen( viewModel: MTFViewModel = hiltViewModel(), onBack: () -&gt; Unit = {}, onGoToDashboard: () -&gt; Unit = {}, )</ID>
+    <ID>LongMethod:MTFScreen.kt$@Composable fun TimeframeRow(tf: TimeframeSignal)</ID>
+    <ID>LongMethod:MTFViewModel.kt$MTFViewModel$fun analyze()</ID>
+    <ID>LongMethod:MacroScreen.kt$@Composable fun MacroContent( data: MacroData, correlations: List&lt;MacroCorrelation&gt;, )</ID>
+    <ID>LongMethod:MainActivity.kt$MainActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
+    <ID>LongMethod:MarketsScreen.kt$@Composable fun MarketRow( coin: CoinPrice, onClick: (String) -&gt; Unit, onToggleTracking: (String) -&gt; Unit, sentiment: com.cryptodept.domain.usecase.SentimentVerdict? = null, )</ID>
+    <ID>LongMethod:MatrixRainScreen.kt$@Composable fun MatrixRainScreen( modifier: Modifier = Modifier, btcPrice: String = "$103,450 ▲2.3%", allPrices: List&lt;String&gt; = emptyList(), // Pass list of "BTC $100k", "ETH $3k" etc. riskScore: Int = 45, onDismiss: () -&gt; Unit, )</ID>
+    <ID>LongMethod:NavGraph.kt$@Composable fun NavGraph( navController: NavHostController, preferencesService: PreferencesService, )</ID>
+    <ID>LongMethod:NewsRepositoryImpl.kt$NewsRepositoryImpl$override suspend fun refreshNews(currencies: String?): Result&lt;Unit&gt;</ID>
+    <ID>LongMethod:NewsScreen.kt$@Composable fun NewsCard( item: NewsItem, onOpen: () -&gt; Unit, )</ID>
+    <ID>LongMethod:NewsScreen.kt$@Composable fun NewsScreen(viewModel: NewsViewModel)</ID>
+    <ID>LongMethod:OnboardingScreen.kt$@Composable fun OnboardingScreen(onOnboardingComplete: () -&gt; Unit)</ID>
+    <ID>LongMethod:OptimalEntryCalculator.kt$OptimalEntryCalculator$suspend fun analyze( coin: String, currentPrice: Double, ohlcData: List&lt;OHLCData&gt;, rsi: Double, bollingerUpper: Double, bollingerLower: Double, bollingerMid: Double, ): EntryAnalysis</ID>
+    <ID>LongMethod:PaywallScreen.kt$@Composable fun PaywallScreen( viewModel: BillingViewModel = hiltViewModel(), onDismiss: () -&gt; Unit = {}, )</ID>
+    <ID>LongMethod:PortfolioScreen.kt$@Composable fun AddPositionDialog( viewModel: PortfolioViewModel, onDismiss: () -&gt; Unit, )</ID>
+    <ID>LongMethod:PortfolioScreen.kt$@Composable fun PortfolioScreen( navController: androidx.navigation.NavController, viewModel: PortfolioViewModel = hiltViewModel(), )</ID>
+    <ID>LongMethod:PositionSizeScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun PositionSizeScreen( viewModel: PositionSizeViewModel = hiltViewModel(), onBack: () -&gt; Unit = {}, )</ID>
+    <ID>LongMethod:PredictionViewModel.kt$PredictionViewModel$fun generateShareText(prediction: PricePrediction): String</ID>
+    <ID>LongMethod:PriceText.kt$@Composable fun PriceText( price: String, modifier: Modifier = Modifier, fontSize: TextUnit = 24.sp, color: Color = LocalTerminalColors.current.primary, )</ID>
+    <ID>LongMethod:PsychologyAnalyzer.kt$PsychologyAnalyzer$suspend fun analyzeSession(): SessionStats</ID>
+    <ID>LongMethod:PsychologyLockOverlay.kt$@Composable fun PsychologyLockOverlay( isVisible: Boolean, onDismiss: () -&gt; Unit, )</ID>
+    <ID>LongMethod:PsychologyScreen.kt$@Composable fun PsychologyContent( stats: SessionStats, onTakeBreak: () -&gt; Unit, )</ID>
+    <ID>LongMethod:RiskScoreEngine.kt$RiskScoreEngine$fun calculate( rsi: Double, fundingRate: Double, // % (e.g. 0.08 = 0.08%) longShortRatio: Double, // &gt; 1.0 = more longs fearGreedIndex: Int, // 0-100 exchangeInflowChange: Double, // % change (positive = more entering exchange) openInterestChange: Double, // % change 24h priceChange24h: Double, // % price change macroRisk: Double = 0.5, // 0.0-1.0 (from DXY + S&amp;P correlation) ): RiskScore</ID>
+    <ID>LongMethod:RiskScoreScreen.kt$@Composable fun RiskContent( score: RiskScoreEngine.RiskScore, btcPrice: Double, onRefresh: () -&gt; Unit, )</ID>
+    <ID>LongMethod:RssNewsParser.kt$RssNewsParser$private suspend fun fetchRssFeed(source: RssSource): List&lt;RssItem&gt;</ID>
+    <ID>LongMethod:RunDeepAnalysisUseCase.kt$RunDeepAnalysisUseCase$suspend fun execute(coinId: String, days: Int): Result&lt;DeepAnalysisResult&gt;</ID>
+    <ID>LongMethod:SeasonalScreen.kt$@Composable fun SeasonalScreen( onBack: () -&gt; Unit, viewModel: SeasonalViewModel = hiltViewModel(), )</ID>
+    <ID>LongMethod:SentimentAnalyzer.kt$SentimentAnalyzer$suspend fun analyzeCoin(symbol: String): SentimentResult</ID>
+    <ID>LongMethod:SettingsScreen.kt$@Composable fun SettingsScreen( onBack: () -&gt; Unit, viewModel: SettingsViewModel = hiltViewModel(), )</ID>
+    <ID>LongMethod:SignalsScreen.kt$@Composable fun SignalRow(coinSignal: CoinSignal)</ID>
+    <ID>LongMethod:SignalsViewModel.kt$SignalsViewModel$fun generateSignals()</ID>
+    <ID>LongMethod:SkeletonsAll.kt$@Composable fun DashboardSkeleton(modifier: Modifier = Modifier)</ID>
+    <ID>LongMethod:SkeletonsAll.kt$@Composable fun JournalSkeleton(modifier: Modifier = Modifier)</ID>
+    <ID>LongMethod:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$fun generateTechnicalTrace( rsi: Double, macdHistogram: Double, price: Double, ema50: Double, ema200: Double, volumeMultiplier: Double, ): List&lt;AnalysisTrace&gt;</ID>
+    <ID>LongMethod:TerminalBottomBar.kt$@Composable fun TerminalBottomBar(navController: NavHostController)</ID>
+    <ID>LongMethod:TerminalCommandBar.kt$@Composable fun TerminalCommandBar( onCommandEntered: (String) -&gt; Unit, modifier: Modifier = Modifier, viewModel: TerminalCommandViewModel = hiltViewModel(), )</ID>
+    <ID>LongMethod:TerminalHelpDialog.kt$@Composable fun TerminalHelpDialog(onDismiss: () -&gt; Unit)</ID>
+    <ID>LongMethod:TickerTape.kt$@Composable fun TickerTape( prices: List&lt;CoinPrice&gt;, networkHealth: com.cryptodept.domain.model.NetworkHealth?, modifier: Modifier = Modifier, )</ID>
+    <ID>LongMethod:ToolsHubScreen.kt$@Composable fun ToolsHubScreen(onNavigateToTool: (String) -&gt; Unit)</ID>
+    <ID>LongMethod:TradeJournalScreen.kt$@Composable fun TradeItem( trade: TradeJournal, onClose: (Double) -&gt; Unit, )</ID>
+    <ID>LongMethod:TradeJournalScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun AddTradeBottomSheet( onDismiss: () -&gt; Unit, onSave: (TradeJournal) -&gt; Unit, )</ID>
+    <ID>LongMethod:TradeJournalScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun TradeJournalScreen(viewModel: JournalViewModel = hiltViewModel())</ID>
+    <ID>LongMethod:TradePlannerEngine.kt$TradePlannerEngine$suspend fun evaluate( coin: String, direction: TradeDirectionType, entryPrice: Double, stopLoss: Double, takeProfit: Double, currentRsi: Double, fundingRate: Double, fearGreedIndex: Int, riskScore: Int, ): TradeSetup</ID>
+    <ID>LongMethod:TradePlannerScreen.kt$@Composable fun ChecklistView(setup: TradeSetup)</ID>
+    <ID>LongMethod:TradePlannerScreen.kt$@Composable fun TradePlannerScreen( viewModel: TradePlannerViewModel = hiltViewModel(), onBack: () -&gt; Unit = {}, onSendToSizer: (Double, Double, Double) -&gt; Unit = { _, _, _ -&gt; }, )</ID>
+    <ID>LongMethod:WhaleTrackerScreen.kt$@Composable fun WhaleTrackerScreen( onBack: () -&gt; Unit, viewModel: WhaleViewModel = hiltViewModel(), )</ID>
+    <ID>LongMethod:WhaleTrackerScreen.kt$@Composable fun WhaleTxCard(tx: WhaleTransaction)</ID>
+    <ID>LongParameterList:BacktesterScreen.kt$( trackedCoins: List&lt;String&gt;, selectedCoin: String, onCoinSelected: (String) -&gt; Unit, rsiEntry: Float, onRsiEntryChange: (Float) -&gt; Unit, rsiExit: Float, onRsiExitChange: (Float) -&gt; Unit, stopLoss: Float, onStopLossChange: (Float) -&gt; Unit, takeProfit: Float, onTakeProfitChange: (Float) -&gt; Unit, initialCapital: Float, onCapitalChange: (Float) -&gt; Unit, riskPerTrade: Float, onRiskChange: (Float) -&gt; Unit, isLoading: Boolean, onRun: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:ConfluenceAlertDetector.kt$ConfluenceAlertDetector$( coin: String, price: Double, rsi: Double, macdBullish: Boolean, priceAboveEma50: Boolean, priceAboveEma200: Boolean, fundingRate: Double, fearGreedIndex: Int, bollingerPosition: Double, // -1.0 (at lower) до +1.0 (at upper) exchangeInflowChange: Double, )</ID>
+    <ID>LongParameterList:DashboardViewModel.kt$DashboardViewModel$( private val getDashboardDataUseCase: GetDashboardDataUseCase, private val refreshPricesUseCase: RefreshPricesUseCase, private val sentimentAnalyzer: com.cryptodept.domain.usecase.SentimentAnalyzer, private val blockchainApi: BlockchainApi, private val etherscanApi: EtherscanApi, private val fearGreedApi: FearGreedApi, private val gson: Gson, private val analytics: com.cryptodept.util.AnalyticsService, private val logService: com.cryptodept.domain.manager.DashboardLogService, private val aiGenerator: com.cryptodept.domain.usecase.AIReportGenerator, private val riskEngine: com.cryptodept.domain.usecase.RiskScoreEngine )</ID>
+    <ID>LongParameterList:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$( private val linearRegression: LinearRegressionPredictor, private val fourierCycles: FourierCyclePredictor, private val monteCarlo: MonteCarloPredictor, private val elliottWave: ElliottWavePredictor, private val wyckoff: WyckoffPhaseDetector, private val hurstCalc: HurstExponentCalculator, private val fractalAnalyzer: FractalDimensionAnalyzer, private val mtfAnalyzer: MultiTimeframeAnalyzer, // Добавено private val accuracyTracker: com.cryptodept.domain.usecase.PredictionAccuracyTracker, private val cache: PredictionCache, )</ID>
+    <ID>MagicNumber:AICoachViewModel.kt$AICoachViewModel$50</ID>
+    <ID>MagicNumber:AIReportGenerator.kt$AIReportGenerator$0.7</ID>
+    <ID>MagicNumber:AIReportGenerator.kt$AIReportGenerator$1</ID>
+    <ID>MagicNumber:AIReportGenerator.kt$AIReportGenerator$200</ID>
+    <ID>MagicNumber:AIReportGenerator.kt$AIReportGenerator$30</ID>
+    <ID>MagicNumber:AIReportGenerator.kt$AIReportGenerator$60</ID>
+    <ID>MagicNumber:AccuracyBadge.kt$0.4f</ID>
+    <ID>MagicNumber:AccuracyBadge.kt$0.6f</ID>
+    <ID>MagicNumber:AccuracyBadge.kt$0xFF00FF41</ID>
+    <ID>MagicNumber:AccuracyBadge.kt$0xFFFF4444</ID>
+    <ID>MagicNumber:AccuracyBadge.kt$0xFFFFB000</ID>
+    <ID>MagicNumber:AccuracyVerificationWorker.kt$AccuracyVerificationWorker.Companion$6</ID>
+    <ID>MagicNumber:AchievementEngine.kt$AchievementEngine$1</ID>
+    <ID>MagicNumber:AlertEvaluationEngine.kt$AlertEvaluationEngine$50.0</ID>
+    <ID>MagicNumber:AlertNotificationService.kt$AlertNotificationService$2001</ID>
+    <ID>MagicNumber:AlertWorker.kt$AlertWorker.Companion$15</ID>
+    <ID>MagicNumber:AlertWorker.kt$AlertWorker.Companion$5</ID>
+    <ID>MagicNumber:Alertengine.kt$AlertEngine$60</ID>
+    <ID>MagicNumber:AnalysisLoadingScreen.kt$0xFF00FF41</ID>
+    <ID>MagicNumber:AnalysisRepositoryImpl.kt$AnalysisRepositoryImpl$12</ID>
+    <ID>MagicNumber:AnalysisRepositoryImpl.kt$AnalysisRepositoryImpl$200</ID>
+    <ID>MagicNumber:AnalysisRepositoryImpl.kt$AnalysisRepositoryImpl$21</ID>
+    <ID>MagicNumber:AnalysisRepositoryImpl.kt$AnalysisRepositoryImpl$26</ID>
+    <ID>MagicNumber:AnalysisRepositoryImpl.kt$AnalysisRepositoryImpl$3</ID>
+    <ID>MagicNumber:AnalysisRepositoryImpl.kt$AnalysisRepositoryImpl$50</ID>
+    <ID>MagicNumber:AnalysisRepositoryImpl.kt$AnalysisRepositoryImpl$9</ID>
+    <ID>MagicNumber:AnalysisViewModel.kt$AnalysisViewModel$30</ID>
+    <ID>MagicNumber:AnalysisViewModel.kt$AnalysisViewModel$5000</ID>
+    <ID>MagicNumber:BacktesterEngine.kt$BacktesterEngine$0.02</ID>
+    <ID>MagicNumber:BacktesterEngine.kt$BacktesterEngine$14</ID>
+    <ID>MagicNumber:BacktesterEngine.kt$BacktesterEngine$252.0</ID>
+    <ID>MagicNumber:BacktesterEngine.kt$BacktesterEngine$365.0</ID>
+    <ID>MagicNumber:BacktesterScreen.kt$255</ID>
+    <ID>MagicNumber:BacktesterScreen.kt$59</ID>
+    <ID>MagicNumber:BacktesterScreen.kt$65</ID>
+    <ID>MagicNumber:BacktesterViewModel.kt$BacktesterViewModel$10000f</ID>
+    <ID>MagicNumber:BacktesterViewModel.kt$BacktesterViewModel$35f</ID>
+    <ID>MagicNumber:BacktesterViewModel.kt$BacktesterViewModel$5000</ID>
+    <ID>MagicNumber:BacktesterViewModel.kt$BacktesterViewModel$5f</ID>
+    <ID>MagicNumber:BacktesterViewModel.kt$BacktesterViewModel$65f</ID>
+    <ID>MagicNumber:BinancePriceSource.kt$BinancePriceSource$30</ID>
+    <ID>MagicNumber:BinanceWebSocketService.kt$BinanceWebSocketService$30000L</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$0.04</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$0.2</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$0.29</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$0.42</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$0.5</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$0.5f</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$0.95</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$0.98</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$0xFF0a0a0a</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$0xFF1a1a1a</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$1.0</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$1.05</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$10.50</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$100f</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$103450.0</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$12</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$12.35</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$120</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$16.2f</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$16L</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$180000L</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$1f</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$2.85</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$2.9f</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$20</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$200</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$2000f</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$200f</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$2100.0</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$212.0</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$2500f</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$28.50</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$3</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$3.0</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$3.8f</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$30</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$3245.0</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$3f</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$4.1f</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$40</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$42.0</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$48.5f</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$5.0</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$50f</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$60</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$600</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$60f</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$645.0</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$8.25</ID>
+    <ID>MagicNumber:BloombergWallScreen.kt$80</ID>
+    <ID>MagicNumber:BootSequenceScreen.kt$20</ID>
+    <ID>MagicNumber:BootSequenceScreen.kt$500</ID>
+    <ID>MagicNumber:CRTOverlay.kt$0.45f</ID>
+    <ID>MagicNumber:CRTOverlay.kt$0.55f</ID>
+    <ID>MagicNumber:CRTOverlay.kt$0.5f</ID>
+    <ID>MagicNumber:CRTOverlay.kt$0.6f</ID>
+    <ID>MagicNumber:CRTOverlay.kt$4000</ID>
+    <ID>MagicNumber:CalculatePositionSizeUseCase.kt$CalculatePositionSizeUseCase$0.50</ID>
+    <ID>MagicNumber:CalculatePositionSizeUseCase.kt$CalculatePositionSizeUseCase$0.70</ID>
+    <ID>MagicNumber:CalculatePositionSizeUseCase.kt$CalculatePositionSizeUseCase$0.85</ID>
+    <ID>MagicNumber:CalculatePositionSizeUseCase.kt$CalculatePositionSizeUseCase$1.5</ID>
+    <ID>MagicNumber:CalculatePositionSizeUseCase.kt$CalculatePositionSizeUseCase$3.0</ID>
+    <ID>MagicNumber:CalculatePositionSizeUseCase.kt$CalculatePositionSizeUseCase$60</ID>
+    <ID>MagicNumber:CalculatePositionSizeUseCase.kt$CalculatePositionSizeUseCase$70</ID>
+    <ID>MagicNumber:CalculatePositionSizeUseCase.kt$CalculatePositionSizeUseCase$80</ID>
+    <ID>MagicNumber:CalendarScreen.kt$0xFF00FF41</ID>
+    <ID>MagicNumber:CalendarScreen.kt$0xFFFF3B30</ID>
+    <ID>MagicNumber:CalendarScreen.kt$0xFFFFB000</ID>
+    <ID>MagicNumber:CalendarViewModel.kt$CalendarViewModel$5000</ID>
+    <ID>MagicNumber:ChartRepositoryImpl.kt$ChartRepositoryImpl$5</ID>
+    <ID>MagicNumber:ChartRepositoryImpl.kt$ChartRepositoryImpl$60</ID>
+    <ID>MagicNumber:ChartsScreen.kt$150</ID>
+    <ID>MagicNumber:ChartsScreen.kt$255</ID>
+    <ID>MagicNumber:ChartsScreen.kt$40</ID>
+    <ID>MagicNumber:ChartsScreen.kt$5f</ID>
+    <ID>MagicNumber:ChartsScreen.kt$65</ID>
+    <ID>MagicNumber:CoinDetailScreen.kt$1.2f</ID>
+    <ID>MagicNumber:CoinDetailScreen.kt$1.5f</ID>
+    <ID>MagicNumber:CoinDetailScreen.kt$20</ID>
+    <ID>MagicNumber:CoinDetailScreen.kt$3</ID>
+    <ID>MagicNumber:CoinDetailViewModel.kt$CoinDetailViewModel$30</ID>
+    <ID>MagicNumber:CoinGeckoPriceSource.kt$CoinGeckoPriceSource$5</ID>
+    <ID>MagicNumber:CoinIconLoader.kt$CoinIconLoader$0.25</ID>
+    <ID>MagicNumber:CoinIconLoader.kt$CoinIconLoader$1024</ID>
+    <ID>MagicNumber:CoinIconLoader.kt$CoinIconLoader$200</ID>
+    <ID>MagicNumber:CoinIconLoader.kt$CoinIconLoader$50</ID>
+    <ID>MagicNumber:Color.kt$0xFF000000</ID>
+    <ID>MagicNumber:Color.kt$0xFF003B00</ID>
+    <ID>MagicNumber:Color.kt$0xFF008F11</ID>
+    <ID>MagicNumber:Color.kt$0xFF00FF41</ID>
+    <ID>MagicNumber:Color.kt$0xFFCCCCCC</ID>
+    <ID>MagicNumber:Color.kt$0xFFFF3B30</ID>
+    <ID>MagicNumber:Color.kt$0xFFFFB000</ID>
+    <ID>MagicNumber:ComparisonScreen.kt$0.2</ID>
+    <ID>MagicNumber:ComparisonScreen.kt$0.5</ID>
+    <ID>MagicNumber:ComparisonScreen.kt$0.8</ID>
+    <ID>MagicNumber:ComparisonScreen.kt$1_000_000</ID>
+    <ID>MagicNumber:ComparisonScreen.kt$1_000_000_000</ID>
+    <ID>MagicNumber:ComparisonScreen.kt$1_000_000_000_000</ID>
+    <ID>MagicNumber:ComparisonScreen.kt$30</ID>
+    <ID>MagicNumber:ComparisonScreen.kt$70</ID>
+    <ID>MagicNumber:ComparisonViewModel.kt$ComparisonViewModel$30</ID>
+    <ID>MagicNumber:ComparisonViewModel.kt$ComparisonViewModel$5</ID>
+    <ID>MagicNumber:ConfluenceAlertDetector.kt$ConfluenceAlertDetector$0.02</ID>
+    <ID>MagicNumber:ConfluenceAlertDetector.kt$ConfluenceAlertDetector$0.08</ID>
+    <ID>MagicNumber:ConfluenceAlertDetector.kt$ConfluenceAlertDetector$0.8</ID>
+    <ID>MagicNumber:ConfluenceAlertDetector.kt$ConfluenceAlertDetector$20</ID>
+    <ID>MagicNumber:ConfluenceAlertDetector.kt$ConfluenceAlertDetector$25</ID>
+    <ID>MagicNumber:ConfluenceAlertDetector.kt$ConfluenceAlertDetector$30</ID>
+    <ID>MagicNumber:ConfluenceAlertDetector.kt$ConfluenceAlertDetector$70</ID>
+    <ID>MagicNumber:ConfluenceAlertDetector.kt$ConfluenceAlertDetector$80</ID>
+    <ID>MagicNumber:ConfluenceAlertDetector.kt$ConfluenceAlertDetector.ConfluenceType.EXTREME$5</ID>
+    <ID>MagicNumber:ConfluenceAlertDetector.kt$ConfluenceAlertDetector.ConfluenceType.MODERATE$3</ID>
+    <ID>MagicNumber:ConfluenceAlertDetector.kt$ConfluenceAlertDetector.ConfluenceType.STRONG$4</ID>
+    <ID>MagicNumber:ContentStudioViewModel.kt$ContentStudioViewModel$50</ID>
+    <ID>MagicNumber:CorrelationEngine.kt$CorrelationEngine$1.0</ID>
+    <ID>MagicNumber:CorrelationScreen.kt$0.1f</ID>
+    <ID>MagicNumber:CorrelationScreen.kt$0.5</ID>
+    <ID>MagicNumber:CorrelationScreen.kt$0.6</ID>
+    <ID>MagicNumber:CorrelationScreen.kt$0.6f</ID>
+    <ID>MagicNumber:CorrelationScreen.kt$0.7f</ID>
+    <ID>MagicNumber:CorrelationScreen.kt$0.8</ID>
+    <ID>MagicNumber:CorrelationScreen.kt$1.6f</ID>
+    <ID>MagicNumber:CorrelationScreen.kt$22f</ID>
+    <ID>MagicNumber:CorrelationScreen.kt$24f</ID>
+    <ID>MagicNumber:CorrelationScreen.kt$4</ID>
+    <ID>MagicNumber:CryptoDeptApplication.kt$CryptoDeptApplication$24</ID>
+    <ID>MagicNumber:CryptoDeptApplication.kt$CryptoDeptApplication$8</ID>
+    <ID>MagicNumber:CryptoDeptWidget.kt$CryptoDeptWidget$0xFF007A1F</ID>
+    <ID>MagicNumber:CryptoDeptWidget.kt$CryptoDeptWidget$0xFF00FF41</ID>
+    <ID>MagicNumber:CryptoDeptWidget.kt$CryptoDeptWidget$0xFF0A0A0A</ID>
+    <ID>MagicNumber:CryptoDeptWidget.kt$CryptoDeptWidget$0xFF1A2E1A</ID>
+    <ID>MagicNumber:CryptoDeptWidget.kt$CryptoDeptWidget$0xFFFF3B30</ID>
+    <ID>MagicNumber:CryptoDeptWidget.kt$CryptoDeptWidget$0xFFFFB000</ID>
+    <ID>MagicNumber:CryptoDeptWidget.kt$CryptoDeptWidget$3</ID>
+    <ID>MagicNumber:CryptoDeptWidget.kt$CryptoDeptWidget$5</ID>
+    <ID>MagicNumber:CryptoDeptWidget.kt$CryptoDeptWidget$8</ID>
+    <ID>MagicNumber:CryptoDeptWidget.kt$CryptoDeptWidget.&lt;no name provided&gt;$0xFF003B00</ID>
+    <ID>MagicNumber:CryptoDeptWidget.kt$CryptoDeptWidget.&lt;no name provided&gt;$0xFF008F11</ID>
+    <ID>MagicNumber:CryptoDeptWidget.kt$CryptoDeptWidget.&lt;no name provided&gt;$0xFF00FF41</ID>
+    <ID>MagicNumber:CryptoDeptWidget.kt$CryptoDeptWidget.&lt;no name provided&gt;$0xFFFF3B30</ID>
+    <ID>MagicNumber:CryptoDeptWidget.kt$CryptoDeptWidget.&lt;no name provided&gt;$0xFFFFB000</ID>
+    <ID>MagicNumber:CryptoPriceForegroundService.kt$CryptoPriceForegroundService$14</ID>
+    <ID>MagicNumber:CryptoPriceForegroundService.kt$CryptoPriceForegroundService$200</ID>
+    <ID>MagicNumber:CryptoPriceForegroundService.kt$CryptoPriceForegroundService$2001</ID>
+    <ID>MagicNumber:CryptoPriceForegroundService.kt$CryptoPriceForegroundService$2002</ID>
+    <ID>MagicNumber:CryptoPriceForegroundService.kt$CryptoPriceForegroundService$30</ID>
+    <ID>MagicNumber:CryptoPriceForegroundService.kt$CryptoPriceForegroundService$300</ID>
+    <ID>MagicNumber:CryptoPriceForegroundService.kt$CryptoPriceForegroundService$30000L</ID>
+    <ID>MagicNumber:CryptoPriceForegroundService.kt$CryptoPriceForegroundService$50</ID>
+    <ID>MagicNumber:CryptoPriceForegroundService.kt$CryptoPriceForegroundService$75</ID>
+    <ID>MagicNumber:CryptoRepositoryImpl.kt$CryptoRepositoryImpl$10_000L</ID>
+    <ID>MagicNumber:CurrencyExtensions.kt$1_000_000</ID>
+    <ID>MagicNumber:CurrencyExtensions.kt$1_000_000_000</ID>
+    <ID>MagicNumber:CurrencyExtensions.kt$1_000_000_000_000</ID>
+    <ID>MagicNumber:DailyBriefingGenerator.kt$DailyBriefingGenerator$0.02</ID>
+    <ID>MagicNumber:DailyBriefingGenerator.kt$DailyBriefingGenerator$0.05</ID>
+    <ID>MagicNumber:DailyBriefingGenerator.kt$DailyBriefingGenerator$0.10</ID>
+    <ID>MagicNumber:DailyBriefingGenerator.kt$DailyBriefingGenerator$15</ID>
+    <ID>MagicNumber:DailyBriefingGenerator.kt$DailyBriefingGenerator$1_000_000</ID>
+    <ID>MagicNumber:DailyBriefingGenerator.kt$DailyBriefingGenerator$25</ID>
+    <ID>MagicNumber:DailyBriefingGenerator.kt$DailyBriefingGenerator$3</ID>
+    <ID>MagicNumber:DailyBriefingGenerator.kt$DailyBriefingGenerator$30</ID>
+    <ID>MagicNumber:DailyBriefingGenerator.kt$DailyBriefingGenerator$45</ID>
+    <ID>MagicNumber:DailyBriefingGenerator.kt$DailyBriefingGenerator$50</ID>
+    <ID>MagicNumber:DailyBriefingGenerator.kt$DailyBriefingGenerator$55</ID>
+    <ID>MagicNumber:DailyBriefingGenerator.kt$DailyBriefingGenerator$70</ID>
+    <ID>MagicNumber:DailyBriefingGenerator.kt$DailyBriefingGenerator$75</ID>
+    <ID>MagicNumber:DailyBriefingGenerator.kt$DailyBriefingGenerator$85</ID>
+    <ID>MagicNumber:DailyBriefingScreen.kt$0xFF00FF41</ID>
+    <ID>MagicNumber:DailyBriefingScreen.kt$0xFFFF3B30</ID>
+    <ID>MagicNumber:DailyBriefingScreen.kt$0xFFFFB000</ID>
+    <ID>MagicNumber:DailyBriefingScreen.kt$15</ID>
+    <ID>MagicNumber:DailyBriefingScreen.kt$50</ID>
+    <ID>MagicNumber:DailyBriefingWorker.kt$DailyBriefingWorker$50</ID>
+    <ID>MagicNumber:DailyBriefingWorker.kt$DailyBriefingWorker$9999</ID>
+    <ID>MagicNumber:DailyRecapPromptBuilder.kt$DailyRecapPromptBuilder$3</ID>
+    <ID>MagicNumber:DailyRecapPromptBuilder.kt$DailyRecapPromptBuilder$5</ID>
+    <ID>MagicNumber:DashboardLogService.kt$DashboardLogService$50</ID>
+    <ID>MagicNumber:DashboardScreen.kt$0.2f</ID>
+    <ID>MagicNumber:DashboardScreen.kt$0.4f</ID>
+    <ID>MagicNumber:DashboardScreen.kt$4</ID>
+    <ID>MagicNumber:DashboardScreen.kt$5</ID>
+    <ID>MagicNumber:DashboardViewModel.kt$DashboardViewModel$1.0</ID>
+    <ID>MagicNumber:DashboardViewModel.kt$DashboardViewModel$1_000_000_000_000_000_000.0</ID>
+    <ID>MagicNumber:DashboardViewModel.kt$DashboardViewModel$35</ID>
+    <ID>MagicNumber:DashboardViewModel.kt$DashboardViewModel$50</ID>
+    <ID>MagicNumber:DashboardViewModel.kt$DashboardViewModel$5000</ID>
+    <ID>MagicNumber:DashboardViewModel.kt$DashboardViewModel$65</ID>
+    <ID>MagicNumber:DatabaseModule.kt$DatabaseModule.&lt;no name provided&gt;$3</ID>
+    <ID>MagicNumber:DatabaseModule.kt$DatabaseModule.&lt;no name provided&gt;$4</ID>
+    <ID>MagicNumber:DatabaseModule.kt$DatabaseModule.&lt;no name provided&gt;$5</ID>
+    <ID>MagicNumber:DatabaseModule.kt$DatabaseModule.&lt;no name provided&gt;$6</ID>
+    <ID>MagicNumber:DatabaseModule.kt$DatabaseModule.&lt;no name provided&gt;$7</ID>
+    <ID>MagicNumber:DatabaseModule.kt$DatabaseModule.&lt;no name provided&gt;$8</ID>
+    <ID>MagicNumber:DeFiRepositoryImpl.kt$DeFiRepositoryImpl$1_000_000</ID>
+    <ID>MagicNumber:DeFiRepositoryImpl.kt$DeFiRepositoryImpl$30</ID>
+    <ID>MagicNumber:DeFiRepositoryImpl.kt$DeFiRepositoryImpl$50</ID>
+    <ID>MagicNumber:DeFiScreen.kt$1_000_000</ID>
+    <ID>MagicNumber:DeFiScreen.kt$1_000_000_000</ID>
+    <ID>MagicNumber:DeepAnalysisComponents.kt$0.5f</ID>
+    <ID>MagicNumber:DeepAnalysisComponents.kt$0.6f</ID>
+    <ID>MagicNumber:DeepAnalysisComponents.kt$0.8f</ID>
+    <ID>MagicNumber:DeepAnalysisComponents.kt$0xFF00FF41</ID>
+    <ID>MagicNumber:DeepAnalysisComponents.kt$0xFFFFB000</ID>
+    <ID>MagicNumber:DeepAnalysisComponents.kt$1.5f</ID>
+    <ID>MagicNumber:DeepAnalysisComponents.kt$6</ID>
+    <ID>MagicNumber:DeepAnalysisResultScreen.kt$0xFF00FF41</ID>
+    <ID>MagicNumber:DeepAnalysisResultScreen.kt$0xFFFFB000</ID>
+    <ID>MagicNumber:DeepAnalysisResultScreen.kt$2000</ID>
+    <ID>MagicNumber:DerivativesRepositoryImpl.kt$DerivativesRepositoryImpl$0.5</ID>
+    <ID>MagicNumber:DerivativesScreen.kt$0.05</ID>
+    <ID>MagicNumber:DerivativesScreen.kt$0.1</ID>
+    <ID>MagicNumber:DerivativesScreen.kt$0.2</ID>
+    <ID>MagicNumber:DerivativesScreen.kt$0xFF00FF41</ID>
+    <ID>MagicNumber:DerivativesScreen.kt$0xFF111111</ID>
+    <ID>MagicNumber:DerivativesScreen.kt$0xFFFF3B30</ID>
+    <ID>MagicNumber:DerivativesScreen.kt$0xFFFFB000</ID>
+    <ID>MagicNumber:DerivativesScreen.kt$12</ID>
+    <ID>MagicNumber:DerivativesScreen.kt$1_000_000</ID>
+    <ID>MagicNumber:DerivativesScreen.kt$1_000_000_000</ID>
+    <ID>MagicNumber:DerivativesScreen.kt$20</ID>
+    <ID>MagicNumber:DerivativesScreen.kt$5</ID>
+    <ID>MagicNumber:DerivativesScreen.kt$500_000_000</ID>
+    <ID>MagicNumber:ElliottWavePredictor.kt$ElliottWavePredictor$0.95</ID>
+    <ID>MagicNumber:ElliottWavePredictor.kt$ElliottWavePredictor$1.05</ID>
+    <ID>MagicNumber:ElliottWavePredictor.kt$ElliottWavePredictor$5</ID>
+    <ID>MagicNumber:ElliottWavePredictor.kt$ElliottWavePredictor$50</ID>
+    <ID>MagicNumber:EntryAnalysis.kt$ZoneType.DECENT$0xFFFFB000</ID>
+    <ID>MagicNumber:EntryAnalysis.kt$ZoneType.IDEAL$0xFF00FF41</ID>
+    <ID>MagicNumber:EntryAnalysis.kt$ZoneType.LAST_RESORT$0xFFFF6600</ID>
+    <ID>MagicNumber:EntryAnalyzerScreen.kt$0.5f</ID>
+    <ID>MagicNumber:EntryAnalyzerScreen.kt$0.95</ID>
+    <ID>MagicNumber:EntryAnalyzerScreen.kt$1.1</ID>
+    <ID>MagicNumber:EntryAnalyzerScreen.kt$40</ID>
+    <ID>MagicNumber:EntryAnalyzerScreen.kt$70</ID>
+    <ID>MagicNumber:EntryAnalyzerViewModel.kt$EntryAnalyzerViewModel$0.6f</ID>
+    <ID>MagicNumber:EntryAnalyzerViewModel.kt$EntryAnalyzerViewModel$0.7f</ID>
+    <ID>MagicNumber:EntryAnalyzerViewModel.kt$EntryAnalyzerViewModel$0.8f</ID>
+    <ID>MagicNumber:EntryAnalyzerViewModel.kt$EntryAnalyzerViewModel$14</ID>
+    <ID>MagicNumber:EntryAnalyzerViewModel.kt$EntryAnalyzerViewModel$40</ID>
+    <ID>MagicNumber:EntryAnalyzerViewModel.kt$EntryAnalyzerViewModel$50.0</ID>
+    <ID>MagicNumber:EntryAnalyzerViewModel.kt$EntryAnalyzerViewModel$5000</ID>
+    <ID>MagicNumber:EntryAnalyzerViewModel.kt$EntryAnalyzerViewModel$60000</ID>
+    <ID>MagicNumber:ErrorMessageMapper.kt$ErrorMessageMapper$404</ID>
+    <ID>MagicNumber:ErrorMessageMapper.kt$ErrorMessageMapper$429</ID>
+    <ID>MagicNumber:ErrorMessageMapper.kt$ErrorMessageMapper$500</ID>
+    <ID>MagicNumber:EtherscanWhaleClient.kt$EtherscanTxDTO$1e18</ID>
+    <ID>MagicNumber:EtherscanWhaleClient.kt$EtherscanWhaleClient$1e18</ID>
+    <ID>MagicNumber:EtherscanWhaleClient.kt$EtherscanWhaleClient$3</ID>
+    <ID>MagicNumber:EtherscanWhaleClient.kt$EtherscanWhaleClient$500</ID>
+    <ID>MagicNumber:FearGreedScreen.kt$0xFF00FF41</ID>
+    <ID>MagicNumber:FearGreedScreen.kt$0xFF4CD964</ID>
+    <ID>MagicNumber:FearGreedScreen.kt$0xFFFF3B30</ID>
+    <ID>MagicNumber:FearGreedScreen.kt$0xFFFF9500</ID>
+    <ID>MagicNumber:FearGreedScreen.kt$0xFFFFCC00</ID>
+    <ID>MagicNumber:FearGreedScreen.kt$180f</ID>
+    <ID>MagicNumber:FearGreedScreen.kt$25</ID>
+    <ID>MagicNumber:FearGreedScreen.kt$45</ID>
+    <ID>MagicNumber:FearGreedScreen.kt$55</ID>
+    <ID>MagicNumber:FirebaseModule.kt$FirebaseModule$3600</ID>
+    <ID>MagicNumber:FourierCyclePredictor.kt$FourierCyclePredictor$0.15</ID>
+    <ID>MagicNumber:FourierCyclePredictor.kt$FourierCyclePredictor$0.2f</ID>
+    <ID>MagicNumber:FourierCyclePredictor.kt$FourierCyclePredictor$0.3f</ID>
+    <ID>MagicNumber:FourierCyclePredictor.kt$FourierCyclePredictor$0.4f</ID>
+    <ID>MagicNumber:FourierCyclePredictor.kt$FourierCyclePredictor$0.85f</ID>
+    <ID>MagicNumber:FourierCyclePredictor.kt$FourierCyclePredictor$2.0</ID>
+    <ID>MagicNumber:FourierCyclePredictor.kt$FourierCyclePredictor$3</ID>
+    <ID>MagicNumber:FourierCyclePredictor.kt$FourierCyclePredictor$32</ID>
+    <ID>MagicNumber:FractalDimensionAnalyzer.kt$FractalDimensionAnalyzer$16</ID>
+    <ID>MagicNumber:GeminiCoachService.kt$GeminiCoachService$5</ID>
+    <ID>MagicNumber:GetNetworkHealthUseCase.kt$GetNetworkHealthUseCase$1e18</ID>
+    <ID>MagicNumber:GetNetworkHealthUseCase.kt$GetNetworkHealthUseCase$50</ID>
+    <ID>MagicNumber:GlitchEffect.kt$0.85f</ID>
+    <ID>MagicNumber:GlitchEffect.kt$0.99f</ID>
+    <ID>MagicNumber:GlitchEffect.kt$1.01f</ID>
+    <ID>MagicNumber:GlitchEffect.kt$150</ID>
+    <ID>MagicNumber:GlitchEffect.kt$2</ID>
+    <ID>MagicNumber:GlitchEffect.kt$60</ID>
+    <ID>MagicNumber:GlitchEffect.kt$8</ID>
+    <ID>MagicNumber:GlobalMarketBar.kt$1e12</ID>
+    <ID>MagicNumber:GlobalMarketBar.kt$1e9</ID>
+    <ID>MagicNumber:GlobalMarketViewModel.kt$GlobalMarketViewModel$60000</ID>
+    <ID>MagicNumber:HalvingDataProvider.kt$HalvingDataProvider$0.25f</ID>
+    <ID>MagicNumber:HalvingDataProvider.kt$HalvingDataProvider$0.50f</ID>
+    <ID>MagicNumber:HalvingDataProvider.kt$HalvingDataProvider$0.75f</ID>
+    <ID>MagicNumber:HalvingDataProvider.kt$HalvingDataProvider$11</ID>
+    <ID>MagicNumber:HalvingDataProvider.kt$HalvingDataProvider$1458L</ID>
+    <ID>MagicNumber:HalvingDataProvider.kt$HalvingDataProvider$20</ID>
+    <ID>MagicNumber:HalvingDataProvider.kt$HalvingDataProvider$2012</ID>
+    <ID>MagicNumber:HalvingDataProvider.kt$HalvingDataProvider$2016</ID>
+    <ID>MagicNumber:HalvingDataProvider.kt$HalvingDataProvider$2020</ID>
+    <ID>MagicNumber:HalvingDataProvider.kt$HalvingDataProvider$2024</ID>
+    <ID>MagicNumber:HalvingDataProvider.kt$HalvingDataProvider$24</ID>
+    <ID>MagicNumber:HalvingDataProvider.kt$HalvingDataProvider$28</ID>
+    <ID>MagicNumber:HalvingDataProvider.kt$HalvingDataProvider$3</ID>
+    <ID>MagicNumber:HalvingDataProvider.kt$HalvingDataProvider$4</ID>
+    <ID>MagicNumber:HalvingDataProvider.kt$HalvingDataProvider$6</ID>
+    <ID>MagicNumber:HalvingDataProvider.kt$HalvingDataProvider$60</ID>
+    <ID>MagicNumber:HalvingDataProvider.kt$HalvingDataProvider$9</ID>
+    <ID>MagicNumber:HapticService.kt$HapticService$1</ID>
+    <ID>MagicNumber:HapticService.kt$HapticService$20</ID>
+    <ID>MagicNumber:HapticService.kt$HapticService$30</ID>
+    <ID>MagicNumber:HapticService.kt$HapticService$50</ID>
+    <ID>MagicNumber:HapticService.kt$HapticService$8</ID>
+    <ID>MagicNumber:HeatmapColorMapper.kt$HeatmapColorMapper$0xFF00FF41</ID>
+    <ID>MagicNumber:HeatmapColorMapper.kt$HeatmapColorMapper$0xFFFF3B30</ID>
+    <ID>MagicNumber:HeatmapDataRepository.kt$HeatmapDataRepository$50</ID>
+    <ID>MagicNumber:HeatmapScreensaverScreen.kt$20</ID>
+    <ID>MagicNumber:HeatmapScreensaverScreen.kt$20f</ID>
+    <ID>MagicNumber:HeatmapScreensaverScreen.kt$3</ID>
+    <ID>MagicNumber:HeatmapScreensaverScreen.kt$4</ID>
+    <ID>MagicNumber:HeatmapScreensaverScreen.kt$40</ID>
+    <ID>MagicNumber:HeatmapScreensaverScreen.kt$8</ID>
+    <ID>MagicNumber:HeliusWhaleClient.kt$HeliusWhaleClient$100_000_000_000.0</ID>
+    <ID>MagicNumber:HeliusWhaleClient.kt$HeliusWhaleClient$1_000_000_000_000L</ID>
+    <ID>MagicNumber:HeliusWhaleClient.kt$HeliusWhaleClient$1e9</ID>
+    <ID>MagicNumber:HurstExponentCalculator.kt$HurstExponentCalculator$0.45f</ID>
+    <ID>MagicNumber:HurstExponentCalculator.kt$HurstExponentCalculator$0.55f</ID>
+    <ID>MagicNumber:HurstExponentCalculator.kt$HurstExponentCalculator$16</ID>
+    <ID>MagicNumber:HurstExponentCalculator.kt$HurstExponentCalculator$32</ID>
+    <ID>MagicNumber:HurstExponentCalculator.kt$HurstExponentCalculator$64</ID>
+    <ID>MagicNumber:HurstExponentCalculator.kt$HurstExponentCalculator$8</ID>
+    <ID>MagicNumber:ImageModule.kt$ImageModule$0.02</ID>
+    <ID>MagicNumber:ImageModule.kt$ImageModule$0.25</ID>
+    <ID>MagicNumber:IndicatorsScreen.kt$1.2f</ID>
+    <ID>MagicNumber:IndicatorsScreen.kt$8</ID>
+    <ID>MagicNumber:IndicatorsViewModel.kt$IndicatorsViewModel$3</ID>
+    <ID>MagicNumber:IndicatorsViewModel.kt$IndicatorsViewModel$30</ID>
+    <ID>MagicNumber:IndicatorsViewModel.kt$IndicatorsViewModel$70</ID>
+    <ID>MagicNumber:JournalViewModel.kt$JournalViewModel$5000</ID>
+    <ID>MagicNumber:KrakenWebSocketService.kt$KrakenWebSocketService$30000L</ID>
+    <ID>MagicNumber:LinearRegressionPredictor.kt$LinearRegressionPredictor$0.995</ID>
+    <ID>MagicNumber:LinearRegressionPredictor.kt$LinearRegressionPredictor$1.005</ID>
+    <ID>MagicNumber:LocalSentimentScorer.kt$LocalSentimentScorer$50</ID>
+    <ID>MagicNumber:MTFScreen.kt$1.5f</ID>
+    <ID>MagicNumber:MTFScreen.kt$30</ID>
+    <ID>MagicNumber:MTFScreen.kt$4</ID>
+    <ID>MagicNumber:MTFScreen.kt$6</ID>
+    <ID>MagicNumber:MTFScreen.kt$70</ID>
+    <ID>MagicNumber:MTFViewModel.kt$MTFViewModel$30</ID>
+    <ID>MagicNumber:MTFViewModel.kt$MTFViewModel$5000</ID>
+    <ID>MagicNumber:MacroRepositoryImpl.kt$MacroRepositoryImpl$0.2</ID>
+    <ID>MagicNumber:MacroRepositoryImpl.kt$MacroRepositoryImpl$0.3</ID>
+    <ID>MagicNumber:MacroRepositoryImpl.kt$MacroRepositoryImpl$0.7</ID>
+    <ID>MagicNumber:MacroRepositoryImpl.kt$MacroRepositoryImpl$5</ID>
+    <ID>MagicNumber:MacroScreen.kt$0.6</ID>
+    <ID>MagicNumber:MacroScreen.kt$0xFF00FF41</ID>
+    <ID>MagicNumber:MacroScreen.kt$0xFF111111</ID>
+    <ID>MagicNumber:MacroScreen.kt$0xFFFF3B30</ID>
+    <ID>MagicNumber:MacroScreen.kt$0xFFFFB000</ID>
+    <ID>MagicNumber:MacroScreen.kt$15</ID>
+    <ID>MagicNumber:MacroScreen.kt$20</ID>
+    <ID>MagicNumber:MainActivity.kt$MainActivity$300</ID>
+    <ID>MagicNumber:MainActivity.kt$MainActivity$60</ID>
+    <ID>MagicNumber:MarketsScreen.kt$0.5f</ID>
+    <ID>MagicNumber:MarketsScreen.kt$0.8f</ID>
+    <ID>MagicNumber:MarketsScreen.kt$4</ID>
+    <ID>MagicNumber:MatrixRainScreen.kt$0xFF008800</ID>
+    <ID>MagicNumber:MatrixRainScreen.kt$0xFF00DD00</ID>
+    <ID>MagicNumber:MatrixRainScreen.kt$0xFF00FF41</ID>
+    <ID>MagicNumber:MatrixRainScreen.kt$0xFFFFA500</ID>
+    <ID>MagicNumber:MatrixRainScreen.kt$1200</ID>
+    <ID>MagicNumber:MatrixRainScreen.kt$2000f</ID>
+    <ID>MagicNumber:MatrixRainScreen.kt$25</ID>
+    <ID>MagicNumber:MatrixRainScreen.kt$25f</ID>
+    <ID>MagicNumber:MatrixRainScreen.kt$28</ID>
+    <ID>MagicNumber:MatrixRainScreen.kt$3</ID>
+    <ID>MagicNumber:MatrixRainScreen.kt$4</ID>
+    <ID>MagicNumber:MatrixRainScreen.kt$40</ID>
+    <ID>MagicNumber:MempoolWhaleClient.kt$MempoolWhaleClient$1e8</ID>
+    <ID>MagicNumber:MempoolWhaleClient.kt$MempoolWhaleClient$5_000_000_000L</ID>
+    <ID>MagicNumber:MonteCarloPredictor.kt$MonteCarloPredictor$0.5f</ID>
+    <ID>MagicNumber:MonteCarloPredictor.kt$MonteCarloPredictor$3.0</ID>
+    <ID>MagicNumber:MultiSourcePriceAggregator.kt$MultiSourcePriceAggregator$3</ID>
+    <ID>MagicNumber:MultiTimeframeAnalyzer.kt$MultiTimeframeAnalyzer$1</ID>
+    <ID>MagicNumber:MultiTimeframeAnalyzer.kt$MultiTimeframeAnalyzer$13</ID>
+    <ID>MagicNumber:MultiTimeframeAnalyzer.kt$MultiTimeframeAnalyzer$14</ID>
+    <ID>MagicNumber:MultiTimeframeAnalyzer.kt$MultiTimeframeAnalyzer$2</ID>
+    <ID>MagicNumber:MultiTimeframeAnalyzer.kt$MultiTimeframeAnalyzer$20</ID>
+    <ID>MagicNumber:MultiTimeframeAnalyzer.kt$MultiTimeframeAnalyzer$24</ID>
+    <ID>MagicNumber:MultiTimeframeAnalyzer.kt$MultiTimeframeAnalyzer$3</ID>
+    <ID>MagicNumber:MultiTimeframeAnalyzer.kt$MultiTimeframeAnalyzer$30</ID>
+    <ID>MagicNumber:MultiTimeframeAnalyzer.kt$MultiTimeframeAnalyzer$35</ID>
+    <ID>MagicNumber:MultiTimeframeAnalyzer.kt$MultiTimeframeAnalyzer$4</ID>
+    <ID>MagicNumber:MultiTimeframeAnalyzer.kt$MultiTimeframeAnalyzer$42</ID>
+    <ID>MagicNumber:MultiTimeframeAnalyzer.kt$MultiTimeframeAnalyzer$5</ID>
+    <ID>MagicNumber:MultiTimeframeAnalyzer.kt$MultiTimeframeAnalyzer$50</ID>
+    <ID>MagicNumber:MultiTimeframeAnalyzer.kt$MultiTimeframeAnalyzer$65</ID>
+    <ID>MagicNumber:MultiTimeframeAnalyzer.kt$MultiTimeframeAnalyzer$7</ID>
+    <ID>MagicNumber:MultiTimeframeAnalyzer.kt$MultiTimeframeAnalyzer$90</ID>
+    <ID>MagicNumber:MultiTimeframeAnalyzer.kt$MultiTimeframeAnalyzer$96</ID>
+    <ID>MagicNumber:NavGraph.kt$0.95</ID>
+    <ID>MagicNumber:NavGraph.kt$1.10</ID>
+    <ID>MagicNumber:NetworkModule.kt$NetworkModule$1024</ID>
+    <ID>MagicNumber:NetworkModule.kt$NetworkModule$30</ID>
+    <ID>MagicNumber:NewsRepositoryImpl.kt$NewsRepositoryImpl$24</ID>
+    <ID>MagicNumber:NewsRepositoryImpl.kt$NewsRepositoryImpl$3600</ID>
+    <ID>MagicNumber:NewsRepositoryImpl.kt$NewsRepositoryImpl$7</ID>
+    <ID>MagicNumber:NewsScreen.kt$3</ID>
+    <ID>MagicNumber:NewsScreen.kt$4</ID>
+    <ID>MagicNumber:NewsScreen.kt$60</ID>
+    <ID>MagicNumber:NewsSyncWorker.kt$NewsSyncWorker.Companion$12</ID>
+    <ID>MagicNumber:NewsViewModel.kt$NewsViewModel$5</ID>
+    <ID>MagicNumber:NewsViewModel.kt$NewsViewModel$5000</ID>
+    <ID>MagicNumber:NewsViewModel.kt$NewsViewModel$60</ID>
+    <ID>MagicNumber:OnboardingScreen.kt$200</ID>
+    <ID>MagicNumber:OnboardingScreen.kt$3</ID>
+    <ID>MagicNumber:OnboardingScreen.kt$30</ID>
+    <ID>MagicNumber:OnboardingScreen.kt$4</ID>
+    <ID>MagicNumber:OnboardingScreen.kt$5</ID>
+    <ID>MagicNumber:OnboardingScreen.kt$500</ID>
+    <ID>MagicNumber:OnboardingScreen.kt$6</ID>
+    <ID>MagicNumber:OnboardingScreen.kt$800</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$0.02</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$0.08</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$0.15</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$0.236</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$0.382</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$0.5</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$0.500</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$0.618</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$0.7</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$0.786</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$0.85</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$0.97</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$0.98</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$0.99</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$0.995</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$1.005</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$1.01</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$1.05</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$15</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$1_000_000</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$20</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$200</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$25</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$3</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$30</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$35</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$35.0</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$42.0</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$50</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$50.0</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$60</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$70</ID>
+    <ID>MagicNumber:OptimalEntryCalculator.kt$OptimalEntryCalculator$75</ID>
+    <ID>MagicNumber:PerformanceScreen.kt$24</ID>
+    <ID>MagicNumber:PerformanceScreen.kt$60</ID>
+    <ID>MagicNumber:PortfolioScreen.kt$0.01f</ID>
+    <ID>MagicNumber:PortfolioScreen.kt$0.15f</ID>
+    <ID>MagicNumber:PortfolioScreen.kt$0.3f</ID>
+    <ID>MagicNumber:PortfolioScreen.kt$5</ID>
+    <ID>MagicNumber:PortfolioViewModel.kt$PortfolioViewModel$5000</ID>
+    <ID>MagicNumber:PositionSizeResult.kt$PositionGrade.ACCEPTABLE$0xFFFFB000</ID>
+    <ID>MagicNumber:PositionSizeResult.kt$PositionGrade.EXCELLENT$0xFF00FF41</ID>
+    <ID>MagicNumber:PositionSizeResult.kt$PositionGrade.GOOD$0xFF39FF14</ID>
+    <ID>MagicNumber:PositionSizeResult.kt$PositionGrade.INVALID$0xFFFF3B30</ID>
+    <ID>MagicNumber:PositionSizeResult.kt$PositionGrade.POOR$0xFFFF6600</ID>
+    <ID>MagicNumber:PositionSizeScreen.kt$6</ID>
+    <ID>MagicNumber:PositionSizeViewModel.kt$PositionSizeViewModel$0.1</ID>
+    <ID>MagicNumber:PositionSizeViewModel.kt$PositionSizeViewModel$0.97</ID>
+    <ID>MagicNumber:PositionSizeViewModel.kt$PositionSizeViewModel$1.06</ID>
+    <ID>MagicNumber:PositionSizeViewModel.kt$PositionSizeViewModel$50</ID>
+    <ID>MagicNumber:PredictionAccuracyTracker.kt$PredictionAccuracyTracker$0.5</ID>
+    <ID>MagicNumber:PredictionAccuracyTracker.kt$PredictionAccuracyTracker$3600</ID>
+    <ID>MagicNumber:PredictionAccuracyTracker.kt$PredictionAccuracyTracker$4</ID>
+    <ID>MagicNumber:PredictionCache.kt$PredictionCache$5</ID>
+    <ID>MagicNumber:PredictionCache.kt$PredictionCache$60</ID>
+    <ID>MagicNumber:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$0.1f</ID>
+    <ID>MagicNumber:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$0.4</ID>
+    <ID>MagicNumber:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$0.45</ID>
+    <ID>MagicNumber:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$0.5</ID>
+    <ID>MagicNumber:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$0.5f</ID>
+    <ID>MagicNumber:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$1.0</ID>
+    <ID>MagicNumber:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$1.01</ID>
+    <ID>MagicNumber:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$1.02</ID>
+    <ID>MagicNumber:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$1.05</ID>
+    <ID>MagicNumber:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$1.10</ID>
+    <ID>MagicNumber:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$1.2</ID>
+    <ID>MagicNumber:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$2.0</ID>
+    <ID>MagicNumber:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$24</ID>
+    <ID>MagicNumber:PredictionScreen.kt$0xFF00FF41</ID>
+    <ID>MagicNumber:PredictionScreen.kt$0xFF0A0A0A</ID>
+    <ID>MagicNumber:PredictionScreen.kt$0xFFFF3131</ID>
+    <ID>MagicNumber:PredictionScreen.kt$0xFFFFB000</ID>
+    <ID>MagicNumber:PredictionScreen.kt$12</ID>
+    <ID>MagicNumber:PredictionScreen.kt$15</ID>
+    <ID>MagicNumber:PredictionViewModel.kt$PredictionViewModel$45</ID>
+    <ID>MagicNumber:PredictionViewModel.kt$PredictionViewModel$54</ID>
+    <ID>MagicNumber:PredictionViewModel.kt$PredictionViewModel$55</ID>
+    <ID>MagicNumber:PredictionViewModel.kt$PredictionViewModel$70</ID>
+    <ID>MagicNumber:PreferencesService.kt$PreferencesService$0.5f</ID>
+    <ID>MagicNumber:PreferencesService.kt$PreferencesService$30</ID>
+    <ID>MagicNumber:PricePrediction.kt$PredictionModel.ELLIOTT_WAVE$0.15f</ID>
+    <ID>MagicNumber:PricePrediction.kt$PredictionModel.FOURIER_CYCLES$0.15f</ID>
+    <ID>MagicNumber:PricePrediction.kt$PredictionModel.FRACTAL_ANALYSIS$0.10f</ID>
+    <ID>MagicNumber:PricePrediction.kt$PredictionModel.HURST_EXPONENT$0.15f</ID>
+    <ID>MagicNumber:PricePrediction.kt$PredictionModel.LINEAR_REGRESSION$0.10f</ID>
+    <ID>MagicNumber:PricePrediction.kt$PredictionModel.MONTE_CARLO$0.20f</ID>
+    <ID>MagicNumber:PricePrediction.kt$PredictionModel.WYCKOFF_PHASE$0.15f</ID>
+    <ID>MagicNumber:PriceText.kt$0xFF003300</ID>
+    <ID>MagicNumber:PriceText.kt$0xFF330000</ID>
+    <ID>MagicNumber:PriceText.kt$1</ID>
+    <ID>MagicNumber:PriceText.kt$150</ID>
+    <ID>MagicNumber:PriceText.kt$300</ID>
+    <ID>MagicNumber:PriceText.kt$500</ID>
+    <ID>MagicNumber:PriceText.kt$600</ID>
+    <ID>MagicNumber:PsychologyAnalyzer.kt$PsychologyAnalyzer$1.5</ID>
+    <ID>MagicNumber:PsychologyAnalyzer.kt$PsychologyAnalyzer$1.8</ID>
+    <ID>MagicNumber:PsychologyAnalyzer.kt$PsychologyAnalyzer$15</ID>
+    <ID>MagicNumber:PsychologyAnalyzer.kt$PsychologyAnalyzer$20</ID>
+    <ID>MagicNumber:PsychologyAnalyzer.kt$PsychologyAnalyzer$24</ID>
+    <ID>MagicNumber:PsychologyAnalyzer.kt$PsychologyAnalyzer$3</ID>
+    <ID>MagicNumber:PsychologyAnalyzer.kt$PsychologyAnalyzer$30</ID>
+    <ID>MagicNumber:PsychologyAnalyzer.kt$PsychologyAnalyzer$5</ID>
+    <ID>MagicNumber:PsychologyAnalyzer.kt$PsychologyAnalyzer$60</ID>
+    <ID>MagicNumber:PsychologyAnalyzer.kt$PsychologyAnalyzer$60000</ID>
+    <ID>MagicNumber:PsychologyAnalyzer.kt$PsychologyAnalyzer$60L</ID>
+    <ID>MagicNumber:PsychologyAnalyzer.kt$PsychologyAnalyzer$8</ID>
+    <ID>MagicNumber:PsychologyScreen.kt$40</ID>
+    <ID>MagicNumber:PsychologyScreen.kt$70</ID>
+    <ID>MagicNumber:RateLimitInterceptor.kt$RateLimitInterceptor$20</ID>
+    <ID>MagicNumber:RateLimitInterceptor.kt$RateLimitInterceptor$30</ID>
+    <ID>MagicNumber:RateLimitInterceptor.kt$RateLimitInterceptor$429</ID>
+    <ID>MagicNumber:RateLimitInterceptor.kt$RateLimitInterceptor$5</ID>
+    <ID>MagicNumber:RateLimitInterceptor.kt$RateLimitInterceptor$60_000L</ID>
+    <ID>MagicNumber:RemoteConfigService.kt$RemoteConfigService$3600</ID>
+    <ID>MagicNumber:RetryInterceptor.kt$RetryInterceptor$30_000L</ID>
+    <ID>MagicNumber:RetryInterceptor.kt$RetryInterceptor$429</ID>
+    <ID>MagicNumber:RetryInterceptor.kt$RetryInterceptor$500</ID>
+    <ID>MagicNumber:RetryInterceptor.kt$RetryInterceptor$599</ID>
+    <ID>MagicNumber:ReviewService.kt$ReviewService$30</ID>
+    <ID>MagicNumber:ReviewService.kt$ReviewService$7</ID>
+    <ID>MagicNumber:ReviewService.kt$ReviewService$86_400_000</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$0.02</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$0.05</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$0.05f</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$0.10</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$0.10f</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$0.15f</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$0.20f</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$0.5</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$0.6</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$0.7</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$0.8</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$1.5</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$10</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$15</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$20</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$25</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$3</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$3.0</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$30</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$35</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$40</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$40.0</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$45</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$5</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$5.0</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$50</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$55</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$60</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$60.0</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$65</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$70</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$75</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$80</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$85</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$90</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine$95</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine.RiskLevel.EXTREME$0xFFFF3B30</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine.RiskLevel.HIGH$0xFFFF6600</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine.RiskLevel.LOW$0xFF39FF14</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine.RiskLevel.MODERATE$0xFFFFB000</ID>
+    <ID>MagicNumber:RiskScoreEngine.kt$RiskScoreEngine.RiskLevel.VERY_LOW$0xFF00FF41</ID>
+    <ID>MagicNumber:RiskScoreScreen.kt$0xFF00FF41</ID>
+    <ID>MagicNumber:RiskScoreScreen.kt$0xFFFF3B30</ID>
+    <ID>MagicNumber:RiskScoreScreen.kt$0xFFFFB000</ID>
+    <ID>MagicNumber:RiskScoreScreen.kt$16</ID>
+    <ID>MagicNumber:RiskScoreScreen.kt$3</ID>
+    <ID>MagicNumber:RiskScoreScreen.kt$40</ID>
+    <ID>MagicNumber:RiskScoreScreen.kt$70</ID>
+    <ID>MagicNumber:RiskViewModel.kt$RiskViewModel$14</ID>
+    <ID>MagicNumber:RiskViewModel.kt$RiskViewModel$30</ID>
+    <ID>MagicNumber:RiskViewModel.kt$RiskViewModel$50</ID>
+    <ID>MagicNumber:RiskViewModel.kt$RiskViewModel$50.0</ID>
+    <ID>MagicNumber:RssNewsParser.kt$RssNewsParser$25</ID>
+    <ID>MagicNumber:RssNewsParser.kt$RssNewsParser$300L</ID>
+    <ID>MagicNumber:RunDeepAnalysisUseCase.kt$RunDeepAnalysisUseCase$0.42f</ID>
+    <ID>MagicNumber:RunDeepAnalysisUseCase.kt$RunDeepAnalysisUseCase$0.65</ID>
+    <ID>MagicNumber:RunDeepAnalysisUseCase.kt$RunDeepAnalysisUseCase$0.96f</ID>
+    <ID>MagicNumber:RunDeepAnalysisUseCase.kt$RunDeepAnalysisUseCase$200</ID>
+    <ID>MagicNumber:RunDeepAnalysisUseCase.kt$RunDeepAnalysisUseCase$35</ID>
+    <ID>MagicNumber:RunDeepAnalysisUseCase.kt$RunDeepAnalysisUseCase$50</ID>
+    <ID>MagicNumber:RunDeepAnalysisUseCase.kt$RunDeepAnalysisUseCase$65</ID>
+    <ID>MagicNumber:ScreensaverCycleService.kt$ScreensaverCycleService$4</ID>
+    <ID>MagicNumber:ScreensaverCycleService.kt$ScreensaverCycleService$60</ID>
+    <ID>MagicNumber:SentimentAnalyzer.kt$SentimentAnalyzer$1.5f</ID>
+    <ID>MagicNumber:SentimentAnalyzer.kt$SentimentAnalyzer$15</ID>
+    <ID>MagicNumber:SentimentAnalyzer.kt$SentimentAnalyzer$20</ID>
+    <ID>MagicNumber:SentimentAnalyzer.kt$SentimentAnalyzer$3</ID>
+    <ID>MagicNumber:SentimentAnalyzer.kt$SentimentAnalyzer$30</ID>
+    <ID>MagicNumber:SentimentAnalyzer.kt$SentimentAnalyzer$4</ID>
+    <ID>MagicNumber:SentimentAnalyzer.kt$SentimentAnalyzer$40</ID>
+    <ID>MagicNumber:SentimentAnalyzer.kt$SentimentAnalyzer$45</ID>
+    <ID>MagicNumber:SentimentAnalyzer.kt$SentimentAnalyzer$5</ID>
+    <ID>MagicNumber:SentimentAnalyzer.kt$SentimentAnalyzer$50f</ID>
+    <ID>MagicNumber:SentimentAnalyzer.kt$SentimentAnalyzer$55</ID>
+    <ID>MagicNumber:SentimentAnalyzer.kt$SentimentAnalyzer$60</ID>
+    <ID>MagicNumber:SentimentAnalyzer.kt$SentimentAnalyzer$70</ID>
+    <ID>MagicNumber:SentimentAnalyzer.kt$SentimentAnalyzer$85</ID>
+    <ID>MagicNumber:SentimentBadge.kt$30</ID>
+    <ID>MagicNumber:SentimentBadge.kt$45</ID>
+    <ID>MagicNumber:SentimentBadge.kt$55</ID>
+    <ID>MagicNumber:SentimentBadge.kt$70</ID>
+    <ID>MagicNumber:SettingsScreen.kt$30</ID>
+    <ID>MagicNumber:SettingsScreen.kt$5</ID>
+    <ID>MagicNumber:SettingsViewModel.kt$SettingsViewModel$0.5f</ID>
+    <ID>MagicNumber:SettingsViewModel.kt$SettingsViewModel$30</ID>
+    <ID>MagicNumber:SettingsViewModel.kt$SettingsViewModel$5</ID>
+    <ID>MagicNumber:SettingsViewModel.kt$SettingsViewModel$5000</ID>
+    <ID>MagicNumber:SignalComposerScreen.kt$30.0</ID>
+    <ID>MagicNumber:SignalEvaluationEngine.kt$SignalEvaluationEngine$50.0</ID>
+    <ID>MagicNumber:SignalsScreen.kt$5</ID>
+    <ID>MagicNumber:SignalsViewModel.kt$SignalsViewModel$14</ID>
+    <ID>MagicNumber:SignalsViewModel.kt$SignalsViewModel$2500L</ID>
+    <ID>MagicNumber:SignalsViewModel.kt$SignalsViewModel$30</ID>
+    <ID>MagicNumber:SignalsViewModel.kt$SignalsViewModel$50</ID>
+    <ID>MagicNumber:SignalsViewModel.kt$SignalsViewModel$70</ID>
+    <ID>MagicNumber:SkeletonsAll.kt$0.5f</ID>
+    <ID>MagicNumber:SkeletonsAll.kt$1200</ID>
+    <ID>MagicNumber:SkeletonsAll.kt$3</ID>
+    <ID>MagicNumber:SkeletonsAll.kt$4</ID>
+    <ID>MagicNumber:SkeletonsAll.kt$5</ID>
+    <ID>MagicNumber:SkeletonsAll.kt$7</ID>
+    <ID>MagicNumber:SkeletonsAll.kt$8</ID>
+    <ID>MagicNumber:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$0.05</ID>
+    <ID>MagicNumber:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$0.236</ID>
+    <ID>MagicNumber:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$0.382</ID>
+    <ID>MagicNumber:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$0.5</ID>
+    <ID>MagicNumber:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$0.618</ID>
+    <ID>MagicNumber:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$0.786</ID>
+    <ID>MagicNumber:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$12</ID>
+    <ID>MagicNumber:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$15</ID>
+    <ID>MagicNumber:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$25</ID>
+    <ID>MagicNumber:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$26</ID>
+    <ID>MagicNumber:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$3</ID>
+    <ID>MagicNumber:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$30</ID>
+    <ID>MagicNumber:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$40</ID>
+    <ID>MagicNumber:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$50</ID>
+    <ID>MagicNumber:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$60</ID>
+    <ID>MagicNumber:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$70</ID>
+    <ID>MagicNumber:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$75</ID>
+    <ID>MagicNumber:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$80</ID>
+    <ID>MagicNumber:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$85</ID>
+    <ID>MagicNumber:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$9</ID>
+    <ID>MagicNumber:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$90</ID>
+    <ID>MagicNumber:TechnicalIndicator.kt$VolumeIndicator$0.8</ID>
+    <ID>MagicNumber:TechnicalIndicator.kt$VolumeIndicator$1.2</ID>
+    <ID>MagicNumber:TechnicalIndicator.kt$VolumeIndicator$1.5</ID>
+    <ID>MagicNumber:TerminalAudioManager.kt$TerminalAudioManager$0.5f</ID>
+    <ID>MagicNumber:TerminalAudioService.kt$TerminalAudioService$0.5f</ID>
+    <ID>MagicNumber:TerminalAudioService.kt$TerminalAudioService$5</ID>
+    <ID>MagicNumber:TerminalCommandBar.kt$1</ID>
+    <ID>MagicNumber:TerminalCommandBar.kt$200</ID>
+    <ID>MagicNumber:TerminalCommandBar.kt$2000</ID>
+    <ID>MagicNumber:TerminalCommandBar.kt$3000</ID>
+    <ID>MagicNumber:TerminalComponents.kt$0.45f</ID>
+    <ID>MagicNumber:TerminalComponents.kt$0.8f</ID>
+    <ID>MagicNumber:TerminalComponents.kt$0xFF0A0A0A</ID>
+    <ID>MagicNumber:TerminalComponents.kt$0xFFFF3B30</ID>
+    <ID>MagicNumber:TerminalComponents.kt$0xFFFF8A80</ID>
+    <ID>MagicNumber:TerminalFormatter.kt$TerminalFormatter$12</ID>
+    <ID>MagicNumber:TerminalFormatter.kt$TerminalFormatter$1_000_000</ID>
+    <ID>MagicNumber:TerminalFormatter.kt$TerminalFormatter$1_000_000_000</ID>
+    <ID>MagicNumber:TerminalFormatter.kt$TerminalFormatter$1_000_000_000_000</ID>
+    <ID>MagicNumber:TerminalFormatter.kt$TerminalFormatter$4</ID>
+    <ID>MagicNumber:TerminalFormatter.kt$TerminalFormatter$6</ID>
+    <ID>MagicNumber:TerminalHelpDialog.kt$14</ID>
+    <ID>MagicNumber:TerminalTtsService.kt$TerminalTtsService$0.8f</ID>
+    <ID>MagicNumber:TerminalTtsService.kt$TerminalTtsService$0.9f</ID>
+    <ID>MagicNumber:Theme.kt$0xFF000000</ID>
+    <ID>MagicNumber:Theme.kt$0xFF003B00</ID>
+    <ID>MagicNumber:Theme.kt$0xFF008F11</ID>
+    <ID>MagicNumber:Theme.kt$0xFF00FF41</ID>
+    <ID>MagicNumber:Theme.kt$0xFF050505</ID>
+    <ID>MagicNumber:Theme.kt$0xFF222222</ID>
+    <ID>MagicNumber:Theme.kt$0xFF332200</ID>
+    <ID>MagicNumber:Theme.kt$0xFF333333</ID>
+    <ID>MagicNumber:Theme.kt$0xFF666666</ID>
+    <ID>MagicNumber:Theme.kt$0xFF996600</ID>
+    <ID>MagicNumber:Theme.kt$0xFFCCCCCC</ID>
+    <ID>MagicNumber:Theme.kt$0xFFFF3B30</ID>
+    <ID>MagicNumber:Theme.kt$0xFFFFB000</ID>
+    <ID>MagicNumber:Theme.kt$0xFFFFFFFF</ID>
+    <ID>MagicNumber:TickerTape.kt$0.8f</ID>
+    <ID>MagicNumber:TickerTape.kt$0xFF00FF41</ID>
+    <ID>MagicNumber:TickerTape.kt$0xFF0A0A0A</ID>
+    <ID>MagicNumber:TickerTape.kt$0xFFFF3B30</ID>
+    <ID>MagicNumber:TickerTape.kt$16</ID>
+    <ID>MagicNumber:TickerTape.kt$3f</ID>
+    <ID>MagicNumber:TradeJournalScreen.kt$0xFF00FF41</ID>
+    <ID>MagicNumber:TradeJournalScreen.kt$0xFF111111</ID>
+    <ID>MagicNumber:TradeJournalScreen.kt$0xFFFF3B30</ID>
+    <ID>MagicNumber:TradeJournalScreen.kt$14</ID>
+    <ID>MagicNumber:TradeJournalScreen.kt$20</ID>
+    <ID>MagicNumber:TradeJournalScreen.kt$30</ID>
+    <ID>MagicNumber:TradePlannerEngine.kt$TradePlannerEngine$0.03</ID>
+    <ID>MagicNumber:TradePlannerEngine.kt$TradePlannerEngine$0.05</ID>
+    <ID>MagicNumber:TradePlannerEngine.kt$TradePlannerEngine$0.10</ID>
+    <ID>MagicNumber:TradePlannerEngine.kt$TradePlannerEngine$15</ID>
+    <ID>MagicNumber:TradePlannerEngine.kt$TradePlannerEngine$4</ID>
+    <ID>MagicNumber:TradePlannerEngine.kt$TradePlannerEngine$40</ID>
+    <ID>MagicNumber:TradePlannerEngine.kt$TradePlannerEngine$50</ID>
+    <ID>MagicNumber:TradePlannerEngine.kt$TradePlannerEngine$6</ID>
+    <ID>MagicNumber:TradePlannerEngine.kt$TradePlannerEngine$65</ID>
+    <ID>MagicNumber:TradePlannerEngine.kt$TradePlannerEngine$70</ID>
+    <ID>MagicNumber:TradePlannerEngine.kt$TradePlannerEngine$8</ID>
+    <ID>MagicNumber:TradePlannerEngine.kt$TradePlannerEngine$85</ID>
+    <ID>MagicNumber:VideoPromptBuilder.kt$VideoPromptBuilder$40</ID>
+    <ID>MagicNumber:VideoPromptBuilder.kt$VideoPromptBuilder$54</ID>
+    <ID>MagicNumber:VideoPromptBuilder.kt$VideoPromptBuilder$55</ID>
+    <ID>MagicNumber:VideoPromptBuilder.kt$VideoPromptBuilder$75</ID>
+    <ID>MagicNumber:WhaleNarratorPromptBuilder.kt$WhaleNarratorPromptBuilder$4</ID>
+    <ID>MagicNumber:WhaleNarratorPromptBuilder.kt$WhaleNarratorPromptBuilder$6</ID>
+    <ID>MagicNumber:WhaleViewModel.kt$WhaleViewModel$5000</ID>
+    <ID>MagicNumber:WyckoffPhaseDetector.kt$WyckoffPhaseDetector$0.985</ID>
+    <ID>MagicNumber:WyckoffPhaseDetector.kt$WyckoffPhaseDetector$1.015</ID>
+    <ID>MagicNumber:WyckoffPhaseDetector.kt$WyckoffPhaseDetector$1.1</ID>
+    <ID>MagicNumber:WyckoffPhaseDetector.kt$WyckoffPhaseDetector$20</ID>
+    <ID>MagicNumber:WyckoffPhaseDetector.kt$WyckoffPhaseDetector$3</ID>
+    <ID>MagicNumber:WyckoffPhaseDetector.kt$WyckoffPhaseDetector$40</ID>
+    <ID>MatchingDeclarationName:Alertengine.kt$AlertEngine</ID>
+    <ID>MatchingDeclarationName:MatrixRainScreen.kt$RainColumn</ID>
+    <ID>MaxLineLength:AICoachScreen.kt$Text("COACH IS THINKING...", color = colors.primary, fontFamily = FontFamily.Monospace, fontSize = 12.sp)</ID>
+    <ID>MaxLineLength:AICoachViewModel.kt$AICoachViewModel$_messages.add(ChatMessage("COACH", "GREETINGS TRADER. I AM YOUR AI COACH. HOW CAN I ASSIST YOUR TERMINAL OPERATIONS TODAY?"))</ID>
+    <ID>MaxLineLength:AchievementEngine.kt$AchievementEngine$Achievement("admin", "BIG BOSS", "Enter admin mode for the first time.", "🕴️", null, AchievementCondition.ADMIN_MODE)</ID>
+    <ID>MaxLineLength:AchievementEngine.kt$AchievementEngine$Achievement("first_alert", "FIRST SIGNAL", "Set your first price alert.", "🔔", null, AchievementCondition.FIRST_ALERT)</ID>
+    <ID>MaxLineLength:AchievementEngine.kt$AchievementEngine$Achievement("predict_10", "PROPHET", "Make 10 price predictions.", "🔮", null, AchievementCondition.PREDICTIONS_COUNT)</ID>
+    <ID>MaxLineLength:AdminPasswordDialog.kt$Text("ACCESS_DENIED: INVALID_KEY", color = colors.danger, fontSize = 10.sp, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:AdminPasswordDialog.kt$Text("ENTER MASTER ACCESS KEY:", color = colors.dimText, fontSize = 12.sp, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:AlertsViewModel.kt$AlertsViewModel$val compositeAlerts: StateFlow&lt;List&lt;com.cryptodept.domain.model.CompositeAlert&gt;&gt; = _compositeAlerts.asStateFlow()</ID>
+    <ID>MaxLineLength:AnalysisScreen.kt$/* if (state is AnalysisUiState.Success) { IconButton(onClick = { val text = viewModel.generateShareText(state as AnalysisUiState.Success) shareAnalysis(context, text) }) { Icon(imageVector = Icons.Default.Share, contentDescription = "Share", tint = colors.primary, modifier = Modifier.size(20.dp)) } if (isAdmin) { IconButton(onClick = { viewModel.generateAIReport(state as AnalysisUiState.Success) }) { Text("POST", color = colors.primary, fontWeight = FontWeight.Bold, fontSize = 10.sp) } IconButton(onClick = { viewModel.generateVideoTeaser(state as AnalysisUiState.Success) }) { Text("VIDEO", color = colors.primary, fontWeight = FontWeight.Bold, fontSize = 10.sp) } } } */</ID>
+    <ID>MaxLineLength:AnalysisScreen.kt$Row</ID>
+    <ID>MaxLineLength:AnalysisScreen.kt$Text("$${String.format(Locale.US, "%.2f", price)}", color = colors.amber, fontFamily = FontFamily.Monospace, fontSize = 12.sp)</ID>
+    <ID>MaxLineLength:AnalysisScreen.kt$Text("&gt;&gt;&gt; MARKET_SENTIMENT (REDDIT/CRYPTO_PANIC)", color = colors.dimText, fontSize = 12.sp, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:AnalysisScreen.kt$confirmButton = { TextButton(onClick = { predictionViewModel.reset() }) { Text("DISMISS", color = colors.primary) } }</ID>
+    <ID>MaxLineLength:BacktesterScreen.kt$"$${String.format(Locale.US, "%,.2f", trade.entryPrice)} → $${String.format(Locale.US, "%,.2f", trade.exitPrice)}"</ID>
+    <ID>MaxLineLength:BacktesterScreen.kt$MetricCard(label = "WIN RATE", value = "${String.format(Locale.US, "%.1f", result.winRate)}%", modifier = Modifier.weight(1f))</ID>
+    <ID>MaxLineLength:BacktesterScreen.kt$ParameterSlider(label = "RSI ENTRY THRESHOLD", value = rsiEntry, range = 10f..50f, onValueChange = onRsiEntryChange)</ID>
+    <ID>MaxLineLength:BacktesterScreen.kt$ParameterSlider(label = "RSI EXIT THRESHOLD", value = rsiExit, range = 50f..90f, onValueChange = onRsiExitChange)</ID>
+    <ID>MaxLineLength:BacktesterScreen.kt$ParameterSlider(label = "TAKE PROFIT %", value = takeProfit, range = 2f..50f, onValueChange = onTakeProfitChange)</ID>
+    <ID>MaxLineLength:BacktesterScreen.kt$Text("&gt;&gt;&gt; EQUITY CURVE (PORTFOLIO VALUE)", color = colors.dimText, fontSize = 10.sp, fontWeight = FontWeight.Bold)</ID>
+    <ID>MaxLineLength:BacktesterScreen.kt$Text("═══════ SIMULATION RESULTS ═══════", color = colors.grid, modifier = Modifier.align(Alignment.CenterHorizontally))</ID>
+    <ID>MaxLineLength:BacktesterScreen.kt$Text(String.format(Locale.US, "%.1f", value), color = colors.primary, fontSize = 10.sp, fontWeight = FontWeight.Bold)</ID>
+    <ID>MaxLineLength:BacktesterScreen.kt$Text(value, color = colors.textPrimary, fontSize = 14.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:BinanceWebSocketService.kt$BinanceWebSocketService$private val STREAM_URL = "wss://stream.binance.com:9443/stream?streams=btcusdt@ticker/ethusdt@ticker/xrpusdt@ticker"</ID>
+    <ID>MaxLineLength:BloombergWallScreen.kt$"$s ${String.format(Locale.US, "%.2f", p)} $arrow${String.format(Locale.US, "%.1f", kotlin.math.abs(c))}%"</ID>
+    <ID>MaxLineLength:BloombergWallScreen.kt$remember { mutableStateListOf&lt;Float&gt;().apply { repeat(columns) { add((0..(rowHeightPx.toInt() * 20)).random().toFloat()) } } }</ID>
+    <ID>MaxLineLength:CalculatePerformanceUseCase.kt$CalculatePerformanceUseCase$val avgLoss = if (losingTrades.isNotEmpty()) losingTrades.map { abs(it.pnlUsd ?: 0.0) }.average() else 0.0</ID>
+    <ID>MaxLineLength:CalculatePositionSizeUseCaseTest.kt$CalculatePositionSizeUseCaseTest$assertTrue("Position should be reduced 50% at risk 80", result.riskAdjustedSize &lt;= result.positionSizeUsd * 0.51)</ID>
+    <ID>MaxLineLength:CalendarScreen.kt$Text("&gt;&gt;&gt; NO UPCOMING EVENTS FOUND", color = Color.Gray, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)</ID>
+    <ID>MaxLineLength:CoinDao.kt$CoinDao$"UPDATE coins SET currentPrice = :newPrice, sourcesCount = :sourcesCount, maxDeviation = :deviation, lastUpdated = :timestamp WHERE id = :id"</ID>
+    <ID>MaxLineLength:CoinDetailScreen.kt$Text("CLOSE", color = TextGray, fontSize = 10.sp, modifier = Modifier.weight(1f), fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:CoinDetailScreen.kt$Text("DATE", color = TextGray, fontSize = 10.sp, modifier = Modifier.weight(1.2f), fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:CoinDetailScreen.kt$Text("EXCHANGE", color = TextGray, fontSize = 10.sp, modifier = Modifier.weight(1.5f), fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:CoinDetailScreen.kt$Text("OPEN", color = TextGray, fontSize = 10.sp, modifier = Modifier.weight(1f), fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:CoinDetailScreen.kt$Text("PAIR", color = TextGray, fontSize = 10.sp, modifier = Modifier.weight(1f), fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:CoinDetailScreen.kt$Text("PRICE", color = TextGray, fontSize = 10.sp, modifier = Modifier.weight(1f), fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:CoinDetailScreen.kt$Text("[ SPARKLINE_DATA_ACTIVE ]", color = WallStreetGreen, fontSize = 12.sp, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:CoinDetailScreen.kt$Text(date, color = WallStreetAmber, fontSize = 11.sp, modifier = Modifier.weight(1.2f), fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:CoinDetailScreen.kt$Text(text = value, color = valueColor, fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)</ID>
+    <ID>MaxLineLength:ComparisonScreen.kt$Text("30D_PEARSON_CORRELATION", color = colors.amber, fontSize = 10.sp, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:CompositeAlertBuilderScreen.kt$Text("DEPLOY ALERT DAEMON", color = Color.Black, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:CompositeAlertBuilderScreen.kt$Text(text = "IF ${type.name}", color = colors.amber, fontSize = 12.sp, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:CompositeAlertBuilderScreen.kt$logicOperator = if (logicOperator == AlertLogicOperator.AND) AlertLogicOperator.OR else AlertLogicOperator.AND</ID>
+    <ID>MaxLineLength:CompositeAlertBuilderScreen.kt$operator = if (operator == AlertDirection.ABOVE) AlertDirection.BELOW else AlertDirection.ABOVE</ID>
+    <ID>MaxLineLength:ContentStudioScreen.kt$Text(audience.label, color = if (selectedAudience == audience) colors.primary else colors.textPrimary, fontSize = 14.sp)</ID>
+    <ID>MaxLineLength:ContentStudioScreen.kt$Text(template.label, color = if (selectedTemplate == template) colors.primary else colors.textPrimary, fontSize = 14.sp)</ID>
+    <ID>MaxLineLength:ContentStudioScreen.kt$colors = RadioButtonDefaults.colors(selectedColor = colors.primary, unselectedColor = colors.dimText)</ID>
+    <ID>MaxLineLength:ContentStudioViewModel.kt$ContentStudioViewModel$health = params["health"] as? NetworkHealth ?: NetworkHealth("N/A", "N/A", "N/A", 50, "Neutral")</ID>
+    <ID>MaxLineLength:CorrelationScreen.kt$android.graphics.Typeface.create(android.graphics.Typeface.MONOSPACE, android.graphics.Typeface.BOLD)</ID>
+    <ID>MaxLineLength:CorrelationScreen.kt$color = (if (kotlin.math.abs(correlation) &gt; 0.6) Color.Black else colors.primary).toArgb()</ID>
+    <ID>MaxLineLength:CryptoDeptWidget.kt$CryptoDeptWidget$.</ID>
+    <ID>MaxLineLength:CryptoDeptWidget.kt$CryptoDeptWidget$Text(text = coin.symbol.uppercase(), style = TextStyle(color = ColorProvider(Color.White), fontSize = 11.sp))</ID>
+    <ID>MaxLineLength:CryptoDeptWidget.kt$CryptoDeptWidget$Text(text = coin.symbol.uppercase(), style = TextStyle(color = ColorProvider(colors.amber), fontSize = 10.sp))</ID>
+    <ID>MaxLineLength:CryptoDeptWidget.kt$CryptoDeptWidget$modifier = GlanceModifier.clickable(actionStartActivity&lt;MainActivity&gt;())</ID>
+    <ID>MaxLineLength:CryptoDeptWidget.kt$CryptoDeptWidget$style = TextStyle(color = ColorProvider(Color(0xFFFFB000)), fontSize = 12.sp, fontWeight = FontWeight.Bold)</ID>
+    <ID>MaxLineLength:CryptoDeptWidget.kt$CryptoDeptWidget$style = TextStyle(color = ColorProvider(Color.White), fontSize = 16.sp, fontWeight = FontWeight.Bold)</ID>
+    <ID>MaxLineLength:CryptoDeptWidget.kt$CryptoDeptWidget$style = TextStyle(color = ColorProvider(colors.amber), fontSize = 8.sp, fontWeight = FontWeight.Bold)</ID>
+    <ID>MaxLineLength:CryptoRepositoryImpl.kt$CryptoRepositoryImpl$if (System.currentTimeMillis() - lastFetchTime &lt; RATE_LIMIT_MS) return@coroutineScope CryptoResult.Success(Unit)</ID>
+    <ID>MaxLineLength:CryptoRepositoryImpl.kt$CryptoRepositoryImpl$override fun getAllCoinPrices(): Flow&lt;List&lt;CoinPrice&gt;&gt;</ID>
+    <ID>MaxLineLength:CryptoRepositoryImpl.kt$CryptoRepositoryImpl$override fun getCoinPrice(coinId: String): Flow&lt;CoinPrice?&gt;</ID>
+    <ID>MaxLineLength:CryptoRepositoryImpl.kt$CryptoRepositoryImpl$override fun getTrackedCoinPrices(): Flow&lt;List&lt;CoinPrice&gt;&gt;</ID>
+    <ID>MaxLineLength:CryptoRepositoryImpl.kt$CryptoRepositoryImpl$override suspend fun getCachedChange24h(coinId: String): Double</ID>
+    <ID>MaxLineLength:DailyBriefingGenerator.kt$DailyBriefingGenerator$"Funding at ${String.format(Locale.ENGLISH, "%.4f", fundingRate)}% — Market severely overlevered. High crash risk."</ID>
+    <ID>MaxLineLength:DailyBriefingGenerator.kt$DailyBriefingGenerator$return "BTC trading at $priceStr ($changeStr 24h), $sentiment with $fgStr (F&amp;G: $fg). Risk Score: ${risk.overall}/100."</ID>
+    <ID>MaxLineLength:DailyBriefingScreen.kt$colors = ButtonDefaults.buttonColors(containerColor = WallStreetGreen, contentColor = Color.Black)</ID>
+    <ID>MaxLineLength:DailyBriefingWorker.kt$DailyBriefingWorker$"${briefing.marketSentence}\n\nRISK: ${briefing.riskScore.level.label}\n${briefing.tradingSuggestion}"</ID>
+    <ID>MaxLineLength:DailyRecapPromptBuilder.kt$DailyRecapPromptBuilder$val topMoversStr = topMovers.take(5).joinToString { "${it.symbol} (${String.format(Locale.US, "%.1f", it.change24h)}%)" }</ID>
+    <ID>MaxLineLength:DashboardScreen.kt$Text("Recommendation: $adviceAction", color = colors.textPrimary, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:DashboardScreen.kt$Text(value, color = colors.primary, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)</ID>
+    <ID>MaxLineLength:DashboardScreen.kt$title = { Text("ACTION RECOMMENDATION", color = colors.primary, fontFamily = FontFamily.Monospace) }</ID>
+    <ID>MaxLineLength:DashboardScreen.kt$val currentPrices = if (uiState is DashboardUiState.Success) (uiState as DashboardUiState.Success).prices else emptyList()</ID>
+    <ID>MaxLineLength:DatabaseModule.kt$DatabaseModule.&lt;no name provided&gt;$db.execSQL("CREATE INDEX IF NOT EXISTS index_price_history_coinId_timestamp ON price_history (coinId, timestamp)")</ID>
+    <ID>MaxLineLength:DeFiScreen.kt$Text("CHAIN: ${yield.chain}", color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:DeFiScreen.kt$Text("TOP_PROTOCOLS", modifier = Modifier.padding(8.dp), fontSize = 10.sp, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:DeFiScreen.kt$Text("YIELD_OPPORTUNITIES", modifier = Modifier.padding(8.dp), fontSize = 10.sp, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:DeFiScreen.kt$Text(protocol.category.uppercase(), color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:DeFiScreen.kt$text = "24H: ${if (protocol.tvlChange1d &gt;= 0) "+" else ""}${String.format(Locale.US, "%.2f", protocol.tvlChange1d)}%"</ID>
+    <ID>MaxLineLength:DeepAnalysisComponents.kt$Direction.SIDEWAYS -&gt; "Consolidation phase. Market is searching for clear direction amidst high disagreement."</ID>
+    <ID>MaxLineLength:DeepAnalysisComponents.kt$Direction.STRONG_UP -&gt; "System detects high-probability breakout. Momentum indicators are synchronized for upward movement."</ID>
+    <ID>MaxLineLength:DeepAnalysisComponents.kt$Text("&gt;&gt;&gt; OVERALL_MARKET_SENTIMENT", color = color.copy(0.6f), fontSize = 10.sp, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:DeepAnalysisComponents.kt$Text("ENSEMBLE_WEIGHT: ${vote.weight}", color = Color.Gray, fontSize = 11.sp, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:DeepAnalysisComponents.kt$Text("PERIOD", color = Color.Gray, fontSize = 10.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.weight(1f))</ID>
+    <ID>MaxLineLength:DeepAnalysisComponents.kt$Text("RSI", color = Color.Gray, fontSize = 10.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.weight(1f))</ID>
+    <ID>MaxLineLength:DeepAnalysisComponents.kt$Text("TREND", color = Color.Gray, fontSize = 10.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.weight(1.5f))</ID>
+    <ID>MaxLineLength:DeepAnalysisComponents.kt$Text(text = direction.name, color = color, fontSize = 26.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:DeepAnalysisComponents.kt$Text(tf.timeframe, color = Color.White, fontSize = 12.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.weight(1f))</ID>
+    <ID>MaxLineLength:DeepAnalysisResultScreen.kt$Text(message, color = Color.Black, fontSize = 12.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:DeepAnalysisUtils.kt$return "cinematic close up, futuristic terminal screen showing $sentiment data for ${prediction.coinId}, $mood, blade runner aesthetic, high detail, 8k"</ID>
+    <ID>MaxLineLength:DeepAnalysisUtils.kt$val mood = if (sentiment.contains("up")) "cyberpunk neon green bull market city" else "dark neon red rainy back alley market"</ID>
+    <ID>MaxLineLength:DerivativesRepositoryImpl.kt$DerivativesRepositoryImpl$dominantSide = if ((summary?.data?.longVolUsd ?: 0.0) &gt; (summary?.data?.shortVolUsd ?: 0.0)) "LONGS" else "SHORTS"</ID>
+    <ID>MaxLineLength:DerivativesScreen.kt$"EXPLANATION: Forced closing of leveraged positions. High liquidations often mark local bottoms (Longs) or tops (Shorts)."</ID>
+    <ID>MaxLineLength:DerivativesScreen.kt$"EXPLANATION: Periodic payments between longs and shorts. Positive = Longs pay Shorts (Bullish sentiment). Negative = Shorts pay Longs (Bearish sentiment)."</ID>
+    <ID>MaxLineLength:DerivativesScreen.kt$"EXPLANATION: Total number of outstanding derivative contracts. Rising OI with Rising Price = Strong Bullish Trend. Falling OI = Trend exhaustion."</ID>
+    <ID>MaxLineLength:DerivativesScreen.kt$Text("+0.1%", color = Color.Gray, fontSize = 10.sp, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)</ID>
+    <ID>MaxLineLength:DerivativesScreen.kt$Text("-0.1%", color = Color.Gray, fontSize = 10.sp, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)</ID>
+    <ID>MaxLineLength:DerivativesScreen.kt$Text("LIQUIDATION DATA UNAVAILABLE", color = Color.Gray, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)</ID>
+    <ID>MaxLineLength:DerivativesScreen.kt$color = if (level.longLiquidationUsd &gt; level.shortLiquidationUsd) Color(0xFFFF3B30) else Color(0xFF00FF41)</ID>
+    <ID>MaxLineLength:EntryAnalyzerScreen.kt$colors = ButtonDefaults.buttonColors(containerColor = colors.primary, contentColor = colors.background)</ID>
+    <ID>MaxLineLength:EntryAnalyzerScreen.kt$text = "$${String.format(Locale.US, "%,.2f", zone.priceFrom)} - $${String.format(Locale.US, "%,.2f", zone.priceTo)}"</ID>
+    <ID>MaxLineLength:EntryAnalyzerViewModel.kt$EntryAnalyzerViewModel$AnalysisComponent("MOMENTUM", (rsi / 100).toFloat(), if (rsi &lt; 40) "OVERSOLD ✓" else "NEUTRAL")</ID>
+    <ID>MaxLineLength:FearGreedScreen.kt$Text(item.value, color = WallStreetGreen, fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)</ID>
+    <ID>MaxLineLength:FearGreedScreen.kt$Text(item.valueClassification, color = getSentimentColor(item.value.toInt()), fontSize = 12.sp, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:FirebaseAnalyticsInterceptor.kt$FirebaseAnalyticsInterceptor$analyticsService.log("Network error: ${request.url.toString().substringBefore("?")} - Code: ${response.code}")</ID>
+    <ID>MaxLineLength:GeminiCoachService.kt$GeminiCoachService$override suspend fun sendMessage(prompt: String): Flow&lt;String&gt;</ID>
+    <ID>MaxLineLength:GetNetworkHealthUseCase.kt$GetNetworkHealthUseCase$runCatching { etherscanApi.getGasOracle(apiKey = BuildConfig.ETHERSCAN_API_KEY) }.getOrNull()</ID>
+    <ID>MaxLineLength:GlobalMarketBar.kt$Text(text = value, color = colors.amber, fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)</ID>
+    <ID>MaxLineLength:HeliusWhaleClient.kt$HeliusWhaleClient$val largeNative = dto.nativeTransfers?.filter { it.amount &gt; 1_000_000_000_000L } // &gt; 1000 SOL (SOL has 9 decimals)</ID>
+    <ID>MaxLineLength:HeliusWhaleClient.kt$HeliusWhaleClient$val largeToken = dto.tokenTransfers?.filter { it.amount.toDoubleOrNull() ?: 0.0 &gt; 100_000_000_000.0 } // Placeholder for large token move</ID>
+    <ID>MaxLineLength:IndicatorsScreen.kt$Text("ASSET", color = TextGray, fontSize = 10.sp, modifier = Modifier.weight(1f), fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:IndicatorsScreen.kt$Text("MACD_HIST", color = TextGray, fontSize = 10.sp, modifier = Modifier.weight(1.2f), fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:IndicatorsScreen.kt$Text("RSI", color = TextGray, fontSize = 10.sp, modifier = Modifier.weight(1.2f), fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:IndicatorsScreen.kt$Text(String.format(Locale.US, "%.1f", result.rsi), color = rsiColor, fontSize = 13.sp, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:IndicatorsScreen.kt$Text(String.format(Locale.US, "%.4f", result.macdValue), color = macdColor, fontSize = 11.sp, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:IndicatorsScreen.kt$Text(result.rsiStatus, color = rsiColor.copy(alpha = 0.6f), fontSize = 9.sp, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:IndicatorsScreen.kt$Text(result.signal, color = macdColor.copy(alpha = 0.6f), fontSize = 9.sp, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:MTFScreen.kt$Text("MACD", modifier = Modifier.weight(1.5f), color = colors.dimText, fontSize = 11.sp, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:MTFScreen.kt$Text("RSI", modifier = Modifier.weight(1.5f), color = colors.dimText, fontSize = 11.sp, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:MTFScreen.kt$Text("SIGNAL", modifier = Modifier.weight(2f), color = colors.dimText, fontSize = 11.sp, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:MTFScreen.kt$Text("TF", modifier = Modifier.weight(1f), color = colors.dimText, fontSize = 11.sp, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:MTFScreen.kt$Text("TREND", modifier = Modifier.weight(2f), color = colors.dimText, fontSize = 11.sp, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:MTFScreen.kt$Text(coin.uppercase(), color = colors.primary, fontSize = 10.sp, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:MTFScreen.kt$colors = ButtonDefaults.buttonColors(containerColor = colors.primary, contentColor = colors.background)</ID>
+    <ID>MaxLineLength:MTFViewModel.kt$MTFViewModel$interpretation = "AGGREGATED CONSENSUS ACROSS ${coins.size} TRACKED ASSETS. SHOWING DOMINANT SIGNALS PER TIMEFRAME."</ID>
+    <ID>MaxLineLength:MTFViewModel.kt$MTFViewModel$neutralCount = allResults.first().timeframes.size - avgBullish.toInt() - avgBearish.toInt()</ID>
+    <ID>MaxLineLength:MTFViewModel.kt$MTFViewModel$val tfSignals = allResults.map { it.timeframes.find { it2 -&gt; it2.timeframe == tf.timeframe } }</ID>
+    <ID>MaxLineLength:MacroRepositoryImpl.kt$MacroRepositoryImpl$// Get BTC daily history (mocked or from repo if available, for now use AlphaVantage for BTC too to align dates)</ID>
+    <ID>MaxLineLength:MacroScreen.kt$Text(text = dxyText, color = Color.White, fontFamily = com.cryptodept.ui.theme.JetBrainsMono, fontSize = 12.sp)</ID>
+    <ID>MaxLineLength:MacroScreen.kt$Text(text = label.padEnd(15), color = Color.Gray, fontFamily = com.cryptodept.ui.theme.JetBrainsMono, fontSize = 12.sp)</ID>
+    <ID>MaxLineLength:MarketsViewModel.kt$MarketsViewModel$private val _sentimentMap = MutableStateFlow&lt;Map&lt;String, com.cryptodept.domain.usecase.SentimentVerdict&gt;&gt;(emptyMap())</ID>
+    <ID>MaxLineLength:MarketsViewModel.kt$MarketsViewModel$val sentimentMap: StateFlow&lt;Map&lt;String, com.cryptodept.domain.usecase.SentimentVerdict&gt;&gt; = _sentimentMap.asStateFlow()</ID>
+    <ID>MaxLineLength:MatrixRainScreen.kt$symbol.contains("$") || symbol.contains("BTC") || symbol.contains("ETH") || symbol.any { it.isDigit() }</ID>
+    <ID>MaxLineLength:MempoolWhaleClient.kt$MempoolWhaleClient$timestamp = System.currentTimeMillis()</ID>
+    <ID>MaxLineLength:MultiSourcePriceAggregator.kt$MultiSourcePriceAggregator$val deferredCoinCap = async { runCatching { coinCapApi.getAsset(coinCapId).data.lastPrice }.getOrNull() }</ID>
+    <ID>MaxLineLength:MultiSourcePriceAggregator.kt$MultiSourcePriceAggregator$val deferredCoinbase = async { runCatching { coinbaseApi.getProductTicker(coinbaseSymbol).lastPrice }.getOrNull() }</ID>
+    <ID>MaxLineLength:MultiSourcePriceAggregator.kt$MultiSourcePriceAggregator$val deferredPaprika = async { runCatching { coinPaprikaApi.getTicker(paprikaId).lastPrice }.getOrNull() }</ID>
+    <ID>MaxLineLength:MultiTimeframeAnalyzer.kt$MultiTimeframeAnalyzer$val recentChange = if (prices.size &gt;= 5) (current - prices[prices.size - 5]) / prices[prices.size - 5] * 100 else 0.0</ID>
+    <ID>MaxLineLength:NetworkModule.kt$NetworkModule$fun</ID>
+    <ID>MaxLineLength:NewsRepositoryImpl.kt$NewsRepositoryImpl$SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.US).parse(dateStr)?.time ?: System.currentTimeMillis()</ID>
+    <ID>MaxLineLength:OptimalEntryCalculator.kt$OptimalEntryCalculator$whyNotNow.add("Funding: ${String.format(java.util.Locale.US, "%.4f", fundingRate)}% — Longs overlevered")</ID>
+    <ID>MaxLineLength:PerformanceScreen.kt$StatCard("MAX DRAWDOWN", "$${String.format(Locale.US, "%.2f", stats.maxDrawdown)}", Modifier.weight(1f), color = colors.danger)</ID>
+    <ID>MaxLineLength:PortfolioScreen.kt$SummaryRow("COST BASIS:", "$${String.format(Locale.US, "%,.2f", summary.totalCostUsd)}", colors.textPrimary)</ID>
+    <ID>MaxLineLength:PortfolioScreen.kt$SummaryRow("TOTAL VALUE:", "$${String.format(Locale.US, "%,.2f", summary.totalValueUsd)}", colors.primary)</ID>
+    <ID>MaxLineLength:PortfolioScreen.kt$Text(value, color = valueColor, fontSize = 14.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)</ID>
+    <ID>MaxLineLength:PositionSizeScreen.kt$ResultRow("Leverage:", "${String.format("%.1fx", res.leverageNeeded)} ${if (res.leverageNeeded &lt;= 1.0) "(NO LEVERAGE)" else ""}")</ID>
+    <ID>MaxLineLength:PositionSizeScreen.kt$Text("Recommended Size: $${formatNumber(res.riskAdjustedSize)}", color = colors.textPrimary, fontSize = 12.sp)</ID>
+    <ID>MaxLineLength:PositionSizeScreen.kt$Text("═══════ CALCULATION RESULT ═══════", color = gradeColor, modifier = Modifier.align(Alignment.CenterHorizontally))</ID>
+    <ID>MaxLineLength:PositionSizeScreen.kt$Text(value, color = actualValueColor, fontSize = 13.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)</ID>
+    <ID>MaxLineLength:PredictionAccuracyTracker.kt$PredictionAccuracyTracker$"actual=$actualDir correct=$wasCorrect change=${String.format("%.2f", priceChange)}%"</ID>
+    <ID>MaxLineLength:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$"Analysis indicates a $trend with 68% of iterations clusterized around the $formattedPrice zone. "</ID>
+    <ID>MaxLineLength:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$"Current wave amplitude suggests we are in the ${(vote.confidence * 100).toInt()}% phase of cycle extension. "</ID>
+    <ID>MaxLineLength:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$"Cycle harmonics indicate a potential trend reversal window approaching within the next 12-18 hours."</ID>
+    <ID>MaxLineLength:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$"Digital Signal Processing (DSP) identified a dominant frequency cycle in the $formattedPrice region. "</ID>
+    <ID>MaxLineLength:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$"Failure to hold this pivot point will confirm a Sign of Weakness (SOW) and lead to further downside."</ID>
+    <ID>MaxLineLength:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$"Fractal dimension of ${String.format(Locale.US, "%.2f", fractalDim)} suggests complex market structure. "</ID>
+    <ID>MaxLineLength:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$"Hurst exponent of $formattedHurst confirms ${if (hurst &gt; 0.5f) "persistent trend" else "mean-reverting"} behavior. "</ID>
+    <ID>MaxLineLength:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$"Indicators support a ${(vote.confidence * 100).toInt()}% confidence level in the projected trajectory."</ID>
+    <ID>MaxLineLength:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$"Linear regression indicates that price is currently oscillating around the equilibrium mean. No significant statistical deviation detected to warrant a high-probability mean-reversion trade."</ID>
+    <ID>MaxLineLength:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$"Standard deviation analysis shows price trading ${if (lastPrice &gt; vote.targetPrice) "above" else "below"} the mean regression line. "</ID>
+    <ID>MaxLineLength:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$"The asset is testing major liquidity pools at $formattedPrice with high relative volume. "</ID>
+    <ID>MaxLineLength:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$"Volume-Spread Analysis (VSA) shows no clear institutional footprints at the moment. The asset is in a high-equilibrium state, suggesting a range-bound period until a significant volume spike occurs."</ID>
+    <ID>MaxLineLength:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$accuracyTracker.recordPrediction(coinId, "ENSEMBLE", consensus.direction.name, consensus.overallConfidence)</ID>
+    <ID>MaxLineLength:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$priceChange24h = if (closes.size &gt;= 2) ((currentPrice - closes.first()) / closes.first() * 100) else 0.0</ID>
+    <ID>MaxLineLength:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$val phase = if (vote.direction.name.contains("UP")) "ACCUMULATION (Phase C)" else "DISTRIBUTION (Phase D)"</ID>
+    <ID>MaxLineLength:PredictionScreen.kt$Text("ENSEMBLE CONSENSUS: $color ${consensus.direction}", color = color, fontWeight = FontWeight.Bold, fontSize = 18.sp)</ID>
+    <ID>MaxLineLength:PredictionScreen.kt$drawLine(color = TermGreen, start = Offset(0f, size.height / 2), end = Offset(size.width, size.height / 2), strokeWidth = 2f)</ID>
+    <ID>MaxLineLength:PredictionViewModel.kt$PredictionViewModel$"1H: $${String.format(Locale.US, "%.2f", prediction.prediction1h.mid)} (${prediction.prediction1h.direction.name})\n"</ID>
+    <ID>MaxLineLength:PredictionViewModel.kt$PredictionViewModel$"4H: $${String.format(Locale.US, "%.2f", prediction.prediction4h.mid)} (${prediction.prediction4h.direction.name})\n"</ID>
+    <ID>MaxLineLength:PredictionViewModel.kt$PredictionViewModel$"Aesthetic: $colorTheme glowing lights, hyper-realistic, 8k resolution, volumetric lighting, photorealistic textures, Bloomberg terminal style overlay. "</ID>
+    <ID>MaxLineLength:PredictionViewModel.kt$PredictionViewModel$"In the center, a massive transparent holographic glass display showing a detailed glowing 3D candlestick chart for $coinId. "</ID>
+    <ID>MaxLineLength:PredictionViewModel.kt$PredictionViewModel$"The screen displays a big bold text: '$coinId PRICE: $price' and a 'BREAKING NEWS: $trend ($change)' ticker tape at the bottom. "</ID>
+    <ID>MaxLineLength:PredictionViewModel.kt$PredictionViewModel$append("10TH_PERCENTILE: $${String.format(Locale.US, "%.2f", prediction.priceDistribution.percentile10)}\n")</ID>
+    <ID>MaxLineLength:PredictionViewModel.kt$PredictionViewModel$append("50TH_PERCENTILE: $${String.format(Locale.US, "%.2f", prediction.priceDistribution.percentile50)}\n")</ID>
+    <ID>MaxLineLength:PredictionViewModel.kt$PredictionViewModel$append("90TH_PERCENTILE: $${String.format(Locale.US, "%.2f", prediction.priceDistribution.percentile90)}\n")</ID>
+    <ID>MaxLineLength:PredictionViewModel.kt$PredictionViewModel$append("STD_DEVIATION: $${String.format(Locale.US, "%.2f", prediction.priceDistribution.standardDeviation)}\n\n")</ID>
+    <ID>MaxLineLength:PredictionViewModel.kt$PredictionViewModel$val models = listOf("FOURIER", "ELLIOTT", "FRACTAL", "ENSEMBLE", "MONTE_CARLO", "WYCKOFF_PHASE", "LINEAR_REGRESSION")</ID>
+    <ID>MaxLineLength:PreferencesService.kt$PreferencesService$private val scope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO + kotlinx.coroutines.SupervisorJob())</ID>
+    <ID>MaxLineLength:PsychologyAnalyzer.kt$PsychologyAnalyzer$"Last trade was ${String.format(java.util.Locale.US, "%.1f", sizeRatio)}x your average size."</ID>
+    <ID>MaxLineLength:PsychologyLockOverlay.kt$text = "Discipline is the bridge between goals and accomplishment. A clear mind sees opportunity where a tilted mind sees only revenge."</ID>
+    <ID>MaxLineLength:PsychologyScreen.kt$CircularProgressIndicator(color = WallStreetGreen, modifier = Modifier.align(Alignment.CenterHorizontally))</ID>
+    <ID>MaxLineLength:PsychologyScreen.kt$Text("No emotional triggers detected. Maintain discipline.", color = TextGray, fontSize = 11.sp, modifier = Modifier.padding(8.dp))</ID>
+    <ID>MaxLineLength:PsychologyScreen.kt$Text("Trades: ${stats.tradesToday}", color = WallStreetWhite, fontSize = 12.sp, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:RiskScoreScreen.kt$Text("EXTREME", color = Color.Gray, fontSize = 10.sp, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)</ID>
+    <ID>MaxLineLength:RiskScoreScreen.kt$Text("HIGH", color = Color.Gray, fontSize = 10.sp, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)</ID>
+    <ID>MaxLineLength:RiskScoreScreen.kt$Text("LOW", color = Color.Gray, fontSize = 10.sp, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)</ID>
+    <ID>MaxLineLength:RiskScoreScreen.kt$Text("MODERATE", color = Color.Gray, fontSize = 10.sp, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)</ID>
+    <ID>MaxLineLength:RootDetector.kt$RootDetector$context.packageManager.getPackageInfo(context.packageName, PackageManager.GET_SIGNING_CERTIFICATES)</ID>
+    <ID>MaxLineLength:RootDetector.kt$RootDetector$fun</ID>
+    <ID>MaxLineLength:RunDeepAnalysisUseCase.kt$RunDeepAnalysisUseCase$val macdSent = if (macdHist &gt; 0) Sentiment.BULLISH.also { bullish++ } else Sentiment.BEARISH.also { bearish++ }</ID>
+    <ID>MaxLineLength:SeasonalScreen.kt$Text(value, color = colors.primary, fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:SeasonalScreen.kt$Text(year, color = colors.amber, fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)</ID>
+    <ID>MaxLineLength:SentimentAnalyzer.kt$SentimentAnalyzer$.</ID>
+    <ID>MaxLineLength:SentimentAnalyzerTest.kt$SentimentAnalyzerTest$listOf(RssNewsParser.RssItem(title = "BNB is bullish", description = "", link = "", pubDate = "", source = "Test"))</ID>
+    <ID>MaxLineLength:SettingsScreen.kt$Text(warning, color = Color.Red, fontFamily = FontFamily.Monospace, fontSize = 12.sp, fontWeight = FontWeight.Bold)</ID>
+    <ID>MaxLineLength:SignalComposerScreen.kt$Icon(Icons.Default.Delete, contentDescription = null, tint = colors.danger, modifier = Modifier.size(20.dp))</ID>
+    <ID>MaxLineLength:SignalComposerScreen.kt$RuleCard(rule, onToggle = { viewModel.toggleRule(rule.id, it) }, onDelete = { viewModel.deleteRule(rule.id) })</ID>
+    <ID>MaxLineLength:SignalComposerScreen.kt$Text(rule.name.uppercase(), color = colors.primary, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:SignalComposerScreen.kt$colors = TextFieldDefaults.colors(focusedContainerColor = colors.surface, unfocusedContainerColor = colors.surface)</ID>
+    <ID>MaxLineLength:SignalEvaluationEngine.kt$SignalEvaluationEngine$reasoning = if (ruleTriggered) "Custom rule '${rule.name}' triggered." else "Custom rule not satisfied."</ID>
+    <ID>MaxLineLength:SocketLifecycleService.kt$SocketLifecycleService$Log.w("CryptoDept_Lifecycle", "Connect attempt $reconnectAttempt failed, retrying in ${delayMs}ms", e)</ID>
+    <ID>MaxLineLength:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$"RSI at ${String.format(Locale.US, "%.1f", rsi)} suggests sellers are exhausted. Potential bounce imminent."</ID>
+    <ID>MaxLineLength:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$else -&gt; AnalysisTrace("VOLUME", 50, "NORMAL", "Trading volume is within average parameters.", TraceIntensity.LOW)</ID>
+    <ID>MaxLineLength:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$val variance = if (lastPrices.isNotEmpty()) lastPrices.map { (it - middle) * (it - middle) }.average() else 0.0</ID>
+    <ID>MaxLineLength:TechnicalAnalysisEngineTest.kt$TechnicalAnalysisEngineTest$val prices = listOf(10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0)</ID>
+    <ID>MaxLineLength:TechnicalAnalysisEngineTest.kt$TechnicalAnalysisEngineTest$val prices = listOf(25.0, 24.0, 23.0, 22.0, 21.0, 20.0, 19.0, 18.0, 17.0, 16.0, 15.0, 14.0, 13.0, 12.0, 11.0, 10.0)</ID>
+    <ID>MaxLineLength:TerminalCommandViewModel.kt$TerminalCommandViewModel$is VoiceCommand.Analyze -&gt; ttsService.speak("INITIALIZING DEEP ANALYSIS FOR ${command.symbol.uppercase()}...")</ID>
+    <ID>MaxLineLength:TerminalCommandViewModel.kt$TerminalCommandViewModel$is VoiceCommand.CreateAlert -&gt; ttsService.speak("SETTING ALERT FOR ${command.symbol.uppercase()} AT ${command.price}...")</ID>
+    <ID>MaxLineLength:ThumbnailPromptBuilder.kt$ThumbnailPromptBuilder$val style = "Visual style combining Mr Beast click-through optimization with Bloomberg's professional data aesthetic. Hyper-realistic 3D, Unreal Engine 5 render."</ID>
+    <ID>MaxLineLength:TickerTape.kt$text = "$symbol${String.format(Locale.US, "%.2f", kotlin.math.abs(coin.priceChangePercentage24h))}%"</ID>
+    <ID>MaxLineLength:TickerTape.kt$text = "${coin.symbol.uppercase()} $${String.format(Locale.US, "%.2f", coin.currentPrice)} "</ID>
+    <ID>MaxLineLength:TickerTape.kt$val trendColor = if (coin.priceChangePercentage24h &gt;= 0) Color(0xFF00FF41) else Color(0xFFFF3B30)</ID>
+    <ID>MaxLineLength:ToolsHubScreen.kt$Text("Today: 4 trades | 1W / 3L | Tilt: 45/100", color = colors.textPrimary, fontSize = 12.sp, fontFamily = JetBrainsMono)</ID>
+    <ID>MaxLineLength:ToolsHubScreen.kt$Text("⚠ 3 consecutive losses — consider a break", color = colors.danger, fontSize = 10.sp, fontFamily = JetBrainsMono)</ID>
+    <ID>MaxLineLength:TradeJournalScreen.kt$Text(text = "[ERROR] ${state.message}", color = colors.danger, modifier = Modifier.align(Alignment.Center))</ID>
+    <ID>MaxLineLength:TradeJournalScreen.kt$Text(text = dateStr, color = Color.Gray, fontSize = 10.sp, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)</ID>
+    <ID>MaxLineLength:TradeJournalScreen.kt$Text(text = label.padEnd(14), color = Color.Gray, fontSize = 12.sp, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)</ID>
+    <ID>MaxLineLength:TradeJournalScreen.kt$colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent, contentColor = Color(0xFF00FF41))</ID>
+    <ID>MaxLineLength:TradeJournalScreen.kt$if (trade.exitPrice != null) " Exit: $${String.format(Locale.US, "%,.2f", trade.exitPrice)}" else ""</ID>
+    <ID>MaxLineLength:TradeJournalScreen.kt$}</ID>
+    <ID>MaxLineLength:TradePlannerEngine.kt$TradePlannerEngine$stopLoss &gt; 0 &amp;&amp; if (entryPrice &gt; 0) kotlin.math.abs(entryPrice - stopLoss) / entryPrice &lt; 0.10 else false</ID>
+    <ID>MaxLineLength:TradePlannerScreen.kt$"✓ Passed checks strengthen your setup\n⚠ Warnings need attention\n✗ Critical fails override verdict"</ID>
+    <ID>MaxLineLength:TradePlannerScreen.kt$Text("LONG", color = if (selected == TradeDirectionType.LONG) colors.background else colors.primary, fontSize = 12.sp)</ID>
+    <ID>MaxLineLength:TradePlannerScreen.kt$Text("SHORT", color = if (selected == TradeDirectionType.SHORT) colors.background else colors.danger, fontSize = 12.sp)</ID>
+    <ID>MaxLineLength:TradePlannerScreen.kt$Text("VERDICT: ${setup.verdict.name.replace("_", " ")}", color = color, fontSize = 18.sp, fontWeight = FontWeight.Black)</ID>
+    <ID>MaxLineLength:TradePlannerScreen.kt$VerdictRow("6-7/10", "GOOD_SETUP", "Good conditions. Can proceed with proper risk.", colors.primary.copy(alpha = 0.7f))</ID>
+    <ID>MaxLineLength:TradePlannerScreen.kt$colors = ButtonDefaults.buttonColors(containerColor = colors.amber, contentColor = colors.background)</ID>
+    <ID>MaxLineLength:WidgetConfigActivity.kt$WidgetConfigActivity$// Set the result to CANCELED. This will cause the widget host to cancel out of the widget placement if they press the back button.</ID>
+    <ID>NestedBlockDepth:EtherscanWhaleClient.kt$EtherscanWhaleClient$suspend fun fetchWhaleTransactions(): List&lt;WhaleTransaction&gt;</ID>
+    <ID>NestedBlockDepth:FractalDimensionAnalyzer.kt$FractalDimensionAnalyzer$fun calculate( prices: List&lt;Double&gt;, kMax: Int = 8, ): Float</ID>
+    <ID>NestedBlockDepth:HeliusWhaleClient.kt$HeliusWhaleClient$suspend fun fetchWhaleTransactions(): List&lt;WhaleTransaction&gt;</ID>
+    <ID>NestedBlockDepth:RssNewsParser.kt$RssNewsParser$private suspend fun fetchRssFeed(source: RssSource): List&lt;RssItem&gt;</ID>
+    <ID>NestedBlockDepth:TreemapPartition.kt$TreemapPartition$private fun process( items: List&lt;Pair&lt;TreemapItem, Double&gt;&gt;, w: Float, h: Float, x: Float, y: Float, results: MutableList&lt;TreemapRect&gt;, )</ID>
+    <ID>ReturnCount:AIReportGenerator.kt$AIReportGenerator$private suspend fun callGemini(prompt: String): Result&lt;String&gt;</ID>
+    <ID>ReturnCount:AlertWorker.kt$AlertWorker$override suspend fun doWork(): Result</ID>
+    <ID>ReturnCount:AnalysisRepositoryImpl.kt$AnalysisRepositoryImpl$private fun calculateEMA( prices: List&lt;Double&gt;, period: Int, ): Double</ID>
+    <ID>ReturnCount:AnalysisRepositoryImpl.kt$AnalysisRepositoryImpl$private fun calculateRSI( prices: List&lt;Double&gt;, period: Int = 14, ): Float</ID>
+    <ID>ReturnCount:ChartRepositoryImpl.kt$ChartRepositoryImpl$override suspend fun refreshOHLCData( coinId: String, days: Int, ): Result&lt;Unit&gt;</ID>
+    <ID>ReturnCount:CorrelationEngine.kt$CorrelationEngine$fun calculatePearson( prices1: List&lt;Double&gt;, prices2: List&lt;Double&gt;, ): Double</ID>
+    <ID>ReturnCount:ElliottWavePredictor.kt$ElliottWavePredictor$fun predict(closes: List&lt;Double&gt;): ModelVote</ID>
+    <ID>ReturnCount:FractalDimensionAnalyzer.kt$FractalDimensionAnalyzer$fun calculate( prices: List&lt;Double&gt;, kMax: Int = 8, ): Float</ID>
+    <ID>ReturnCount:GetRsiUseCase.kt$GetRsiUseCase$fun execute( data: List&lt;OHLCData&gt;, period: Int = 14, ): Double?</ID>
+    <ID>ReturnCount:HurstExponentCalculator.kt$HurstExponentCalculator$fun calculate(prices: List&lt;Double&gt;): Float</ID>
+    <ID>ReturnCount:LinearRegressionPredictor.kt$LinearRegressionPredictor$fun predict( prices: List&lt;Double&gt;, periodsAhead: Int, ): ModelVote</ID>
+    <ID>ReturnCount:PositionSizeViewModel.kt$PositionSizeViewModel$private fun calculate()</ID>
+    <ID>ReturnCount:PredictionCache.kt$PredictionCache$fun get( coinId: String, timeframe: String, ): PricePrediction?</ID>
+    <ID>ReturnCount:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$private fun isSameDirection( d1: Direction, d2: Direction, ): Boolean</ID>
+    <ID>ReturnCount:RetryInterceptor.kt$RetryInterceptor$override fun intercept(chain: Interceptor.Chain): Response</ID>
+    <ID>ReturnCount:SentimentAnalyzer.kt$SentimentAnalyzer$suspend fun analyzeCoin(symbol: String): SentimentResult</ID>
+    <ID>ReturnCount:TechnicalAnalysisEngine.kt$TechnicalAnalysisEngine$fun calculateRSI( prices: List&lt;Double&gt;, period: Int = 14, ): Double</ID>
+    <ID>ReturnCount:VoiceCommandParser.kt$VoiceCommandParser$private fun extractSymbol(input: String): String</ID>
+    <ID>SwallowedException:AccuracyVerificationWorker.kt$AccuracyVerificationWorker$e: Exception</ID>
+    <ID>SwallowedException:AlertWorker.kt$AlertWorker$e: Exception</ID>
+    <ID>SwallowedException:CryptoDeptWidget.kt$CryptoDeptWidget$e: Exception</ID>
+    <ID>SwallowedException:CryptoRepositoryImpl.kt$CryptoRepositoryImpl$e: Exception</ID>
+    <ID>SwallowedException:DerivativesRepositoryImpl.kt$DerivativesRepositoryImpl$e: Exception</ID>
+    <ID>SwallowedException:EtherscanWhaleClient.kt$EtherscanWhaleClient$e: Exception</ID>
+    <ID>SwallowedException:HeliusWhaleClient.kt$HeliusWhaleClient$e: Exception</ID>
+    <ID>SwallowedException:MarketsViewModel.kt$MarketsViewModel$e: Exception</ID>
+    <ID>SwallowedException:MempoolWhaleClient.kt$MempoolWhaleClient$e: Exception</ID>
+    <ID>SwallowedException:NewsRepositoryImpl.kt$NewsRepositoryImpl$e: Exception</ID>
+    <ID>SwallowedException:NewsSyncWorker.kt$NewsSyncWorker$e: Exception</ID>
+    <ID>SwallowedException:NewsViewModel.kt$NewsViewModel$e: Exception</ID>
+    <ID>SwallowedException:NotificationHelper.kt$NotificationHelper$e: SecurityException</ID>
+    <ID>SwallowedException:PerformanceViewModel.kt$PerformanceViewModel$e: Exception</ID>
+    <ID>SwallowedException:PositionSizeScreen.kt$e: Exception</ID>
+    <ID>SwallowedException:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$e: Exception</ID>
+    <ID>SwallowedException:PriceSyncWorker.kt$PriceSyncWorker$e: Exception</ID>
+    <ID>SwallowedException:RedditClient.kt$RedditClient$e: Exception</ID>
+    <ID>SwallowedException:RootDetector.kt$RootDetector$e: Exception</ID>
+    <ID>SwallowedException:RssNewsParser.kt$RssNewsParser$e: Exception</ID>
+    <ID>SwallowedException:TradePlannerEngine.kt$TradePlannerEngine$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:AICoachViewModel.kt$AICoachViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:AIReportGenerator.kt$AIReportGenerator$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:AccuracyVerificationWorker.kt$AccuracyVerificationWorker$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:AlertWorker.kt$AlertWorker$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:BacktesterViewModel.kt$BacktesterViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:BillingService.kt$BillingService$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:BinanceWebSocketService.kt$BinanceWebSocketService.&lt;no name provided&gt;$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:BriefingViewModel.kt$BriefingViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:CalculatePerformanceUseCase.kt$CalculatePerformanceUseCase$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:ChartRepositoryImpl.kt$ChartRepositoryImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:ComparisonViewModel.kt$ComparisonViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:ContentStudioViewModel.kt$ContentStudioViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:CryptoDeptWidget.kt$CryptoDeptWidget$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:CryptoPriceForegroundService.kt$CryptoPriceForegroundService$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:CryptoRepositoryImpl.kt$CryptoRepositoryImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:DailyBriefingWorker.kt$DailyBriefingWorker$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:DashboardViewModel.kt$DashboardViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:DatabaseModule.kt$DatabaseModule.&lt;no name provided&gt;$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:DeFiRepositoryImpl.kt$DeFiRepositoryImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:DeFiViewModel.kt$DeFiViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:DerivativesRepositoryImpl.kt$DerivativesRepositoryImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:DerivativesViewModel.kt$DerivativesViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:EntryAnalyzerViewModel.kt$EntryAnalyzerViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:EtherscanWhaleClient.kt$EtherscanWhaleClient$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:FearGreedViewModel.kt$FearGreedViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:FirebaseAnalyticsInterceptor.kt$FirebaseAnalyticsInterceptor$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:GetCorrelationMatrixUseCase.kt$GetCorrelationMatrixUseCase$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:GetNetworkHealthUseCase.kt$GetNetworkHealthUseCase$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:HeliusWhaleClient.kt$HeliusWhaleClient$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:IndicatorsViewModel.kt$IndicatorsViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:JournalRepositoryImpl.kt$JournalRepositoryImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:KrakenWebSocketService.kt$KrakenWebSocketService.&lt;no name provided&gt;$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:MTFViewModel.kt$MTFViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:MacroRepositoryImpl.kt$MacroRepositoryImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:MacroViewModel.kt$MacroViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:MarketsViewModel.kt$MarketsViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:MempoolWhaleClient.kt$MempoolWhaleClient$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:MultiTimeframeAnalyzer.kt$MultiTimeframeAnalyzer$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:NewsRepositoryImpl.kt$NewsRepositoryImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:NewsSyncWorker.kt$NewsSyncWorker$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:NewsViewModel.kt$NewsViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:PerformanceViewModel.kt$PerformanceViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:PositionSizeScreen.kt$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:PredictionAccuracyTracker.kt$PredictionAccuracyTracker$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:PredictionEnsembleEngine.kt$PredictionEnsembleEngine$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:PredictionViewModel.kt$PredictionViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:PriceSyncWorker.kt$PriceSyncWorker$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:PsychologyViewModel.kt$PsychologyViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:RedditClient.kt$RedditClient$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:RiskViewModel.kt$RiskViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:RootDetector.kt$RootDetector$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:RssNewsParser.kt$RssNewsParser$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:RunDeepAnalysisUseCase.kt$RunDeepAnalysisUseCase$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:SentimentAnalyzer.kt$SentimentAnalyzer$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:SignalsViewModel.kt$SignalsViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:SocketLifecycleService.kt$SocketLifecycleService$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:TradePlannerEngine.kt$TradePlannerEngine$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:WhaleRepositoryImpl.kt$WhaleRepositoryImpl$e: Exception</ID>
+    <ID>TooGenericExceptionThrown:BriefingViewModel.kt$BriefingViewModel$throw Exception("FUNDING DATA UNAVAILABLE")</ID>
+    <ID>TooGenericExceptionThrown:CryptoRepositoryImpl.kt$CryptoRepositoryImpl$throw Exception("NOT_FOUND")</ID>
+    <ID>TooGenericExceptionThrown:EntryAnalyzerViewModel.kt$EntryAnalyzerViewModel$throw Exception("NO_DATA")</ID>
+    <ID>TooGenericExceptionThrown:MTFViewModel.kt$MTFViewModel$throw Exception("NO_TRACKED_COINS")</ID>
+    <ID>TooManyFunctions:AnalyticsService.kt$AnalyticsService</ID>
+    <ID>TooManyFunctions:CryptoPriceForegroundService.kt$CryptoPriceForegroundService : Service</ID>
+    <ID>TooManyFunctions:CryptoRepository.kt$CryptoRepository</ID>
+    <ID>TooManyFunctions:CryptoRepositoryImpl.kt$CryptoRepositoryImpl : CryptoRepository</ID>
+    <ID>TooManyFunctions:NetworkModule.kt$NetworkModule</ID>
+    <ID>TooManyFunctions:PreferencesService.kt$PreferencesService</ID>
+    <ID>TooManyFunctions:RepositoryModule.kt$RepositoryModule</ID>
+    <ID>TooManyFunctions:SettingsViewModel.kt$SettingsViewModel : ViewModel</ID>
+    <ID>TooManyFunctions:TerminalAudioManager.kt$TerminalAudioManager</ID>
+    <ID>TooManyFunctions:TradeJournalDao.kt$TradeJournalDao</ID>
+    <ID>UnusedParameter:AIReportGenerator.kt$AIReportGenerator$data: MarketDataSnapshot</ID>
+    <ID>UnusedParameter:Alertengine.kt$AlertEngine$currentVolume: Double</ID>
+    <ID>UnusedParameter:BacktesterScreen.kt$initialCapital: Float</ID>
+    <ID>UnusedParameter:BacktesterScreen.kt$onCapitalChange: (Float) -&gt; Unit</ID>
+    <ID>UnusedParameter:BacktesterScreen.kt$onRiskChange: (Float) -&gt; Unit</ID>
+    <ID>UnusedParameter:BacktesterScreen.kt$riskPerTrade: Float</ID>
+    <ID>UnusedParameter:MatrixRainScreen.kt$allPrices: List&lt;String&gt; = emptyList()</ID>
+    <ID>UnusedParameter:RiskScoreScreen.kt$btcPrice: Double</ID>
+    <ID>UnusedParameter:TradePlannerScreen.kt$maxScore: Int</ID>
+    <ID>UnusedPrivateProperty:AICoachViewModel.kt$AICoachViewModel$private val cryptoRepository: CryptoRepository</ID>
+    <ID>UnusedPrivateProperty:AchievementEngine.kt$AchievementEngine$private val preferencesService: PreferencesService</ID>
+    <ID>UnusedPrivateProperty:CryptoRepositoryImpl.kt$CryptoRepositoryImpl$private val billingService: com.cryptodept.data.billing.BillingService</ID>
+    <ID>UnusedPrivateProperty:ErrorMessageMapper.kt$ErrorMessageMapper$@dagger.hilt.android.qualifiers.ApplicationContext private val context: Context</ID>
+    <ID>UnusedPrivateProperty:HeatmapScreensaverScreen.kt$val colors = LocalTerminalColors.current</ID>
+    <ID>UnusedPrivateProperty:OptimalEntryCalculator.kt$OptimalEntryCalculator$val ema200 = taEngine.calculateEMA(prices, minOf(200, prices.size)).lastOrNull() ?: currentPrice</ID>
+    <ID>UnusedPrivateProperty:PositionSizeViewModel.kt$PositionSizeViewModel$private val preferencesManager: PreferencesManager</ID>
+    <ID>UnusedPrivateProperty:RssNewsParser.kt$RssNewsParser$var currentItem: RssItem? = null</ID>
+    <ID>UnusedPrivateProperty:SignalsViewModel.kt$SignalsViewModel$private val cryptoRepository: CryptoRepository</ID>
+    <ID>UnusedPrivateProperty:TradePlannerEngine.kt$TradePlannerEngine$private val riskEngine: RiskScoreEngine</ID>
+    <ID>UnusedPrivateProperty:TradePlannerEngine.kt$TradePlannerEngine$private val taEngine: TechnicalAnalysisEngine</ID>
+    <ID>UseCheckOrError:CryptoResult.kt$throw IllegalStateException("Cannot fold Loading state without specialized handler")</ID>
+    <ID>VariableNaming:BinanceWebSocketService.kt$BinanceWebSocketService$private val STREAM_URL = "wss://stream.binance.com:9443/stream?streams=btcusdt@ticker/ethusdt@ticker/xrpusdt@ticker"</ID>
+    <ID>VariableNaming:BloombergWallScreen.kt$val _colors = LocalTerminalColors.current</ID>
+    <ID>VariableNaming:ChartRepositoryImpl.kt$ChartRepositoryImpl$private val CACHE_TTL_MS = 5 * 60 * 1000L // 5 минути</ID>
+    <ID>VariableNaming:CryptoRepositoryImpl.kt$CryptoRepositoryImpl$private val RATE_LIMIT_MS = 10_000L</ID>
+    <ID>VariableNaming:HalvingDataProvider.kt$HalvingDataProvider$private val AVG_CYCLE_DAYS = 1458L // Approx 4 years</ID>
+    <ID>VariableNaming:IndicatorsViewModel.kt$IndicatorsViewModel$private val TRACKED_COINS = listOf( "bitcoin", "ethereum", "ripple", "solana", "cardano", "polkadot", "dogecoin", "chainlink", "shiba-inu", "litecoin", "avalanche-2", "tron", "matic-network", "stellar", "cosmos", )</ID>
+    <ID>VariableNaming:KrakenWebSocketService.kt$KrakenWebSocketService$private val KRAKEN_WS_URL = "wss://ws.kraken.com/v2"</ID>
+    <ID>VariableNaming:MonteCarloPredictor.kt$MonteCarloPredictor$private val SIMULATIONS = 1000</ID>
+    <ID>VariableNaming:MultiTimeframeAnalyzer.kt$MultiTimeframeAnalyzer$// Mapping: timeframe label → CoinGecko days param private val TIMEFRAME_CONFIG = listOf( Triple("15m", 1, 96), // 1 ден данни, последните 96 свещи Triple("1H", 1, 24), // 1 ден данни, последните 24 свещи Triple("4H", 7, 42), // 7 дни данни, последните 42 свещи Triple("1D", 30, 30), // 30 дни данни Triple("1W", 90, 13), // 90 дни данни (приблизително 13 седмични свещи) )</ID>
+    <ID>VariableNaming:NotificationHelper.kt$NotificationHelper$private val CHANNEL_ID = NotificationChannels.ALERTS_CHANNEL_ID</ID>
+    <ID>VariableNaming:PredictionCache.kt$PredictionCache$private val TTL_MS = 5 * 60 * 1000L // 5 минути</ID>
+    <ID>VariableNaming:RssNewsParser.kt$RssNewsParser$private val RSS_SOURCES = listOf( RssSource("CryptoPanic", "https://cryptopanic.com/news/rss/", "Aggregator"), RssSource("CoinTelegraph", "https://cointelegraph.com/rss", "General"), RssSource("The Block", "https://www.theblock.co/rss.xml", "Institutional"), RssSource("Decrypt", "https://decrypt.co/feed", "General"), RssSource("Bitcoin Mag", "https://bitcoinmagazine.com/feed", "Bitcoin"), RssSource("CryptoSlate", "https://cryptoslate.com/feed/", "General"), RssSource("NewsBTC", "https://www.newsbtc.com/feed/", "General"), RssSource("CoinDesk", "https://www.coindesk.com/arc/outboundfeeds/rss/", "General"), )</ID>
+    <ID>VariableNaming:SentimentAnalyzer.kt$SentimentAnalyzer$// Score-based word mapping private val BULLISH_WORDS = mapOf( "bull" to 2, "bullish" to 3, "surge" to 3, "pump" to 2, "moon" to 4, "ath" to 4, "breakout" to 3, "rally" to 3, "gains" to 2, "adoption" to 3, "accumulate" to 2, "buy" to 1, "long" to 1, "strong" to 2, "growth" to 2, "upgrade" to 2, "positive" to 1, "institutional" to 3, "inflow" to 3, "support" to 2, "reversal" to 2, "bottom" to 3, "explosion" to 4, "soaring" to 3, "undervalued" to 3, "accumulating" to 2, "listing" to 2, "partnership" to 3, "massive" to 2, "holding" to 1, )</ID>
+    <ID>VariableNaming:SentimentAnalyzer.kt$SentimentAnalyzer$private val BEARISH_WORDS = mapOf( "bear" to 2, "bearish" to 3, "crash" to 4, "dump" to 3, "drop" to 2, "fall" to 2, "short" to 1, "sell" to 1, "weak" to 2, "correction" to 2, "liquidation" to 3, "fud" to 4, "ban" to 4, "hack" to 5, "scam" to 5, "negative" to 2, "fear" to 3, "outflow" to 3, "resistance" to 2, "death" to 4, "collapse" to 5, "plunge" to 4, "disaster" to 5, "rug" to 5, "caution" to 2, "oversold" to 1, "unstable" to 3, "rejected" to 2, "panic" to 4, "bloodbath" to 5, )</ID>
+    <ID>VariableNaming:SentimentAnalyzer.kt$SentimentAnalyzer$private val CACHE_DURATION_MS = 10 * 60 * 1000L // 10 minutes</ID>
+    <ID>VariableNaming:SignalsViewModel.kt$SignalsViewModel$// Правилни символи + намалено до 5 монети за да не се hit-ва rate limit private val TRACKED_COINS = listOf( Pair("bitcoin", "BTC"), Pair("ethereum", "ETH"), Pair("ripple", "XRP"), Pair("solana", "SOL"), Pair("cardano", "ADA"), )</ID>
+    <ID>VariableNaming:SocketLifecycleService.kt$SocketLifecycleService$private val INITIAL_DELAY_MS = 1_000L</ID>
+    <ID>VariableNaming:SocketLifecycleService.kt$SocketLifecycleService$private val MAX_RECONNECT_ATTEMPTS = 10</ID>
+    <ID>WildcardImport:AICoachScreen.kt$import androidx.compose.foundation.*</ID>
+    <ID>WildcardImport:AICoachScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:AICoachScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:AICoachScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:AICoachViewModel.kt$import kotlinx.coroutines.flow.*</ID>
+    <ID>WildcardImport:AIReportGenerator.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:AccuracyVerificationWorker.kt$import androidx.work.*</ID>
+    <ID>WildcardImport:AchievementsScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:AchievementsScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:AchievementsScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:AdminPasswordDialog.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:AdminPasswordDialog.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:AdminPasswordDialog.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:AlertDao.kt$import androidx.room.*</ID>
+    <ID>WildcardImport:AlertEvaluationEngine.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:AlertEvaluationEngineTest.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:AlertWorker.kt$import androidx.work.*</ID>
+    <ID>WildcardImport:Alertengine.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:AlertsScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:AlertsScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:AlertsScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:AlertsScreen.kt$import com.cryptodept.ui.theme.*</ID>
+    <ID>WildcardImport:AlertsViewModel.kt$import kotlinx.coroutines.flow.*</ID>
+    <ID>WildcardImport:AnalysisLoadingScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:AnalysisLoadingScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:AnalysisRepositoryImpl.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:AnalysisScreen.kt$import androidx.compose.foundation.*</ID>
+    <ID>WildcardImport:AnalysisScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:AnalysisScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:AnalysisScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:AnalysisScreen.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:AnalysisScreen.kt$import com.cryptodept.ui.theme.*</ID>
+    <ID>WildcardImport:AnalysisViewModel.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:AnalysisViewModel.kt$import com.cryptodept.domain.usecase.*</ID>
+    <ID>WildcardImport:AnalysisViewModel.kt$import kotlinx.coroutines.*</ID>
+    <ID>WildcardImport:AnalysisViewModel.kt$import kotlinx.coroutines.flow.*</ID>
+    <ID>WildcardImport:BacktesterScreen.kt$import androidx.compose.foundation.*</ID>
+    <ID>WildcardImport:BacktesterScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:BacktesterScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:BacktesterScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:BacktesterViewModel.kt$import kotlinx.coroutines.flow.*</ID>
+    <ID>WildcardImport:BillingService.kt$import com.android.billingclient.api.*</ID>
+    <ID>WildcardImport:BinanceWebSocketService.kt$import kotlinx.coroutines.*</ID>
+    <ID>WildcardImport:BinanceWebSocketService.kt$import okhttp3.*</ID>
+    <ID>WildcardImport:BloombergWallScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:BloombergWallScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:BootSequenceScreen.kt$import androidx.compose.animation.core.*</ID>
+    <ID>WildcardImport:BootSequenceScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:BootSequenceScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:CRTOverlay.kt$import androidx.compose.animation.core.*</ID>
+    <ID>WildcardImport:CalculatePositionSizeUseCaseTest.kt$import org.junit.Assert.*</ID>
+    <ID>WildcardImport:CalendarScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:CalendarScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:CalendarViewModel.kt$import kotlinx.coroutines.flow.*</ID>
+    <ID>WildcardImport:ChartsScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:ChartsScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:ChartsScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:ChartsScreen.kt$import com.cryptodept.ui.theme.*</ID>
+    <ID>WildcardImport:ChartsViewModel.kt$import kotlinx.coroutines.flow.*</ID>
+    <ID>WildcardImport:CoinDao.kt$import androidx.room.*</ID>
+    <ID>WildcardImport:CoinDetailScreen.kt$import androidx.compose.foundation.*</ID>
+    <ID>WildcardImport:CoinDetailScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:CoinDetailScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:CoinDetailScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:CoinDetailScreen.kt$import com.cryptodept.ui.theme.*</ID>
+    <ID>WildcardImport:ComparisonScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:ComparisonScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:ComparisonScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:ComparisonViewModel.kt$import kotlinx.coroutines.flow.*</ID>
+    <ID>WildcardImport:CompositeAlertBuilderScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:CompositeAlertBuilderScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:CompositeAlertBuilderScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:CompositeAlertBuilderScreen.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:ContentStudioScreen.kt$import androidx.compose.foundation.*</ID>
+    <ID>WildcardImport:ContentStudioScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:ContentStudioScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:ContentStudioScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:ContentStudioViewModel.kt$import com.cryptodept.domain.usecase.*</ID>
+    <ID>WildcardImport:CorrelationScreen.kt$import androidx.compose.foundation.*</ID>
+    <ID>WildcardImport:CorrelationScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:CorrelationScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:CorrelationScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:CryptoDeptApplication.kt$import androidx.work.*</ID>
+    <ID>WildcardImport:CryptoDeptWidget.kt$import androidx.glance.*</ID>
+    <ID>WildcardImport:CryptoDeptWidget.kt$import androidx.glance.layout.*</ID>
+    <ID>WildcardImport:CryptoDeptWidget.kt$import androidx.glance.text.*</ID>
+    <ID>WildcardImport:CryptoPriceForegroundService.kt$import android.app.*</ID>
+    <ID>WildcardImport:CryptoPriceForegroundService.kt$import kotlinx.coroutines.*</ID>
+    <ID>WildcardImport:CryptoRepository.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:CryptoRepositoryImpl.kt$import com.cryptodept.data.api.*</ID>
+    <ID>WildcardImport:CryptoRepositoryImpl.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:CryptoRepositoryImpl.kt$import com.cryptodept.domain.repository.*</ID>
+    <ID>WildcardImport:CryptoRepositoryImpl.kt$import kotlinx.coroutines.*</ID>
+    <ID>WildcardImport:CryptoRepositoryTest.kt$import io.mockk.*</ID>
+    <ID>WildcardImport:CustomSignalDao.kt$import androidx.room.*</ID>
+    <ID>WildcardImport:DailyBriefingGeneratorTest.kt$import org.junit.Assert.*</ID>
+    <ID>WildcardImport:DailyBriefingScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:DailyBriefingScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:DashboardScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:DashboardScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:DashboardScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:DashboardScreen.kt$import com.cryptodept.ui.components.*</ID>
+    <ID>WildcardImport:DashboardScreen.kt$import com.cryptodept.ui.theme.*</ID>
+    <ID>WildcardImport:DashboardViewModel.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:DashboardViewModel.kt$import com.cryptodept.domain.usecase.*</ID>
+    <ID>WildcardImport:DashboardViewModel.kt$import kotlinx.coroutines.flow.*</ID>
+    <ID>WildcardImport:DatabaseModule.kt$import com.cryptodept.data.db.*</ID>
+    <ID>WildcardImport:DeFiScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:DeFiScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:DeFiScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:DeepAnalysisComponents.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:DeepAnalysisComponents.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:DeepAnalysisComponents.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:DeepAnalysisResultScreen.kt$import androidx.compose.animation.*</ID>
+    <ID>WildcardImport:DeepAnalysisResultScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:DeepAnalysisResultScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:DeepAnalysisResultScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:DeepAnalysisResultScreen.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:DerivativesRepositoryImpl.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:DerivativesScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:DerivativesScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:EmptyState.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:EntryAnalyzerScreen.kt$import androidx.compose.foundation.*</ID>
+    <ID>WildcardImport:EntryAnalyzerScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:EntryAnalyzerScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:EntryAnalyzerScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:EntryAnalyzerScreen.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:EntryAnalyzerScreen.kt$import com.cryptodept.ui.theme.*</ID>
+    <ID>WildcardImport:EntryAnalyzerViewModel.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:EntryAnalyzerViewModel.kt$import kotlinx.coroutines.flow.*</ID>
+    <ID>WildcardImport:ErrorState.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:ErrorState.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:ExampleUnitTest.kt$import org.junit.Assert.*</ID>
+    <ID>WildcardImport:FearGreedScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:FearGreedScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:FearGreedScreen.kt$import com.cryptodept.ui.theme.*</ID>
+    <ID>WildcardImport:FourierCyclePredictor.kt$import kotlin.math.*</ID>
+    <ID>WildcardImport:FractalDimensionAnalyzer.kt$import kotlin.math.*</ID>
+    <ID>WildcardImport:GetDashboardDataUseCase.kt$import kotlinx.coroutines.flow.*</ID>
+    <ID>WildcardImport:GlitchEffect.kt$import androidx.compose.animation.core.*</ID>
+    <ID>WildcardImport:GlitchEffect.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:GlobalMarketBar.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:GlobalMarketBar.kt$import com.cryptodept.ui.theme.*</ID>
+    <ID>WildcardImport:HeatmapScreensaverScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:HeatmapScreensaverScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:HeatmapScreensaverScreen.kt$import androidx.compose.ui.text.*</ID>
+    <ID>WildcardImport:HistoricalTab.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:HurstExponentCalculator.kt$import kotlin.math.*</ID>
+    <ID>WildcardImport:IndicatorsScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:IndicatorsScreen.kt$import com.cryptodept.ui.theme.*</ID>
+    <ID>WildcardImport:JournalViewModel.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:JournalViewModel.kt$import kotlinx.coroutines.flow.*</ID>
+    <ID>WildcardImport:KrakenWebSocketService.kt$import kotlinx.coroutines.*</ID>
+    <ID>WildcardImport:KrakenWebSocketService.kt$import okhttp3.*</ID>
+    <ID>WildcardImport:LinearRegressionPredictor.kt$import kotlin.math.*</ID>
+    <ID>WildcardImport:MTFScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:MTFScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:MTFScreen.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:MTFScreen.kt$import com.cryptodept.ui.theme.*</ID>
+    <ID>WildcardImport:MTFViewModel.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:MTFViewModel.kt$import kotlinx.coroutines.flow.*</ID>
+    <ID>WildcardImport:MacroRepositoryImpl.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:MacroScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:MacroScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:MacroViewModel.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:MacroViewModel.kt$import kotlinx.coroutines.flow.*</ID>
+    <ID>WildcardImport:MainActivity.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:MainActivity.kt$import com.cryptodept.ui.screensaver.*</ID>
+    <ID>WildcardImport:MainActivity.kt$import com.cryptodept.ui.theme.*</ID>
+    <ID>WildcardImport:MarketsScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:MatrixRainScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:MatrixRainScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:MatrixRainScreen.kt$import androidx.compose.ui.text.*</ID>
+    <ID>WildcardImport:MonteCarloPredictor.kt$import kotlin.math.*</ID>
+    <ID>WildcardImport:MultiTimeframeAnalyzer.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:NavGraph.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:NavGraph.kt$import com.cryptodept.ui.tools.*</ID>
+    <ID>WildcardImport:NetworkModule.kt$import com.cryptodept.data.api.*</ID>
+    <ID>WildcardImport:NewsRepositoryImpl.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:NewsScreen.kt$import androidx.compose.foundation.*</ID>
+    <ID>WildcardImport:NewsScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:NewsScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:NewsScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:NewsScreen.kt$import com.cryptodept.ui.theme.*</ID>
+    <ID>WildcardImport:NewsSyncWorker.kt$import androidx.work.*</ID>
+    <ID>WildcardImport:NewsViewModel.kt$import kotlinx.coroutines.flow.*</ID>
+    <ID>WildcardImport:OnboardingScreen.kt$import androidx.compose.animation.*</ID>
+    <ID>WildcardImport:OnboardingScreen.kt$import androidx.compose.animation.core.*</ID>
+    <ID>WildcardImport:OnboardingScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:OnboardingScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:OnboardingScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:OptimalEntryCalculator.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:PaywallScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:PaywallScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:PaywallScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:PerformanceScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:PerformanceScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:PortfolioDao.kt$import androidx.room.*</ID>
+    <ID>WildcardImport:PortfolioRepositoryImpl.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:PortfolioRepositoryImpl.kt$import kotlinx.coroutines.flow.*</ID>
+    <ID>WildcardImport:PortfolioScreen.kt$import androidx.compose.foundation.*</ID>
+    <ID>WildcardImport:PortfolioScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:PortfolioScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:PortfolioScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:PortfolioScreen.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:PortfolioScreen.kt$import com.cryptodept.ui.theme.*</ID>
+    <ID>WildcardImport:PortfolioViewModel.kt$import kotlinx.coroutines.flow.*</ID>
+    <ID>WildcardImport:PositionSizeScreen.kt$import androidx.compose.foundation.*</ID>
+    <ID>WildcardImport:PositionSizeScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:PositionSizeScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:PositionSizeScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:PositionSizeScreen.kt$import com.cryptodept.ui.theme.*</ID>
+    <ID>WildcardImport:PositionSizeViewModel.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:PositionSizeViewModel.kt$import kotlinx.coroutines.flow.*</ID>
+    <ID>WildcardImport:PredictionCacheTest.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:PredictionEnsembleEngine.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:PredictionHistoryScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:PredictionHistoryScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:PredictionHistoryScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:PredictionScreen.kt$import androidx.compose.foundation.*</ID>
+    <ID>WildcardImport:PredictionScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:PredictionScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:PredictionScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:PredictionScreen.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:PredictionViewModel.kt$import kotlinx.coroutines.flow.*</ID>
+    <ID>WildcardImport:PreferencesService.kt$import androidx.datastore.preferences.core.*</ID>
+    <ID>WildcardImport:PriceHistoryDao.kt$import androidx.room.*</ID>
+    <ID>WildcardImport:PriceText.kt$import androidx.compose.animation.*</ID>
+    <ID>WildcardImport:PriceText.kt$import androidx.compose.animation.core.*</ID>
+    <ID>WildcardImport:PriceText.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:PriceText.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:PsychologyAnalyzer.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:PsychologyLockOverlay.kt$import androidx.compose.animation.*</ID>
+    <ID>WildcardImport:PsychologyLockOverlay.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:PsychologyLockOverlay.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:PsychologyScreen.kt$import androidx.compose.foundation.*</ID>
+    <ID>WildcardImport:PsychologyScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:PsychologyScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:PsychologyScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:PsychologyScreen.kt$import com.cryptodept.ui.theme.*</ID>
+    <ID>WildcardImport:RepositoryModule.kt$import com.cryptodept.data.repository.*</ID>
+    <ID>WildcardImport:RepositoryModule.kt$import com.cryptodept.domain.repository.* // Global interface import</ID>
+    <ID>WildcardImport:RiskScoreEngineTest.kt$import org.junit.Assert.*</ID>
+    <ID>WildcardImport:RiskScoreScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:RiskScoreScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:RunDeepAnalysisUseCase.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:ScreensaverCycleService.kt$import kotlinx.coroutines.*</ID>
+    <ID>WildcardImport:SeasonalScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:SeasonalScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:SettingsScreen.kt$import androidx.compose.foundation.*</ID>
+    <ID>WildcardImport:SettingsScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:SettingsScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:SettingsScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:SettingsScreen.kt$import androidx.compose.ui.*</ID>
+    <ID>WildcardImport:SettingsScreen.kt$import androidx.compose.ui.graphics.*</ID>
+    <ID>WildcardImport:SettingsScreen.kt$import androidx.compose.ui.unit.*</ID>
+    <ID>WildcardImport:SignalComposerScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:SignalComposerScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:SignalComposerScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:SignalComposerScreen.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:SignalComposerViewModel.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:SignalEvaluationEngine.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:SignalRepositoryImpl.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:SignalsScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:SkeletonsAll.kt$import androidx.compose.animation.core.*</ID>
+    <ID>WildcardImport:SkeletonsAll.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:SocketLifecycleService.kt$import kotlinx.coroutines.*</ID>
+    <ID>WildcardImport:TechnicalBreakdownSheet.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:TechnicalBreakdownSheet.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:TerminalBottomBar.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:TerminalCommandBar.kt$import androidx.compose.animation.core.*</ID>
+    <ID>WildcardImport:TerminalCommandBar.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:TerminalCommandBar.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:TerminalCommandBar.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:TerminalCommandBar.kt$import com.cryptodept.util.*</ID>
+    <ID>WildcardImport:TerminalCommandViewModel.kt$import com.cryptodept.util.*</ID>
+    <ID>WildcardImport:TerminalComponents.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:TerminalComponents.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:TerminalComponents.kt$import com.cryptodept.ui.theme.*</ID>
+    <ID>WildcardImport:TerminalHelpDialog.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:TerminalHelpDialog.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:TickerTape.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:TickerTape.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:ToolsHubScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:ToolsHubScreen.kt$import androidx.compose.material.icons.filled.*</ID>
+    <ID>WildcardImport:ToolsHubScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:ToolsHubScreen.kt$import com.cryptodept.ui.theme.*</ID>
+    <ID>WildcardImport:TradeJournalDao.kt$import androidx.room.*</ID>
+    <ID>WildcardImport:TradeJournalScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:TradeJournalScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:TradeJournalScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:TradeJournalScreen.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:TradePlannerEngine.kt$import com.cryptodept.domain.model.*</ID>
+    <ID>WildcardImport:TradePlannerEngineTest.kt$import org.junit.Assert.*</ID>
+    <ID>WildcardImport:TradePlannerScreen.kt$import androidx.compose.foundation.*</ID>
+    <ID>WildcardImport:TradePlannerScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:TradePlannerScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:TradePlannerScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:TradePlannerScreen.kt$import com.cryptodept.ui.theme.*</ID>
+    <ID>WildcardImport:WhaleTrackerScreen.kt$import androidx.compose.foundation.*</ID>
+    <ID>WildcardImport:WhaleTrackerScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:WhaleTrackerScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:WhaleTrackerScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:WhaleViewModel.kt$import kotlinx.coroutines.flow.*</ID>
+    <ID>WildcardImport:WidgetConfigActivity.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:WidgetConfigActivity.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:WidgetConfigActivity.kt$import androidx.compose.runtime.*</ID>
+  </CurrentIssues>
+</SmellBaseline>

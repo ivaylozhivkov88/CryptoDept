@@ -1,9 +1,7 @@
 package com.cryptodept.ui.tools
 
-import android.graphics.Color as AndroidColor
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
@@ -28,17 +26,18 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import java.text.SimpleDateFormat
 import java.util.*
+import android.graphics.Color as AndroidColor
 
 @Composable
 fun BacktesterScreen(
     viewModel: BacktesterViewModel = hiltViewModel(),
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
 ) {
     val colors = LocalTerminalColors.current
     val uiState by viewModel.uiState.collectAsState()
     val trackedCoins by viewModel.trackedCoins.collectAsState()
     val selectedCoin by viewModel.selectedCoin.collectAsState()
-    
+
     val rsiEntry by viewModel.rsiEntry.collectAsState()
     val rsiExit by viewModel.rsiExit.collectAsState()
     val stopLoss by viewModel.stopLoss.collectAsState()
@@ -47,18 +46,19 @@ fun BacktesterScreen(
     val riskPerTrade by viewModel.riskPerTrade.collectAsState()
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colors.background)
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState())
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(colors.background)
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
     ) {
         Text(
             text = ">>> STRATEGY BACKTESTER",
             color = colors.primary,
             fontFamily = FontFamily.Monospace,
             fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -81,7 +81,7 @@ fun BacktesterScreen(
             riskPerTrade = riskPerTrade,
             onRiskChange = { viewModel.riskPerTrade.value = it },
             isLoading = uiState is BacktestUiState.Loading,
-            onRun = { viewModel.runBacktest() }
+            onRun = { viewModel.runBacktest() },
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -127,10 +127,10 @@ fun BacktestForm(
     riskPerTrade: Float,
     onRiskChange: (Float) -> Unit,
     isLoading: Boolean,
-    onRun: () -> Unit
+    onRun: () -> Unit,
 ) {
     val colors = LocalTerminalColors.current
-    
+
     Column(modifier = Modifier.fillMaxWidth().border(1.dp, colors.grid).padding(12.dp)) {
         Text("CONFIG_PARAMETERS", color = colors.dimText, fontSize = 10.sp)
         Spacer(modifier = Modifier.height(8.dp))
@@ -140,11 +140,12 @@ fun BacktestForm(
             items(trackedCoins) { coin ->
                 val isSelected = selectedCoin == coin
                 Box(
-                    modifier = Modifier
-                        .border(1.dp, if (isSelected) colors.primary else colors.grid, RectangleShape)
-                        .background(if (isSelected) colors.primary.copy(alpha = 0.2f) else Color.Transparent)
-                        .clickable { onCoinSelected(coin) }
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                    modifier =
+                        Modifier
+                            .border(1.dp, if (isSelected) colors.primary else colors.grid, RectangleShape)
+                            .background(if (isSelected) colors.primary.copy(alpha = 0.2f) else Color.Transparent)
+                            .clickable { onCoinSelected(coin) }
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
                 ) {
                     Text(coin.uppercase(), color = if (isSelected) colors.primary else colors.dimText, fontSize = 10.sp)
                 }
@@ -157,15 +158,15 @@ fun BacktestForm(
         ParameterSlider(label = "RSI EXIT THRESHOLD", value = rsiExit, range = 50f..90f, onValueChange = onRsiExitChange)
         ParameterSlider(label = "STOP LOSS %", value = stopLoss, range = 1f..20f, onValueChange = onStopLossChange)
         ParameterSlider(label = "TAKE PROFIT %", value = takeProfit, range = 2f..50f, onValueChange = onTakeProfitChange)
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         Button(
             onClick = onRun,
             modifier = Modifier.fillMaxWidth(),
             enabled = !isLoading,
             shape = RectangleShape,
-            colors = ButtonDefaults.buttonColors(containerColor = colors.primary, contentColor = colors.background)
+            colors = ButtonDefaults.buttonColors(containerColor = colors.primary, contentColor = colors.background),
         ) {
             Text(if (isLoading) "RUNNING SIMULATION..." else "[RUN BACKTEST]", fontWeight = FontWeight.Bold)
         }
@@ -173,7 +174,12 @@ fun BacktestForm(
 }
 
 @Composable
-fun ParameterSlider(label: String, value: Float, range: ClosedFloatingPointRange<Float>, onValueChange: (Float) -> Unit) {
+fun ParameterSlider(
+    label: String,
+    value: Float,
+    range: ClosedFloatingPointRange<Float>,
+    onValueChange: (Float) -> Unit,
+) {
     val colors = LocalTerminalColors.current
     Column(modifier = Modifier.padding(vertical = 4.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -184,7 +190,12 @@ fun ParameterSlider(label: String, value: Float, range: ClosedFloatingPointRange
             value = value,
             onValueChange = onValueChange,
             valueRange = range,
-            colors = SliderDefaults.colors(thumbColor = colors.primary, activeTrackColor = colors.primary, inactiveTrackColor = colors.grid)
+            colors =
+                SliderDefaults.colors(
+                    thumbColor = colors.primary,
+                    activeTrackColor = colors.primary,
+                    inactiveTrackColor = colors.grid,
+                ),
         )
     }
 }
@@ -197,17 +208,21 @@ fun BacktestResultsView(result: com.cryptodept.domain.usecase.BacktesterEngine.B
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Text("═══════ SIMULATION RESULTS ═══════", color = colors.grid, modifier = Modifier.align(Alignment.CenterHorizontally))
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         // Main Return
         Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "$sign${String.format(Locale.US, "%.2f", result.totalReturn)}% ($sign$${String.format(Locale.US, "%,.0f", result.totalReturnUsd)})",
+                text = "$sign${String.format(
+                    Locale.US,
+                    "%.2f",
+                    result.totalReturn,
+                )}% ($sign$${String.format(Locale.US, "%,.0f", result.totalReturnUsd)})",
                 color = pnlColor,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Black,
-                fontFamily = FontFamily.Monospace
+                fontFamily = FontFamily.Monospace,
             )
             Text("TOTAL NET RETURN", color = colors.dimText, fontSize = 12.sp)
         }
@@ -220,15 +235,30 @@ fun BacktestResultsView(result: com.cryptodept.domain.usecase.BacktesterEngine.B
             MetricCard(label = "TOTAL TRADES", value = result.totalTrades.toString(), modifier = Modifier.weight(1f))
         }
         Row(modifier = Modifier.fillMaxWidth()) {
-            MetricCard(label = "MAX DRAWDOWN", value = "-${String.format(Locale.US, "%.1f", result.maxDrawdown)}%", modifier = Modifier.weight(1f))
-            MetricCard(label = "PROFIT FACTOR", value = String.format(Locale.US, "%.2f", result.profitFactor), modifier = Modifier.weight(1f))
+            MetricCard(
+                label = "MAX DRAWDOWN",
+                value = "-${String.format(Locale.US, "%.1f", result.maxDrawdown)}%",
+                modifier = Modifier.weight(1f),
+            )
+            MetricCard(
+                label = "PROFIT FACTOR",
+                value = String.format(Locale.US, "%.2f", result.profitFactor),
+                modifier = Modifier.weight(1f),
+            )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
         // Equity Curve
         Text(">>> EQUITY CURVE (PORTFOLIO VALUE)", color = colors.dimText, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-        Box(modifier = Modifier.fillMaxWidth().height(250.dp).background(colors.grid.copy(alpha = 0.1f)).border(1.dp, colors.grid)) {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(250.dp)
+                    .background(colors.grid.copy(alpha = 0.1f))
+                    .border(1.dp, colors.grid),
+        ) {
             EquityChart(result.equityCurve)
         }
 
@@ -246,13 +276,18 @@ fun BacktestResultsView(result: com.cryptodept.domain.usecase.BacktesterEngine.B
 }
 
 @Composable
-fun MetricCard(label: String, value: String, modifier: Modifier = Modifier) {
+fun MetricCard(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier,
+) {
     val colors = LocalTerminalColors.current
     Column(
-        modifier = modifier
-            .border(0.5.dp, colors.grid)
-            .padding(12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier =
+            modifier
+                .border(0.5.dp, colors.grid)
+                .padding(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(label, color = colors.dimText, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
         Text(value, color = colors.textPrimary, fontSize = 14.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
@@ -270,18 +305,18 @@ fun EquityChart(data: List<Pair<Long, Double>>) {
                 legend.isEnabled = false
                 setTouchEnabled(false)
                 setBackgroundColor(AndroidColor.TRANSPARENT)
-                
+
                 // PRICHINA 1: Handle empty data
                 setNoDataText("AWAITING BACKTEST DATA...")
                 setNoDataTextColor(AndroidColor.rgb(0, 255, 65))
-                
+
                 xAxis.apply {
                     position = XAxis.XAxisPosition.BOTTOM
                     textColor = AndroidColor.LTGRAY
                     setDrawGridLines(true)
                     gridColor = AndroidColor.rgb(0, 59, 0) // grid color
                 }
-                
+
                 axisLeft.apply {
                     textColor = AndroidColor.LTGRAY
                     setDrawGridLines(true)
@@ -297,19 +332,21 @@ fun EquityChart(data: List<Pair<Long, Double>>) {
                 return@AndroidView
             }
 
-            val entries = data.mapIndexed { index, pair ->
-                Entry(index.toFloat(), pair.second.toFloat())
-            }
-            val dataSet = LineDataSet(entries, "Equity").apply {
-                color = AndroidColor.rgb(0, 255, 65)
-                setDrawCircles(false)
-                setDrawValues(false)
-                lineWidth = 2f
-                mode = LineDataSet.Mode.CUBIC_BEZIER
-            }
+            val entries =
+                data.mapIndexed { index, pair ->
+                    Entry(index.toFloat(), pair.second.toFloat())
+                }
+            val dataSet =
+                LineDataSet(entries, "Equity").apply {
+                    color = AndroidColor.rgb(0, 255, 65)
+                    setDrawCircles(false)
+                    setDrawValues(false)
+                    lineWidth = 2f
+                    mode = LineDataSet.Mode.CUBIC_BEZIER
+                }
             chart.data = LineData(dataSet)
             chart.invalidate()
-        }
+        },
     )
 }
 
@@ -318,22 +355,26 @@ fun TradeRow(trade: com.cryptodept.domain.usecase.BacktesterEngine.SimulatedTrad
     val colors = LocalTerminalColors.current
     val pnlColor = if (trade.pnlUsd >= 0) colors.primary else colors.danger
     val sdf = SimpleDateFormat("MM/dd HH:mm", Locale.US)
-    
+
     Row(
         modifier = Modifier.fillMaxWidth().padding(8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Column {
             Text(sdf.format(Date(trade.entryTimestamp)), color = colors.dimText, fontSize = 9.sp)
-            Text("$${String.format(Locale.US, "%,.2f", trade.entryPrice)} → $${String.format(Locale.US, "%,.2f", trade.exitPrice)}", color = colors.textPrimary, fontSize = 11.sp)
+            Text(
+                "$${String.format(Locale.US, "%,.2f", trade.entryPrice)} → $${String.format(Locale.US, "%,.2f", trade.exitPrice)}",
+                color = colors.textPrimary,
+                fontSize = 11.sp,
+            )
         }
         Text(
             text = "${if (trade.pnlUsd >= 0) "+" else ""}${String.format(Locale.US, "%.1f", trade.pnlPercent)}%",
             color = pnlColor,
             fontWeight = FontWeight.Bold,
             fontSize = 12.sp,
-            fontFamily = FontFamily.Monospace
+            fontFamily = FontFamily.Monospace,
         )
     }
 }

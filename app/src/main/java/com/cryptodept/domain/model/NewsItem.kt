@@ -1,5 +1,9 @@
 package com.cryptodept.domain.model
 
+import androidx.compose.runtime.Immutable
+import kotlinx.collections.immutable.ImmutableList
+
+@Immutable
 data class NewsItem(
     val id: String,
     val title: String,
@@ -7,7 +11,7 @@ data class NewsItem(
     val source: String,
     val publishedAt: Long,
     val sentiment: NewsSentiment,
-    val currencies: List<String>
+    val currencies: ImmutableList<String>,
 )
 
 enum class NewsSentiment { BULLISH, BEARISH, NEUTRAL }

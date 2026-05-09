@@ -11,10 +11,13 @@ import androidx.room.TypeConverters
         AlertEntity::class,
         TradeJournalEntity::class,
         PredictionAccuracyEntity::class,
-        PortfolioEntity::class
+        PortfolioEntity::class,
+        CustomSignalRuleEntity::class,
+        NewsEntity::class,
+        NetworkHealthEntity::class,
     ],
-    version = 5,
-    exportSchema = true
+    version = 9,
+    exportSchema = true,
 )
 @TypeConverters(Converters::class)
 abstract class CryptoDatabase : RoomDatabase() {
@@ -24,6 +27,9 @@ abstract class CryptoDatabase : RoomDatabase() {
     abstract val tradeJournalDao: TradeJournalDao
     abstract val predictionAccuracyDao: PredictionAccuracyDao
     abstract val portfolioDao: PortfolioDao
+    abstract val customSignalDao: CustomSignalDao
+    abstract val newsDao: NewsDao
+    abstract val networkHealthDao: NetworkHealthDao
 
     companion object {
         const val DATABASE_NAME = "crypto_db"

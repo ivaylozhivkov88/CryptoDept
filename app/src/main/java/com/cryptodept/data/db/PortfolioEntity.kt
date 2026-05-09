@@ -11,25 +11,27 @@ data class PortfolioEntity(
     val symbol: String,
     val quantity: Double,
     val averageEntryPrice: Double,
-    val addedAt: Long
+    val addedAt: Long,
 ) {
-    fun toDomain() = PortfolioEntry(
-        id = id,
-        coinId = coinId,
-        symbol = symbol,
-        quantity = quantity,
-        averageEntryPrice = averageEntryPrice,
-        addedAt = addedAt
-    )
+    fun toDomain() =
+        PortfolioEntry(
+            id = id,
+            coinId = coinId,
+            symbol = symbol,
+            quantity = quantity,
+            averageEntryPrice = averageEntryPrice,
+            addedAt = addedAt,
+        )
 
     companion object {
-        fun fromDomain(entry: PortfolioEntry) = PortfolioEntity(
-            id = entry.id,
-            coinId = entry.coinId,
-            symbol = entry.symbol,
-            quantity = entry.quantity,
-            averageEntryPrice = entry.averageEntryPrice,
-            addedAt = entry.addedAt
-        )
+        fun fromDomain(entry: PortfolioEntry) =
+            PortfolioEntity(
+                id = entry.id,
+                coinId = entry.coinId,
+                symbol = entry.symbol,
+                quantity = entry.quantity,
+                averageEntryPrice = entry.averageEntryPrice,
+                addedAt = entry.addedAt,
+            )
     }
 }

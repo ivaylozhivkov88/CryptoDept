@@ -19,7 +19,7 @@ data class TradeJournal(
     val pnlPercent: Double?,
     val riskRewardActual: Double?,
     val positionSizeUsd: Double?,
-    val marketConditions: String
+    val marketConditions: String,
 )
 
 enum class TradeDirection { LONG, SHORT }
@@ -30,5 +30,5 @@ data class JournalStats(
     val averagePnL: Double,
     val winRate: Double,
     val totalTrades: Int,
-    val averageRR: Double
+    val averageRR: Double,
 )

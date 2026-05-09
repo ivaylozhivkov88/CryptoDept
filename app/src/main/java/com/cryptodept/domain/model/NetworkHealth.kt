@@ -7,5 +7,5 @@ data class NetworkHealth(
     val fearGreedIndex: Int,
     val fearGreedLabel: String,
     val socialPulse: Int = 50,
-    val socialPulseLabel: String = "NEUTRAL"
+    val socialPulseLabel: String = "NEUTRAL",
 )

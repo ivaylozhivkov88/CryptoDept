@@ -11,7 +11,6 @@ import org.junit.Test
 
 @HiltAndroidTest
 class AlertsScreenTest {
-
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)
 
@@ -30,7 +29,7 @@ class AlertsScreenTest {
 
         // Verify Title
         composeTestRule.onNodeWithText(">>> ACTIVE PRICE ALERTS").assertIsDisplayed()
-        
+
         // If empty, should show NO_ACTIVE_ALERTS
         // composeTestRule.onNodeWithText("NO ACTIVE ALERTS FOUND").assertIsDisplayed()
     }

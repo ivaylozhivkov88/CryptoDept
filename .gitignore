@@ -14,3 +14,15 @@
 .cxx
 local.properties
 secrets.properties
+
+# Firebase
+google-services.json
+app/google-services.json
+
+# Keystores & Secrets
+*.jks
+*.txt
+!README.md
+!CRYPTODEPT_MASTERPLAN_v4.md
+!CRYPTODEPT_RULES_4v.md
+!PENDING_BUGS.md

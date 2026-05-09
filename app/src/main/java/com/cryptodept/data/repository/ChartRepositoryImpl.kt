@@ -11,83 +11,95 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class ChartRepositoryImpl @Inject constructor(
-    private val api: CoinGeckoApi
-) : ChartRepository {
+class ChartRepositoryImpl
+    @Inject
+    constructor(
+        private val api: CoinGeckoApi,
+    ) : ChartRepository {
+        // In-memory cache: key = "coinId_days", value = OHLC list
+        private val _cache = MutableStateFlow<Map<String, List<OHLCData>>>(emptyMap())
 
-    // In-memory cache: key = "coinId_days", value = OHLC list
-    private val _cache = MutableStateFlow<Map<String, List<OHLCData>>>(emptyMap())
+        // Timestamp на последния fetch за всеки ключ
+        private val lastFetchTime = mutableMapOf<String, Long>()
+        private val CACHE_TTL_MS = 5 * 60 * 1000L // 5 минути
 
-    // Timestamp на последния fetch за всеки ключ
-    private val lastFetchTime = mutableMapOf<String, Long>()
-    private val CACHE_TTL_MS = 5 * 60 * 1000L // 5 минути
+        override fun getOHLCData(
+            coinId: String,
+            days: Int,
+        ): Flow<List<OHLCData>> {
+            val cacheKey = "${coinId}_$days"
+            return _cache.map { cache -> cache[cacheKey] ?: emptyList() }
+        }
 
-    override fun getOHLCData(coinId: String, days: Int): Flow<List<OHLCData>> {
-        val cacheKey = "${coinId}_$days"
-        return _cache.map { cache -> cache[cacheKey] ?: emptyList() }
-    }
+        override suspend fun refreshOHLCData(
+            coinId: String,
+            days: Int,
+        ): Result<Unit> {
+            val cacheKey = "${coinId}_$days"
 
-    override suspend fun refreshOHLCData(coinId: String, days: Int): Result<Unit> {
-        val cacheKey = "${coinId}_$days"
+            // Проверка на кеша
+            val lastFetch = lastFetchTime[cacheKey] ?: 0L
+            if (System.currentTimeMillis() - lastFetch < CACHE_TTL_MS) {
+                val cached = _cache.value[cacheKey]
+                if (!cached.isNullOrEmpty()) {
+                    Log.d("ChartRepository", "💾 OHLC cache hit for $coinId ($days days)")
+                    return Result.success(Unit)
+                }
+            }
 
-        // Проверка на кеша
-        val lastFetch = lastFetchTime[cacheKey] ?: 0L
-        if (System.currentTimeMillis() - lastFetch < CACHE_TTL_MS) {
-            val cached = _cache.value[cacheKey]
-            if (!cached.isNullOrEmpty()) {
-                Log.d("ChartRepository", "💾 OHLC cache hit for $coinId ($days days)")
-                return Result.success(Unit)
+            return try {
+                Log.d("ChartRepository", "🌐 Fetching OHLC for $coinId ($days days)...")
+
+                // CoinGecko връща List<List<Double>> -> [timestamp, open, high, low, close]
+                val response = api.getCoinOHLC(id = coinId, days = days.toString())
+
+                val data =
+                    response.mapNotNull { item ->
+                        // Подсигуряваме се, че имаме поне 5 елемента (време + 4 цени)
+                        if (item.size >= 5) {
+                            OHLCData(
+                                timestamp = item[0].toLong(),
+                                open = item[1],
+                                high = item[2],
+                                low = item[3],
+                                close = item[4],
+                                volume = 0.0, // CoinGecko OHLC API обикновено не връща обем в този ендпоинт
+                            )
+                        } else {
+                            null
+                        }
+                    }
+
+                if (data.isEmpty()) {
+                    Log.w("ChartRepository", "⚠ Empty or malformed OHLC response for $coinId")
+                    return Result.failure(Exception("No valid OHLC data for $coinId"))
+                }
+
+                // Обновяване на кеша по thread-safe начин
+                synchronized(this) {
+                    val currentMap = _cache.value.toMutableMap()
+                    currentMap[cacheKey] = data
+                    _cache.value = currentMap
+                    lastFetchTime[cacheKey] = System.currentTimeMillis()
+                }
+
+                Log.d("ChartRepository", "✅ OHLC loaded: ${data.size} candles for $coinId")
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Log.e("ChartRepository", "❌ OHLC fetch failed for $coinId: ${e.message}")
+                Result.failure(e)
             }
         }
 
-        return try {
-            Log.d("ChartRepository", "🌐 Fetching OHLC for $coinId ($days days)...")
-
-            // CoinGecko връща List<List<Double>> -> [timestamp, open, high, low, close]
-            val response = api.getCoinOHLC(id = coinId, days = days.toString())
-
-            val data = response.mapNotNull { item ->
-                // Подсигуряваме се, че имаме поне 5 елемента (време + 4 цени)
-                if (item.size >= 5) {
-                    OHLCData(
-                        timestamp = item[0].toLong(),
-                        open = item[1],
-                        high = item[2],
-                        low = item[3],
-                        close = item[4],
-                        volume = 0.0 // CoinGecko OHLC API обикновено не връща обем в този ендпоинт
-                    )
-                } else null
-            }
-
-            if (data.isEmpty()) {
-                Log.w("ChartRepository", "⚠ Empty or malformed OHLC response for $coinId")
-                return Result.failure(Exception("No valid OHLC data for $coinId"))
-            }
-
-            // Обновяване на кеша по thread-safe начин
-            synchronized(this) {
-                val currentMap = _cache.value.toMutableMap()
-                currentMap[cacheKey] = data
-                _cache.value = currentMap
-                lastFetchTime[cacheKey] = System.currentTimeMillis()
-            }
-
-            Log.d("ChartRepository", "✅ OHLC loaded: ${data.size} candles for $coinId")
-            Result.success(Unit)
-
-        } catch (e: Exception) {
-            Log.e("ChartRepository", "❌ OHLC fetch failed for $coinId: ${e.message}")
-            Result.failure(e)
+        /**
+         * Връща кешираните OHLC данни директно (без Flow).
+         * Използва се от AnalysisViewModel за бърз достъп.
+         */
+        fun getCachedOHLC(
+            coinId: String,
+            days: Int,
+        ): List<OHLCData> {
+            val cacheKey = "${coinId}_$days"
+            return _cache.value[cacheKey] ?: emptyList()
         }
     }
-
-    /**
-     * Връща кешираните OHLC данни директно (без Flow).
-     * Използва се от AnalysisViewModel за бърз достъп.
-     */
-    fun getCachedOHLC(coinId: String, days: Int): List<OHLCData> {
-        val cacheKey = "${coinId}_$days"
-        return _cache.value[cacheKey] ?: emptyList()
-    }
-}

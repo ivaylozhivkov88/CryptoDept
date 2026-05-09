@@ -5,10 +5,10 @@ import com.cryptodept.domain.repository.AlertsRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class GetAlertsUseCase @Inject constructor(
-    private val repository: AlertsRepository
-) {
-    operator fun invoke(): Flow<List<Alert>> {
-        return repository.getAlerts()
+class GetAlertsUseCase
+    @Inject
+    constructor(
+        private val repository: AlertsRepository,
+    ) {
+        operator fun invoke(): Flow<List<Alert>> = repository.getAlerts()
     }
-}

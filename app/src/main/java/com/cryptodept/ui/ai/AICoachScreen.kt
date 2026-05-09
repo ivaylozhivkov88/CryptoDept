@@ -26,9 +26,7 @@ import com.cryptodept.viewmodel.AICoachViewModel
 import com.cryptodept.viewmodel.ChatMessage
 
 @Composable
-fun AICoachScreen(
-    viewModel: AICoachViewModel = hiltViewModel()
-) {
+fun AICoachScreen(viewModel: AICoachViewModel = hiltViewModel()) {
     val colors = LocalTerminalColors.current
     val messages = viewModel.messages
     val isLoading by viewModel.isLoading.collectAsState()
@@ -42,17 +40,18 @@ fun AICoachScreen(
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colors.background)
-            .padding(16.dp)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(colors.background)
+                .padding(16.dp),
     ) {
         Text(
             text = ">>> AI TRADE COACH [GEMINI]",
             color = colors.primary,
             fontFamily = FontFamily.Monospace,
             fontSize = 16.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -60,7 +59,7 @@ fun AICoachScreen(
         // Quick Actions
         Row(
             modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             QuickActionButton("ANALYZE JOURNAL") { viewModel.analyzeJournal() }
             QuickActionButton("DAILY ADVICE") { viewModel.sendMessage("GIVE ME DAILY TRADING ADVICE") }
@@ -72,12 +71,13 @@ fun AICoachScreen(
         // Chat History
         LazyColumn(
             state = listState,
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .border(1.dp, colors.grid, RectangleShape)
-                .padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .border(1.dp, colors.grid, RectangleShape)
+                    .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             items(messages) { msg ->
                 ChatBubble(msg)
@@ -93,12 +93,13 @@ fun AICoachScreen(
 
         // Input
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-                .border(1.dp, colors.primary, RectangleShape)
-                .padding(horizontal = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .border(1.dp, colors.primary, RectangleShape)
+                    .padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text("YOU> ", color = colors.amber, fontFamily = FontFamily.Monospace, fontSize = 14.sp)
             BasicTextField(
@@ -108,12 +109,13 @@ fun AICoachScreen(
                 textStyle = TextStyle(color = colors.primary, fontFamily = FontFamily.Monospace, fontSize = 14.sp),
                 cursorBrush = SolidColor(colors.primary),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
-                keyboardActions = KeyboardActions(onSend = {
-                    if (inputText.isNotBlank()) {
-                        viewModel.sendMessage(inputText)
-                        inputText = ""
-                    }
-                })
+                keyboardActions =
+                    KeyboardActions(onSend = {
+                        if (inputText.isNotBlank()) {
+                            viewModel.sendMessage(inputText)
+                            inputText = ""
+                        }
+                    }),
             )
         }
     }
@@ -127,29 +129,34 @@ fun ChatBubble(msg: ChatMessage) {
     val prefix = if (isCoach) "COACH> " else "YOU> "
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(1.dp, borderColor.copy(alpha = 0.5f), RectangleShape)
-            .padding(8.dp)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .border(1.dp, borderColor.copy(alpha = 0.5f), RectangleShape)
+                .padding(8.dp),
     ) {
         Text(
             text = prefix + msg.text,
             color = if (isCoach) colors.primary else colors.textPrimary,
             fontFamily = FontFamily.Monospace,
             fontSize = 13.sp,
-            lineHeight = 18.sp
+            lineHeight = 18.sp,
         )
     }
 }
 
 @Composable
-fun QuickActionButton(label: String, onClick: () -> Unit) {
+fun QuickActionButton(
+    label: String,
+    onClick: () -> Unit,
+) {
     val colors = LocalTerminalColors.current
     Box(
-        modifier = Modifier
-            .border(1.dp, colors.primary, RectangleShape)
-            .clickable { onClick() }
-            .padding(horizontal = 12.dp, vertical = 6.dp)
+        modifier =
+            Modifier
+                .border(1.dp, colors.primary, RectangleShape)
+                .clickable { onClick() }
+                .padding(horizontal = 12.dp, vertical = 6.dp),
     ) {
         Text(label, color = colors.primary, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
     }

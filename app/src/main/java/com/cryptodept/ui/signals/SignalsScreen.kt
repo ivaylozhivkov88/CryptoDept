@@ -12,52 +12,142 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cryptodept.domain.model.Sentiment
 import com.cryptodept.domain.model.SignalStrength
+import com.cryptodept.domain.usecase.AlphaSignal
+import com.cryptodept.domain.usecase.SignalType
 import com.cryptodept.ui.components.TerminalLoadingSkeleton
-import com.cryptodept.ui.theme.LocalTerminalColors
 import com.cryptodept.ui.theme.GreenPrimary
+import com.cryptodept.ui.theme.LocalTerminalColors
 import com.cryptodept.ui.theme.TerminalRed
-import com.cryptodept.viewmodel.SignalsViewModel
 import com.cryptodept.viewmodel.CoinSignal
+import com.cryptodept.viewmodel.SignalsViewModel
+import java.util.Locale
 
 @Composable
-fun SignalsScreen(
-    viewModel: SignalsViewModel = hiltViewModel()
-) {
+fun SignalsScreen(viewModel: SignalsViewModel = hiltViewModel()) {
     val signals by viewModel.signals.collectAsState()
+    val alphaSignals by viewModel.alphaSignals.collectAsState()
+    val isPro by viewModel.isPro.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val colors = LocalTerminalColors.current
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colors.background)
-            .padding(8.dp)
+    LazyColumn(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(colors.background)
+                .padding(8.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text(
-            text = "--- COMPOSITE_SIGNAL_FEED [v2.0] ---",
-            color = colors.primary,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
+        item {
+            Text(
+                text = "--- ALPHA_INTELLIGENCE_FEED [PRO] ---",
+                color = colors.amber,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Monospace,
+                modifier = Modifier.padding(bottom = 8.dp),
+            )
+        }
 
-        if (isLoading) {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(5) {
-                    TerminalLoadingSkeleton(modifier = Modifier.height(100.dp).padding(vertical = 4.dp))
-                }
+        if (alphaSignals.isNotEmpty()) {
+            items(alphaSignals) { alpha ->
+                AlphaSignalRow(alpha, isPro)
+            }
+        } else if (isLoading) {
+            item { TerminalLoadingSkeleton(modifier = Modifier.height(80.dp)) }
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "--- COMPOSITE_MARKET_SIGNALS ---",
+                color = colors.primary,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Monospace,
+                modifier = Modifier.padding(bottom = 8.dp),
+            )
+        }
+
+        if (isLoading && signals.isEmpty()) {
+            items(3) {
+                TerminalLoadingSkeleton(modifier = Modifier.height(100.dp).padding(vertical = 4.dp))
             }
         } else {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(signals) { signal ->
-                    SignalRow(signal)
-                }
+            items(signals) { signal ->
+                SignalRow(signal)
+            }
+        }
+    }
+}
+
+@Composable
+fun AlphaSignalRow(signal: AlphaSignal, isPro: Boolean) {
+    val colors = LocalTerminalColors.current
+    
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(2.dp, colors.amber, RectangleShape)
+            .background(if (isPro) colors.amber.copy(alpha = 0.05f) else Color.DarkGray.copy(alpha = 0.2f))
+            .padding(12.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "★ ALPHA_SIGNAL",
+                color = colors.amber,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Monospace,
+                fontSize = 12.sp
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = "STRENGTH: ${signal.strength}%",
+                color = colors.amber,
+                fontSize = 11.sp,
+                fontFamily = FontFamily.Monospace
+            )
+        }
+        
+        Text(
+            text = "TYPE: ${signal.type.name.replace("_", " ")}",
+            color = colors.textPrimary,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.ExtraBold,
+            fontFamily = FontFamily.Monospace
+        )
+        
+        Spacer(modifier = Modifier.height(4.dp))
+        
+        if (isPro) {
+            Text(
+                text = signal.reason,
+                color = colors.primary,
+                fontSize = 12.sp,
+                fontFamily = FontFamily.Monospace
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(20.dp)
+                    .background(colors.grid.copy(alpha = 0.5f))
+            ) {
+                Text(
+                    text = "CONFIDENTIAL_DATA_OBFUSCATED_UPGRADE_TO_PRO",
+                    color = Color.Black,
+                    fontSize = 9.sp,
+                    fontFamily = FontFamily.Monospace,
+                    modifier = Modifier.align(Alignment.Center)
+                )
             }
         }
     }
@@ -68,34 +158,36 @@ fun SignalRow(coinSignal: CoinSignal) {
     val signal = coinSignal.signal
     val colors = LocalTerminalColors.current
 
-    val strengthColor = when (signal.strength) {
-        SignalStrength.STRONG_BUY, SignalStrength.BUY -> GreenPrimary
-        SignalStrength.STRONG_SELL, SignalStrength.SELL -> TerminalRed
-        else -> colors.dimText
-    }
+    val strengthColor =
+        when (signal.strength) {
+            SignalStrength.STRONG_BUY, SignalStrength.BUY -> GreenPrimary
+            SignalStrength.STRONG_SELL, SignalStrength.SELL -> TerminalRed
+            else -> colors.dimText
+        }
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(1.dp, strengthColor.copy(alpha = 0.5f))
-            .padding(12.dp)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .border(1.dp, strengthColor.copy(alpha = 0.5f))
+                .padding(12.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = "⚡ NEW_SIGNAL: ${coinSignal.coinId.uppercase()}",
                 color = colors.primary,
                 fontWeight = FontWeight.Bold,
-                fontSize = 14.sp
+                fontSize = 14.sp,
             )
             Text(
                 text = signal.strength.name.replace("_", " "),
                 color = strengthColor,
                 fontWeight = FontWeight.Black,
-                fontSize = 12.sp
+                fontSize = 12.sp,
             )
         }
 
@@ -103,15 +195,16 @@ fun SignalRow(coinSignal: CoinSignal) {
 
         Row(modifier = Modifier.fillMaxWidth()) {
             signal.indicators.forEach { ind ->
-                val indColor = when (ind.sentiment) {
-                    Sentiment.BULLISH -> GreenPrimary
-                    Sentiment.BEARISH -> TerminalRed
-                    else -> colors.dimText
-                }
+                val indColor =
+                    when (ind.sentiment) {
+                        Sentiment.BULLISH -> GreenPrimary
+                        Sentiment.BEARISH -> TerminalRed
+                        else -> colors.dimText
+                    }
                 Text(
                     text = "${ind.name}: ${ind.value}  ",
                     color = indColor,
-                    fontSize = 10.sp
+                    fontSize = 10.sp,
                 )
             }
         }
@@ -125,7 +218,7 @@ fun SignalRow(coinSignal: CoinSignal) {
             Text(
                 text = "█".repeat(dots) + "░".repeat(10 - dots) + " ${(signal.confidence * 100).toInt()}%",
                 color = colors.primary,
-                fontSize = 10.sp
+                fontSize = 10.sp,
             )
         }
     }

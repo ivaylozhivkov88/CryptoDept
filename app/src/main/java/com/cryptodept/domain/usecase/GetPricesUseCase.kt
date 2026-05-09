@@ -5,10 +5,10 @@ import com.cryptodept.domain.repository.CryptoRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class GetPricesUseCase @Inject constructor(
-    private val repository: CryptoRepository
-) {
-    operator fun invoke(): Flow<List<CoinPrice>> {
-        return repository.getTrackedCoinPrices()
+class GetPricesUseCase
+    @Inject
+    constructor(
+        private val repository: CryptoRepository,
+    ) {
+        operator fun invoke(): Flow<List<CoinPrice>> = repository.getTrackedCoinPrices()
     }
-}

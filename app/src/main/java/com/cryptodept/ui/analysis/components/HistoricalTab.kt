@@ -11,8 +11,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cryptodept.data.db.PriceHistoryEntity
-import com.cryptodept.ui.theme.WallStreetGreen
 import com.cryptodept.ui.theme.GridGray
+import com.cryptodept.ui.theme.WallStreetGreen
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -36,14 +36,14 @@ fun HistoricalTab(history: List<PriceHistoryEntity>) {
                         modifier = Modifier.weight(1f),
                         color = WallStreetGreen,
                         fontFamily = FontFamily.Monospace,
-                        fontSize = 12.sp
+                        fontSize = 12.sp,
                     )
                     Text(
                         text = "$${String.format(Locale.US, "%.2f", entry.price)}",
                         modifier = Modifier.weight(1f),
                         color = WallStreetGreen,
                         fontFamily = FontFamily.Monospace,
-                        fontSize = 12.sp
+                        fontSize = 12.sp,
                     )
                 }
                 HorizontalDivider(color = GridGray.copy(alpha = 0.3f))

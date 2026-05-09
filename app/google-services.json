@@ -12,7 +12,20 @@
           "package_name": "com.cryptodept"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "227749481414-blpf109jotjjh5ls71j0g0ribsi5gt53.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cryptodept",
+            "certificate_hash": "de100556a0e5226ccee812c96d2220d8102f71a7"
+          }
+        },
+        {
+          "client_id": "227749481414-4ao5bfu5g8ifbqr77s689b7dkdk3ksu5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAzQdHGrfCmtaVKiVr5Cx5Yhje3q3zpgGA"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "227749481414-4ao5bfu5g8ifbqr77s689b7dkdk3ksu5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

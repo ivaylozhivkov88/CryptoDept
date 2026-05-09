@@ -2,9 +2,7 @@
 <data-extraction-rules>
     <cloud-backup>
         <include domain="sharedpref" path="." />
-        <exclude domain="sharedpref" path="com.cryptodept.secrets" />
         <include domain="database" path="crypto_database" />
-        <exclude domain="file" path="secrets.properties" />
     </cloud-backup>
     <device-transfer>
         <include domain="sharedpref" path="." />

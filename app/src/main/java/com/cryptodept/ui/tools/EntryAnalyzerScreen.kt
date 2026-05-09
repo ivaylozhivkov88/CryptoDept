@@ -18,16 +18,17 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cryptodept.domain.model.*
 import com.cryptodept.ui.theme.*
-import com.cryptodept.viewmodel.EntryAnalyzerViewModel
-import com.cryptodept.viewmodel.EntryAnalysisUiState
 import com.cryptodept.viewmodel.AnalysisComponent
+import com.cryptodept.viewmodel.EntryAnalysisUiState
+import com.cryptodept.viewmodel.EntryAnalyzerViewModel
 import java.util.Locale
 
 @Composable
 fun EntryAnalyzerScreen(
     viewModel: EntryAnalyzerViewModel = hiltViewModel(),
     onBack: () -> Unit = {},
-    onUseInPlanner: (String, Double, Double, Double) -> Unit = { _, _, _, _ -> }
+    onUseInPlanner: (String, Double, Double, Double) -> Unit = { _, _, _, _ -> },
+    onNavigateToMarkets: () -> Unit = {},
 ) {
     val colors = LocalTerminalColors.current
     val trackedCoins by viewModel.trackedCoins.collectAsState()
@@ -35,41 +36,61 @@ fun EntryAnalyzerScreen(
     val uiState by viewModel.entryData.collectAsState()
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colors.background)
-            .padding(16.dp)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(colors.background)
+                .padding(16.dp),
     ) {
         // 1. Header
-        Text(
-            text = ">>> OPTIMAL ENTRY CALCULATOR",
-            color = colors.primary,
-            fontFamily = FontFamily.Monospace,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = ">>> OPTIMAL ENTRY CALCULATOR",
+                color = colors.primary,
+                fontFamily = FontFamily.Monospace,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                text = "[TRACK_MORE]",
+                color = colors.amber,
+                fontSize = 10.sp,
+                fontFamily = FontFamily.Monospace,
+                modifier = Modifier.clickable { onNavigateToMarkets() }
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // 2. Coin selector row
         LazyRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(trackedCoins) { coin ->
                 val isSelected = selectedCoin == coin
                 Box(
-                    modifier = Modifier
-                        .border(1.dp, if (isSelected) colors.primary else colors.grid, RectangleShape)
-                        .background(if (isSelected) colors.primary.copy(alpha = 0.2f) else Color.Transparent)
-                        .clickable { viewModel.selectCoin(coin) }
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                    modifier =
+                        Modifier
+                            .border(
+                                width = if (isSelected) 3.dp else 1.dp,
+                                color = if (isSelected) colors.primary else colors.grid,
+                                shape = RectangleShape
+                            )
+                            .background(if (isSelected) colors.primary.copy(alpha = 0.15f) else Color.Transparent)
+                            .clickable { viewModel.selectCoin(coin) }
+                            .padding(horizontal = 14.dp, vertical = 8.dp),
                 ) {
                     Text(
                         text = coin.uppercase(),
                         color = if (isSelected) colors.primary else colors.dimText,
-                        fontSize = 10.sp,
-                        fontFamily = FontFamily.Monospace
+                        fontSize = 12.sp,
+                        fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Normal,
+                        fontFamily = FontFamily.Monospace,
                     )
                 }
             }
@@ -89,7 +110,7 @@ fun EntryAnalyzerScreen(
                         state = state,
                         colors = colors,
                         onUseInPlanner = onUseInPlanner,
-                        onRefresh = { viewModel.refresh() }
+                        onRefresh = { viewModel.refresh() },
                     )
                 }
                 is EntryAnalysisUiState.Error -> {
@@ -99,11 +120,11 @@ fun EntryAnalyzerScreen(
                 }
             }
         }
-        
+
         Spacer(modifier = Modifier.height(8.dp))
         TextButton(
             onClick = onBack,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+            modifier = Modifier.align(Alignment.CenterHorizontally),
         ) {
             Text("< BACK_TO_TOOLS", color = colors.primary, fontFamily = FontFamily.Monospace)
         }
@@ -115,16 +136,16 @@ fun EntryAnalyzerContent(
     state: EntryAnalysisUiState.Success,
     colors: TerminalColorSet,
     onUseInPlanner: (String, Double, Double, Double) -> Unit,
-    onRefresh: () -> Unit
+    onRefresh: () -> Unit,
 ) {
     val analysis = state.analysis
-    
+
     LazyColumn(modifier = Modifier.fillMaxSize()) {
-        // 4. REAL-TIME DATA панел
+        // 4. REAL-TIME DATA PANEL
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 val data = "RSI: [${String.format(Locale.US, "%.1f", state.currentRsi)}] | TREND: [▲]"
                 Text(data, color = colors.dimText, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
@@ -132,21 +153,23 @@ fun EntryAnalyzerContent(
             HorizontalDivider(color = colors.grid, thickness = 1.dp, modifier = Modifier.padding(vertical = 12.dp))
         }
 
-        // 6. ENTRY ANALYSIS резултати
+        // 6. ENTRY ANALYSIS RESULTS
         item {
-            val scoreColor = when {
-                analysis.entryScore > 70 -> colors.primary
-                analysis.entryScore > 40 -> colors.amber
-                else -> colors.danger
-            }
-            
+            val scoreColor =
+                when {
+                    analysis.entryScore > 70 -> colors.primary
+                    analysis.entryScore > 40 -> colors.amber
+                    else -> colors.danger
+                }
+
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(1.dp, scoreColor)
-                    .background(scoreColor.copy(alpha = 0.05f))
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, scoreColor)
+                        .background(scoreColor.copy(alpha = 0.05f))
+                        .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text("ENTRY SCORE", color = scoreColor, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
                 Text(
@@ -154,22 +177,22 @@ fun EntryAnalyzerContent(
                     color = scoreColor,
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Black,
-                    fontFamily = FontFamily.Monospace
+                    fontFamily = FontFamily.Monospace,
                 )
                 Text(
                     text = analysis.verdict.name.replace("_", " "),
                     color = scoreColor,
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             state.components.forEach { component ->
                 ComponentProgressBar(component, colors)
             }
-            
+
             HorizontalDivider(color = colors.grid, thickness = 1.dp, modifier = Modifier.padding(vertical = 12.dp))
         }
 
@@ -178,7 +201,7 @@ fun EntryAnalyzerContent(
             Text(">>> IDENTIFIED ENTRY ZONES", color = colors.primary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
         }
-        
+
         if (analysis.betterZones.isEmpty()) {
             item {
                 Text("NO OPTIMAL ZONES DETECTED", color = colors.dimText, fontSize = 11.sp)
@@ -195,22 +218,27 @@ fun EntryAnalyzerContent(
             Spacer(modifier = Modifier.height(16.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(
-                    onClick = { 
+                    onClick = {
                         val zone = analysis.betterZones.firstOrNull()
-                        onUseInPlanner(analysis.coin, zone?.priceTo ?: analysis.currentPrice, zone?.priceFrom ?: (analysis.currentPrice * 0.95), analysis.currentPrice * 1.1)
+                        onUseInPlanner(
+                            analysis.coin,
+                            zone?.priceTo ?: analysis.currentPrice,
+                            zone?.priceFrom ?: (analysis.currentPrice * 0.95),
+                            analysis.currentPrice * 1.1,
+                        )
                     },
                     modifier = Modifier.weight(1f).height(48.dp),
                     shape = RectangleShape,
-                    colors = ButtonDefaults.buttonColors(containerColor = colors.primary, contentColor = colors.background)
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.primary, contentColor = colors.background),
                 ) {
                     Text("USE IN PLANNER", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 }
-                
+
                 OutlinedButton(
                     onClick = onRefresh,
                     modifier = Modifier.weight(0.5f).height(48.dp),
                     shape = RectangleShape,
-                    border = BorderStroke(1.dp, colors.primary)
+                    border = BorderStroke(1.dp, colors.primary),
                 ) {
                     Text("REFRESH", color = colors.primary, fontSize = 11.sp)
                 }
@@ -220,7 +248,10 @@ fun EntryAnalyzerContent(
 }
 
 @Composable
-fun ComponentProgressBar(component: AnalysisComponent, colors: TerminalColorSet) {
+fun ComponentProgressBar(
+    component: AnalysisComponent,
+    colors: TerminalColorSet,
+) {
     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(component.name, color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
@@ -231,7 +262,7 @@ fun ComponentProgressBar(component: AnalysisComponent, colors: TerminalColorSet)
             modifier = Modifier.fillMaxWidth().height(4.dp),
             color = colors.primary,
             trackColor = colors.grid,
-            strokeCap = RectangleShape.let { androidx.compose.ui.graphics.StrokeCap.Butt }
+            strokeCap = RectangleShape.let { androidx.compose.ui.graphics.StrokeCap.Butt },
         )
     }
 }
@@ -241,11 +272,12 @@ fun EntryZoneCard(zone: EntryZone) {
     val colors = LocalTerminalColors.current
     val color = Color(zone.type.color)
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(1.dp, color)
-            .background(color.copy(alpha = 0.05f))
-            .padding(12.dp)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .border(1.dp, color)
+                .background(color.copy(alpha = 0.05f))
+                .padding(12.dp),
     ) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(zone.type.label, color = color, fontWeight = FontWeight.Bold, fontSize = 11.sp)
@@ -255,7 +287,7 @@ fun EntryZoneCard(zone: EntryZone) {
             text = "$${String.format(Locale.US, "%,.2f", zone.priceFrom)} - $${String.format(Locale.US, "%,.2f", zone.priceTo)}",
             color = colors.textPrimary,
             fontSize = 15.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
         )
         Text(zone.reason, color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
     }

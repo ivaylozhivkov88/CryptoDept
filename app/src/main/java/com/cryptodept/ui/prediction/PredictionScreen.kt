@@ -27,11 +27,12 @@ private val TermRed = Color(0xFFFF3131)
 fun PredictionScreen(prediction: PricePrediction) {
     Surface(color = TermBg, modifier = Modifier.fillMaxSize()) {
         LazyColumn(
-            modifier = Modifier
-                .padding(8.dp)
-                .border(1.dp, TermGreen, RoundedCornerShape(4.dp))
-                .padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier =
+                Modifier
+                    .padding(8.dp)
+                    .border(1.dp, TermGreen, RoundedCornerShape(4.dp))
+                    .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             item { TerminalHeader(prediction) }
             item { ConsensusSection(prediction.ensembleConsensus) }
@@ -56,8 +57,12 @@ fun TerminalHeader(p: PricePrediction) {
             Text("[${p.coinId} ▼]", color = TermGreen, fontWeight = FontWeight.Bold)
         }
         Text(
-            "DATA QUALITY: ${"█".repeat((p.dataQuality * 10).toInt())}${"░".repeat(10 - (p.dataQuality * 10).toInt())} ${(p.dataQuality * 100).toInt()}%",
-            color = TermGreen, fontSize = 12.sp, fontFamily = FontFamily.Monospace
+            "DATA QUALITY: ${"█".repeat(
+                (p.dataQuality * 10).toInt(),
+            )}${"░".repeat(10 - (p.dataQuality * 10).toInt())} ${(p.dataQuality * 100).toInt()}%",
+            color = TermGreen,
+            fontSize = 12.sp,
+            fontFamily = FontFamily.Monospace,
         )
         HorizontalDivider(Modifier.padding(vertical = 8.dp), color = TermGreen, thickness = 1.dp)
     }
@@ -65,11 +70,12 @@ fun TerminalHeader(p: PricePrediction) {
 
 @Composable
 fun ConsensusSection(consensus: EnsembleConsensus) {
-    val color = when(consensus.direction) {
-        Direction.STRONG_UP, Direction.UP -> TermGreen
-        Direction.DOWN, Direction.STRONG_DOWN -> TermRed
-        else -> TermAmber
-    }
+    val color =
+        when (consensus.direction) {
+            Direction.STRONG_UP, Direction.UP -> TermGreen
+            Direction.DOWN, Direction.STRONG_DOWN -> TermRed
+            else -> TermAmber
+        }
     Column {
         Text("ENSEMBLE CONSENSUS: $color ${consensus.direction}", color = color, fontWeight = FontWeight.Bold, fontSize = 18.sp)
         Text("Confidence: ████████░░ ${(consensus.overallConfidence * 100).toInt()}%", color = TermGreen)
@@ -88,7 +94,11 @@ fun PriceTargetsSection(p: PricePrediction) {
 }
 
 @Composable
-fun TargetLine(label: String, target: PriceTarget, current: Double) {
+fun TargetLine(
+    label: String,
+    target: PriceTarget,
+    current: Double,
+) {
     Column {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text("$label L: ${target.low.toInt()}", color = TermGreen, fontSize = 10.sp)
@@ -96,9 +106,9 @@ fun TargetLine(label: String, target: PriceTarget, current: Double) {
             Text("H: ${target.high.toInt()}", color = TermGreen, fontSize = 10.sp)
         }
         Canvas(Modifier.fillMaxWidth().height(12.dp)) {
-            drawLine(color = TermGreen, start = Offset(0f, size.height/2), end = Offset(size.width, size.height/2), strokeWidth = 2f)
+            drawLine(color = TermGreen, start = Offset(0f, size.height / 2), end = Offset(size.width, size.height / 2), strokeWidth = 2f)
             val pos = ((current - target.low) / (target.high - target.low)).coerceIn(0.0, 1.0).toFloat()
-            drawCircle(color = TermGreen, radius = 6f, center = Offset(size.width * pos, size.height/2))
+            drawCircle(color = TermGreen, radius = 6f, center = Offset(size.width * pos, size.height / 2))
         }
     }
 }
@@ -109,7 +119,11 @@ fun SectionHeader(title: String) {
 }
 
 @Composable
-fun ModelRow(model: PredictionModel, vote: ModelVote, isDissenter: Boolean) {
+fun ModelRow(
+    model: PredictionModel,
+    vote: ModelVote,
+    isDissenter: Boolean,
+) {
     val color = if (isDissenter) TermAmber else TermGreen
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         Text("${if (isDissenter) "⚠ " else ""}${model.displayName.take(15)}", color = color, fontSize = 12.sp)
@@ -121,12 +135,20 @@ fun ModelRow(model: PredictionModel, vote: ModelVote, isDissenter: Boolean) {
 fun DistributionSection(dist: PriceDistribution) {
     Column {
         DistributionBar("50%ile (MED)", dist.percentile50, dist.percentile90)
-        Text("SKEW: ${if(dist.skewness > 0) "▲ BULLISH" else "▼ BEARISH"} (${String.format("%.2f", dist.skewness)})", color = TermGreen, fontSize = 11.sp)
+        Text(
+            "SKEW: ${if (dist.skewness > 0) "▲ BULLISH" else "▼ BEARISH"} (${String.format("%.2f", dist.skewness)})",
+            color = TermGreen,
+            fontSize = 11.sp,
+        )
     }
 }
 
 @Composable
-fun DistributionBar(label: String, value: Double, max: Double) {
+fun DistributionBar(
+    label: String,
+    value: Double,
+    max: Double,
+) {
     val ratio = (value / max).coerceIn(0.0, 1.0).toFloat()
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(label.padEnd(12), color = TermGreen, fontSize = 10.sp, modifier = Modifier.width(80.dp))
@@ -140,6 +162,6 @@ fun Footer() {
         "MATHEMATICAL MODELS ONLY. NOT FINANCIAL ADVICE.\nRUNNING 1000 MONTE CARLO SIMULATIONS... DONE.",
         color = TermGreen.copy(alpha = 0.5f),
         fontSize = 9.sp,
-        modifier = Modifier.padding(top = 10.dp)
+        modifier = Modifier.padding(top = 10.dp),
     )
 }

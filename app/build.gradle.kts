@@ -8,6 +8,9 @@ plugins {
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics)
+    alias(libs.plugins.firebase.perf)
+    alias(libs.plugins.ktlint)
+    alias(libs.plugins.detekt)
 }
 
 android {
@@ -23,22 +26,42 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        val secrets = Properties().apply {
-            val secretsFile = rootProject.file("secrets.properties")
-            if (secretsFile.exists()) {
-                load(secretsFile.inputStream())
+        val localProps =
+            Properties().apply {
+                val localPropsFile = rootProject.file("local.properties")
+                if (localPropsFile.exists()) {
+                    localPropsFile.inputStream().use { load(it) }
+                }
             }
-        }
 
-        buildConfigField("String", "COINGECKO_API_KEY", "\"${secrets["COINGECKO_API_KEY"] ?: ""}\"")
-        buildConfigField("String", "BINANCE_API_KEY", "\"${secrets["BINANCE_API_KEY"] ?: ""}\"")
-        buildConfigField("String", "ETHERSCAN_API_KEY", "\"${secrets["ETHERSCAN_API_KEY"] ?: ""}\"")
-        buildConfigField("String", "CRYPTOPANIC_API_KEY", "\"${secrets["CRYPTOPANIC_API_KEY"] ?: ""}\"")
-        buildConfigField("String", "COINGLASS_API_KEY", "\"${secrets["COINGLASS_API_KEY"] ?: ""}\"")
-        buildConfigField("String", "ALPHA_VANTAGE_API_KEY", "\"${secrets["ALPHA_VANTAGE_API_KEY"] ?: ""}\"")
-        buildConfigField("String", "COINMARKETCAL_API_KEY", "\"${secrets["COINMARKETCAL_API_KEY"] ?: ""}\"")
-        buildConfigField("String", "GEMINI_API_KEY", "\"${secrets["GEMINI_API_KEY"] ?: ""}\"")
-        buildConfigField("String", "WHALE_ALERT_API_KEY", "\"${secrets["WHALE_ALERT_API_KEY"] ?: ""}\"")
+        fun getSecret(key: String): String = localProps.getProperty(key) ?: ""
+
+        buildConfigField("String", "COINGECKO_API_KEY", "\"${getSecret("COINGECKO_API_KEY")}\"")
+        buildConfigField("String", "BINANCE_API_KEY", "\"${getSecret("BINANCE_API_KEY")}\"")
+        buildConfigField("String", "ETHERSCAN_API_KEY", "\"${getSecret("ETHERSCAN_API_KEY")}\"")
+        buildConfigField("String", "CRYPTOPANIC_API_KEY", "\"${getSecret("CRYPTOPANIC_API_KEY")}\"")
+        buildConfigField("String", "COINGLASS_API_KEY", "\"${getSecret("COINGLASS_API_KEY")}\"")
+        buildConfigField("String", "ALPHA_VANTAGE_API_KEY", "\"${getSecret("ALPHA_VANTAGE_API_KEY")}\"")
+        buildConfigField("String", "COINMARKETCAL_API_KEY", "\"${getSecret("COINMARKETCAL_API_KEY")}\"")
+        buildConfigField("String", "GEMINI_API_KEY", "\"${getSecret("GEMINI_API_KEY")}\"")
+        buildConfigField("String", "HELIUS_API_KEY", "\"${getSecret("HELIUS_API_KEY")}\"")
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${getSecret("GOOGLE_WEB_CLIENT_ID")}\"")
+    }
+
+    signingConfigs {
+        create("release") {
+            val localProps =
+                Properties().apply {
+                    val localPropsFile = rootProject.file("local.properties")
+                    if (localPropsFile.exists()) {
+                        localPropsFile.inputStream().use { load(it) }
+                    }
+                }
+            storeFile = file(localProps.getProperty("KEYSTORE_PATH") ?: "keystore.jks")
+            storePassword = localProps.getProperty("KEYSTORE_PASSWORD")
+            keyAlias = localProps.getProperty("KEY_ALIAS")
+            keyPassword = localProps.getProperty("KEY_PASSWORD")
+        }
     }
 
     // Enable Room schema export for migration tracking
@@ -52,8 +75,9 @@ android {
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
@@ -74,8 +98,27 @@ android {
     }
 }
 
+ktlint {
+    version.set("1.3.1")
+    android.set(true)
+    ignoreFailures.set(true)
+    reporters {
+        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.PLAIN)
+    }
+}
+
+detekt {
+    toolVersion = "1.23.6"
+    config.setFrom("$rootDir/detekt.yml")
+    baseline = file("$rootDir/detekt-baseline.xml")
+    buildUponDefaultConfig = true
+    allRules = false
+    autoCorrect = false
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -86,6 +129,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.work.runtime.ktx)
@@ -96,9 +140,14 @@ dependencies {
     implementation(libs.androidx.hilt.work)
     ksp(libs.androidx.hilt.compiler)
 
+    // Paging
+    implementation(libs.androidx.paging.runtime)
+    implementation(libs.androidx.paging.compose)
+
     // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.paging)
     ksp(libs.androidx.room.compiler)
 
     // DataStore
@@ -113,6 +162,8 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.kotlinx.collections.immutable)
 
     // Charts
     implementation(libs.mpandroidchart)
@@ -130,7 +181,10 @@ dependencies {
     implementation(libs.firebase.messaging)
     implementation(libs.firebase.appcheck)
     implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.perf)
     implementation(libs.firebase.config)
+    implementation(libs.firebase.auth)
+    implementation(libs.play.services.auth)
 
     // Gemini AI
     implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
@@ -141,8 +195,23 @@ dependencies {
     // Play Review
     implementation(libs.play.review.ktx)
 
+    // Image Loading
+    implementation(libs.coil.compose)
+    implementation(libs.coil.svg)
+
+    // Security
+    implementation(libs.androidx.security.crypto)
+    implementation(libs.sqlcipher)
+    implementation(libs.sqlite)
+    implementation(libs.rootbeer)
+
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.turbine)
+    testImplementation(libs.truth)
+    testImplementation(libs.okhttp.mockwebserver)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.work.testing)
@@ -150,7 +219,9 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.hilt.android.testing)
     androidTestImplementation(libs.mockk.android)
+    androidTestImplementation(libs.androidx.benchmark.junit4)
     kspAndroidTest(libs.hilt.compiler)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+    debugImplementation(libs.leakcanary.android)
 }

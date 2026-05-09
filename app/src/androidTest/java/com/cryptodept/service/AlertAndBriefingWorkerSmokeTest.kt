@@ -15,16 +15,17 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class AlertAndBriefingWorkerSmokeTest {
-
     private lateinit var context: Context
 
     @Before
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
 
-        val config = Configuration.Builder()
-            .setExecutor(SynchronousExecutor())
-            .build()
+        val config =
+            Configuration
+                .Builder()
+                .setExecutor(SynchronousExecutor())
+                .build()
 
         WorkManagerTestInitHelper.initializeTestWorkManager(context, config)
     }

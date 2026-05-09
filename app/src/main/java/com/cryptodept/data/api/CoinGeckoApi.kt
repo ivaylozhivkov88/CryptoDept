@@ -13,7 +13,7 @@ interface CoinGeckoApi {
         @Query("include_market_cap") includeMarketCap: Boolean = true,
         @Query("include_24hr_vol") include24hrVol: Boolean = true,
         @Query("include_24hr_change") include24hrChange: Boolean = true,
-        @Query("include_last_updated_at") includeLastUpdatedAt: Boolean = true
+        @Query("include_last_updated_at") includeLastUpdatedAt: Boolean = true,
     ): Map<String, Map<String, Double>>
 
     @GET("coins/markets")
@@ -24,14 +24,14 @@ interface CoinGeckoApi {
         @Query("per_page") perPage: Int = 100,
         @Query("page") page: Int = 1,
         @Query("sparkline") sparkline: Boolean = true,
-        @Query("price_change_percentage") priceChangePercentage: String = "24h"
+        @Query("price_change_percentage") priceChangePercentage: String = "24h",
     ): List<CoinMarketResponse>
 
     @GET("coins/{id}/ohlc")
     suspend fun getCoinOHLC(
         @Path("id") id: String,
         @Query("vs_currency") vsCurrency: String = "usd",
-        @Query("days") days: String
+        @Query("days") days: String,
     ): List<List<Double>>
 
     @GET("coins/{id}")
@@ -42,7 +42,7 @@ interface CoinGeckoApi {
         @Query("market_data") marketData: Boolean = true,
         @Query("community_data") communityData: Boolean = false,
         @Query("developer_data") developerData: Boolean = false,
-        @Query("sparkline") sparkline: Boolean = true
+        @Query("sparkline") sparkline: Boolean = true,
     ): CoinDetailResponse
 
     @GET("global")
@@ -56,7 +56,7 @@ interface CoinGeckoApi {
 }
 
 data class CoinGeckoNewsResponse(
-    val data: List<CoinGeckoNewsItem>
+    val data: List<CoinGeckoNewsItem>,
 )
 
 data class CoinGeckoNewsItem(
@@ -65,7 +65,7 @@ data class CoinGeckoNewsItem(
     val url: String,
     @SerializedName("updated_at") val updatedAt: Long,
     @SerializedName("news_site") val newsSource: String,
-    @SerializedName("thumb_2x") val thumb: String?
+    @SerializedName("thumb_2x") val thumb: String?,
 )
 
 data class CoinMarketResponse(
@@ -94,11 +94,11 @@ data class CoinMarketResponse(
     val atl_change_percentage: Double,
     val atl_date: String,
     val last_updated: String,
-    val sparkline_in_7d: SparklineResponse?
+    val sparkline_in_7d: SparklineResponse?,
 )
 
 data class SparklineResponse(
-    val price: List<Double>
+    val price: List<Double>,
 )
 
 data class CoinDetailResponse(
@@ -108,14 +108,14 @@ data class CoinDetailResponse(
     val description: Map<String, String>?,
     val links: CoinLinks?,
     @SerializedName("market_data") val marketData: MarketData?,
-    val tickers: List<TickerDetail>?
+    val tickers: List<TickerDetail>?,
 )
 
 data class CoinLinks(
     val homepage: List<String>?,
     @SerializedName("blockchain_site") val blockchainSite: List<String>?,
     @SerializedName("official_forum_url") val officialForumUrl: List<String>?,
-    @SerializedName("subreddit_url") val subredditUrl: String?
+    @SerializedName("subreddit_url") val subredditUrl: String?,
 )
 
 data class MarketData(
@@ -125,7 +125,7 @@ data class MarketData(
     @SerializedName("high_24h") val high24h: Map<String, Double>?,
     @SerializedName("low_24h") val low24h: Map<String, Double>?,
     @SerializedName("price_change_percentage_24h") val priceChangePercentage24h: Double,
-    @SerializedName("sparkline_7d") val sparkline7d: SparklineResponse?
+    @SerializedName("sparkline_7d") val sparkline7d: SparklineResponse?,
 )
 
 data class TickerDetail(
@@ -134,16 +134,16 @@ data class TickerDetail(
     val market: MarketInfo,
     val last: Double,
     val volume: Double,
-    @SerializedName("trade_url") val tradeUrl: String?
+    @SerializedName("trade_url") val tradeUrl: String?,
 )
 
 data class MarketInfo(
     val name: String,
-    val identifier: String
+    val identifier: String,
 )
 
 data class GlobalDataResponse(
-    val data: GlobalData
+    val data: GlobalData,
 )
 
 data class GlobalData(
@@ -151,15 +151,15 @@ data class GlobalData(
     @SerializedName("total_market_cap") val totalMarketCap: Map<String, Double>,
     @SerializedName("total_volume") val totalVolume: Map<String, Double>,
     @SerializedName("market_cap_percentage") val marketCapPercentage: Map<String, Double>,
-    @SerializedName("market_cap_change_percentage_24h_usd") val marketCapChangePercentage24hUsd: Double
+    @SerializedName("market_cap_change_percentage_24h_usd") val marketCapChangePercentage24hUsd: Double,
 )
 
 data class TrendingResponse(
-    val coins: List<TrendingCoinItem>
+    val coins: List<TrendingCoinItem>,
 )
 
 data class TrendingCoinItem(
-    val item: TrendingCoin
+    val item: TrendingCoin,
 )
 
 data class TrendingCoin(
@@ -168,5 +168,5 @@ data class TrendingCoin(
     val symbol: String,
     @SerializedName("market_cap_rank") val marketCapRank: Int,
     val thumb: String,
-    val score: Int
+    val score: Int,
 )

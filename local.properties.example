@@ -1,0 +1,22 @@
+# API Keys for CryptoDept Terminal
+# Rename this file to local.properties and fill in your keys
+
+COINGECKO_API_KEY=your_coingecko_key_here
+BINANCE_API_KEY=your_binance_key_here
+ETHERSCAN_API_KEY=your_etherscan_key_here
+CRYPTOPANIC_API_KEY=your_cryptopanic_key_here
+COINGLASS_API_KEY=your_coinglass_key_here
+ALPHA_VANTAGE_API_KEY=your_alphavantage_key_here
+COINMARKETCAL_API_KEY=your_coinmarketcal_key_here
+GEMINI_API_KEY=your_gemini_ai_key_here
+HELIUS_API_KEY=your_helius_solana_rpc_key_here
+
+# Firebase / Google Auth
+# Get this from your Google Cloud Console / Firebase Settings
+GOOGLE_WEB_CLIENT_ID=your_google_web_client_id_here.apps.googleusercontent.com
+
+# Keystore (optional for debug)
+KEYSTORE_PATH=keystore.jks
+KEYSTORE_PASSWORD=your_password
+KEY_ALIAS=your_alias
+KEY_PASSWORD=your_password

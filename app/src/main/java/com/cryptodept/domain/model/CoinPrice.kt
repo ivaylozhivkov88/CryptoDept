@@ -1,5 +1,10 @@
 package com.cryptodept.domain.model
 
+import androidx.compose.runtime.Immutable
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+
+@Immutable
 data class CoinPrice(
     val id: String,
     val symbol: String,
@@ -12,8 +17,9 @@ data class CoinPrice(
     val high24h: Double,
     val low24h: Double,
     val lastUpdated: Long,
-    val sparkline: List<Double> = emptyList(),
+    val isTracked: Boolean = false,
+    val sparkline: ImmutableList<Double> = persistentListOf(),
     // V2 Aggregation Data
     val sourcesCount: Int = 1,
-    val maxDeviation: Double = 0.0
+    val maxDeviation: Double = 0.0,
 )

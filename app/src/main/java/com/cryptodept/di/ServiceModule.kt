@@ -14,5 +14,7 @@ import javax.inject.Singleton
 object ServiceModule {
     @Provides
     @Singleton
-    fun provideAlertNotificationService(@ApplicationContext ctx: Context) = AlertNotificationService(ctx)
+    fun provideAlertNotificationService(
+        @ApplicationContext ctx: Context,
+    ) = AlertNotificationService(ctx)
 }

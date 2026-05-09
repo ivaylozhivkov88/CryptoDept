@@ -3,6 +3,7 @@ package com.cryptodept.domain.model
 data class PricePrediction(
     val coinId: String,
     val currentPrice: Double,
+    val priceChange24h: Double = 0.0, // Добавено за Content Generation
     val timestamp: Long,
     val prediction1h: PriceTarget,
     val prediction4h: PriceTarget,
@@ -13,7 +14,7 @@ data class PricePrediction(
     val mtfConsensus: MTFConsensus? = null, // Добавено
     val modelsAgreement: Float,
     val dataQuality: Float,
-    val calculatedAt: Long = System.currentTimeMillis()
+    val calculatedAt: Long = System.currentTimeMillis(),
 )
 
 data class PriceTarget(
@@ -22,7 +23,7 @@ data class PriceTarget(
     val high: Double,
     val direction: Direction,
     val confidence: Float,
-    val keyLevel: Double? = null
+    val keyLevel: Double? = null,
 )
 
 data class EnsembleConsensus(
@@ -30,7 +31,7 @@ data class EnsembleConsensus(
     val overallConfidence: Float,
     val modelVotes: Map<PredictionModel, ModelVote>,
     val agreementScore: Float,
-    val dissenterModels: List<PredictionModel>
+    val dissenterModels: List<PredictionModel>,
 )
 
 data class ModelVote(
@@ -39,7 +40,7 @@ data class ModelVote(
     val targetPrice: Double,
     val confidence: Float,
     val weight: Float,
-    val reasoning: String = "" // ФИКС: Добавено поле за динамичния текст
+    val reasoning: String = "", // ФИКС: Добавено поле за динамичния текст
 )
 
 data class PriceDistribution(
@@ -50,17 +51,20 @@ data class PriceDistribution(
     val percentile90: Double,
     val expectedValue: Double,
     val standardDeviation: Double,
-    val skewness: Double
+    val skewness: Double,
 )
 
 enum class Direction { STRONG_UP, UP, SIDEWAYS, DOWN, STRONG_DOWN }
 
-enum class PredictionModel(val displayName: String, val baseWeight: Float) {
+enum class PredictionModel(
+    val displayName: String,
+    val baseWeight: Float,
+) {
     LINEAR_REGRESSION("Linear Regression", 0.10f),
     FOURIER_CYCLES("Fourier Cycle Analysis", 0.15f),
     MONTE_CARLO("Monte Carlo Simulation", 0.20f),
     ELLIOTT_WAVE("Elliott Wave Theory", 0.15f),
     WYCKOFF_PHASE("Wyckoff Method", 0.15f),
     FRACTAL_ANALYSIS("Fractal Dimension", 0.10f),
-    HURST_EXPONENT("Hurst Exponent", 0.15f)
+    HURST_EXPONENT("Hurst Exponent", 0.15f),
 }

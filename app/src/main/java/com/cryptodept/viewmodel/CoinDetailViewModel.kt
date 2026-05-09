@@ -14,47 +14,54 @@ import javax.inject.Inject
 
 sealed class CoinDetailUiState {
     object Loading : CoinDetailUiState()
-    data class Success(val detail: CoinDetail, val ohlc: List<OHLCData>) : CoinDetailUiState()
-    data class Error(val message: String) : CoinDetailUiState()
+
+    data class Success(
+        val detail: CoinDetail,
+        val ohlc: List<OHLCData>,
+    ) : CoinDetailUiState()
+
+    data class Error(
+        val message: String,
+    ) : CoinDetailUiState()
 }
 
 @HiltViewModel
-class CoinDetailViewModel @Inject constructor(
-    private val repository: CryptoRepository
-) : ViewModel() {
+class CoinDetailViewModel
+    @Inject
+    constructor(
+        private val repository: CryptoRepository,
+    ) : ViewModel() {
+        private val _uiState = MutableStateFlow<CoinDetailUiState>(CoinDetailUiState.Loading)
+        val uiState: StateFlow<CoinDetailUiState> = _uiState.asStateFlow()
 
-    private val _uiState = MutableStateFlow<CoinDetailUiState>(CoinDetailUiState.Loading)
-    val uiState: StateFlow<CoinDetailUiState> = _uiState.asStateFlow()
-
-    fun loadCoinDetail(coinId: String) {
-        viewModelScope.launch {
-            _uiState.value = CoinDetailUiState.Loading
-            
-            val detailResult = repository.getCoinDetail(coinId)
-            val ohlc = repository.getOHLCData(coinId, 30)
-
-            detailResult.fold(
-                onSuccess = { detail ->
-                    _uiState.value = CoinDetailUiState.Success(detail, ohlc)
-                },
-                onFailure = { error ->
-                    _uiState.value = CoinDetailUiState.Error(error.message ?: "Unknown error")
-                }
-            )
-        }
-    }
-
-    fun toggleTracking() {
-        val currentState = _uiState.value
-        if (currentState is CoinDetailUiState.Success) {
+        fun loadCoinDetail(coinId: String) {
             viewModelScope.launch {
-                val result = repository.toggleTracking(currentState.detail.id)
-                if (result.isSuccess) {
-                    loadCoinDetail(currentState.detail.id)
-                } else {
-                    _uiState.value = CoinDetailUiState.Error(result.exceptionOrNull()?.message ?: "ACTION_FAILED")
+                _uiState.value = CoinDetailUiState.Loading
+
+                val detailResult = repository.getCoinDetail(coinId)
+                val ohlc = repository.getOHLCData(coinId, 30)
+
+                detailResult
+                    .onSuccess { detail ->
+                        _uiState.value = CoinDetailUiState.Success(detail, ohlc)
+                    }.onFailure { error ->
+                        _uiState.value = CoinDetailUiState.Error(error.message ?: "Unknown error")
+                    }
+            }
+        }
+
+        fun toggleTracking() {
+            val currentState = _uiState.value
+            if (currentState is CoinDetailUiState.Success) {
+                viewModelScope.launch {
+                    val result = repository.toggleTracking(currentState.detail.id)
+                    result
+                        .onSuccess {
+                            loadCoinDetail(currentState.detail.id)
+                        }.onFailure { error ->
+                            _uiState.value = CoinDetailUiState.Error(error.message ?: "ACTION_FAILED")
+                        }
                 }
             }
         }
     }
-}

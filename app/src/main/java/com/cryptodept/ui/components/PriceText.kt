@@ -21,7 +21,7 @@ fun PriceText(
     price: String,
     modifier: Modifier = Modifier,
     fontSize: TextUnit = 24.sp,
-    color: Color = LocalTerminalColors.current.primary
+    color: Color = LocalTerminalColors.current.primary,
 ) {
     var oldPrice by remember { mutableStateOf(price) }
     var priceDirection by remember { mutableIntStateOf(0) } // 1 for up, -1 for down, 0 for same
@@ -30,7 +30,14 @@ fun PriceText(
         if (price != oldPrice) {
             val oldVal = oldPrice.replace(Regex("[^\\d.]"), "").toDoubleOrNull() ?: 0.0
             val newVal = price.replace(Regex("[^\\d.]"), "").toDoubleOrNull() ?: 0.0
-            priceDirection = if (newVal > oldVal) 1 else if (newVal < oldVal) -1 else 0
+            priceDirection =
+                if (newVal > oldVal) {
+                    1
+                } else if (newVal < oldVal) {
+                    -1
+                } else {
+                    0
+                }
 
             kotlinx.coroutines.delay(600)
             oldPrice = price
@@ -39,26 +46,28 @@ fun PriceText(
     }
 
     val backgroundColor by animateColorAsState(
-        targetValue = when (priceDirection) {
-            1 -> Color(0xFF003300)
-            -1 -> Color(0xFF330000)
-            else -> Color.Transparent
-        },
+        targetValue =
+            when (priceDirection) {
+                1 -> Color(0xFF003300)
+                -1 -> Color(0xFF330000)
+                else -> Color.Transparent
+            },
         animationSpec = tween(300),
-        label = "bgFlash"
+        label = "bgFlash",
     )
 
     val glowRadius by animateDpAsState(
         targetValue = if (priceDirection != 0) 8.dp else 0.dp,
         animationSpec = tween(500),
-        label = "glow"
+        label = "glow",
     )
 
     Box(
-        modifier = modifier
-            .background(backgroundColor)
-            .padding(horizontal = 4.dp),
-        contentAlignment = Alignment.Center
+        modifier =
+            modifier
+                .background(backgroundColor)
+                .padding(horizontal = 4.dp),
+        contentAlignment = Alignment.Center,
     ) {
         if (glowRadius > 0.dp) {
             Text(
@@ -66,7 +75,7 @@ fun PriceText(
                 color = color.copy(alpha = 0.5f),
                 fontSize = fontSize,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.blur(glowRadius)
+                modifier = Modifier.blur(glowRadius),
             )
         }
 
@@ -83,13 +92,13 @@ fun PriceText(
                     fadeIn(tween(0)) togetherWith fadeOut(tween(0))
                 }
             },
-            label = "priceAnimation"
+            label = "priceAnimation",
         ) { targetPrice ->
             Text(
                 text = targetPrice,
                 color = color,
                 fontSize = fontSize,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
             )
         }
     }

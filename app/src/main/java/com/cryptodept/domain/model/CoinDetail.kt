@@ -14,7 +14,7 @@ data class CoinDetail(
     val priceChangePercentage24h: Double,
     val isTracked: Boolean = false,
     val sparkline: List<Double>,
-    val markets: List<MarketTicker>
+    val markets: List<MarketTicker>,
 )
 
 data class MarketTicker(
@@ -22,5 +22,5 @@ data class MarketTicker(
     val pair: String,
     val price: Double,
     val volume: Double,
-    val tradeUrl: String?
+    val tradeUrl: String?,
 )

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.cryptodept.ui.theme.LocalTerminalColors
 
@@ -18,49 +17,55 @@ fun DashboardSkeleton(modifier: Modifier = Modifier) {
     val alpha by infiniteTransition.animateFloat(
         initialValue = 0.3f,
         targetValue = 0.7f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1200, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "skeleton_shimmer"
+        animationSpec =
+            infiniteRepeatable(
+                animation = tween(1200, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+        label = "skeleton_shimmer",
     )
     val shimmerColor = colors.grid.copy(alpha = alpha)
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(colors.background)
-            .padding(12.dp)
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(colors.background)
+                .padding(12.dp),
     ) {
         // TickerTape skeleton
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(40.dp)
-                .background(shimmerColor)
-                .padding(bottom = 12.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(40.dp)
+                    .background(shimmerColor)
+                    .padding(bottom = 12.dp),
         )
 
         // Header section (3 rows)
         repeat(3) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(20.dp)
-                    .padding(bottom = 8.dp)
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(20.dp)
+                        .padding(bottom = 8.dp),
             ) {
                 Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .background(shimmerColor)
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .background(shimmerColor),
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Box(
-                    modifier = Modifier
-                        .weight(0.5f)
-                        .fillMaxHeight()
-                        .background(shimmerColor)
+                    modifier =
+                        Modifier
+                            .weight(0.5f)
+                            .fillMaxHeight()
+                            .background(shimmerColor),
                 )
             }
         }
@@ -70,36 +75,40 @@ fun DashboardSkeleton(modifier: Modifier = Modifier) {
         // Market list (8 rows)
         repeat(8) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(36.dp)
-                    .background(colors.background)
-                    .border(1.dp, colors.grid)
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(36.dp)
+                        .background(colors.background)
+                        .border(1.dp, colors.grid)
+                        .padding(8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 // Symbol placeholder
                 Box(
-                    modifier = Modifier
-                        .width(48.dp)
-                        .fillMaxHeight()
-                        .background(shimmerColor)
+                    modifier =
+                        Modifier
+                            .width(48.dp)
+                            .fillMaxHeight()
+                            .background(shimmerColor),
                 )
 
                 // Price placeholder
                 Box(
-                    modifier = Modifier
-                        .width(72.dp)
-                        .fillMaxHeight()
-                        .background(shimmerColor)
+                    modifier =
+                        Modifier
+                            .width(72.dp)
+                            .fillMaxHeight()
+                            .background(shimmerColor),
                 )
 
                 // Change % placeholder
                 Box(
-                    modifier = Modifier
-                        .width(48.dp)
-                        .fillMaxHeight()
-                        .background(shimmerColor)
+                    modifier =
+                        Modifier
+                            .width(48.dp)
+                            .fillMaxHeight()
+                            .background(shimmerColor),
                 )
             }
             if (it < 7) Spacer(modifier = Modifier.height(4.dp))
@@ -114,28 +123,31 @@ fun ChartsSkeleton(modifier: Modifier = Modifier) {
     val alpha by infiniteTransition.animateFloat(
         initialValue = 0.3f,
         targetValue = 0.7f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1200, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "chart_shimmer"
+        animationSpec =
+            infiniteRepeatable(
+                animation = tween(1200, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+        label = "chart_shimmer",
     )
     val shimmerColor = colors.grid.copy(alpha = alpha)
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(colors.background)
-            .padding(12.dp)
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(colors.background)
+                .padding(12.dp),
     ) {
         // Coin info placeholders
         repeat(2) {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(24.dp)
-                    .background(shimmerColor)
-                    .padding(bottom = 8.dp)
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(24.dp)
+                        .background(shimmerColor)
+                        .padding(bottom = 8.dp),
             )
         }
 
@@ -143,27 +155,30 @@ fun ChartsSkeleton(modifier: Modifier = Modifier) {
 
         // Chart area placeholder
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(280.dp)
-                .background(colors.background)
-                .border(1.dp, colors.grid)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(280.dp)
+                    .background(colors.background)
+                    .border(1.dp, colors.grid),
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
         // Indicators row
         Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             repeat(4) {
                 Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(40.dp)
-                        .background(shimmerColor)
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .height(40.dp)
+                            .background(shimmerColor),
                 )
             }
         }
@@ -177,42 +192,47 @@ fun AnalysisSkeleton(modifier: Modifier = Modifier) {
     val alpha by infiniteTransition.animateFloat(
         initialValue = 0.3f,
         targetValue = 0.7f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1200, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "analysis_shimmer"
+        animationSpec =
+            infiniteRepeatable(
+                animation = tween(1200, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+        label = "analysis_shimmer",
     )
     val shimmerColor = colors.grid.copy(alpha = alpha)
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(colors.background)
-            .padding(12.dp)
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(colors.background)
+                .padding(12.dp),
     ) {
         // Risk meter circle placeholder
         Box(
-            modifier = Modifier
-                .size(120.dp)
-                .background(shimmerColor)
-                .padding(bottom = 16.dp)
+            modifier =
+                Modifier
+                    .size(120.dp)
+                    .background(shimmerColor)
+                    .padding(bottom = 16.dp),
         )
 
         // Metric cards (4)
         repeat(4) {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-                    .background(colors.background)
-                    .border(1.dp, colors.grid)
-                    .padding(8.dp)
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(60.dp)
+                        .background(colors.background)
+                        .border(1.dp, colors.grid)
+                        .padding(8.dp),
             ) {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(shimmerColor)
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .background(shimmerColor),
                 )
             }
             if (it < 3) Spacer(modifier = Modifier.height(8.dp))
@@ -227,33 +247,37 @@ fun JournalSkeleton(modifier: Modifier = Modifier) {
     val alpha by infiniteTransition.animateFloat(
         initialValue = 0.3f,
         targetValue = 0.7f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1200, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "journal_shimmer"
+        animationSpec =
+            infiniteRepeatable(
+                animation = tween(1200, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+        label = "journal_shimmer",
     )
     val shimmerColor = colors.grid.copy(alpha = alpha)
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(colors.background)
-            .padding(12.dp)
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(colors.background)
+                .padding(12.dp),
     ) {
         // Summary cards row
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             repeat(4) {
                 Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(60.dp)
-                        .background(shimmerColor)
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .height(60.dp)
+                            .background(shimmerColor),
                 )
             }
         }
@@ -263,37 +287,38 @@ fun JournalSkeleton(modifier: Modifier = Modifier) {
         // Trade rows (5)
         repeat(5) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-                    .background(colors.background)
-                    .border(1.dp, colors.grid)
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .background(colors.background)
+                        .border(1.dp, colors.grid)
+                        .padding(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .background(shimmerColor)
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .background(shimmerColor),
                 )
                 Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .background(shimmerColor)
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .background(shimmerColor),
                 )
                 Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .background(shimmerColor)
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .background(shimmerColor),
                 )
             }
             if (it < 4) Spacer(modifier = Modifier.height(4.dp))
         }
     }
 }
-
-
-

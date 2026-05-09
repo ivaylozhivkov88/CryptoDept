@@ -11,7 +11,6 @@ import org.junit.Test
 
 @HiltAndroidTest
 class DashboardScreenTest {
-
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)
 
@@ -27,10 +26,10 @@ class DashboardScreenTest {
     fun testDashboardElements() {
         // Wait for Loading to finish (Skeleton -> Content)
         composeTestRule.onNodeWithText(">>> MARKET TERMINAL v3.0", substring = true).assertIsDisplayed()
-        
+
         // Check TickerTape
         composeTestRule.onNodeWithTag("TickerTape").assertExists()
-        
+
         // Check CommandBar
         composeTestRule.onNodeWithTag("TerminalInput").assertExists()
     }

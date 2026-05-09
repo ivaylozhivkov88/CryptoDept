@@ -11,7 +11,6 @@ import org.junit.Test
 
 @HiltAndroidTest
 class AnalysisScreenTest {
-
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)
 
@@ -30,7 +29,7 @@ class AnalysisScreenTest {
 
         // Wait for content or title
         composeTestRule.onNodeWithText(">>> TERMINAL_DEPT_V3").assertIsDisplayed()
-        
+
         // Check if Signal box is visible (contains strength text eventually)
         // We can't guarantee market data in UI tests without mocks, but we check title
         composeTestRule.onNodeWithText("BTC").assertExists()
@@ -39,11 +38,11 @@ class AnalysisScreenTest {
     @Test
     fun testDeepScanAction() {
         composeTestRule.onNodeWithTag("TerminalInput").performTextInput("ANALYSIS ETH\n")
-        
+
         // Find and click Deep Scan button
         // Scroll if needed (AnalysisScreen is verticalScroll)
         composeTestRule.onNodeWithText("> RUN_DEEP_QUANT_SCAN").performScrollTo().performClick()
-        
+
         // Verify if Paywall or Analysis loading screen appears (since it's a Pro feature)
         // If not Pro, should show Paywall
         composeTestRule.onNodeWithText(">>> CRYPTODEPT PRO REQUIRED").assertExists()

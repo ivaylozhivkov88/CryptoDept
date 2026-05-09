@@ -3,6 +3,4 @@
     <include domain="sharedpref" path="." />
     <include domain="database" path="crypto_database" />
     <exclude domain="sharedpref" path="com.cryptodept.secrets.xml" />
-    <exclude domain="file" path="." />
-    <exclude domain="cache" path="." />
 </full-backup-content>

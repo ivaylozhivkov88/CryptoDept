@@ -18,7 +18,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object FirebaseModule {
-
     @Provides
     @Singleton
     fun provideAnalytics(): FirebaseAnalytics = Firebase.analytics
@@ -31,9 +30,10 @@ object FirebaseModule {
     @Singleton
     fun provideRemoteConfig(): FirebaseRemoteConfig {
         val remoteConfig = Firebase.remoteConfig
-        val configSettings = remoteConfigSettings {
-            minimumFetchIntervalInSeconds = 3600 // 1 hour
-        }
+        val configSettings =
+            remoteConfigSettings {
+                minimumFetchIntervalInSeconds = 3600 // 1 hour
+            }
         remoteConfig.setConfigSettingsAsync(configSettings)
         remoteConfig.setDefaultsAsync(R.xml.remote_config_defaults)
         return remoteConfig

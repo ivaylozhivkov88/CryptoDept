@@ -10,7 +10,7 @@ import retrofit2.http.Query
 interface SentimentApiService {
     @GET("social/pulse")
     suspend fun getSocialPulse(
-        @Query("symbol") symbol: String
+        @Query("symbol") symbol: String,
     ): SocialPulseResponse
 }
 
@@ -20,5 +20,5 @@ data class SocialPulseResponse(
     val mentions24h: Int,
     val positiveSent: Float,
     val negativeSent: Float,
-    val dominantSource: String // "TWITTER", "REDDIT", "TELEGRAM"
+    val dominantSource: String, // "TWITTER", "REDDIT", "TELEGRAM"
 )

@@ -11,7 +11,6 @@ import org.junit.Test
 
 @HiltAndroidTest
 class SettingsScreenTest {
-
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)
 
@@ -33,10 +32,10 @@ class SettingsScreenTest {
 
         // Test Audio Toggle (find by text in the same row if possible, or just click row)
         composeTestRule.onNodeWithText("AUDIO_FEEDBACK").performClick()
-        
+
         // Test Back Button
         composeTestRule.onNodeWithText("< RETURN_TO_CORE").performClick()
-        
+
         // Should be back on Dashboard
         composeTestRule.onNodeWithText(">>> MARKET TERMINAL v3.0", substring = true).assertIsDisplayed()
     }

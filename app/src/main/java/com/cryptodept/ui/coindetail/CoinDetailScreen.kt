@@ -30,7 +30,7 @@ import java.util.Locale
 @Composable
 fun CoinDetailScreen(
     coinId: String,
-    viewModel: CoinDetailViewModel = hiltViewModel()
+    viewModel: CoinDetailViewModel = hiltViewModel(),
 ) {
     LaunchedEffect(coinId) {
         viewModel.loadCoinDetail(coinId)
@@ -39,23 +39,24 @@ fun CoinDetailScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(CRTBlack)
-            .padding(8.dp)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(CRTBlack)
+                .padding(8.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = ">>> ASSET_DOSSIER: ${coinId.uppercase()}",
                 color = WallStreetGreen,
                 fontFamily = FontFamily.Monospace,
-                fontSize = 14.sp
+                fontSize = 14.sp,
             )
-            
+
             if (uiState is CoinDetailUiState.Success) {
                 val isTracked = (uiState as CoinDetailUiState.Success).detail.isTracked
                 Text(
@@ -63,7 +64,7 @@ fun CoinDetailScreen(
                     color = if (isTracked) Color.Gray else WallStreetAmber,
                     fontFamily = FontFamily.Monospace,
                     fontSize = 11.sp,
-                    modifier = Modifier.clickable { viewModel.toggleTracking() }
+                    modifier = Modifier.clickable { viewModel.toggleTracking() },
                 )
             }
         }
@@ -84,7 +85,10 @@ fun CoinDetailScreen(
 }
 
 @Composable
-fun CoinDetailContent(detail: CoinDetail, ohlc: List<OHLCData>) {
+fun CoinDetailContent(
+    detail: CoinDetail,
+    ohlc: List<OHLCData>,
+) {
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("OVERVIEW", "MARKETS", "HISTORICAL", "ABOUT")
 
@@ -97,9 +101,9 @@ fun CoinDetailContent(detail: CoinDetail, ohlc: List<OHLCData>) {
             indicator = { tabPositions ->
                 TabRowDefaults.SecondaryIndicator(
                     Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
-                    color = WallStreetGreen
+                    color = WallStreetGreen,
                 )
-            }
+            },
         ) {
             tabs.forEachIndexed { index, title ->
                 Tab(
@@ -110,9 +114,9 @@ fun CoinDetailContent(detail: CoinDetail, ohlc: List<OHLCData>) {
                             text = title,
                             fontSize = 10.sp,
                             fontFamily = FontFamily.Monospace,
-                            fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal
+                            fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal,
                         )
-                    }
+                    },
                 )
             }
         }
@@ -131,9 +135,10 @@ fun CoinDetailContent(detail: CoinDetail, ohlc: List<OHLCData>) {
 @Composable
 fun OverviewTab(detail: CoinDetail) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
     ) {
         InfoRow("CURRENT_PRICE", "$${String.format(Locale.US, "%,.2f", detail.currentPrice)}")
         InfoRow("MARKET_CAP", "$${String.format(Locale.US, "%,.0f", detail.marketCap)}")
@@ -148,11 +153,12 @@ fun OverviewTab(detail: CoinDetail) {
         Text("7D_PERFORMANCE_SPARKLINE", color = TextGray, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
 
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(60.dp)
-                .border(1.dp, GridGray, RectangleShape),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(60.dp)
+                    .border(1.dp, GridGray, RectangleShape),
+            contentAlignment = Alignment.Center,
         ) {
             Text("[ SPARKLINE_DATA_ACTIVE ]", color = WallStreetGreen, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
         }
@@ -171,14 +177,33 @@ fun MarketsTab(detail: CoinDetail) {
         }
         items(detail.markets.take(20)) { ticker ->
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(0.5.dp, GridGray)
-                    .padding(8.dp)
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .border(0.5.dp, GridGray)
+                        .padding(8.dp),
             ) {
-                Text(ticker.exchange.uppercase(), color = WallStreetAmber, fontSize = 11.sp, modifier = Modifier.weight(1.5f), fontFamily = FontFamily.Monospace)
-                Text(ticker.pair.uppercase(), color = WallStreetGreen, fontSize = 11.sp, modifier = Modifier.weight(1f), fontFamily = FontFamily.Monospace)
-                Text("$${String.format(Locale.US, "%,.2f", ticker.price)}", color = WallStreetGreen, fontSize = 11.sp, modifier = Modifier.weight(1f), fontFamily = FontFamily.Monospace)
+                Text(
+                    ticker.exchange.uppercase(),
+                    color = WallStreetAmber,
+                    fontSize = 11.sp,
+                    modifier = Modifier.weight(1.5f),
+                    fontFamily = FontFamily.Monospace,
+                )
+                Text(
+                    ticker.pair.uppercase(),
+                    color = WallStreetGreen,
+                    fontSize = 11.sp,
+                    modifier = Modifier.weight(1f),
+                    fontFamily = FontFamily.Monospace,
+                )
+                Text(
+                    "$${String.format(Locale.US, "%,.2f", ticker.price)}",
+                    color = WallStreetGreen,
+                    fontSize = 11.sp,
+                    modifier = Modifier.weight(1f),
+                    fontFamily = FontFamily.Monospace,
+                )
             }
         }
     }
@@ -197,14 +222,27 @@ fun HistoricalTab(ohlc: List<OHLCData>) {
         items(ohlc.reversed()) { data ->
             val date = java.text.SimpleDateFormat("dd/MM/yy", Locale.US).format(java.util.Date(data.timestamp))
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(0.5.dp, GridGray)
-                    .padding(8.dp)
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .border(0.5.dp, GridGray)
+                        .padding(8.dp),
             ) {
                 Text(date, color = WallStreetAmber, fontSize = 11.sp, modifier = Modifier.weight(1.2f), fontFamily = FontFamily.Monospace)
-                Text(String.format(Locale.US, "%.2f", data.open), color = WallStreetGreen, fontSize = 11.sp, modifier = Modifier.weight(1f), fontFamily = FontFamily.Monospace)
-                Text(String.format(Locale.US, "%.2f", data.close), color = WallStreetGreen, fontSize = 11.sp, modifier = Modifier.weight(1f), fontFamily = FontFamily.Monospace)
+                Text(
+                    String.format(Locale.US, "%.2f", data.open),
+                    color = WallStreetGreen,
+                    fontSize = 11.sp,
+                    modifier = Modifier.weight(1f),
+                    fontFamily = FontFamily.Monospace,
+                )
+                Text(
+                    String.format(Locale.US, "%.2f", data.close),
+                    color = WallStreetGreen,
+                    fontSize = 11.sp,
+                    modifier = Modifier.weight(1f),
+                    fontFamily = FontFamily.Monospace,
+                )
             }
         }
     }
@@ -212,23 +250,28 @@ fun HistoricalTab(ohlc: List<OHLCData>) {
 
 @Composable
 fun AboutTab(detail: CoinDetail) {
-    // Интелигентно разделяне на параграфи
-    val paragraphs = remember(detail.description) {
-        val clean = android.text.Html.fromHtml(detail.description, android.text.Html.FROM_HTML_MODE_COMPACT).toString()
-        // Ако текстът няма нови редове, разделяме на всеки 3 изречения
-        if (!clean.contains("\n\n")) {
-            val sentences = clean.split(Regex("(?<=\\.)\\s+"))
-            sentences.chunked(3).map { it.joinToString(" ") }
-        } else {
-            clean.split("\n\n").filter { it.isNotBlank() }
+    // Intelligent paragraph splitting
+    val paragraphs =
+        remember(detail.description) {
+            val clean =
+                android.text.Html
+                    .fromHtml(detail.description, android.text.Html.FROM_HTML_MODE_COMPACT)
+                    .toString()
+            // If text has no newlines, split every 3 sentences
+            if (!clean.contains("\n\n")) {
+                val sentences = clean.split(Regex("(?<=\\.)\\s+"))
+                sentences.chunked(3).map { it.joinToString(" ") }
+            } else {
+                clean.split("\n\n").filter { it.isNotBlank() }
+            }
         }
-    }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 8.dp, vertical = 12.dp)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 8.dp, vertical = 12.dp),
     ) {
         Text(
             text = "--- DECODED_ASSET_INTEL ---",
@@ -236,7 +279,7 @@ fun AboutTab(detail: CoinDetail) {
             fontWeight = FontWeight.Bold,
             fontSize = 12.sp,
             fontFamily = FontFamily.Monospace,
-            modifier = Modifier.padding(bottom = 16.dp)
+            modifier = Modifier.padding(bottom = 16.dp),
         )
 
         paragraphs.forEach { para ->
@@ -245,7 +288,7 @@ fun AboutTab(detail: CoinDetail) {
                     text = ">> ",
                     color = WallStreetAmber,
                     fontSize = 12.sp,
-                    fontFamily = FontFamily.Monospace
+                    fontFamily = FontFamily.Monospace,
                 )
                 Text(
                     text = para.trim(),
@@ -254,7 +297,7 @@ fun AboutTab(detail: CoinDetail) {
                     lineHeight = 22.sp,
                     fontFamily = FontFamily.Monospace,
                     textAlign = TextAlign.Justify,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
         }
@@ -269,7 +312,7 @@ fun AboutTab(detail: CoinDetail) {
                 color = WallStreetAmber,
                 fontSize = 11.sp,
                 fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
@@ -277,7 +320,7 @@ fun AboutTab(detail: CoinDetail) {
                 color = TextGray,
                 fontSize = 11.sp,
                 fontFamily = FontFamily.Monospace,
-                textDecoration = TextDecoration.Underline
+                textDecoration = TextDecoration.Underline,
             )
         }
 
@@ -286,18 +329,23 @@ fun AboutTab(detail: CoinDetail) {
             color = GridGray,
             fontSize = 9.sp,
             fontFamily = FontFamily.Monospace,
-            modifier = Modifier.padding(top = 8.dp)
+            modifier = Modifier.padding(top = 8.dp),
         )
     }
 }
 
 @Composable
-fun InfoRow(label: String, value: String, valueColor: Color = WallStreetGreen) {
+fun InfoRow(
+    label: String,
+    value: String,
+    valueColor: Color = WallStreetGreen,
+) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Text(text = "$label:", color = TextGray, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
         Text(text = value, color = valueColor, fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)

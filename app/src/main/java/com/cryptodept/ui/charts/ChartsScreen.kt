@@ -5,8 +5,6 @@
 
 package com.cryptodept.ui.charts
 
-import android.graphics.Color as AndroidColor
-import android.graphics.Paint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,13 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.compose.ui.text.font.FontFamily
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cryptodept.ui.components.TerminalErrorOverlay
-import com.cryptodept.ui.components.TerminalLoadingSkeleton
 import com.cryptodept.ui.theme.*
 import com.cryptodept.viewmodel.ChartUiState
 import com.cryptodept.viewmodel.ChartsViewModel
@@ -32,11 +29,12 @@ import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.CandleData
 import com.github.mikephil.charting.data.CandleDataSet
 import com.github.mikephil.charting.data.CandleEntry
+import android.graphics.Color as AndroidColor
 
 @Composable
 fun ChartsScreen(
     coinId: String,
-    viewModel: ChartsViewModel = hiltViewModel()
+    viewModel: ChartsViewModel = hiltViewModel(),
 ) {
     val colors = LocalTerminalColors.current
     var showFibonacci by remember { mutableStateOf(false) }
@@ -48,33 +46,35 @@ fun ChartsScreen(
     val state by viewModel.chartState.collectAsState()
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colors.background)
-            .padding(8.dp)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(colors.background)
+                .padding(8.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = ">>> TERMINAL CHART: ${coinId.uppercase()}",
                 color = colors.primary,
                 fontFamily = FontFamily.Monospace,
-                fontSize = 14.sp
+                fontSize = 14.sp,
             )
-            
+
             // Step 55: Fibonacci Toggle
             Text(
                 text = if (showFibonacci) "[FIB: ON]" else "[FIB: OFF]",
                 color = if (showFibonacci) colors.amber else colors.dimText,
                 fontFamily = FontFamily.Monospace,
                 fontSize = 11.sp,
-                modifier = Modifier
-                    .background(if (showFibonacci) colors.amber.copy(alpha = 0.2f) else Color.Transparent)
-                    .padding(horizontal = 4.dp)
-                    .clickable { showFibonacci = !showFibonacci }
+                modifier =
+                    Modifier
+                        .background(if (showFibonacci) colors.amber.copy(alpha = 0.2f) else Color.Transparent)
+                        .padding(horizontal = 4.dp)
+                        .clickable { showFibonacci = !showFibonacci },
             )
         }
 
@@ -82,7 +82,8 @@ fun ChartsScreen(
 
         when (val chartState = state) {
             is ChartUiState.Loading -> {
-                com.cryptodept.ui.components.skeletons.ChartsSkeleton()
+                com.cryptodept.ui.components.skeletons
+                    .ChartsSkeleton()
             }
             is ChartUiState.Success -> {
                 if (chartState.data.isEmpty()) {
@@ -91,16 +92,17 @@ fun ChartsScreen(
                     }
                 } else {
                     CandleChart(
-                        entries = chartState.data.mapIndexed { index, ohlc ->
-                            CandleEntry(
-                                index.toFloat(),
-                                ohlc.high.toFloat(),
-                                ohlc.low.toFloat(),
-                                ohlc.open.toFloat(),
-                                ohlc.close.toFloat()
-                            )
-                        },
-                        showFibonacci = showFibonacci
+                        entries =
+                            chartState.data.mapIndexed { index, ohlc ->
+                                CandleEntry(
+                                    index.toFloat(),
+                                    ohlc.high.toFloat(),
+                                    ohlc.low.toFloat(),
+                                    ohlc.open.toFloat(),
+                                    ohlc.close.toFloat(),
+                                )
+                            },
+                        showFibonacci = showFibonacci,
                     )
                 }
             }
@@ -112,20 +114,24 @@ fun ChartsScreen(
 }
 
 @Composable
-fun CandleChart(entries: List<CandleEntry>, showFibonacci: Boolean) {
+fun CandleChart(
+    entries: List<CandleEntry>,
+    showFibonacci: Boolean,
+) {
     val contentDesc = if (showFibonacci) "Candlestick chart with Fibonacci levels" else "Candlestick chart"
     AndroidView(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(vertical = 16.dp)
-            .semantics { contentDescription = contentDesc },
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(vertical = 16.dp)
+                .semantics { contentDescription = contentDesc },
         factory = { context ->
             CandleStickChart(context).apply {
                 description.isEnabled = false
                 legend.isEnabled = false
                 setBackgroundColor(AndroidColor.TRANSPARENT)
                 setGridBackgroundColor(AndroidColor.TRANSPARENT)
-                
+
                 // Step 54: Crosshair
                 setDrawMarkerViews(true)
                 setTouchEnabled(true)
@@ -150,24 +156,25 @@ fun CandleChart(entries: List<CandleEntry>, showFibonacci: Boolean) {
             }
         },
         update = { chart ->
-            val dataSet = CandleDataSet(entries, "Market Data").apply {
-                color = AndroidColor.rgb(0, 255, 65) // Terminal Green
-                shadowColor = AndroidColor.rgb(0, 150, 40) // Dimmer green
-                shadowWidth = 1.0f
-                decreasingColor = AndroidColor.RED
-                increasingColor = AndroidColor.GREEN
-                neutralColor = AndroidColor.WHITE
-                setDrawValues(false)
-                
-                // Phosphor Glow Effect simulator
-                setDrawIcons(false)
-                enableDashedHighlightLine(10f, 5f, 0f)
-            }
+            val dataSet =
+                CandleDataSet(entries, "Market Data").apply {
+                    color = AndroidColor.rgb(0, 255, 65) // Terminal Green
+                    shadowColor = AndroidColor.rgb(0, 150, 40) // Dimmer green
+                    shadowWidth = 1.0f
+                    decreasingColor = AndroidColor.RED
+                    increasingColor = AndroidColor.GREEN
+                    neutralColor = AndroidColor.WHITE
+                    setDrawValues(false)
+
+                    // Phosphor Glow Effect simulator
+                    setDrawIcons(false)
+                    enableDashedHighlightLine(10f, 5f, 0f)
+                }
 
             chart.data = CandleData(dataSet)
             chart.invalidate()
-            
+
             // Note: Real Fibonacci implementation would require a custom Renderer or drawing on Canvas overlay
-        }
+        },
     )
 }
