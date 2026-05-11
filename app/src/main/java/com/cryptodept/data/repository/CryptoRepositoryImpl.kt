@@ -31,6 +31,16 @@ class CryptoRepositoryImpl @Inject constructor(
     @Inject
     lateinit var alertsRepository: AlertsRepository
 
+    init {
+        repositoryScope.launch {
+            coinDao.deleteStablecoins()
+        }
+    }
+
+    private val STABLECOIN_IDS = setOf(
+        "tether", "usd-coin", "binance-usd", "dai", "true-usd", "paxos-standard", "frax", "usdd", "fdusd", "pyusd", "first-digital-usd", "paypal-usd", "ethena-usde"
+    )
+
     internal fun startPriceSubscriptions() {
         if (subscriptionJob?.isActive == true) return
         subscriptionJob = repositoryScope.launch {
@@ -71,6 +81,7 @@ class CryptoRepositoryImpl @Inject constructor(
         } catch (_: Exception) {}
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun getTrackedCoinPrices(): Flow<List<CoinPrice>> = 
         coinDao.getTrackedCoins().flatMapLatest { tracked ->
             if (tracked.isEmpty()) {
@@ -105,8 +116,10 @@ class CryptoRepositoryImpl @Inject constructor(
 
             lastFetchTime = System.currentTimeMillis()
 
-            val entities = marketResponse.map { res ->
-                CoinEntity(
+            val entities = marketResponse
+                .filter { !STABLECOIN_IDS.contains(it.id) }
+                .map { res ->
+                    CoinEntity(
                     id = res.id,
                     symbol = res.symbol,
                     name = res.name,

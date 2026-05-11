@@ -9,10 +9,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cryptodept.domain.model.*
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun DeepAnalysisResultScreen(
@@ -33,7 +34,12 @@ fun DeepAnalysisResultScreen(
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     var showCopyToast by remember { mutableStateOf(false) }
+
+    val preferencesService = remember { com.cryptodept.data.datastore.PreferencesService(context, com.cryptodept.util.SecurePrefsService(context)) }
+    val isAdmin by preferencesService.isAdmin.collectAsState(initial = false)
+    val marketingAgent = remember { MarketingStrategist() }
 
     Box(
         modifier =
@@ -136,42 +142,50 @@ fun DeepAnalysisResultScreen(
                     .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            // SHARE TEXT BUTTON
-            FloatingActionButton(
-                onClick = {
-                    val shareText = generateShareText(prediction)
-                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val clip = ClipData.newPlainText("Analysis Report", shareText)
-                    clipboard.setPrimaryClip(clip)
-                    showCopyToast = true
-                },
-                modifier = Modifier.size(56.dp),
-                containerColor = Color(0xFFFFB000),
-                contentColor = Color.Black,
-                shape = RoundedCornerShape(4.dp),
-            ) {
-                Text("📄", fontSize = 20.sp)
-            }
-
-            // SHARE AI PROMPT BUTTON
-            FloatingActionButton(
-                onClick = {
-                    val prompt = generateAiPrompt(prediction)
-                    val sendIntent: Intent =
-                        Intent().apply {
-                            action = Intent.ACTION_SEND
-                            putExtra(Intent.EXTRA_TEXT, prompt)
-                            type = "text/plain"
+            if (isAdmin) {
+                // VIRAL FACEBOOK REPORT BUTTON
+                FloatingActionButton(
+                    onClick = {
+                        coroutineScope.launch {
+                            val packageReport = marketingAgent.generateMarketingPackage(prediction)
+                            val fbPost = packageReport.details["facebook_post"] ?: ""
+                            val sendIntent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                putExtra(Intent.EXTRA_TEXT, fbPost)
+                                type = "text/plain"
+                            }
+                            context.startActivity(Intent.createChooser(sendIntent, "Post Viral Report"))
                         }
-                    val shareIntent = Intent.createChooser(sendIntent, "Share AI Visualizer Prompt")
-                    context.startActivity(shareIntent)
-                },
-                modifier = Modifier.size(56.dp),
-                containerColor = Color(0xFF00FF41),
-                contentColor = Color.Black,
-                shape = RoundedCornerShape(4.dp),
-            ) {
-                Icon(Icons.Default.Share, contentDescription = "Share Prompt")
+                    },
+                    modifier = Modifier.size(56.dp),
+                    containerColor = Color(0xFF00FF41),
+                    contentColor = Color.Black,
+                    shape = RoundedCornerShape(4.dp),
+                ) {
+                    Text("FB", fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                }
+
+                // META.AI VIDEO PROMPT BUTTON
+                FloatingActionButton(
+                    onClick = {
+                        coroutineScope.launch {
+                            val packageReport = marketingAgent.generateMarketingPackage(prediction)
+                            val videoPrompt = packageReport.details["video_prompt"] ?: ""
+                            val sendIntent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                putExtra(Intent.EXTRA_TEXT, videoPrompt)
+                                type = "text/plain"
+                            }
+                            context.startActivity(Intent.createChooser(sendIntent, "Share Meta.ai Video Prompt"))
+                        }
+                    },
+                    modifier = Modifier.size(56.dp),
+                    containerColor = Color.White,
+                    contentColor = Color.Black,
+                    shape = RoundedCornerShape(4.dp),
+                ) {
+                    Text("AI", fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                }
             }
         }
 

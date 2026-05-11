@@ -1,5 +1,6 @@
 package com.cryptodept.ui.screensaver
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -24,12 +25,14 @@ import kotlinx.coroutines.delay
 import java.util.*
 import kotlin.random.Random
 
-class RainDrop(
+// High-performance data structure
+private class FastRainDrop(
     val column: Int,
     var y: Float,
     var speed: Float,
     var length: Int,
-    var chars: MutableList<String>
+    var characters: List<String>,
+    var segmentLimit: Float // When to vanish
 )
 
 @Composable
@@ -40,66 +43,52 @@ fun MatrixRainScreen(
     riskScore: Int = 50,
     onDismiss: () -> Unit,
 ) {
-    val colors = LocalTerminalColors.current
-    // Add Katakana characters for more authentic Matrix look using Unicode escapes
-    val matrixChars = ("01ABCDEFGHIJKLMNOPQRSTUVWXYZ₿Ξ$" + 
-        "\uFF66\uFF67\uFF68\uFF69\uFF6A\uFF6B\uFF6C\uFF6D\uFF6E\uFF6F" + 
-        "\uFF70\uFF71\uFF72\uFF73\uFF74\uFF75\uFF76\uFF77\uFF78\uFF79" + 
-        "\uFF7A\uFF7B\uFF7C\uFF7D\uFF7E\uFF7F\uFF80\uFF81\uFF82\uFF83" + 
-        "\uFF84\uFF85\uFF86\uFF87\uFF88\uFF89\uFF8A\uFF8B\uFF8C\uFF8D" + 
-        "\uFF8E\uFF8F\uFF90\uFF91\uFF92\uFF93\uFF94\uFF95\uFF96\uFF97" + 
-        "\uFF98\uFF99\uFF9A\uFF9B\uFF9C\uFF9D").map { it.toString() }
-    
+    val matrixChars = remember {
+        ("\uFF66\uFF67\uFF68\uFF69\uFF6A\uFF6B\uFF6C\uFF6D\uFF6E\uFF6F" +
+        "\uFF70\uFF71\uFF72\uFF73\uFF74\uFF75\uFF76\uFF77\uFF78\uFF79" +
+        "\uFF7A\uFF7B\uFF7C\uFF7D\uFF7E\uFF7F\uFF80\uFF81\uFF82\uFF83" +
+        "\uFF84\uFF85\uFF86\uFF87\uFF88\uFF89\uFF8A\uFF8B\uFF8C\uFF8D" +
+        "\uFF8E\uFF8F\uFF90\uFF91\uFF92\uFF93\uFF94\uFF95\uFF96\uFF97" +
+        "\uFF98\uFF99\uFF9A\uFF9B\uFF9C\uFF9D" + "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ₿Ξ$").map { it.toString() }
+    }
+
     val density = LocalDensity.current
     val configuration = LocalConfiguration.current
     val screenWidth = with(density) { configuration.screenWidthDp.dp.toPx() }
     val screenHeight = with(density) { configuration.screenHeightDp.dp.toPx() }
     
-    val fontSize = 14.sp
+    val fontSize = 13.sp
     val fontSizePx = with(density) { fontSize.toPx() }
-    
     val textMeasurer = rememberTextMeasurer()
     
-    val columnWidth = fontSizePx * 0.8f // Narrower columns for more density
+    val columnWidth = fontSizePx * 0.9f
     val columnsCount = (screenWidth / columnWidth).toInt()
 
-    // State for rain drops
-    val drops = remember { 
-        mutableStateListOf<RainDrop>().apply {
-            repeat(columnsCount) { i ->
-                add(
-                    RainDrop(
-                        column = i,
-                        y = Random.nextFloat() * -screenHeight * 2f, // Spread out vertically
-                        speed = Random.nextFloat() * 6f + 3f, // Vary speeds
-                        length = Random.nextInt(10, 35), // Longer trails
-                        chars = MutableList(35) { matrixChars.random() }
-                    )
-                )
-            }
+    // Initialize drops with segment limits for "appearing/disappearing" effect
+    val drops = remember {
+        List(columnsCount) { i ->
+            FastRainDrop(
+                column = i,
+                y = Random.nextFloat() * -screenHeight,
+                speed = Random.nextFloat() * 5f + 5f,
+                length = Random.nextInt(8, 20),
+                characters = List(25) { matrixChars.random() },
+                segmentLimit = Random.nextFloat() * screenHeight * 0.8f + (screenHeight * 0.2f)
+            )
         }
     }
-    
-    var tick by remember { mutableLongStateOf(0L) }
 
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(40)
-            tick++
-            drops.forEach { drop ->
-                drop.y += drop.speed
-                if (drop.y > screenHeight + (drop.length * fontSizePx)) {
-                    drop.y = -fontSizePx * drop.length
-                    drop.speed = Random.nextFloat() * 4f + 4f
-                }
-                // Randomly change some characters in the trail for "glimmer"
-                if (Random.nextFloat() > 0.8f) {
-                    val idx = Random.nextInt(drop.chars.size)
-                    drop.chars[idx] = matrixChars.random()
-                }
-            }
-        }
-    }
+    // Single animation source for 60 FPS
+    val infiniteTransition = rememberInfiniteTransition(label = "MatrixRain")
+    val frame by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(16, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "Frame"
+    )
 
     Box(
         modifier = modifier
@@ -107,26 +96,35 @@ fun MatrixRainScreen(
             .background(Color.Black)
             .pointerInput(Unit) { detectTapGestures { onDismiss() } }
     ) {
-        // Use tick here to force recomposition
-        val currentTick = tick
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val dummy = currentTick // Force read
+            // Force redraw on each frame
+            val _trigger = frame 
+            
             drops.forEach { drop ->
+                // Update position
+                drop.y += drop.speed
+                
+                // If drop passes its segment limit OR bottom of screen, reset to a new random start
+                if (drop.y > drop.segmentLimit || drop.y > size.height + (drop.length * fontSizePx)) {
+                    drop.y = -fontSizePx * drop.length
+                    drop.segmentLimit = Random.nextFloat() * size.height * 0.7f + (size.height * 0.3f)
+                    drop.speed = Random.nextFloat() * 5f + 5f
+                }
+
                 val x = drop.column * columnWidth
+                
+                // Draw trailing characters
                 for (i in 0 until drop.length) {
                     val charY = drop.y - (i * fontSizePx)
                     if (charY < -fontSizePx || charY > size.height) continue
 
-                    val alpha = (1f - (i.toFloat() / drop.length)).coerceIn(0f, 1f)
-                    val charColor = if (i == 0) {
-                        Color.White // Glowing head
-                    } else {
-                        Color(0xFF00FF41).copy(alpha = alpha) // Classic Matrix Green fading
-                    }
+                    val alpha = (1f - (i.toFloat() / drop.length)).coerceIn(0.1f, 1f)
+                    val charColor = if (i == 0) Color.White else Color(0xFF00FF41).copy(alpha = alpha)
 
+                    // Draw text with minimal styling overhead
                     drawText(
                         textMeasurer = textMeasurer,
-                        text = drop.chars[i % drop.chars.size],
+                        text = drop.characters[i % drop.characters.size],
                         topLeft = androidx.compose.ui.geometry.Offset(x, charY),
                         style = TextStyle(
                             color = charColor,
@@ -136,52 +134,55 @@ fun MatrixRainScreen(
                         )
                     )
                 }
+                
+                // Occasionally swap a character for glimmer effect (staggered)
+                if (Random.nextFloat() > 0.98f) {
+                    drop.characters = drop.characters.toMutableList().apply {
+                        set(Random.nextInt(size), matrixChars.random())
+                    }
+                }
             }
         }
 
-        // --- ELITE CLOCK OVERLAY ---
-        val currentTime = remember { mutableStateOf(Calendar.getInstance().time) }
-        LaunchedEffect(tick) {
-            if (tick % 25 == 0L) currentTime.value = Calendar.getInstance().time
+        // --- OPTIMIZED CLOCK ---
+        var currentTime by remember { mutableStateOf(Calendar.getInstance().time) }
+        LaunchedEffect(Unit) {
+            while(true) {
+                currentTime = Calendar.getInstance().time
+                delay(1000) // Update only once per second
+            }
         }
 
         Column(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(24.dp)
-                .background(Color.Black.copy(alpha = 0.8f))
-                .border(1.dp, Color(0xFF00FF41).copy(alpha = 0.5f))
+                .background(Color.Black.copy(alpha = 0.7f))
+                .border(1.dp, Color(0xFF00FF41).copy(alpha = 0.4f))
                 .padding(12.dp),
             horizontalAlignment = Alignment.End
         ) {
             Text(
-                text = java.text.SimpleDateFormat("HH:mm:ss", Locale.US).format(currentTime.value),
+                text = java.text.SimpleDateFormat("HH:mm:ss", Locale.US).format(currentTime),
                 color = Color(0xFF00FF41),
                 fontFamily = FontFamily.Monospace,
-                fontSize = 48.sp,
-                fontWeight = FontWeight.Black,
-                style = TextStyle(
-                    shadow = Shadow(
-                        color = Color(0xFF00FF41),
-                        blurRadius = 10f
-                    )
-                ),
+                fontSize = 44.sp,
+                fontWeight = FontWeight.ExtraBold,
+                style = TextStyle(shadow = Shadow(Color(0xFF00FF41), blurRadius = 8f)),
                 softWrap = false
             )
-            
             Text(
                 text = "BTC PRICE: $btcPrice",
                 color = Color(0xFFFFA500),
                 fontFamily = FontFamily.Monospace,
-                fontSize = 16.sp,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Bold
             )
-            
             Text(
                 text = "RISK_LEVEL: $riskScore/100",
                 color = if (riskScore > 75) Color.Red else Color(0xFF00FF41),
                 fontFamily = FontFamily.Monospace,
-                fontSize = 14.sp
+                fontSize = 12.sp
             )
         }
     }

@@ -5,10 +5,7 @@ import com.cryptodept.domain.repository.AIProvider
 import com.cryptodept.domain.repository.CryptoRepository
 import com.cryptodept.domain.repository.JournalRepository
 import com.google.common.truth.Truth.assertThat
-import io.mockk.coEvery
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.any
+import io.mockk.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf

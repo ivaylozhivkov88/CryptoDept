@@ -41,9 +41,17 @@ class AnalysisViewModel @Inject constructor(
         .flatMapLatest { (coin, days) ->
             flow {
                 emit(AnalysisUiState.Loading)
-                runDeepAnalysis.execute(coin, days)
-                    .onSuccess { emit(AnalysisUiState.Success(it)) }
-                    .onFailure { emit(AnalysisUiState.Error(it.message ?: "UNKNOWN ERROR")) }
+                try {
+                    withTimeout(20000) {
+                        runDeepAnalysis.execute(coin, days)
+                            .onSuccess { emit(AnalysisUiState.Success(it)) }
+                            .onFailure { emit(AnalysisUiState.Error(it.message ?: "UNKNOWN ERROR")) }
+                    }
+                } catch (e: TimeoutCancellationException) {
+                    emit(AnalysisUiState.Error("ANALYSIS_TIMEOUT: NETWORK_CONGESTION_DETECTED"))
+                } catch (e: Exception) {
+                    emit(AnalysisUiState.Error(e.message ?: "SYSTEM_ERROR"))
+                }
             }
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AnalysisUiState.Loading)
 

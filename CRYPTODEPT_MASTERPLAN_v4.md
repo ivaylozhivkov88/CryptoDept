@@ -1209,4 +1209,48 @@ Improvements across each category with specific prompts:
 
 ---
 
-*Updated by CryptoDept Senior Architect | 12.05.2026 | v6.7 — SPEED OPTIMIZED*
+# ═══════════════════════════════════════
+# PHASE O: AGENTIC INTELLIGENCE (NEW AGENTS.MD ARCHITECTURE)
+# ═══════════════════════════════════════
+
+## PROMPT #2000 — Multi-Agent Orchestration Framework
+**TASK:** Transition to a system of specialized AI agents for higher accuracy
+and modular intelligence.
+
+### #2000-A — Agent Governance & Domain Definitions (Part A: Core)  ≈ 1800 tokens
+[✅ DONE — 12.05.2026]
+**TASK:** Create `AGENTS.MD` in the root directory to define the intelligence
+protocol. Implement `CryptoAgent` sealed interface and sub-types: 
+`TechnicalSentinel`, `WhaleScout`, `SentimentPulse`, and `NarrativeOrchestrator`. 
+Create `AgentReport` data models to hold atomic data from each agent. 
+*   **Logic:** Each agent has a specific "System Instruction" and set of 
+* "Constraints" defined in the code.
+*   **Unit Tests:** Create `AgentGovernanceTest.kt` to verify that each 
+* agent properly formats its output for the Orchestrator.
+
+### #2000-B — Specialized Agent Logic & Parallel Processing (Part B: Bridge)  ≈ 2200 tokens
+[✅ DONE — 12.05.2026]
+**TASK:** Implement the specific logic for each agent using Kotlin Flow and 
+Coroutines for parallel execution.
+*   **TechnicalSentinel:** Processes OHLCV data + indicators (FFT, RSI).
+*   **WhaleScout:** Integrates multi-chain transactions (ETH/SOL/BTC).
+*   **SentimentPulse:** Aggregates Reddit, CryptoPanic, and DefiLlama TVL trends.
+*   **NarrativeOrchestrator:** A specialized Hilt-injected service that takes 
+* all sub-agent reports and generates a final prompt for Gemini AI. 
+*   **API Integration:** Connect **DefiLlama API** (free, no key) and 
+* **DexScreener** (free, no key) as new data sources for `SentimentPulse`.
+
+### #2000-C — Agentic UI & Narrative Reveal (Part C: UI/Polish)  ≈ 1900 tokens
+[✅ DONE — 12.05.2026]
+**TASK:** Update `AnalysisScreen` and `Dashboard` to show the "Agentic Workflow".
+*   **Visuals:** Add a "Scanning..." state where each agent's status is 
+* shown (e.g., "[SENTINEL_READY]", "[WHALE_TRACKING_ACTIVE]"). 
+*   **Final Report:** The AI narrative should now cite which agent provided
+* which data (e.g., "WhaleScout detected high accumulation... while Sentinel 
+* notes bearish RSI").
+*   **Polish:** Add "Agent Heartbeat" animations in the System Event Log to 
+* show the terminal is "thinking" in the background.
+
+---
+
+*Updated by CryptoDept Senior Architect | 12.05.2026 | v6.8 — AGENTIC PREP COMPLETE*

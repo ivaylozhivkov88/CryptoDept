@@ -3,7 +3,7 @@ package com.cryptodept.domain.usecase
 import com.cryptodept.domain.model.*
 import com.cryptodept.domain.repository.ChartRepository
 import com.cryptodept.domain.repository.CryptoRepository
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import java.util.Locale
@@ -30,26 +30,41 @@ class RunDeepAnalysisUseCase
                             else -> coinId.lowercase()
                         }
 
-                    withTimeoutOrNull(5000) {
-                        chartRepository.refreshOHLCData(normalizedId, days)
-                    }
-
-                    val ohlcData = cryptoRepository.getOHLCData(normalizedId, days)
+                    // 1. Fetch OHLC Data with overall timeout
+                    val ohlcData = withTimeoutOrNull(12000) {
+                        try {
+                            chartRepository.refreshOHLCData(normalizedId, days)
+                        } catch (_: Exception) {}
+                        cryptoRepository.getOHLCData(normalizedId, days)
+                    } ?: emptyList()
 
                     if (ohlcData.isEmpty()) {
                         return@withContext Result.failure(Exception("NO DATA FOR $normalizedId"))
                     }
 
-                    val prices = ohlcData.map { it.close }
-                    val rsi = taEngine.calculateRSI(prices)
-                    val macd = taEngine.calculateMACD(prices)
-                    val patterns = taEngine.detectPatterns(ohlcData)
-                    val fib = taEngine.calculateFibonacciLevels(prices.maxOrNull() ?: 0.0, prices.minOrNull() ?: 0.0)
+                    // 2. Run Analysis in Parallel
+                    val analysisJob = async {
+                        val prices = ohlcData.map { it.close }
+                        val rsi = taEngine.calculateRSI(prices)
+                        val macd = taEngine.calculateMACD(prices)
+                        val patterns = taEngine.detectPatterns(ohlcData)
+                        val fib = taEngine.calculateFibonacciLevels(prices.maxOrNull() ?: 0.0, prices.minOrNull() ?: 0.0)
+                        val compositeSignal = calculateCompositeSignal(rsi, macd, patterns)
+                        val traces = generateTraces(normalizedId, prices, ohlcData, rsi, macd)
+                        
+                        Triple(compositeSignal, fib, traces) to Triple(rsi, macd, patterns)
+                    }
 
-                    val compositeSignal = calculateCompositeSignal(rsi, macd, patterns)
-                    val sentimentResult = sentimentAnalyzer.analyzeCoin(coinId.uppercase())
+                    val sentimentJob = async {
+                        withTimeoutOrNull(8000) {
+                            sentimentAnalyzer.analyzeCoin(coinId.uppercase())
+                        }
+                    }
 
-                    val traces = generateTraces(normalizedId, prices, ohlcData, rsi, macd)
+                    val (analysisData, taData) = analysisJob.await()
+                    val (compositeSignal, fib, traces) = analysisData
+                    val (rsi, macd, patterns) = taData
+                    val sentimentResult = sentimentJob.await()
 
                     Result.success(
                         DeepAnalysisResult(

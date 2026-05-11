@@ -32,10 +32,14 @@ class AuthService @Inject constructor(
 
     private fun updateAdminStatus(user: FirebaseUser?) {
         if (user != null) {
-            // Here we can check against a list of admin emails or a Firebase custom claim
-            // or if their email matches a specific one.
-            val isAdminEmail = user.email != null // Simplified for security audit
+            // Authorized admin emails for CryptoDept Terminal
+            val adminEmails = listOf(
+                "kaiko.dept@gmail.com",
+                "ivaylozhivkov14@gmail.com"
+            )
+            val isAdminEmail = adminEmails.contains(user.email)
             if (isAdminEmail) {
+                // This will also trigger setProStatus(true) internally
                 preferencesService.setAdminStatus(true)
             }
         }

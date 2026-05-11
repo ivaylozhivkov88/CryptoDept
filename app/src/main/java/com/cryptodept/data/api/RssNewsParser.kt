@@ -48,7 +48,9 @@ class RssNewsParser
             val deferredItems = RSS_SOURCES.map { source ->
                 async(Dispatchers.IO) {
                     try {
-                        fetchRssFeed(source)
+                        withTimeout(8000) {
+                            fetchRssFeed(source)
+                        }
                     } catch (e: Exception) {
                         Log.e("RSS_ERROR", "Failed ${source.name}: ${e.message}")
                         emptyList<RssItem>()

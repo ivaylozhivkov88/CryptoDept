@@ -8,6 +8,7 @@ import com.cryptodept.domain.manager.DashboardLogService
 import com.cryptodept.util.AnalyticsService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -22,7 +23,8 @@ class DashboardViewModel @Inject constructor(
     private val riskEngine: RiskScoreEngine,
     private val logService: DashboardLogService,
     private val analytics: AnalyticsService,
-    private val preferencesService: com.cryptodept.data.datastore.PreferencesService
+    private val preferencesService: com.cryptodept.data.datastore.PreferencesService,
+    private val agentCoordinator: MultiAgentCoordinator
 ) : ViewModel() {
 
     private val _tutorialStep = MutableStateFlow<TutorialStep?>(null)
@@ -66,6 +68,9 @@ class DashboardViewModel @Inject constructor(
 
     private val _aiSummary = MutableStateFlow("ANALYZING MARKET DYNAMICS...")
     val aiSummary: StateFlow<String> = _aiSummary.asStateFlow()
+
+    private val _agentStatuses = MutableStateFlow<Map<String, AgentStatus>>(emptyMap())
+    val agentStatuses: StateFlow<Map<String, AgentStatus>> = _agentStatuses.asStateFlow()
 
     private val _networkHealth = MutableStateFlow<NetworkHealth?>(null)
     val networkHealth: StateFlow<NetworkHealth?> = _networkHealth.asStateFlow()
@@ -137,6 +142,12 @@ class DashboardViewModel @Inject constructor(
 
     private fun fetchAiSummary(health: NetworkHealth) {
         viewModelScope.launch(Dispatchers.IO) {
+            _agentStatuses.value = mapOf(
+                "SENTINEL" to AgentStatus.SCANNING,
+                "SCOUT" to AgentStatus.READY,
+                "PULSE" to AgentStatus.READY
+            )
+            
             val prices = (uiState.value as? DashboardUiState.Success)?.prices ?: emptyList()
             val btc = prices.find { it.symbol.lowercase() == "btc" }
             
@@ -162,11 +173,24 @@ class DashboardViewModel @Inject constructor(
                 dxyChange = 0.0,
             )
 
-            aiGenerator.generateShortSummary(snapshot).onSuccess { summary ->
-                _aiSummary.value = summary.uppercase()
-            }.onFailure {
-                _aiSummary.value = "AI_NARRATIVE_UNAVAILABLE"
+            // Simulate agentic scan for UI reveal
+            delay(800)
+            _agentStatuses.value = _agentStatuses.value.toMutableMap().apply { 
+                put("SENTINEL", AgentStatus.SUCCESS)
+                put("SCOUT", AgentStatus.SCANNING)
             }
+            delay(600)
+            _agentStatuses.value = _agentStatuses.value.toMutableMap().apply { 
+                put("SCOUT", AgentStatus.SUCCESS)
+                put("PULSE", AgentStatus.SCANNING)
+            }
+            delay(700)
+            _agentStatuses.value = _agentStatuses.value.toMutableMap().apply { 
+                put("PULSE", AgentStatus.SUCCESS)
+            }
+
+            val report = agentCoordinator.runOrchestration(snapshot)
+            _aiSummary.value = report.summary
         }
     }
 }

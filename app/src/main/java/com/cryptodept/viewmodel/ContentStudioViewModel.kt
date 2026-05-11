@@ -39,11 +39,12 @@ class ContentStudioViewModel
         private val _aiResponse = MutableStateFlow("")
         val aiResponse: StateFlow<String> = _aiResponse.asStateFlow()
 
-        fun generatePrompt(
-            template: ContentTemplate,
-            audience: AudienceProfile,
-            params: Map<String, Any>,
-        ) {
+        @Suppress("UNCHECKED_CAST")
+    fun generatePrompt(
+        template: ContentTemplate,
+        audience: AudienceProfile,
+        params: Map<String, Any>,
+    ) {
             val prompt =
                 when (template) {
                     ContentTemplate.DAILY_RECAP -> {

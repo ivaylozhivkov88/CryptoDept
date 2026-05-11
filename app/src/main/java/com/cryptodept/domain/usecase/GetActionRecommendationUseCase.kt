@@ -17,10 +17,22 @@ class GetActionRecommendationUseCase @Inject constructor(
             AppConstants.TA.RSI_NEUTRAL.toInt()
         }
 
-        return when {
-            avgChange > 1.0 && pulse >= 65 -> Recommendation("BUY", "Momentum + Sentiment Bullish.")
-            avgChange < -1.0 && pulse <= 35 -> Recommendation("SELL", "Momentum + Sentiment Bearish.")
-            else -> Recommendation("WAIT", "Neutral market conditions.")
+        val action = when {
+            avgChange > 1.5 && pulse >= 70 -> "ACCUMULATE"
+            avgChange < -1.5 && pulse <= 30 -> "LIQUIDATE"
+            avgChange > 0.5 && pulse >= 55 -> "BUY_LITE"
+            avgChange < -0.5 && pulse <= 45 -> "SELL_LITE"
+            else -> "HOLD_STABLE"
         }
+
+        val explanation = when (action) {
+            "ACCUMULATE" -> "Strong bullish momentum confirmed across top assets. Sentiment signals institutional pressure; consider scaling into high-conviction positions."
+            "LIQUIDATE" -> "Aggressive bearish breakdown in progress. Market sentiment reflects extreme panic; prioritize capital preservation and reduce exposure."
+            "BUY_LITE" -> "Moderate recovery detected. Social pulse is improving, suggesting a potential short-term bounce for major currency pairs."
+            "SELL_LITE" -> "Minor distribution phase active. Technical indicators suggest temporary exhaustion; watch for support retests before re-entry."
+            else -> "Market is currently range-bound with neutral volatility. No clear edge detected; maintain existing positions and await clear volume confirmation."
+        }
+
+        return Recommendation(action, explanation)
     }
 }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -40,7 +41,7 @@ fun ToolsHubScreen(
             ToolItem("POSITION SIZER", "Risk-based calculator", Icons.Default.Build, Screen.PositionSizer.route),
             ToolItem("WHALE TRACKER", "On-chain activity", Icons.Default.Notifications, Screen.WhaleTracker.route),
             ToolItem("ENTRY ANALYZER", "Optimal entry zones", Icons.Default.Search, Screen.EntryAnalysis.route),
-            ToolItem("MULTI-TIMEFRAME", "All TFs at a glance", Icons.Default.List, Screen.MtfAnalysis.route),
+            ToolItem("MULTI-TIMEFRAME", "All TFs at a glance", Icons.AutoMirrored.Filled.List, Screen.MtfAnalysis.route),
             ToolItem("TRADE PLANNER", "Pre-trade checklist", Icons.Default.Check, Screen.TradePlanner.route),
             ToolItem("PSYCHOLOGY", "Tilt & emotion monitor", Icons.Default.Face, Screen.Psychology.route),
             ToolItem("JOURNAL", "Trade history", Icons.Default.Star, Screen.Journal.route),

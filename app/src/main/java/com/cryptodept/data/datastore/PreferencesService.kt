@@ -5,8 +5,13 @@ import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import com.cryptodept.util.SecurePrefsService
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -56,6 +61,12 @@ class PreferencesService
         }
 
         // Flows за четене с вградена защита от грешки
+        private val _isPro = MutableStateFlow(securePrefs.getBoolean("is_pro", false))
+        val isPro: StateFlow<Boolean> = _isPro.asStateFlow()
+
+        private val _isAdmin = MutableStateFlow(securePrefs.getBoolean("is_admin", false))
+        val isAdmin: StateFlow<Boolean> = _isAdmin.asStateFlow()
+
         val refreshInterval: Flow<Int> =
             dataStore.data
                 .catch { exception -> if (exception is IOException) emit(emptyPreferences()) else throw exception }
@@ -105,18 +116,6 @@ class PreferencesService
             dataStore.data
                 .catch { exception -> if (exception is IOException) emit(emptyPreferences()) else throw exception }
                 .map { it[FOCUS_MODE_ENABLED] ?: false }
-
-        val isPro: Flow<Boolean> =
-            flow {
-                val secureValue = securePrefs.getBoolean("is_pro", false)
-                emit(secureValue)
-            }
-
-        val isAdmin: Flow<Boolean> =
-            flow {
-                val secureValue = securePrefs.getBoolean("is_admin", false)
-                emit(secureValue)
-            }
 
         suspend fun performMigration() {
             migrateIfNeeded()
@@ -184,10 +183,16 @@ class PreferencesService
 
         fun setProStatus(isPro: Boolean) {
             securePrefs.saveBoolean("is_pro", isPro)
+            _isPro.value = isPro
         }
 
         fun setAdminStatus(isAdmin: Boolean) {
             securePrefs.saveBoolean("is_admin", isAdmin)
+            _isAdmin.value = isAdmin
+            // Admins are automatically PRO users
+            if (isAdmin) {
+                setProStatus(true)
+            }
         }
 
         suspend fun setPowerUserMode(enabled: Boolean) {

@@ -40,7 +40,7 @@ class GetNetworkHealthUseCase
                     val fg = fearGreed.await()
 
                     var safeGasPrice = "N/A"
-                    if (eth != null && eth.status == "1" && eth.result != null && eth.result.isJsonObject) {
+                    if (eth != null && eth.status == "1" && eth.result != null) {
                         val gasData = gson.fromJson(eth.result, GasOracleResult::class.java)
                         safeGasPrice = "${gasData.SafeGasPrice} Gwei"
                     }

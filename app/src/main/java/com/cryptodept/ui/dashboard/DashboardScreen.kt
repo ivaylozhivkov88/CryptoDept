@@ -1,25 +1,36 @@
 package com.cryptodept.ui.dashboard
 
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.cryptodept.domain.model.CoinPrice
+import com.cryptodept.domain.model.AgentStatus
 import com.cryptodept.ui.components.*
 import com.cryptodept.ui.effects.GlitchEffect
 import com.cryptodept.ui.navigation.Screen
@@ -130,51 +141,71 @@ fun DashboardScreen(
                 }
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().height(100.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
                 ) {
-                    Text(
-                        text = ">>> MARKET TERMINAL v3.0",
-                        color = colors.primary,
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 14.sp,
-                        modifier =
-                            Modifier
-                                .testTag("TerminalHeader")
-                                .onTargetPositioned { targetRects[TutorialStep.HEADER] = it }
-                                .clickable(
-                                    onClickLabel = "View Market News",
-                                    onClick = { navController.navigate(Screen.News.route) },
-                                ),
-                    )
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = ">>> MARKET TERMINAL v3.0",
+                            color = colors.primary,
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = 14.sp,
+                            modifier =
+                                Modifier
+                                    .testTag("TerminalHeader")
+                                    .onTargetPositioned { targetRects[TutorialStep.HEADER] = it }
+                                    .clickable(
+                                        onClickLabel = "View Market News",
+                                        onClick = { navController.navigate(Screen.News.route) },
+                                    ),
+                        )
+                        
+                        Spacer(modifier = Modifier.height(30.dp))
+                        
                         Text(
                             text = "SOURCES: MULTI-API",
                             color = colors.amber,
                             fontFamily = FontFamily.Monospace,
-                            fontSize = 12.sp,
+                            fontSize = 10.sp,
                         )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            // WHAT SHOULD I DO NOW? button
-                            GlitchEffect(trigger = adviceGlitchTrigger) {
-                                TextButton(
-                                    onClick = {
-                                        // trigger glitch and compute recommendation
-                                        adviceGlitchTrigger = System.currentTimeMillis().toString()
-                                        viewModel.computeActionRecommendation { action, explanation ->
-                                            adviceAction = action
-                                            adviceExplanation = explanation
-                                            showAdviceDialog = true
-                                        }
-                                    },
-                                    colors = ButtonDefaults.textButtonColors(contentColor = colors.primary),
-                                    modifier = Modifier.onTargetPositioned { targetRects[TutorialStep.WHATS_NEXT] = it }
-                                ) {
-                                    Text("[WHAT NOW?]", fontFamily = FontFamily.Monospace, fontSize = 11.sp)
-                                }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .size(100.dp)
+                            .padding(end = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        networkHealth?.let { health ->
+                            FearGreedPieChart3D(
+                                value = health.fearGreedIndex.toFloat(),
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                    }
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        // WHAT SHOULD I DO NOW? button
+                        GlitchEffect(trigger = adviceGlitchTrigger) {
+                            TextButton(
+                                onClick = {
+                                    // trigger glitch and compute recommendation
+                                    adviceGlitchTrigger = System.currentTimeMillis().toString()
+                                    viewModel.computeActionRecommendation { action, explanation ->
+                                        adviceAction = action
+                                        adviceExplanation = explanation
+                                        showAdviceDialog = true
+                                    }
+                                },
+                                colors = ButtonDefaults.textButtonColors(contentColor = colors.primary),
+                                modifier = Modifier.onTargetPositioned { targetRects[TutorialStep.WHATS_NEXT] = it }
+                            ) {
+                                Text("[WHAT NOW?]", fontFamily = FontFamily.Monospace, fontSize = 11.sp)
                             }
                         }
                     }
+                }
 
                 HorizontalDivider(color = colors.grid, thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
 
@@ -199,6 +230,8 @@ fun DashboardScreen(
                 HorizontalDivider(color = colors.grid, thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
 
                 // AI SUMMARY BANNER
+                val agentStatuses by viewModel.agentStatuses.collectAsStateWithLifecycle()
+
                 Box(
                     modifier =
                         Modifier
@@ -209,13 +242,41 @@ fun DashboardScreen(
                             .onTargetPositioned { targetRects[TutorialStep.AI_NARRATIVE] = it }
                             .testTag("AiSummaryBanner"),
                 ) {
-                    Text(
-                        text = "AI_MARKET_NARRATIVE: $aiSummary",
-                        color = colors.textPrimary,
-                        fontSize = 11.sp,
-                        fontFamily = FontFamily.Monospace,
-                        lineHeight = 14.sp,
-                    )
+                    Column {
+                        // AGENT STATUS BAR
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            agentStatuses.forEach { (id, status) ->
+                                val statusColor = when(status) {
+                                    AgentStatus.SCANNING -> colors.amber
+                                    AgentStatus.SUCCESS -> colors.primary
+                                    else -> colors.dimText
+                                }
+                                val statusText = when(status) {
+                                    AgentStatus.SCANNING -> "SCANNING..."
+                                    AgentStatus.SUCCESS -> "ACTIVE"
+                                    else -> "READY"
+                                }
+                                Text(
+                                    text = "[$id:$statusText]",
+                                    color = statusColor,
+                                    fontSize = 8.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+
+                        Text(
+                            text = "AI_MARKET_NARRATIVE: $aiSummary",
+                            color = colors.textPrimary,
+                            fontSize = 11.sp,
+                            fontFamily = FontFamily.Monospace,
+                            lineHeight = 14.sp,
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -528,13 +589,37 @@ fun EventLogRow(event: com.cryptodept.domain.model.SystemEvent) {
             else -> colors.dimText
         }
 
-    Row(modifier = Modifier.fillMaxWidth()) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 1.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // HEARTBEAT ANIMATION
+        if (event.message.contains("SCANNING") || event.message.contains("ANALYZING")) {
+            val infiniteTransition = rememberInfiniteTransition(label = "heartbeat")
+            val alpha by infiniteTransition.animateFloat(
+                initialValue = 0.2f,
+                targetValue = 1.0f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(600, easing = LinearEasing),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = "alpha"
+            )
+            Box(
+                modifier = Modifier
+                    .size(4.dp)
+                    .background(colors.primary.copy(alpha = alpha), CircleShape)
+                    .padding(end = 4.dp)
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+        }
+
         Text(
             text = "[$timeStr]",
             color = colors.dimText,
             fontSize = 9.sp,
             fontFamily = FontFamily.Monospace,
-            modifier = Modifier.padding(end = 4.dp),
+            modifier = Modifier.padding(end = 6.dp),
         )
         Text(
             text = event.message,
@@ -542,7 +627,116 @@ fun EventLogRow(event: com.cryptodept.domain.model.SystemEvent) {
             fontSize = 9.sp,
             fontFamily = FontFamily.Monospace,
             lineHeight = 11.sp,
+            modifier = Modifier.weight(1f)
         )
+    }
+}
+
+@Composable
+fun FearGreedPieChart3D(
+    value: Float,
+    modifier: Modifier = Modifier
+) {
+    val colors = LocalTerminalColors.current
+    val density = LocalDensity.current
+    val textMeasurer = rememberTextMeasurer()
+
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val sweepAngle = (value / 100f) * 360f
+                val remainingAngle = 360f - sweepAngle
+                
+                val width = size.width
+                val height = size.height * 0.7f
+                val depth = with(density) { 8.dp.toPx() }
+                
+                // Side of greed slice (Green)
+                drawArc(
+                    color = colors.primary.copy(alpha = 0.5f),
+                    startAngle = -90f,
+                    sweepAngle = sweepAngle,
+                    useCenter = true,
+                    topLeft = androidx.compose.ui.geometry.Offset(0f, depth),
+                    size = androidx.compose.ui.geometry.Size(width, height)
+                )
+                
+                // Side of fear slice (Red)
+                drawArc(
+                    color = colors.danger.copy(alpha = 0.5f),
+                    startAngle = -90f + sweepAngle,
+                    sweepAngle = remainingAngle,
+                    useCenter = true,
+                    topLeft = androidx.compose.ui.geometry.Offset(0f, depth),
+                    size = androidx.compose.ui.geometry.Size(width, height)
+                )
+
+                // Top greed slice
+                drawArc(
+                    color = colors.primary,
+                    startAngle = -90f,
+                    sweepAngle = sweepAngle,
+                    useCenter = true,
+                    topLeft = androidx.compose.ui.geometry.Offset(0f, 0f),
+                    size = androidx.compose.ui.geometry.Size(width, height)
+                )
+                
+                // Top fear slice
+                drawArc(
+                    color = colors.danger,
+                    startAngle = -90f + sweepAngle,
+                    sweepAngle = remainingAngle,
+                    useCenter = true,
+                    topLeft = androidx.compose.ui.geometry.Offset(0f, 0f),
+                    size = androidx.compose.ui.geometry.Size(width, height)
+                )
+
+                // Draw Percentages inside slices
+                // Greed %
+                if (sweepAngle > 30) {
+                    val greedMidAngle = -90f + (sweepAngle / 2f)
+                    val rad = Math.toRadians(greedMidAngle.toDouble())
+                    val textStr = "${value.toInt()}%"
+                    val textLayoutResult = textMeasurer.measure(
+                        text = textStr,
+                        style = TextStyle(color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                    )
+                    val textX = (width / 2) + (Math.cos(rad) * width / 4).toFloat() - (textLayoutResult.size.width / 2)
+                    val textY = (height / 2) + (Math.sin(rad) * height / 4).toFloat() - (textLayoutResult.size.height / 2)
+                    
+                    drawText(
+                        textLayoutResult = textLayoutResult,
+                        topLeft = androidx.compose.ui.geometry.Offset(textX, textY)
+                    )
+                }
+
+                // Fear %
+                if (remainingAngle > 30) {
+                    val fearMidAngle = -90f + sweepAngle + (remainingAngle / 2f)
+                    val rad = Math.toRadians(fearMidAngle.toDouble())
+                    val textStr = "${100 - value.toInt()}%"
+                    val textLayoutResult = textMeasurer.measure(
+                        text = textStr,
+                        style = TextStyle(color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                    )
+                    val textX = (width / 2) + (Math.cos(rad) * width / 4).toFloat() - (textLayoutResult.size.width / 2)
+                    val textY = (height / 2) + (Math.sin(rad) * height / 4).toFloat() - (textLayoutResult.size.height / 2)
+                    
+                    drawText(
+                        textLayoutResult = textLayoutResult,
+                        topLeft = androidx.compose.ui.geometry.Offset(textX, textY)
+                    )
+                }
+            }
+        }
+        
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Text("FEAR", color = colors.danger, fontSize = 8.sp, fontFamily = FontFamily.Monospace)
+            Text("GREED", color = colors.primary, fontSize = 8.sp, fontFamily = FontFamily.Monospace)
+        }
     }
 }
 
