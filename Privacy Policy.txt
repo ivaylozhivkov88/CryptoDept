@@ -1,0 +1,28 @@
+Privacy Policy for CryptoDept
+Last Updated: May 11, 2026
+
+1. Introduction
+This Privacy Policy explains how CryptoDept ("we," "our," or "the app") handles information. We value your privacy and aim to be transparent about our data practices.
+
+2. Data Collection
+
+Personal Data: CryptoDept does not collect any personally identifiable information (PII) such as your name, email address, phone number, or location.
+
+Financial Data: The app does not access your bank accounts, credit card information, or crypto wallets. It is a tracking tool, not an exchange or a wallet.
+
+Usage Data: We do not track your search history or the specific assets you monitor. All watchlist data is stored locally on your device.
+
+3. Third-Party Services
+The app fetches market data from public cryptocurrency APIs. These third-party services may receive your IP address as part of the standard technical process of making an HTTPS request, but no other identifying data is shared with them.
+
+4. Data Security
+Since all your settings and watchlists are stored locally, your data remains under your control. We use industry-standard HTTPS encryption for all data transmitted between the app and the market data providers.
+
+5. Children’s Privacy
+Our services are not directed to children under the age of 13. We do not knowingly collect personal information from children.
+
+6. Changes to This Policy
+We may update our Privacy Policy from time to time. Any changes will be reflected in this document.
+
+7. Contact Us
+If you have any questions about this Privacy Policy, you can contact the developer via the contact information provided in the Google Play Store listing.
