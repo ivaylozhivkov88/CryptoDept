@@ -30,6 +30,13 @@ import com.cryptodept.ui.components.GlobalMarketBar
 import com.cryptodept.ui.components.TerminalBottomBar
 import com.cryptodept.ui.components.crt.CRTOverlay
 import com.cryptodept.ui.navigation.NavGraph
+import com.cryptodept.ui.tutorial.*
+import com.cryptodept.domain.tutorial.TutorialController
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
+import androidx.compose.ui.platform.LocalContext
 import com.cryptodept.ui.onboarding.OnboardingScreen
 import com.cryptodept.ui.screensaver.*
 import com.cryptodept.ui.theme.*
@@ -44,6 +51,12 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface MainActivityEntryPoint {
+    fun tutorialController(): TutorialController
+}
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -101,6 +114,7 @@ class MainActivity : ComponentActivity() {
             .schedule(this)
 
         setContent {
+            val context = LocalContext.current
             val phosphorModeStr by preferencesService.phosphorMode.collectAsState(initial = "GREEN")
             val mode =
                 when (phosphorModeStr) {
@@ -132,6 +146,13 @@ class MainActivity : ComponentActivity() {
             val heatmapData by heatmapDataRepository.getHeatmapData().collectAsState(initial = emptyList())
             val isOnboardingComplete by preferencesService.isOnboardingComplete.collectAsState(initial = true)
             val connectivityStatus by connectivityObserver.observe().collectAsState(initial = ConnectivityObserver.Status.Available)
+            
+            val mainEntryPoint = remember(context) {
+                EntryPointAccessors.fromApplication(context.applicationContext, MainActivityEntryPoint::class.java)
+            }
+            val tutorialController = mainEntryPoint.tutorialController()
+            val tutorialState by tutorialController.state.collectAsState()
+            val targetRegistry = remember { TutorialTargetRegistry() }
 
             LaunchedEffect(lastInteractionTime, screensaverTimeout) {
                 isIdle = false
@@ -172,6 +193,20 @@ class MainActivity : ComponentActivity() {
                     } else {
                         val navController = rememberNavController()
                         
+                        // Auto-navigate when current step's screenRoute differs from current
+                        LaunchedEffect(tutorialState.currentStep?.id) {
+                            val step = tutorialState.currentStep ?: return@LaunchedEffect
+                            val currentRoute = navController.currentBackStackEntry?.destination?.route ?: return@LaunchedEffect
+
+                            if (currentRoute != step.screenRoute) {
+                                kotlinx.coroutines.delay(200)
+                                navController.navigate(step.screenRoute) {
+                                    launchSingleTop = true
+                                }
+                                kotlinx.coroutines.delay(600)
+                            }
+                        }
+
                         // Handle shortcut route
                         LaunchedEffect(intent) {
                             intent?.getStringExtra("route")?.let { route ->
@@ -179,87 +214,131 @@ class MainActivity : ComponentActivity() {
                             }
                         }
 
-                        Box(
-                            modifier =
-                                Modifier
-                                    .fillMaxSize()
-                                    .pointerInput(Unit) {
-                                        awaitPointerEventScope {
-                                            while (true) {
-                                                awaitPointerEvent()
-                                                lastInteractionTime = System.currentTimeMillis()
-                                                isIdle = false
+                        CompositionLocalProvider(
+                            LocalTutorialTargetRegistry provides targetRegistry
+                        ) {
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .fillMaxSize()
+                                        .pointerInput(Unit) {
+                                            awaitPointerEventScope {
+                                                while (true) {
+                                                    awaitPointerEvent()
+                                                    lastInteractionTime = System.currentTimeMillis()
+                                                    isIdle = false
+                                                }
+                                            }
+                                        },
+                            ) {
+                                Scaffold(
+                                    modifier = Modifier.fillMaxSize(),
+                                    containerColor = androidx.compose.ui.graphics.Color.Black,
+                                    bottomBar = {
+                                        val isKeyboardVisible = WindowInsets.ime.asPaddingValues().calculateBottomPadding() > 0.dp
+                                        if (!isIdle && !isKeyboardVisible) TerminalBottomBar(navController)
+                                    },
+                                ) { innerPadding ->
+                                    Box(modifier = Modifier.padding(innerPadding)) {
+                                        Column(modifier = Modifier.fillMaxSize()) {
+                                            if (connectivityStatus != ConnectivityObserver.Status.Available) {
+                                                com.cryptodept.ui.components.OfflineBanner()
+                                            }
+                                            GlobalMarketBar()
+                                            NavGraph(
+                                                navController = navController,
+                                                preferencesService = preferencesService,
+                                            )
+                                        }
+                                        CRTOverlay()
+                                    }
+                                }
+
+                                if (isIdle) {
+                                    val btcDisplay =
+                                        btcPriceState?.let {
+                                            "${it.currentPrice.toCurrency(
+                                                0,
+                                            )} ${if (it.priceChangePercentage24h >= 0) "▲" else "▼"}${it.priceChangePercentage24h.toPercentage(
+                                                decimals = 1,
+                                            )}"
+                                        } ?: "FETCHING..."
+
+                                    androidx.compose.animation.Crossfade(
+                                        targetState = currentScreensaver,
+                                        animationSpec =
+                                            androidx.compose.animation.core
+                                                .tween(300),
+                                        label = "screensaver_fade",
+                                    ) { type ->
+                                        when (type) {
+                                            ScreensaverType.BLOOMBERG_WALL -> {
+                                                BloombergWallScreen(
+                                                    modifier = Modifier.fillMaxSize(),
+                                                    onDismiss = {
+                                                        isIdle = false
+                                                        lastInteractionTime = System.currentTimeMillis()
+                                                    },
+                                                )
+                                            }
+                                            ScreensaverType.MATRIX_RAIN -> {
+                                                MatrixRainScreen(
+                                                    modifier = Modifier.fillMaxSize(),
+                                                    btcPrice = btcDisplay,
+                                                    allPrices = allPricesState,
+                                                    riskScore = riskScoreState,
+                                                    onDismiss = {
+                                                        isIdle = false
+                                                        lastInteractionTime = System.currentTimeMillis()
+                                                    },
+                                                )
+                                            }
+                                            ScreensaverType.HEATMAP -> {
+                                                HeatmapScreensaverScreen(items = heatmapData)
                                             }
                                         }
-                                    },
-                        ) {
-                            Scaffold(
-                                modifier = Modifier.fillMaxSize(),
-                                containerColor = androidx.compose.ui.graphics.Color.Black,
-                                bottomBar = {
-                                    val isKeyboardVisible = WindowInsets.ime.asPaddingValues().calculateBottomPadding() > 0.dp
-                                    if (!isIdle && !isKeyboardVisible) TerminalBottomBar(navController)
-                                },
-                            ) { innerPadding ->
-                                Box(modifier = Modifier.padding(innerPadding)) {
-                                    Column(modifier = Modifier.fillMaxSize()) {
-                                        if (connectivityStatus != ConnectivityObserver.Status.Available) {
-                                            com.cryptodept.ui.components.OfflineBanner()
-                                        }
-                                        GlobalMarketBar()
-                                        NavGraph(
-                                            navController = navController,
-                                            preferencesService = preferencesService,
-                                        )
                                     }
-                                    CRTOverlay()
+                                }
+
+                                // OVERLAY ABOVE EVERYTHING
+                                TutorialOverlay(
+                                    controller = tutorialController,
+                                    registry = targetRegistry
+                                )
+
+                                // START DIALOG
+                                if (tutorialState.showStartDialog) {
+                                    TutorialStartDialog(
+                                        onStart = { tutorialController.startTutorial() },
+                                        onSkip = {
+                                            tutorialController.dismissStartDialog()
+                                            tutorialController.completeTutorial()
+                                        }
+                                    )
+                                }
+
+                                // SKIP CONFIRMATION
+                                if (tutorialState.showSkipConfirmation) {
+                                    TutorialSkipConfirmDialog(
+                                        onConfirm = { tutorialController.confirmSkip() },
+                                        onCancel = { tutorialController.cancelSkip() }
+                                    )
+                                }
+
+                                // COMPLETION DIALOG
+                                if (tutorialState.showCompletionDialog) {
+                                    TutorialCompletionDialog(
+                                        onDismiss = { tutorialController.dismissCompletionDialog() }
+                                    )
                                 }
                             }
+                        }
 
-                            if (isIdle) {
-                                val btcDisplay =
-                                    btcPriceState?.let {
-                                        "${it.currentPrice.toCurrency(
-                                            0,
-                                        )} ${if (it.priceChangePercentage24h >= 0) "▲" else "▼"}${it.priceChangePercentage24h.toPercentage(
-                                            decimals = 1,
-                                        )}"
-                                    } ?: "FETCHING..."
-
-                                androidx.compose.animation.Crossfade(
-                                    targetState = currentScreensaver,
-                                    animationSpec =
-                                        androidx.compose.animation.core
-                                            .tween(300),
-                                    label = "screensaver_fade",
-                                ) { type ->
-                                    when (type) {
-                                        ScreensaverType.BLOOMBERG_WALL -> {
-                                            BloombergWallScreen(
-                                                modifier = Modifier.fillMaxSize(),
-                                                onDismiss = {
-                                                    isIdle = false
-                                                    lastInteractionTime = System.currentTimeMillis()
-                                                },
-                                            )
-                                        }
-                                        ScreensaverType.MATRIX_RAIN -> {
-                                            MatrixRainScreen(
-                                                modifier = Modifier.fillMaxSize(),
-                                                btcPrice = btcDisplay,
-                                                allPrices = allPricesState,
-                                                riskScore = riskScoreState,
-                                                onDismiss = {
-                                                    isIdle = false
-                                                    lastInteractionTime = System.currentTimeMillis()
-                                                },
-                                            )
-                                        }
-                                        ScreensaverType.HEATMAP -> {
-                                            HeatmapScreensaverScreen(items = heatmapData)
-                                        }
-                                    }
-                                }
+                        // Trigger start dialog after onboarding
+                        LaunchedEffect(isOnboardingComplete) {
+                            if (tutorialController.shouldShowStartDialog()) {
+                                kotlinx.coroutines.delay(800)
+                                tutorialController.promptToStartTutorial()
                             }
                         }
                     }

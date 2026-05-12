@@ -18,6 +18,8 @@ import com.cryptodept.BuildConfig
 import com.cryptodept.data.auth.AuthService
 import com.cryptodept.ui.components.AdminPasswordDialog
 import com.cryptodept.ui.components.TerminalCard
+import com.cryptodept.ui.tutorial.tutorialTarget
+import com.cryptodept.domain.tutorial.TutorialTargetId
 import com.cryptodept.ui.theme.LocalTerminalColors
 import com.cryptodept.viewmodel.SettingsViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -173,7 +175,12 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         // PHOSPHOR MODE TOGGLE
-        SettingRow("PHOSPHOR_TYPE", "Current: $phosphorMode", true) {
+        SettingRow(
+            label = "PHOSPHOR_TYPE", 
+            desc = "Current: $phosphorMode", 
+            checked = true,
+            modifier = Modifier.tutorialTarget(TutorialTargetId.SETTINGS_THEME)
+        ) {
             val nextMode = if (phosphorMode == "GREEN") "AMBER" else "GREEN"
             viewModel.setPhosphorMode(nextMode)
         }
@@ -265,6 +272,7 @@ fun SettingsScreen(
                 Modifier
                     .fillMaxWidth()
                     .border(1.dp, colors.primary.copy(alpha = 0.2f), RectangleShape)
+                    .tutorialTarget(TutorialTargetId.SETTINGS_REPLAY_TUTORIAL)
                     .clickable { viewModel.restartOnboarding() }
                     .padding(12.dp),
         ) {
@@ -368,12 +376,13 @@ fun SettingRow(
     label: String,
     desc: String,
     checked: Boolean,
+    modifier: Modifier = Modifier,
     onCheckedChange: (Boolean) -> Unit,
 ) {
     val colors = LocalTerminalColors.current
     Row(
         modifier =
-            Modifier
+            modifier
                 .fillMaxWidth()
                 .border(1.dp, colors.primary.copy(alpha = 0.2f), RectangleShape)
                 .padding(12.dp),

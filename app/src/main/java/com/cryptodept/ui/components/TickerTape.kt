@@ -43,7 +43,7 @@ fun TickerTape(
                 list.add(TickerItem.Stat("MEMPOOL: ${it.btcMempool}"))
                 list.add(TickerItem.Stat("GAS: ${it.ethGas}"))
             }
-            List(10) { list }.flatten()
+            if (list.isEmpty()) emptyList() else List(50) { list }.flatten() // LARGE ENOUGH FOR SEAMLESS LOOP
         }
 
     val listState = rememberLazyListState()
@@ -51,13 +51,17 @@ fun TickerTape(
 
     LaunchedEffect(tickerItems.size) {
         if (tickerItems.isEmpty()) return@LaunchedEffect
+        
+        // Start from middle to allow scrolling both ways
         listState.scrollToItem(tickerItems.size / 2)
 
         while (isActive) {
             listState.scrollBy(TerminalConfig.Animation.TICKER_SPEED)
+            
+            // Loop logic: if we reach 90% of the list, jump back to middle
             val firstVisible = listState.firstVisibleItemIndex
             val size = currentItems.size
-            if (size > 0 && firstVisible >= (size * 0.8f)) {
+            if (size > 0 && firstVisible >= (size * 0.9f)) {
                 listState.scrollToItem(size / 2)
             }
             delay(16)
@@ -80,7 +84,7 @@ fun TickerTape(
     ) {
         LazyRow(
             state = listState,
-            userScrollEnabled = false,
+            userScrollEnabled = true,
             modifier = Modifier.fillMaxSize(),
             verticalAlignment = Alignment.CenterVertically,
         ) {

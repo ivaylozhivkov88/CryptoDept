@@ -94,4 +94,6 @@ sealed class Screen(
     object ContentStudio : Screen("content_studio")
 
     object Achievements : Screen("achievements", "ACHIEVEMENTS", "🏆")
+
+    object AgentHub : Screen("agent_hub", "AGENT HUB", "🤖")
 }

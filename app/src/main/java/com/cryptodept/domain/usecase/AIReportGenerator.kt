@@ -6,6 +6,9 @@ import com.cryptodept.domain.model.*
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -22,14 +25,23 @@ class AIReportGenerator
         companion object {
             private const val GEMINI_API_URL =
                 "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+            private const val GEMINI_STREAM_URL =
+                "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent"
             private const val MAX_TOKENS = 2000
         }
 
         private val client =
             OkHttpClient
                 .Builder()
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(60, TimeUnit.SECONDS)
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .readTimeout(20, TimeUnit.SECONDS)
+                .writeTimeout(15, TimeUnit.SECONDS)
+                .build()
+
+        private val streamingClient = 
+            client.newBuilder()
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(0, TimeUnit.SECONDS) // For streaming we want to keep it open
                 .build()
 
         private val gson = Gson()
@@ -65,20 +77,42 @@ class AIReportGenerator
         suspend fun generateShortSummary(data: MarketDataSnapshot): Result<String> =
             withContext(Dispatchers.IO) {
                 try {
-                    val prompt =
-                        """
-                        Analyze this crypto market data and give me EXACTLY ONE SENTENCE (max 20 words) summary for a terminal dashboard.
-                        Be cynical, professional, and data-driven.
-                        DATA: BTC ${data.priceChange24h}%, Dom ${data.btcDominance}%, Fear&Greed ${data.fearGreedIndex}, Risk ${data.riskScore}.
-                        Example: "BTC holding critical support at 100k; market sentiment neutral as dominance remains high."
-                        """.trimIndent()
+                    val prompt = buildShortSummaryPrompt(data)
                     callGemini(prompt)
                 } catch (e: Exception) {
                     Result.failure(e)
                 }
             }
 
+        fun generateMarketAnalysisStream(data: MarketDataSnapshot): Flow<String> {
+            val prompt = buildMarketPrompt(data)
+            return callGeminiStream(prompt)
+        }
+
+        fun generateCoinAnalysisStream(
+            coinName: String,
+            coinSymbol: String,
+            data: MarketDataSnapshot,
+        ): Flow<String> {
+            val prompt = buildCoinPrompt(coinName, coinSymbol, data)
+            return callGeminiStream(prompt)
+        }
+
+        fun generateShortSummaryStream(data: MarketDataSnapshot): Flow<String> {
+            val prompt = buildShortSummaryPrompt(data)
+            return callGeminiStream(prompt)
+        }
+
+        private fun buildShortSummaryPrompt(data: MarketDataSnapshot): String =
+            """
+            Analyze this crypto market data and give me EXACTLY ONE SENTENCE (max 20 words) summary for a terminal dashboard.
+            Be cynical, professional, and data-driven.
+            DATA: BTC ${data.priceChange24h}%, Dom ${data.btcDominance}%, Fear&Greed ${data.fearGreedIndex}, Risk ${data.riskScore}.
+            Example: "BTC holding critical support at 100k; market sentiment neutral as dominance remains high."
+            """.trimIndent()
+
         private suspend fun callGemini(prompt: String): Result<String> {
+            // ... (keep existing callGemini for non-streaming usage)
             return try {
                 val apiKey = BuildConfig.GEMINI_API_KEY
                 if (apiKey.isBlank()) {
@@ -105,6 +139,7 @@ class AIReportGenerator
                         .post(gson.toJson(requestBody).toRequestBody("application/json".toMediaType()))
                         .build()
 
+                // Use a capped call to avoid long hangs
                 val response = client.newCall(request).execute()
                 val bodyString = response.body?.string() ?: ""
 
@@ -127,6 +162,68 @@ class AIReportGenerator
                 Result.failure(e)
             }
         }
+
+        private fun callGeminiStream(prompt: String): Flow<String> = flow {
+            try {
+                val apiKey = BuildConfig.GEMINI_API_KEY
+                if (apiKey.isBlank()) {
+                    Log.e("CryptoDept_AI", "GEMINI_API_KEY is missing")
+                    return@flow
+                }
+
+                val requestBody = mapOf(
+                    "contents" to listOf(
+                        mapOf("parts" to listOf(mapOf("text" to prompt)))
+                    ),
+                    "generationConfig" to mapOf(
+                        "maxOutputTokens" to MAX_TOKENS,
+                        "temperature" to 0.7
+                    )
+                )
+
+                val request = Request.Builder()
+                    .url("$GEMINI_STREAM_URL?alt=sse&key=$apiKey")
+                    .post(gson.toJson(requestBody).toRequestBody("application/json".toMediaType()))
+                    .build()
+
+                // Use the dedicated streaming client with specific timeouts
+                streamingClient.newCall(request).execute().use { response ->
+                    if (!response.isSuccessful) {
+                        Log.e("CryptoDept_AI", "Gemini stream API error: ${response.code}")
+                        return@flow
+                    }
+
+                    val reader = response.body?.charStream()?.buffered() ?: return@flow
+                    reader.useLines { lines ->
+                        lines.forEach { line ->
+                            if (line.startsWith("data: ")) {
+                                val jsonChunk = line.removePrefix("data: ").trim()
+                                if (jsonChunk.isNotEmpty() && jsonChunk != "[DONE]") {
+                                    try {
+                                        val json = JSONObject(jsonChunk)
+                                        val candidates = json.optJSONArray("candidates") ?: return@forEach
+                                        if (candidates.length() == 0) return@forEach
+
+                                        val content = candidates.getJSONObject(0).optJSONObject("content") ?: return@forEach
+                                        val parts = content.optJSONArray("parts") ?: return@forEach
+                                        if (parts.length() == 0) return@forEach
+
+                                        val text = parts.getJSONObject(0).optString("text", "")
+                                        if (text.isNotEmpty()) {
+                                            emit(text)
+                                        }
+                                    } catch (e: Exception) {
+                                        Log.w("CryptoDept_AI", "Failed to parse SSE chunk: $e")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("CryptoDept_AI", "Gemini stream fatal error: ${e.message}")
+            }
+        }.flowOn(Dispatchers.IO)
 
         private fun buildCoinPrompt(
             coinName: String,

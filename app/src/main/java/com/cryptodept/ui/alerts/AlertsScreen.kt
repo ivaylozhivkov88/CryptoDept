@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cryptodept.domain.model.Alert
 import com.cryptodept.domain.model.AlertDirection
+import com.cryptodept.ui.tutorial.tutorialTarget
+import com.cryptodept.domain.tutorial.TutorialTargetId
 import com.cryptodept.ui.theme.*
 import com.cryptodept.viewmodel.AlertsViewModel
 import java.util.*
@@ -43,6 +45,7 @@ fun AlertsScreen(
                 containerColor = colors.primary,
                 contentColor = Color.Black,
                 shape = RectangleShape,
+                modifier = Modifier.tutorialTarget(TutorialTargetId.ALERTS_COMPOSITE_BUILDER)
             ) {
                 Text("+", fontSize = 24.sp, fontWeight = FontWeight.Bold)
             }
@@ -83,7 +86,9 @@ fun AlertsScreen(
                 }
             } else {
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .tutorialTarget(TutorialTargetId.ALERTS_LIST),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     items(alerts, key = { it.id }) { alert ->

@@ -54,6 +54,7 @@ class PreferencesService
             val IS_ADMIN = booleanPreferencesKey("is_admin")
             val POWER_USER_MODE = booleanPreferencesKey("power_user_mode")
             val FOCUS_MODE_ENABLED = booleanPreferencesKey("focus_mode_enabled")
+            val TUTORIAL_COMPLETED = booleanPreferencesKey("tutorial_completed_v1")
             val LAST_REVIEW_PROMPT_TIME = longPreferencesKey("last_review_prompt_time")
             val LAUNCH_COUNT = intPreferencesKey("launch_count")
 
@@ -66,6 +67,9 @@ class PreferencesService
 
         private val _isAdmin = MutableStateFlow(securePrefs.getBoolean("is_admin", false))
         val isAdmin: StateFlow<Boolean> = _isAdmin.asStateFlow()
+
+        private val _isTutorialCompleted = MutableStateFlow(securePrefs.getBoolean("tutorial_completed_v1", false))
+        val isTutorialCompleted: StateFlow<Boolean> = _isTutorialCompleted.asStateFlow()
 
         val refreshInterval: Flow<Int> =
             dataStore.data
@@ -116,6 +120,7 @@ class PreferencesService
             dataStore.data
                 .catch { exception -> if (exception is IOException) emit(emptyPreferences()) else throw exception }
                 .map { it[FOCUS_MODE_ENABLED] ?: false }
+
 
         suspend fun performMigration() {
             migrateIfNeeded()
@@ -201,6 +206,12 @@ class PreferencesService
 
         suspend fun setFocusModeEnabled(enabled: Boolean) {
             dataStore.edit { it[FOCUS_MODE_ENABLED] = enabled }
+        }
+
+        suspend fun setTutorialCompleted(completed: Boolean) {
+            securePrefs.saveBoolean("tutorial_completed_v1", completed)
+            _isTutorialCompleted.value = completed
+            dataStore.edit { it[TUTORIAL_COMPLETED] = completed }
         }
 
         suspend fun saveLastReviewPromptTime(timestamp: Long) {

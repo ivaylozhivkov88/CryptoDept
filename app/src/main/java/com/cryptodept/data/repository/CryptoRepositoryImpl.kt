@@ -3,7 +3,6 @@ package com.cryptodept.data.repository
 import com.cryptodept.data.api.*
 import com.cryptodept.data.db.CoinDao
 import com.cryptodept.data.db.CoinEntity
-import com.cryptodept.data.db.PriceHistoryDao
 import com.cryptodept.domain.model.*
 import com.cryptodept.domain.repository.*
 import kotlinx.coroutines.*
@@ -18,7 +17,7 @@ class CryptoRepositoryImpl @Inject constructor(
     private val binanceSource: BinancePriceSource,
     private val aggregator: MultiSourcePriceAggregator,
     private val coinDao: CoinDao,
-    private val priceHistoryDao: PriceHistoryDao,
+    private val priceHistoryRepository: PriceHistoryRepository,
     private val networkHealthDao: com.cryptodept.data.db.NetworkHealthDao,
     private val binanceWS: BinanceWebSocketService,
     private val krakenWS: KrakenWebSocketService,
@@ -98,7 +97,9 @@ class CryptoRepositoryImpl @Inject constructor(
         try {
             if (System.currentTimeMillis() - lastFetchTime < RATE_LIMIT_MS) return@coroutineScope CryptoResult.Success(Unit)
             
-            val response = runCatching { api.getCoinMarkets(perPage = 15) }
+            val response = runCatching { 
+                withTimeout(10000) { api.getCoinMarkets(perPage = 15) }
+            }
             val marketResponse = response.getOrNull()
             
             if (marketResponse == null || marketResponse.isEmpty()) {
@@ -135,6 +136,12 @@ class CryptoRepositoryImpl @Inject constructor(
                 )
             }
             coinDao.insertCoins(entities)
+            
+            // Save to price history (one record per day logic inside repo)
+            entities.forEach { coin ->
+                priceHistoryRepository.saveDailyPrice(coin.id, coin.currentPrice, coin.totalVolume)
+            }
+
             CryptoResult.Success(Unit)
         } catch (e: Exception) {
             CryptoResult.Error(e)
@@ -207,7 +214,7 @@ class CryptoRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getPriceAtTimestamp(coinId: String, timestamp: Long): Double =
-        priceHistoryDao.getNearestPriceBeforeTimestamp(coinId, timestamp) ?: getCurrentPrice(coinId)
+        priceHistoryRepository.getPriceAtTimestamp(coinId, timestamp) ?: getCurrentPrice(coinId)
 
     override suspend fun toggleTracking(coinId: String): CryptoResult<Unit> = try {
         val coin = coinDao.getCoinById(coinId) ?: throw Exception("NOT_FOUND")

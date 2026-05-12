@@ -1,8 +1,8 @@
 package com.cryptodept.data.repository
 
-import com.cryptodept.data.db.PriceHistoryDao
 import com.cryptodept.domain.model.*
 import com.cryptodept.domain.repository.AnalysisRepository
+import com.cryptodept.domain.repository.PriceHistoryRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -14,10 +14,10 @@ import kotlin.math.sqrt
 class AnalysisRepositoryImpl
     @Inject
     constructor(
-        private val priceHistoryDao: PriceHistoryDao,
+        private val priceHistoryRepository: PriceHistoryRepository,
     ) : AnalysisRepository {
         override fun getTechnicalIndicators(coinId: String): Flow<TechnicalIndicators> {
-            return priceHistoryDao.getPriceHistory(coinId).map { history ->
+            return priceHistoryRepository.getPriceHistory(coinId).map { history ->
                 // Обръщаме историята, за да работим в хронологичен ред (от минало към настояще)
                 val prices = history.map { it.price }.reversed()
 

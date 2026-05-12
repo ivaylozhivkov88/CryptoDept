@@ -9,6 +9,7 @@ import com.cryptodept.domain.model.NetworkHealth
 import com.google.gson.Gson
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -25,14 +26,16 @@ class GetNetworkHealthUseCase
         suspend operator fun invoke(): Result<NetworkHealth> =
             coroutineScope {
                 try {
-                    val btcStats = async { blockchainApi.getStats() }
+                    val btcStats = async { 
+                        runCatching { withTimeoutOrNull(10000) { blockchainApi.getStats() } }.getOrNull() 
+                    }
                     val ethGas =
                         async {
-                            runCatching { etherscanApi.getGasOracle(apiKey = BuildConfig.ETHERSCAN_API_KEY) }.getOrNull()
+                            runCatching { withTimeoutOrNull(5000) { etherscanApi.getGasOracle(apiKey = BuildConfig.ETHERSCAN_API_KEY) } }.getOrNull()
                         }
                     val fearGreed =
                         async {
-                            runCatching { fearGreedApi.getFearGreedIndex() }.getOrNull()
+                            runCatching { withTimeoutOrNull(5000) { fearGreedApi.getFearGreedIndex() } }.getOrNull()
                         }
 
                     val btc = btcStats.await()
@@ -49,8 +52,8 @@ class GetNetworkHealthUseCase
                     val fearGreedIndex = fgValue?.value?.toIntOrNull() ?: 50
                     val fearGreedLabel = fgValue?.valueClassification ?: "NEUTRAL"
 
-                    val hashrateStr = "${(btc.hash_rate / 1e18).toInt()} EH/s"
-                    val mempoolStr = "${btc.mempool_count} TXs"
+                    val hashrateStr = if (btc != null) "${(btc.hash_rate / 1e18).toInt()} EH/s" else "N/A"
+                    val mempoolStr = if (btc != null) "${btc.mempool_count} TXs" else "N/A"
 
                     val pulse = sentimentAnalyzer.calculatePulse("BTC")
                     val pulseLabel = sentimentAnalyzer.getPulseLabel(pulse)

@@ -31,6 +31,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.cryptodept.domain.model.CoinPrice
 import com.cryptodept.domain.model.AgentStatus
+import com.cryptodept.ui.components.StreamingText
+import com.cryptodept.ui.tutorial.tutorialTarget
+import com.cryptodept.domain.tutorial.TutorialTargetId
 import com.cryptodept.ui.components.*
 import com.cryptodept.ui.effects.GlitchEffect
 import com.cryptodept.ui.navigation.Screen
@@ -50,7 +53,7 @@ fun DashboardScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val networkHealth by viewModel.networkHealth.collectAsStateWithLifecycle()
     val events by viewModel.events.collectAsStateWithLifecycle()
-    val aiSummary by viewModel.aiSummary.collectAsStateWithLifecycle()
+    val isAiStreaming by viewModel.isAiStreaming.collectAsStateWithLifecycle()
     val tutorialStep by viewModel.tutorialStep.collectAsStateWithLifecycle()
     val focusModeEnabled by viewModel.focusModeEnabled.collectAsStateWithLifecycle()
     
@@ -110,12 +113,14 @@ fun DashboardScreen(
                 Modifier
                     .fillMaxSize()
                     .background(colors.background)
-                    .padding(TerminalConfig.UI.DEFAULT_PADDING),
+                    .padding(TerminalConfig.UI.DEFAULT_PADDING)
+                    .imePadding(),
         ) {
             val currentPrices = if (uiState is DashboardUiState.Success) (uiState as DashboardUiState.Success).prices else emptyList()
             TickerTape(
                 prices = currentPrices,
                 networkHealth = networkHealth,
+                modifier = Modifier.tutorialTarget(TutorialTargetId.DASH_PRICE_TICKER)
             )
 
             HorizontalDivider(color = colors.grid, thickness = TerminalConfig.UI.BORDER_WIDTH)
@@ -141,7 +146,7 @@ fun DashboardScreen(
                 }
 
                 Row(
-                    modifier = Modifier.fillMaxWidth().height(100.dp),
+                    modifier = Modifier.fillMaxWidth().height(80.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.Top
                 ) {
@@ -161,7 +166,7 @@ fun DashboardScreen(
                                     ),
                         )
                         
-                        Spacer(modifier = Modifier.height(30.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
                         
                         Text(
                             text = "SOURCES: MULTI-API",
@@ -173,14 +178,16 @@ fun DashboardScreen(
 
                     Box(
                         modifier = Modifier
-                            .size(100.dp)
+                            .size(80.dp)
                             .padding(end = 8.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         networkHealth?.let { health ->
                             FearGreedPieChart3D(
                                 value = health.fearGreedIndex.toFloat(),
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .tutorialTarget(TutorialTargetId.DASH_SENTIMENT_GAUGE)
                             )
                         }
                     }
@@ -212,77 +219,103 @@ fun DashboardScreen(
                 networkHealth?.let { health ->
                     NetworkHealthPanel(
                         health = health,
-                        modifier = Modifier.onTargetPositioned { targetRects[TutorialStep.NETWORK_HEALTH] = it },
+                        modifier = Modifier
+                            .onTargetPositioned { targetRects[TutorialStep.NETWORK_HEALTH] = it }
+                            .tutorialTarget(TutorialTargetId.DASH_NETWORK_HEALTH),
                         onClick = { navController.navigate(Screen.FearGreed.route) }
                     )
-                    HorizontalDivider(color = colors.grid, thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
+                    HorizontalDivider(color = colors.grid, thickness = 1.dp, modifier = Modifier.padding(vertical = 2.dp))
                 }
 
                 val prices = (uiState as? DashboardUiState.Success)?.prices ?: emptyList()
                 if (prices.isNotEmpty()) {
                     MarketDominanceBar(prices)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    MiniHeatmap(prices)
-                    HorizontalDivider(color = colors.grid, thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
+                    MiniHeatmap(
+                        prices = prices,
+                        modifier = Modifier.tutorialTarget(TutorialTargetId.DASH_TOP_MOVERS)
+                    )
+                    HorizontalDivider(color = colors.grid, thickness = 1.dp, modifier = Modifier.padding(vertical = 2.dp))
                 }
 
                 QuickAccessPanel(navController)
-                HorizontalDivider(color = colors.grid, thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
+                HorizontalDivider(color = colors.grid, thickness = 1.dp, modifier = Modifier.padding(vertical = 2.dp))
 
                 // AI SUMMARY BANNER
                 val agentStatuses by viewModel.agentStatuses.collectAsStateWithLifecycle()
+                val aiSummary by viewModel.aiSummary.collectAsStateWithLifecycle()
 
                 Box(
                     modifier =
                         Modifier
                             .fillMaxWidth()
+                            .heightIn(max = 110.dp)
                             .border(1.dp, colors.primary)
                             .background(colors.primary.copy(alpha = 0.05f))
-                            .padding(8.dp)
+                            .padding(horizontal = 8.dp, vertical = 6.dp)
                             .onTargetPositioned { targetRects[TutorialStep.AI_NARRATIVE] = it }
+                            .tutorialTarget(TutorialTargetId.DASH_AI_NARRATIVE)
                             .testTag("AiSummaryBanner"),
                 ) {
                     Column {
-                        // AGENT STATUS BAR
+                        // AGENT STATUS BAR - COMPACT
                         Row(
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            agentStatuses.forEach { (id, status) ->
-                                val statusColor = when(status) {
-                                    AgentStatus.SCANNING -> colors.amber
-                                    AgentStatus.SUCCESS -> colors.primary
-                                    else -> colors.dimText
+                            Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                agentStatuses.forEach { (id, status) ->
+                                    val statusColor = when(status) {
+                                        AgentStatus.SCANNING -> colors.amber
+                                        AgentStatus.SUCCESS -> colors.primary
+                                        else -> colors.dimText
+                                    }
+                                    val statusText = when(status) {
+                                        AgentStatus.SCANNING -> "SCAN"
+                                        AgentStatus.SUCCESS -> "ACT"
+                                        else -> "RDY"
+                                    }
+                                    Text(
+                                        text = "[$id:$statusText]",
+                                        color = statusColor,
+                                        fontSize = 7.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        fontWeight = FontWeight.Bold
+                                    )
                                 }
-                                val statusText = when(status) {
-                                    AgentStatus.SCANNING -> "SCANNING..."
-                                    AgentStatus.SUCCESS -> "ACTIVE"
-                                    else -> "READY"
-                                }
-                                Text(
-                                    text = "[$id:$statusText]",
-                                    color = statusColor,
-                                    fontSize = 8.sp,
-                                    fontFamily = FontFamily.Monospace,
-                                    fontWeight = FontWeight.Bold
-                                )
                             }
+                            
+                            // [LIVE] INDICATOR
+                             Text(
+                                text = "[LIVE]",
+                                color = colors.primary,
+                                fontSize = 7.sp,
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Black
+                            )
                         }
 
-                        Text(
-                            text = "AI_MARKET_NARRATIVE: $aiSummary",
-                            color = colors.textPrimary,
-                            fontSize = 11.sp,
-                            fontFamily = FontFamily.Monospace,
-                            lineHeight = 14.sp,
+                        StreamingText(
+                            text = if (aiSummary.isNotBlank()) "AI_NARRATIVE: $aiSummary" else "",
+                            isStreaming = isAiStreaming,
+                            modifier = Modifier.fillMaxWidth(),
+                            fontSize = 10.sp,
+                            placeholder = "AI_NARRATIVE: INITIALIZING..."
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
                 // TERMINAL EVENT LOG
-                Box(modifier = Modifier.weight(2f).border(1.dp, colors.grid).padding(4.dp)) {
+                Box(
+                    modifier = Modifier
+                        .weight(2f)
+                        .border(1.dp, colors.grid)
+                        .padding(4.dp)
+                        .tutorialTarget(TutorialTargetId.DASH_WHALE_FEED)
+                ) {
                     Column {
                         Text(
                             text = "--- SYSTEM_EVENT_LOG ---",
@@ -292,9 +325,19 @@ fun DashboardScreen(
                             modifier = Modifier.padding(bottom = 4.dp),
                         )
                         LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier.fillMaxSize().padding(top = 4.dp),
                             verticalArrangement = Arrangement.spacedBy(2.dp),
                         ) {
+                            if (events.isEmpty()) {
+                                item {
+                                    Text(
+                                        ">>> WAITING FOR SYSTEM_DATA...",
+                                        color = colors.dimText,
+                                        fontSize = 9.sp,
+                                        fontFamily = FontFamily.Monospace
+                                    )
+                                }
+                            }
                             items(events, key = { it.id }) { event ->
                                 EventLogRow(event)
                             }
@@ -306,7 +349,7 @@ fun DashboardScreen(
             TerminalCommandBar(
                 modifier = Modifier
                     .onTargetPositioned { targetRects[TutorialStep.COMMAND_BAR] = it }
-                    .imePadding(),
+                    .tutorialTarget(TutorialTargetId.DASH_QUICK_ACTIONS),
                 onCommandEntered = { cmd ->
                     val cleanCmd = cmd.trim().removePrefix("/").uppercase()
                     val parts = cleanCmd.split(" ")
@@ -409,7 +452,7 @@ fun DashboardScreen(
 @Composable
 fun QuickAccessPanel(navController: NavController) {
     val colors = LocalTerminalColors.current
-    Column(modifier = Modifier.fillMaxWidth().padding(4.dp)) {
+    Column(modifier = Modifier.fillMaxWidth().padding(2.dp)) {
         Text(
             text = ">>> QUICK ACCESS ENGINE",
             color = colors.dimText,
@@ -481,7 +524,7 @@ fun NetworkHealthPanel(
                     onClickLabel = "View Detailed Network Health",
                     onClick = onClick
                 )
-                .padding(8.dp)
+                .padding(4.dp)
                 .testTag("NetworkHealthPanel"),
     ) {
         Text(
@@ -550,11 +593,14 @@ fun MarketDominanceBar(prices: List<CoinPrice>) {
 }
 
 @Composable
-fun MiniHeatmap(prices: List<CoinPrice>) {
+fun MiniHeatmap(
+    prices: List<CoinPrice>,
+    modifier: Modifier = Modifier,
+) {
     val colors = LocalTerminalColors.current
     val topPrices = prices.take(10)
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         topPrices.forEach { coin ->
@@ -699,7 +745,7 @@ fun FearGreedPieChart3D(
                     val textStr = "${value.toInt()}%"
                     val textLayoutResult = textMeasurer.measure(
                         text = textStr,
-                        style = TextStyle(color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                        style = TextStyle(color = Color.Black, fontSize = 10.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
                     )
                     val textX = (width / 2) + (Math.cos(rad) * width / 4).toFloat() - (textLayoutResult.size.width / 2)
                     val textY = (height / 2) + (Math.sin(rad) * height / 4).toFloat() - (textLayoutResult.size.height / 2)
@@ -717,7 +763,7 @@ fun FearGreedPieChart3D(
                     val textStr = "${100 - value.toInt()}%"
                     val textLayoutResult = textMeasurer.measure(
                         text = textStr,
-                        style = TextStyle(color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                        style = TextStyle(color = Color.Black, fontSize = 10.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
                     )
                     val textX = (width / 2) + (Math.cos(rad) * width / 4).toFloat() - (textLayoutResult.size.width / 2)
                     val textY = (height / 2) + (Math.sin(rad) * height / 4).toFloat() - (textLayoutResult.size.height / 2)

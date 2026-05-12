@@ -274,5 +274,9 @@ fun NavGraph(
             com.cryptodept.ui.comparison
                 .ComparisonScreen(coin1Id = c1, coin2Id = c2, onBack = { navController.popBackStack() })
         }
+
+        composable(Screen.AgentHub.route) {
+            com.cryptodept.ui.agents.AgentHubScreen(navController = navController)
+        }
     }
 }

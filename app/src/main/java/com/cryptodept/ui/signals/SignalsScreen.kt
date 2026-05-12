@@ -23,6 +23,8 @@ import com.cryptodept.domain.model.SignalStrength
 import com.cryptodept.domain.usecase.AlphaSignal
 import com.cryptodept.domain.usecase.SignalType
 import com.cryptodept.ui.components.TerminalLoadingSkeleton
+import com.cryptodept.ui.tutorial.tutorialTarget
+import com.cryptodept.domain.tutorial.TutorialTargetId
 import com.cryptodept.ui.theme.GreenPrimary
 import com.cryptodept.ui.theme.LocalTerminalColors
 import com.cryptodept.ui.theme.TerminalRed
@@ -43,7 +45,8 @@ fun SignalsScreen(viewModel: SignalsViewModel = hiltViewModel()) {
             Modifier
                 .fillMaxSize()
                 .background(colors.background)
-                .padding(8.dp),
+                .padding(8.dp)
+                .tutorialTarget(TutorialTargetId.SIGNALS_LIST),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item {
@@ -53,7 +56,9 @@ fun SignalsScreen(viewModel: SignalsViewModel = hiltViewModel()) {
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Monospace,
-                modifier = Modifier.padding(bottom = 8.dp),
+                modifier = Modifier
+                    .padding(bottom = 8.dp)
+                    .tutorialTarget(TutorialTargetId.SIGNALS_COMPOSER),
             )
         }
 
@@ -212,7 +217,10 @@ fun SignalRow(coinSignal: CoinSignal) {
         Spacer(modifier = Modifier.height(8.dp))
 
         // Confidence Bar
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.tutorialTarget(TutorialTargetId.SIGNALS_PERFORMANCE)
+        ) {
             Text("CONFIDENCE: ", color = colors.dimText, fontSize = 10.sp)
             val dots = (signal.confidence * 10).toInt().coerceIn(0, 10)
             Text(

@@ -21,6 +21,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cryptodept.domain.model.*
+import com.cryptodept.ui.tutorial.tutorialTarget
+import com.cryptodept.domain.tutorial.TutorialTargetId
+import com.cryptodept.ui.components.StreamingText
 import com.cryptodept.ui.components.TechnicalBreakdownSheet
 import com.cryptodept.ui.components.TerminalErrorOverlay
 import com.cryptodept.ui.components.TerminalHelpDialog
@@ -43,6 +46,7 @@ fun AnalysisScreen(
     val state by viewModel.analysisState.collectAsStateWithLifecycle()
     val trackedCoins by viewModel.trackedCoins.collectAsStateWithLifecycle()
     val aiReport by viewModel.aiReport.collectAsStateWithLifecycle()
+    val isAiStreaming by viewModel.isAiStreaming.collectAsStateWithLifecycle()
     val predictionState by predictionViewModel.uiState.collectAsStateWithLifecycle()
 
     var showHelp by remember { mutableStateOf(false) }
@@ -85,12 +89,11 @@ fun AnalysisScreen(
                             .heightIn(max = 500.dp)
                             .verticalScroll(rememberScrollState()),
                 ) {
-                    Text(
+                    StreamingText(
                         text = aiReport!!,
-                        color = colors.textPrimary,
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 13.sp,
-                        lineHeight = 20.sp,
+                        isStreaming = isAiStreaming,
+                        textColor = colors.textPrimary,
+                        fontSize = 13.sp
                     )
                 }
             },
@@ -169,7 +172,12 @@ fun AnalysisScreen(
 
                 HorizontalDivider(color = colors.grid, modifier = Modifier.padding(vertical = 8.dp))
 
-                AssetSelector(assets = trackedCoins, selectedAsset = coinId, onSelect = { viewModel.loadAnalysis(it) })
+                AssetSelector(
+                    assets = trackedCoins, 
+                    selectedAsset = coinId, 
+                    onSelect = { viewModel.loadAnalysis(it) },
+                    modifier = Modifier.tutorialTarget(TutorialTargetId.ANALYSIS_COIN_SELECTOR)
+                )
 
                 when (val uiState = state) {
                     is AnalysisUiState.Loading -> {
@@ -275,10 +283,11 @@ fun AssetSelector(
     assets: List<String>,
     selectedAsset: String,
     onSelect: (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val colors = LocalTerminalColors.current
     Row(
-        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(bottom = 16.dp),
+        modifier = modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(bottom = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         assets.forEach { asset ->
@@ -334,6 +343,7 @@ fun AnalysisContentV2(
                     RectangleShape,
                 ).background(signalColor.copy(alpha = 0.1f))
                 .padding(16.dp)
+                .tutorialTarget(TutorialTargetId.ANALYSIS_AI_VERDICT)
                 .semantics {
                     contentDescription = "Asset signal is ${signal.strength.name}"
                 },
@@ -369,7 +379,7 @@ fun AnalysisContentV2(
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    Text(">>> INDICATOR_MATRIX", color = colors.dimText, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+    Text(">>> INDICATOR_MATRIX", color = colors.dimText, fontSize = 12.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.tutorialTarget(TutorialTargetId.ANALYSIS_INDICATORS))
     result.compositeSignal.indicators.forEach { ind ->
         val indColor =
             when (ind.sentiment) {
@@ -441,7 +451,7 @@ fun AnalysisContentV2(
                 onShowPaywall()
             }
         },
-        modifier = Modifier.fillMaxWidth().height(56.dp),
+        modifier = Modifier.fillMaxWidth().height(56.dp).tutorialTarget(TutorialTargetId.ANALYSIS_DEEP_SCAN),
         border = BorderStroke(1.dp, colors.primary),
         shape = RectangleShape,
         colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.primary),

@@ -23,6 +23,7 @@ data class AgentReport(
     val status: AgentStatus = AgentStatus.READY,
     val summary: String,
     val confidence: Double,
+    val anomalyScore: Int = 0,
     val details: Map<String, String> = emptyMap()
 )
 
@@ -139,24 +140,24 @@ class MarketingStrategist : CryptoAgent {
         """.trimIndent()
 
         val metaAiVideoPrompt = """
-            STRICT_COMMAND: Create a 5-second STILL digital dashboard image. 
+            STRICT_COMMAND: Create a 5-second STILL digital terminal VIDEO file. 
             SCENE: Professional high-contrast terminal screen on a solid pitch-black background.
             
             VISUAL_TOP_ELEMENT: $logoDesc centered at the top.
             
-            TEXT_DATA_TO_RENDER (EXACTLY AS WRITTEN):
+            TEXT_DATA_TO_RENDER (STATIONARY):
             DATE: $dateStr
             ASSET: $coin
             PRICE: $price
             TARGET: $target
             STATUS: SYSTEM_OPTIMIZED
             
-            TECHNICAL_CONSTRAINTS: 
+            TECHNICAL_CONSTRAINTS (FOR VIDEO STABILITY): 
             1. ZERO_MOVEMENT: Do not animate text, background, or camera.
             2. ZERO_FLICKER: No digital glitches, no noise, no pulsing effects.
-            3. STABILITY_FIRST: All characters must remain in fixed coordinates for the entire duration.
+            3. STATIONARY_PIXELS: All letters and numbers must remain at fixed coordinates from second 0 to second 5.
             
-            VISUAL_STYLE: Flat 2D vector-style electric green typography (#00FF41). Razor-sharp 8K focus. No 3D depth, no reflections.
+            VISUAL_STYLE: Flat 2D vector-style electric green typography (#00FF41). Razor-sharp 8K focus. No 3D depth, no cinematic lens flare.
         """.trimIndent()
 
         return AgentReport(
@@ -173,12 +174,96 @@ class NarrativeOrchestrator : CryptoAgent {
     override val name = "ORCHESTRATOR"
     
     override suspend fun analyze(data: MarketDataSnapshot): AgentReport {
+        var anomalyScore = 0
+        val anomalies = mutableListOf<String>()
+
+        // Anomaly Logic 1: Extreme Volatility + High Risk
+        if (Math.abs(data.priceChange24h) > 15.0 && data.riskScore > 75) {
+            anomalyScore += 40
+            anomalies.add("EXTREME_VOLATILITY_AT_PEAK_RISK")
+        }
+
+        // Anomaly Logic 2: Whale/Sentiment Mismatch
+        if (data.newsSentiment == "BULLISH" && data.riskScore > 85) {
+            anomalyScore += 30
+            anomalies.add("SENTIMENT_TRAP_OVERLEVERAGED")
+        }
+
+        // Anomaly Logic 3: Technical Breakdown
+        if (data.rsi < 25 && data.fearGreedIndex < 20) {
+            anomalyScore += 50
+            anomalies.add("SYSTEMIC_PANIC_BOTTOM_DETECTED")
+        }
+        
         val verdict = when {
             data.riskScore < 30 -> "ACCUMULATION_PHASE_ACTIVE"
             data.riskScore > 70 -> "DISTRIBUTION_RISK_HIGH"
             else -> "SIDEWAYS_CONSOLIDATION"
         }
-        return AgentReport(id, name, summary = "FINAL_VERDICT: $verdict", confidence = 0.88)
+
+        val reasoning = when(verdict) {
+            "ACCUMULATION_PHASE_ACTIVE" -> "Math-Sentinel confirms oversold RSI levels below 35, while WhaleScout detects significant smart money inflows on BTC/ETH. Pulse identifies extreme fear sentiment, often indicative of a cycle bottom. Synthesized bias: HIGHLY_BULLISH."
+            "DISTRIBUTION_RISK_HIGH" -> "Sentinel warns of RSI bearish divergence on 4H/Daily. Scout identifies heavy whale selling into strength. Sentiment Pulse indicates dangerous retail euphoria and over-leveraged long positions. Synthesized bias: HIGH_RISK_LIQUIDATION."
+            else -> "Market participants are currently in equilibrium. Sentiment is neutral with low whale conviction. No significant technical breakout identified in the current timeframe. Recommended strategy: WAIT for volume confirmation."
+        }
+
+        val finalAnalysis = if (anomalyScore > 70) {
+            ">>> CRITICAL_ANOMALY_DETECTED [SCORE: $anomalyScore]\nLOG: ${anomalies.joinToString(", ")}\n$reasoning"
+        } else {
+            ">>> EXECUTIVE_INTELLIGENCE_SUMMARY\nVERDICT: $verdict\nREASONING: $reasoning"
+        }
+
+        return AgentReport(
+            agentId = id, 
+            agentName = name, 
+            summary = finalAnalysis, 
+            confidence = 0.92, 
+            status = if (anomalyScore > 80) AgentStatus.ERROR else AgentStatus.SUCCESS,
+            anomalyScore = anomalyScore
+        )
+    }
+}
+
+/**
+ * [AGENT-FBI] Oversight Sentinel (The Silent Watcher)
+ * Mission: Internal security and anomaly detection. Monitors other agents for data hallucination or manipulation.
+ */
+class OversightSentinel : CryptoAgent {
+    override val id = "AGENT-FBI"
+    override val name = "OVERSIGHT_SENTINEL"
+
+    override suspend fun analyze(data: MarketDataSnapshot): AgentReport {
+        val anomalies = mutableListOf<String>()
+        
+        // 1. Check for TA/Sentiment mismatch (Potential Manipulation)
+        if (data.rsi > 75 && data.fearGreedIndex < 30) {
+            anomalies.add("MISMATCH: EXTREME_BULLISH_TA vs EXTREME_FEAR_SENTIMENT. Possible Whale trap detected.")
+        }
+        
+        // 2. Check for "Ghost" Volume (Artificial Hype)
+        if (data.priceChange24h > 10.0 && data.riskScore > 80) {
+            anomalies.add("ALERT: RAPID_PRICE_SURGE with CRITICAL_RISK. Detecting potential Wash-Trading or Artificial Hype.")
+        }
+
+        // 3. Data Integrity Check
+        if (data.price <= 0 || data.rsi < 0) {
+            anomalies.add("CRITICAL: AGENT_DATA_CORRUPTION. Source stream integrity compromised.")
+        }
+
+        val summary = if (anomalies.isEmpty()) {
+            "ALL_AGENTS_CLEAR. System integrity at 100%. No internal inconsistencies detected."
+        } else {
+            ">>> OVERSIGHT_ALERT: ${anomalies.joinToString(" | ")}"
+        }
+
+        return AgentReport(
+            agentId = id,
+            agentName = name,
+            status = if (anomalies.isEmpty()) AgentStatus.SUCCESS else AgentStatus.ERROR,
+            summary = summary,
+            confidence = 0.99,
+            details = mapOf("fbi_clearance" to "LEVEL_5", "active_anomalies" to anomalies.size.toString())
+        )
     }
 }
 

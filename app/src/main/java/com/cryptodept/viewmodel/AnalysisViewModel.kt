@@ -71,12 +71,18 @@ class AnalysisViewModel @Inject constructor(
     private val _aiReport = MutableStateFlow<String?>(null)
     val aiReport: StateFlow<String?> = _aiReport.asStateFlow()
 
+    private val _isAiStreaming = MutableStateFlow(false)
+    val isAiStreaming: StateFlow<Boolean> = _isAiStreaming.asStateFlow()
+
     fun generateAIReport(result: DeepAnalysisResult) {
         viewModelScope.launch {
-            _aiReport.value = "CONNECTING..."
-            generateReport.execute(result).collect { 
-                _aiReport.value = it 
-            }
+            _aiReport.value = ""
+            _isAiStreaming.value = true
+            generateReport.execute(result)
+                .onCompletion { _isAiStreaming.value = false }
+                .collect { chunk ->
+                    _aiReport.value = (_aiReport.value ?: "") + chunk
+                }
         }
     }
 

@@ -22,6 +22,8 @@ import androidx.navigation.NavController
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.cryptodept.ui.tutorial.tutorialTarget
+import com.cryptodept.domain.tutorial.TutorialTargetId
 import com.cryptodept.ui.navigation.Screen
 import com.cryptodept.ui.theme.*
 import com.cryptodept.ui.analysis.handleGlobalCommand
@@ -38,15 +40,15 @@ fun ToolsHubScreen(
 
     val allTools =
         listOf(
-            ToolItem("POSITION SIZER", "Risk-based calculator", Icons.Default.Build, Screen.PositionSizer.route),
-            ToolItem("WHALE TRACKER", "On-chain activity", Icons.Default.Notifications, Screen.WhaleTracker.route),
-            ToolItem("ENTRY ANALYZER", "Optimal entry zones", Icons.Default.Search, Screen.EntryAnalysis.route),
-            ToolItem("MULTI-TIMEFRAME", "All TFs at a glance", Icons.AutoMirrored.Filled.List, Screen.MtfAnalysis.route),
-            ToolItem("TRADE PLANNER", "Pre-trade checklist", Icons.Default.Check, Screen.TradePlanner.route),
-            ToolItem("PSYCHOLOGY", "Tilt & emotion monitor", Icons.Default.Face, Screen.Psychology.route),
+            ToolItem("POSITION SIZER", "Risk-based calculator", Icons.Default.Build, Screen.PositionSizer.route, targetId = TutorialTargetId.TOOLS_POSITION_SIZER),
+            ToolItem("WHALE TRACKER", "On-chain activity", Icons.Default.Notifications, Screen.WhaleTracker.route, targetId = TutorialTargetId.TOOLS_WHALE_TRACKER),
+            ToolItem("ENTRY ANALYZER", "Optimal entry zones", Icons.Default.Search, Screen.EntryAnalysis.route, targetId = TutorialTargetId.TOOLS_ENTRY_ANALYZER),
+            ToolItem("MULTI-TIMEFRAME", "All TFs at a glance", Icons.AutoMirrored.Filled.List, Screen.MtfAnalysis.route, targetId = TutorialTargetId.TOOLS_MTF_ANALYZER),
+            ToolItem("TRADE PLANNER", "Pre-trade checklist", Icons.Default.Check, Screen.TradePlanner.route, targetId = TutorialTargetId.TOOLS_TRADE_PLANNER),
+            ToolItem("PSYCHOLOGY", "Tilt & emotion monitor", Icons.Default.Face, Screen.Psychology.route, targetId = TutorialTargetId.TOOLS_PSYCHOLOGY),
             ToolItem("JOURNAL", "Trade history", Icons.Default.Star, Screen.Journal.route),
             ToolItem("PERFORMANCE", "Personal trade stats", Icons.Default.ThumbUp, Screen.Performance.route),
-            ToolItem("BACKTESTER", "Strategy simulation", Icons.Default.Refresh, Screen.Backtester.route),
+            ToolItem("BACKTESTER", "Strategy simulation", Icons.Default.Refresh, Screen.Backtester.route, targetId = TutorialTargetId.TOOLS_BACKTESTER),
             ToolItem("DEFI", "TVL & Yield monitor", Icons.Default.Info, Screen.DeFi.route),
             ToolItem("HALVING", "Bitcoin cycle analyzer", Icons.Default.DateRange, Screen.Seasonal.route),
             ToolItem("SIGNALS", "Signal composer", Icons.Default.Add, Screen.SignalComposer.route),
@@ -130,6 +132,7 @@ fun ToolCard(
             Modifier
                 .border(1.dp, colors.grid)
                 .background(colors.background)
+                .let { if (tool.targetId != null) it.tutorialTarget(tool.targetId) else it }
                 .clickable { onClick() }
                 .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -165,4 +168,5 @@ data class ToolItem(
     val icon: ImageVector,
     val route: String,
     val adminOnly: Boolean = false,
+    val targetId: TutorialTargetId? = null,
 )

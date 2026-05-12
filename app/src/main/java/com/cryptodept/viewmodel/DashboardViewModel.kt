@@ -1,5 +1,6 @@
 package com.cryptodept.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cryptodept.domain.model.*
@@ -7,10 +8,8 @@ import com.cryptodept.domain.usecase.*
 import com.cryptodept.domain.manager.DashboardLogService
 import com.cryptodept.util.AnalyticsService
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -43,8 +42,8 @@ class DashboardViewModel @Inject constructor(
     fun nextStep() {
         val current = _tutorialStep.value ?: return
         val nextIndex = current.ordinal + 1
-        if (nextIndex < TutorialStep.values().size) {
-            _tutorialStep.value = TutorialStep.values()[nextIndex]
+        if (nextIndex < TutorialStep.entries.size) {
+            _tutorialStep.value = TutorialStep.entries[nextIndex]
         } else {
             _tutorialStep.value = null
         }
@@ -68,6 +67,9 @@ class DashboardViewModel @Inject constructor(
 
     private val _aiSummary = MutableStateFlow("ANALYZING MARKET DYNAMICS...")
     val aiSummary: StateFlow<String> = _aiSummary.asStateFlow()
+
+    private val _isAiStreaming = MutableStateFlow(false)
+    val isAiStreaming: StateFlow<Boolean> = _isAiStreaming.asStateFlow()
 
     private val _agentStatuses = MutableStateFlow<Map<String, AgentStatus>>(emptyMap())
     val agentStatuses: StateFlow<Map<String, AgentStatus>> = _agentStatuses.asStateFlow()
@@ -190,7 +192,33 @@ class DashboardViewModel @Inject constructor(
             }
 
             val report = agentCoordinator.runOrchestration(snapshot)
+            
+            // Step 1: Set local report as immediate baseline
             _aiSummary.value = report.summary
+            _isAiStreaming.value = true
+            
+            var aiStarted = false
+            try {
+                withTimeout(30000) { // Give AI more time, but don't hang forever
+                    aiGenerator.generateShortSummaryStream(snapshot)
+                        .catch { e -> 
+                            Log.e("Dashboard", "AI Stream failed: ${e.message}")
+                        }
+                        .collect { chunk ->
+                            if (!aiStarted) {
+                                // Step 2: First AI chunk received! Clear local summary to show AI narrative
+                                _aiSummary.value = ""
+                                aiStarted = true
+                            }
+                            _aiSummary.value += chunk
+                        }
+                }
+            } catch (e: Exception) {
+                Log.w("Dashboard", "AI Stream timed out or error")
+            } finally {
+                _isAiStreaming.value = false
+                // If AI never started or failed, the local summary is already there
+            }
         }
     }
 }

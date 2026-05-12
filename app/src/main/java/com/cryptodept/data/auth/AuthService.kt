@@ -35,7 +35,8 @@ class AuthService @Inject constructor(
             // Authorized admin emails for CryptoDept Terminal
             val adminEmails = listOf(
                 "kaiko.dept@gmail.com",
-                "ivaylozhivkov14@gmail.com"
+                "ivaylozhivkov14@gmail.com",
+                "condignia@gmail.com"
             )
             val isAdminEmail = adminEmails.contains(user.email)
             if (isAdminEmail) {

@@ -1,14 +1,13 @@
 package com.cryptodept.ui.components
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
@@ -20,12 +19,36 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cryptodept.ui.theme.*
 import com.cryptodept.viewmodel.GlobalMarketViewModel
+import kotlinx.coroutines.delay
 import java.util.Locale
 
 @Composable
 fun GlobalMarketBar(viewModel: GlobalMarketViewModel = hiltViewModel()) {
     val data by viewModel.marketData.collectAsState()
     val colors = LocalTerminalColors.current
+    val scrollState = rememberScrollState()
+
+    // Auto-scroll logic
+    LaunchedEffect(data) {
+        if (data != null) {
+            while (true) {
+                val maxScroll = scrollState.maxValue
+                if (maxScroll > 0) {
+                    // Slower scroll than main ticker: ~40ms per pixel
+                    scrollState.animateScrollTo(
+                        value = maxScroll,
+                        animationSpec = tween(
+                            durationMillis = maxScroll * 40,
+                            easing = LinearEasing
+                        )
+                    )
+                    delay(1000)
+                    scrollState.scrollTo(0)
+                }
+                delay(100)
+            }
+        }
+    }
 
     Row(
         modifier =
@@ -34,7 +57,7 @@ fun GlobalMarketBar(viewModel: GlobalMarketViewModel = hiltViewModel()) {
                 .height(24.dp)
                 .background(colors.background)
                 .padding(horizontal = 8.dp)
-                .horizontalScroll(rememberScrollState())
+                .horizontalScroll(scrollState, enabled = true)
                 .semantics { contentDescription = "Global Market Summary" },
         verticalAlignment = Alignment.CenterVertically,
     ) {

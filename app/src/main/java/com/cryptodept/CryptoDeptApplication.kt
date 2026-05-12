@@ -43,6 +43,7 @@ class CryptoDeptApplication :
         scheduleDailyBriefing()
         CryptoDataSyncWorker.schedule(this)
         com.cryptodept.service.NewsSyncWorker.schedule(this)
+        com.cryptodept.service.AgentWatchdogWorker.schedule(this)
     }
 
     private fun setupCrashlytics() {

@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cryptodept.domain.model.CoinDetail
 import com.cryptodept.domain.model.OHLCData
+import com.cryptodept.ui.components.SimpleLineChart
+import com.cryptodept.ui.components.SimpleSparkline
 import com.cryptodept.ui.components.TerminalErrorOverlay
 import com.cryptodept.ui.components.TerminalLoadingSkeleton
 import com.cryptodept.ui.theme.*
@@ -124,7 +126,7 @@ fun CoinDetailContent(
         Spacer(modifier = Modifier.height(8.dp))
 
         when (selectedTab) {
-            0 -> OverviewTab(detail)
+            0 -> OverviewTab(detail, ohlc)
             1 -> MarketsTab(detail)
             2 -> HistoricalTab(ohlc)
             3 -> AboutTab(detail)
@@ -133,7 +135,8 @@ fun CoinDetailContent(
 }
 
 @Composable
-fun OverviewTab(detail: CoinDetail) {
+fun OverviewTab(detail: CoinDetail, ohlc: List<OHLCData>) {
+    val colors = LocalTerminalColors.current
     Column(
         modifier =
             Modifier
@@ -150,17 +153,40 @@ fun OverviewTab(detail: CoinDetail) {
         InfoRow("24H_CHANGE", "${String.format(Locale.US, "%.2f", detail.priceChangePercentage24h)}%", changeColor)
 
         Spacer(modifier = Modifier.height(16.dp))
-        Text("7D_PERFORMANCE_SPARKLINE", color = TextGray, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+        
+        Text("--- 24H_PRICE_ACTION ---", color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .border(1.dp, colors.grid, RectangleShape)
+                    .padding(8.dp),
+        ) {
+            SimpleLineChart(
+                data = ohlc.takeLast(24), 
+                lineColor = if (detail.priceChangePercentage24h >= 0) colors.primary else colors.danger
+            )
+        }
 
+        Spacer(modifier = Modifier.height(16.dp))
+        Text("7D_PERFORMANCE_SPARKLINE", color = TextGray, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+        Spacer(modifier = Modifier.height(4.dp))
+        
         Box(
             modifier =
                 Modifier
                     .fillMaxWidth()
                     .height(60.dp)
-                    .border(1.dp, GridGray, RectangleShape),
-            contentAlignment = Alignment.Center,
+                    .border(1.dp, GridGray, RectangleShape)
+                    .padding(4.dp),
         ) {
-            Text("[ SPARKLINE_DATA_ACTIVE ]", color = WallStreetGreen, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+            SimpleSparkline(
+                prices = detail.sparkline,
+                color = if ((detail.sparkline.lastOrNull() ?: 0.0) >= (detail.sparkline.firstOrNull() ?: 0.0)) WallStreetGreen else WallStreetRed
+            )
         }
     }
 }

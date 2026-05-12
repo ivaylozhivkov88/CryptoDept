@@ -20,6 +20,8 @@ import androidx.navigation.NavHostController
 import com.cryptodept.domain.model.CoinPrice
 import com.cryptodept.ui.components.TerminalErrorOverlay
 import com.cryptodept.ui.components.TerminalLoadingSkeleton
+import com.cryptodept.ui.tutorial.tutorialTarget
+import com.cryptodept.domain.tutorial.TutorialTargetId
 import com.cryptodept.ui.navigation.Screen
 import com.cryptodept.ui.theme.LocalTerminalColors // REPLACED
 import com.cryptodept.viewmodel.MarketsUiState
@@ -47,7 +49,9 @@ fun MarketsScreen(
             color = colors.primary,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 8.dp),
+            modifier = Modifier
+                .padding(bottom = 8.dp)
+                .tutorialTarget(TutorialTargetId.MARKETS_GLOBAL_STATS),
         )
 
         when (val state = uiState) {
@@ -94,14 +98,15 @@ fun MarketsList(
     onToggleTracking: (String) -> Unit,
 ) {
     val colors = LocalTerminalColors.current
-    LazyColumn {
+    LazyColumn(modifier = Modifier.tutorialTarget(TutorialTargetId.MARKETS_LIST)) {
         item {
             Row(
                 modifier =
                     Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp)
-                        .background(colors.surface),
+                        .background(colors.surface)
+                        .tutorialTarget(TutorialTargetId.MARKETS_SORT_FILTER),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Spacer(modifier = Modifier.width(32.dp)) // Space for star icon
@@ -148,6 +153,7 @@ fun MarketRow(
             modifier =
                 Modifier
                     .padding(end = 8.dp)
+                    .tutorialTarget(TutorialTargetId.MARKETS_FAVORITES)
                     .clickable { onToggleTracking(coin.id) },
         )
 

@@ -16,4 +16,5 @@ enum class AchievementCondition {
     WHALE_TRACKED,
     ADMIN_MODE,
     FIRST_TRADE,
+    FIRST_BOOT,
 }

@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "price_history",
-    indices = [Index(value = ["coinId", "timestamp"])],
+    indices = [Index(value = ["coinId", "timestamp"], unique = true)],
 )
 data class PriceHistoryEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,

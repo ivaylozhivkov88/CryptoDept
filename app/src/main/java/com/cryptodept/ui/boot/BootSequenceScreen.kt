@@ -22,17 +22,18 @@ fun BootSequenceScreen(onBootComplete: () -> Unit) {
 
     val fullLogs =
         listOf(
-            "CRYPTODEPT TERMINAL v3.0",
+            "CRYPTODEPT TERMINAL v6.0",
             "========================",
-            "(c) 2026 CRYPTODEPT SYSTEMS",
+            "(c) 2026 WORLD #1 ELITE MODE",
             "",
             "SYSTEM BOOT SEQUENCE INITIATED...",
             "",
             "[OK] MEMORY CHECK.............. 2048MB",
-            "[OK] STORAGE DRIVER............ ROOM DB v4",
+            "[OK] STORAGE DRIVER............ ROOM DB v11",
             "[OK] NETWORK INTERFACE......... MULTI-API",
             "[OK] WEBSOCKET DAEMON.......... BINANCE FEED",
-            "[OK] PREDICTION ENGINE......... ENSEMBLE v2",
+            "[OK] PREDICTION ENGINE......... ENSEMBLE v3",
+            "[OK] AGENTIC OVERSIGHT......... ACTIVE",
             "[OK] RISK CALCULATOR........... ONLINE",
             "[OK] FIREBASE SERVICES......... CONNECTED",
             "[..] LOADING MARKET DATA.......",

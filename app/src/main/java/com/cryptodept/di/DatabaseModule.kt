@@ -171,4 +171,7 @@ object DatabaseModule {
 
     @Provides
     fun provideNetworkHealthDao(db: CryptoDatabase): NetworkHealthDao = db.networkHealthDao
+
+    @Provides
+    fun provideIntelligenceBriefingDao(db: CryptoDatabase): IntelligenceBriefingDao = db.intelligenceBriefingDao
 }

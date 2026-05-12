@@ -45,3 +45,12 @@
 
 # --- BUILD CONFIG ---
 -keep class com.cryptodept.BuildConfig { *; }
+
+# --- OPTIMIZATION ---
+# Add this to help R8 with memory/processing if needed
+-optimizations !code/simplification/arithmetic,!field/*,!class/merging/*
+
+# --- MISSING CLASSES ---
+-dontwarn sun.misc.Unsafe
+-dontwarn javax.annotation.**
+

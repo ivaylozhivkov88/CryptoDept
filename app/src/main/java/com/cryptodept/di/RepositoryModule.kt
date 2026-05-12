@@ -63,4 +63,12 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindWhaleRepository(impl: WhaleRepositoryImpl): WhaleRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPriceHistoryRepository(impl: PriceHistoryRepositoryImpl): PriceHistoryRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindBriefingRepository(impl: BriefingRepositoryImpl): BriefingRepository
 }

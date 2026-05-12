@@ -33,5 +33,9 @@ object AgentModule {
 
     @Provides
     @Singleton
+    fun provideOversightSentinel(): OversightSentinel = OversightSentinel()
+
+    @Provides
+    @Singleton
     fun provideMarketNarrator(): MarketNarrator = MarketNarrator()
 }

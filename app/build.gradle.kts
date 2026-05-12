@@ -21,8 +21,8 @@ android {
         applicationId = "com.cryptodept"
         minSdk = 26
         targetSdk = 35
-        versionCode = 304
-        versionName = "3.0.4-SUPREME"
+        versionCode = 1
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -67,6 +67,7 @@ android {
     // Enable Room schema export for migration tracking
     ksp {
         arg("room.schemaLocation", "$projectDir/schemas")
+        arg("ksp.incremental.log", "false")
     }
 
     buildTypes {

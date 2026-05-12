@@ -32,6 +32,7 @@ class AchievementEngine
                         AchievementCondition.WHALE_TRACKED,
                     ),
                     Achievement("admin", "BIG BOSS", "Enter admin mode for the first time.", "🕴️", null, AchievementCondition.ADMIN_MODE),
+                    Achievement("first_boot", "FIRST BOOT", "Completed the system tour.", "🚀", null, AchievementCondition.FIRST_BOOT),
                 )
         }
 

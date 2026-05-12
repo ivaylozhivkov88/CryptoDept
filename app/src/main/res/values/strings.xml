@@ -14,4 +14,137 @@
     <string name="shortcut_briefing">Daily Briefing</string>
     <string name="shortcut_whale_tracker">Whale Tracker</string>
     <string name="shortcut_content_studio">Content Studio</string>
+
+    <!-- ════════════════════════════════════════════ -->
+    <!-- ONBOARDING TUTORIAL — Interactive Tour       -->
+    <!-- ════════════════════════════════════════════ -->
+
+    <!-- Chapter titles -->
+    <string name="tutorial_chapter_dashboard">>>> CHAPTER 1: DASHBOARD</string>
+    <string name="tutorial_chapter_markets">>>> CHAPTER 2: MARKETS</string>
+    <string name="tutorial_chapter_analysis">>>> CHAPTER 3: ANALYSIS</string>
+    <string name="tutorial_chapter_tools">>>> CHAPTER 4: TRADER TOOLS</string>
+    <string name="tutorial_chapter_signals">>>> CHAPTER 5: AI SIGNALS</string>
+    <string name="tutorial_chapter_alerts">>>> CHAPTER 6: ALERTS</string>
+    <string name="tutorial_chapter_settings">>>> CHAPTER 7: SETTINGS</string>
+
+    <!-- Tour controls -->
+    <string name="tutorial_start_question">>>> INITIATE GUIDED SYSTEM TOUR? &lt;&lt;&lt;</string>
+    <string name="tutorial_start_body">A 33-step interactive walkthrough of all CryptoDept modules.\n\nEstimated duration: 3 minutes.</string>
+    <string name="tutorial_start_yes">[YES, START TOUR]</string>
+    <string name="tutorial_start_no">[SKIP — I KNOW WHAT I\'M DOING]</string>
+    <string name="tutorial_skip">[SKIP_TOUR]</string>
+    <string name="tutorial_next">[NEXT &gt;&gt;]</string>
+    <string name="tutorial_previous">[&lt;&lt; PREV]</string>
+    <string name="tutorial_finish">[COMPLETE_TOUR]</string>
+    <string name="tutorial_step_counter">[%1$d/%2$d]</string>
+    <string name="tutorial_skip_confirm">Abort tour? You can replay it from Settings.</string>
+    <string name="tutorial_completed_title">>>> TRAINING_COMPLETE</string>
+    <string name="tutorial_completed_message">All systems familiarized. You are now authorized to operate CryptoDept Terminal at full capacity.\n\nAchievement unlocked: [FIRST_BOOT]</string>
+
+    <!-- ============= DASHBOARD (8) ============= -->
+    <string name="tutorial_dash_1_title">[01] PRICE_TICKER</string>
+    <string name="tutorial_dash_1_message">Live price feed for your watched assets. Tap any to dive into Analysis.</string>
+
+    <string name="tutorial_dash_2_title">[02] AI_MARKET_NARRATIVE</string>
+    <string name="tutorial_dash_2_message">Synthesized strategic report from 6 AI agents. Refreshes every 5 minutes.</string>
+
+    <string name="tutorial_dash_3_title">[03] TOP_MOVERS</string>
+    <string name="tutorial_dash_3_message">Real-time gainers and losers across 200+ tracked coins. Sortable by % or volume.</string>
+
+    <string name="tutorial_dash_4_title">[04] WHALE_FEED</string>
+    <string name="tutorial_dash_4_message">Live $500k+ transactions on BTC, ETH, and SOL chains. Direct from blockchain.</string>
+
+    <string name="tutorial_dash_5_title">[05] SENTIMENT_PULSE</string>
+    <string name="tutorial_dash_5_message">Aggregated mood from Reddit, CryptoPanic, and news feeds. Fear &amp; Greed at a glance.</string>
+
+    <string name="tutorial_dash_6_title">[06] NETWORK_HEALTH</string>
+    <string name="tutorial_dash_6_message">Gas fees, mempool congestion, validator status. Critical for transaction timing.</string>
+
+    <string name="tutorial_dash_7_title">[07] NAVIGATION_DRAWER</string>
+    <string name="tutorial_dash_7_message">Access all 30+ modules from here. Swipe right from screen edge or tap menu icon.</string>
+
+    <string name="tutorial_dash_8_title">[08] QUICK_ACTIONS</string>
+    <string name="tutorial_dash_8_message">Long-press for shortcuts to Alerts, Briefing, Whale Tracker, and Content Studio.</string>
+
+    <!-- ============= MARKETS (4) ============= -->
+    <string name="tutorial_mkt_1_title">[09] GLOBAL_STATS</string>
+    <string name="tutorial_mkt_1_message">Total market cap, BTC dominance, 24h volume. The big picture in one row.</string>
+
+    <string name="tutorial_mkt_2_title">[10] COIN_LIST</string>
+    <string name="tutorial_mkt_2_message">200+ assets ranked by market cap. Live price + 24h change + sparkline.</string>
+
+    <string name="tutorial_mkt_3_title">[11] SORT_AND_FILTER</string>
+    <string name="tutorial_mkt_3_message">Sort by gain, volume, or volatility. Filter by category (DeFi, L1, Meme, etc.).</string>
+
+    <string name="tutorial_mkt_4_title">[12] FAVORITES</string>
+    <string name="tutorial_mkt_4_message">Star coins for quick access. Watchlist syncs to Dashboard and Alerts.</string>
+
+    <!-- ============= ANALYSIS (5) ============= -->
+    <string name="tutorial_ana_1_title">[13] COIN_SELECTOR</string>
+    <string name="tutorial_ana_1_message">Switch the analyzed asset. All charts and AI reports update instantly.</string>
+
+    <string name="tutorial_ana_2_title">[14] TECHNICAL_INDICATORS</string>
+    <string name="tutorial_ana_2_message">RSI, MACD, EMA 50/200, Bollinger Bands. Live values with bias interpretation.</string>
+
+    <string name="tutorial_ana_3_title">[15] AI_VERDICT</string>
+    <string name="tutorial_ana_3_message">Gemini-powered strategic conclusion. Confidence score and rationale included.</string>
+
+    <string name="tutorial_ana_4_title">[16] PREDICTION_ENSEMBLE</string>
+    <string name="tutorial_ana_4_message">6 forecasting engines: FFT, Monte Carlo, Wyckoff, Elliott, Hurst, Linear.</string>
+
+    <string name="tutorial_ana_5_title">[17] DEEP_SCAN</string>
+    <string name="tutorial_ana_5_message">Premium feature: detailed pattern recognition across multiple timeframes.</string>
+
+    <!-- ============= TOOLS HUB (8) ============= -->
+    <string name="tutorial_tools_1_title">[18] POSITION_SIZER</string>
+    <string name="tutorial_tools_1_message">Calculate exact lot size for your risk %. Supports leverage up to 100x.</string>
+
+    <string name="tutorial_tools_2_title">[19] TRADE_PLANNER</string>
+    <string name="tutorial_tools_2_message">Compute entry, stop-loss, take-profit with custom R:R ratio. Visual preview.</string>
+
+    <string name="tutorial_tools_3_title">[20] MTF_ANALYZER</string>
+    <string name="tutorial_tools_3_message">Multi-Timeframe Analysis. Check bias on 1H, 4H, Daily for confluence.</string>
+
+    <string name="tutorial_tools_4_title">[21] BACKTESTER</string>
+    <string name="tutorial_tools_4_message">Test trading strategies on historical data. Win rate, drawdown, profit factor.</string>
+
+    <string name="tutorial_tools_5_title">[22] PSYCHOLOGY_COACH</string>
+    <string name="tutorial_tools_5_message">Locks the app when you trade emotionally. FOMO and revenge-trading detector.</string>
+
+    <string name="tutorial_tools_6_title">[23] WHALE_TRACKER</string>
+    <string name="tutorial_tools_6_message">Filter whale movements by chain, value, exchange. Set custom alerts.</string>
+
+    <string name="tutorial_tools_7_title">[24] ENTRY_ANALYZER</string>
+    <string name="tutorial_tools_7_message">Evaluate quality of a planned entry. Confluence score from 0 to 100.</string>
+
+    <string name="tutorial_tools_8_title">[25] CORRELATION_MATRIX</string>
+    <string name="tutorial_tools_8_message">See which coins move together. Critical for portfolio diversification.</string>
+
+    <!-- ============= SIGNALS (3) ============= -->
+    <string name="tutorial_sig_1_title">[26] AI_SIGNALS_FEED</string>
+    <string name="tutorial_sig_1_message">Curated trade ideas from the ensemble engines. Updated every 15 minutes.</string>
+
+    <string name="tutorial_sig_2_title">[27] SIGNAL_COMPOSER</string>
+    <string name="tutorial_sig_2_message">Build your own custom signals from indicator combinations.</string>
+
+    <string name="tutorial_sig_3_title">[28] PERFORMANCE_TRACKER</string>
+    <string name="tutorial_sig_3_message">Audit your signal accuracy. Win rate, average R, longest streak.</string>
+
+    <!-- ============= ALERTS (3) ============= -->
+    <string name="tutorial_alt_1_title">[29] ACTIVE_ALERTS</string>
+    <string name="tutorial_alt_1_message">View, edit, and silence triggered alerts. Push notifications enabled by default.</string>
+
+    <string name="tutorial_alt_2_title">[30] COMPOSITE_BUILDER</string>
+    <string name="tutorial_alt_2_message">Combine conditions: "BTC drops 5% AND whale moves >$1M = ALERT".</string>
+
+    <string name="tutorial_alt_3_title">[31] PRIORITY_SYSTEM</string>
+    <string name="tutorial_alt_3_message">Set urgency levels: LOW, MEDIUM, HIGH, CRITICAL. Critical bypasses Do Not Disturb.</string>
+
+    <!-- ============= SETTINGS (2) ============= -->
+    <string name="tutorial_set_1_title">[32] APPEARANCE_AND_LOCALE</string>
+    <string name="tutorial_set_1_message">Theme variants (amber, green, blue phosphor), language, font size.</string>
+
+    <string name="tutorial_set_2_title">[33] REPLAY_THIS_TOUR</string>
+    <string name="tutorial_set_2_message">Want to see this again? Tap here anytime to restart the guided tour.</string>
 </resources>
