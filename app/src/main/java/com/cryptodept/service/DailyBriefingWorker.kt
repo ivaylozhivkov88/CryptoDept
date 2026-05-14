@@ -5,8 +5,7 @@ import android.content.Context
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.hilt.work.HiltWorker
-import androidx.work.CoroutineWorker
-import androidx.work.WorkerParameters
+import androidx.work.*
 import com.cryptodept.R
 import com.cryptodept.domain.repository.CryptoRepository
 import com.cryptodept.domain.repository.DerivativesRepository
@@ -15,6 +14,8 @@ import com.cryptodept.domain.usecase.RiskScoreEngine
 import com.cryptodept.util.NotificationChannels
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import java.util.*
+import java.util.concurrent.TimeUnit
 
 @HiltWorker
 class DailyBriefingWorker
@@ -91,6 +92,43 @@ class DailyBriefingWorker
             } catch (e: Exception) {
                 Log.e("CryptoDept_Briefing", "Daily briefing failed: ${e.message}")
                 Result.retry()
+            }
+        }
+
+        companion object {
+            private const val WORK_NAME = "daily_briefing"
+
+            fun schedule(context: Context) {
+                val briefingRequest =
+                    PeriodicWorkRequestBuilder<DailyBriefingWorker>(24, TimeUnit.HOURS)
+                        .setInitialDelay(calculateDelayUntil8AM(), TimeUnit.MILLISECONDS)
+                        .setConstraints(
+                            Constraints
+                                .Builder()
+                                .setRequiredNetworkType(NetworkType.CONNECTED)
+                                .setRequiresBatteryNotLow(true)
+                                .build(),
+                        ).build()
+
+                WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+                    WORK_NAME,
+                    ExistingPeriodicWorkPolicy.KEEP,
+                    briefingRequest,
+                )
+            }
+
+            private fun calculateDelayUntil8AM(): Long {
+                val calendar = Calendar.getInstance()
+                val now = calendar.timeInMillis
+                calendar.set(Calendar.HOUR_OF_DAY, 8)
+                calendar.set(Calendar.MINUTE, 0)
+                calendar.set(Calendar.SECOND, 0)
+                calendar.set(Calendar.MILLISECOND, 0)
+
+                if (calendar.timeInMillis <= now) {
+                    calendar.add(Calendar.DAY_OF_YEAR, 1)
+                }
+                return calendar.timeInMillis - now
             }
         }
     }

@@ -7,9 +7,7 @@ import com.cryptodept.service.AlertNotificationService
 import com.cryptodept.util.AnalyticsService
 import com.cryptodept.util.HapticService
 import com.google.gson.Gson
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.mockk
+import io.mockk.*
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -25,6 +23,12 @@ class AlertsRepositoryTest {
 
     @Before
     fun setup() {
+        mockkStatic(android.util.Log::class)
+        every { android.util.Log.d(any<String>(), any<String>()) } returns 0
+        every { android.util.Log.i(any<String>(), any<String>()) } returns 0
+        every { android.util.Log.e(any<String>(), any<String>()) } returns 0
+        every { android.util.Log.w(any<String>(), any<String>()) } returns 0
+
         repository = AlertsRepositoryImpl(
             alertDao,
             alertNotificationService,

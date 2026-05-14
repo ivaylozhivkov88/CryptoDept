@@ -51,11 +51,10 @@ class TechnicalAnalysisEngineTest {
     fun `detectPatterns identifies Hammer`() {
         val ohlc =
             listOf(
-                OHLCData(0, 100.0, 100.0, 100.0, 100.0, 100.0), // Dummy
-                OHLCData(1, 100.0, 101.0, 95.0, 99.0, 1000.0), // Hammer-ish: open=100, close=99, high=101, low=95
-                // body = 1, lower wick = 4, upper wick = 1
-                // last.lowerWick >= last.bodySize * 2 (4 >= 1*2) -> true
-                // last.upperWick <= last.bodySize (1 <= 1) -> true
+                OHLCData(0, 100.0, 100.0, 100.0, 100.0, 100.0), // Dummy 1
+                OHLCData(1, 100.0, 100.0, 100.0, 100.0, 100.0), // Dummy 2
+                OHLCData(2, 100.0, 101.0, 95.0, 99.0, 1000.0), // Hammer: body=1, lowWick=4, upWick=1
+                // size must be >= 3
             )
         val patterns = engine.detectPatterns(ohlc)
         assertThat(patterns.any { it.pattern == TechnicalAnalysisEngine.CandlePattern.HAMMER }).isTrue()

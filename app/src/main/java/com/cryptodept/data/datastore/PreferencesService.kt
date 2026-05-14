@@ -54,15 +54,17 @@ class PreferencesService
             val IS_ADMIN = booleanPreferencesKey("is_admin")
             val POWER_USER_MODE = booleanPreferencesKey("power_user_mode")
             val FOCUS_MODE_ENABLED = booleanPreferencesKey("focus_mode_enabled")
+            val CRASHLYTICS_CONSENT = booleanPreferencesKey("crashlytics_consent")
             val TUTORIAL_COMPLETED = booleanPreferencesKey("tutorial_completed_v1")
             val LAST_REVIEW_PROMPT_TIME = longPreferencesKey("last_review_prompt_time")
             val LAUNCH_COUNT = intPreferencesKey("launch_count")
+            val PRO_EXPIRY_TIMESTAMP = longPreferencesKey("pro_expiry_timestamp")
 
             const val KEY_MIGRATED_TO_SECURE = "migrated_to_secure_v5"
         }
 
         // Flows за четене с вградена защита от грешки
-        private val _isPro = MutableStateFlow(securePrefs.getBoolean("is_pro", false))
+        private val _isPro = MutableStateFlow(securePrefs.getBoolean("is_pro", false) || (securePrefs.getLong("pro_expiry_timestamp", 0L) > System.currentTimeMillis()))
         val isPro: StateFlow<Boolean> = _isPro.asStateFlow()
 
         private val _isAdmin = MutableStateFlow(securePrefs.getBoolean("is_admin", false))
@@ -84,7 +86,7 @@ class PreferencesService
         val soundsEnabled: Flow<Boolean> =
             dataStore.data
                 .catch { exception -> if (exception is IOException) emit(emptyPreferences()) else throw exception }
-                .map { it[SOUNDS_ENABLED] ?: true }
+                .map { it[SOUNDS_ENABLED] ?: false }
 
         val soundsVolume: Flow<Float> =
             dataStore.data
@@ -121,6 +123,7 @@ class PreferencesService
                 .catch { exception -> if (exception is IOException) emit(emptyPreferences()) else throw exception }
                 .map { it[FOCUS_MODE_ENABLED] ?: false }
 
+        val crashlyticsConsent: Flow<Boolean> = dataStore.data.map { it[CRASHLYTICS_CONSENT] ?: true }
 
         suspend fun performMigration() {
             migrateIfNeeded()
@@ -200,12 +203,41 @@ class PreferencesService
             }
         }
 
+        fun setProExpiry(durationDays: Int) {
+            val currentExpiry = securePrefs.getLong("pro_expiry_timestamp", 0L)
+            val startTime = if (currentExpiry > System.currentTimeMillis()) currentExpiry else System.currentTimeMillis()
+            val newExpiry = startTime + (durationDays * 24 * 60 * 60 * 1000L)
+            
+            securePrefs.saveLong("pro_expiry_timestamp", newExpiry)
+            _isPro.value = true
+            
+            scope.launch {
+                dataStore.edit { it[PRO_EXPIRY_TIMESTAMP] = newExpiry }
+            }
+        }
+
+        fun checkProStatus() {
+            val expiry = securePrefs.getLong("pro_expiry_timestamp", 0L)
+            val isProByBilling = securePrefs.getBoolean("is_pro", false)
+            val isExpired = expiry <= System.currentTimeMillis()
+            
+            if (!isProByBilling && expiry > 0 && isExpired) {
+                _isPro.value = false
+            } else if (expiry > System.currentTimeMillis()) {
+                _isPro.value = true
+            }
+        }
+
         suspend fun setPowerUserMode(enabled: Boolean) {
             dataStore.edit { it[POWER_USER_MODE] = enabled }
         }
 
         suspend fun setFocusModeEnabled(enabled: Boolean) {
             dataStore.edit { it[FOCUS_MODE_ENABLED] = enabled }
+        }
+
+        suspend fun setCrashlyticsConsent(enabled: Boolean) {
+            dataStore.edit { it[CRASHLYTICS_CONSENT] = enabled }
         }
 
         suspend fun setTutorialCompleted(completed: Boolean) {

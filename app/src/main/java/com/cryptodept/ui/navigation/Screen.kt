@@ -15,7 +15,7 @@ sealed class Screen(
         fun createRoute(coinId: String) = "analysis?coinId=$coinId"
     }
 
-    object Signals : Screen("signals", "SIGNALS", "⚡")
+    object Signals : Screen("signals", "INSIGHTS", "⚡")
 
     object News : Screen("news", "NEWS", "📰")
 
@@ -77,9 +77,9 @@ sealed class Screen(
     object WhaleTracker : Screen("whale_tracker")
 
     // BLOCK F: SUPREME MODE
-    object Prediction : Screen("prediction")
+    object Prediction : Screen("prediction", "PREDICT", "🔮")
 
-    object Portfolio : Screen("portfolio")
+    object Portfolio : Screen("portfolio", "TRACKER", "📁")
 
     object AICoach : Screen("ai_coach")
 

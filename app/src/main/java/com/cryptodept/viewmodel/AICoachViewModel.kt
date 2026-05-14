@@ -25,8 +25,15 @@ class AICoachViewModel
         private val _isLoading = MutableStateFlow(false)
         val isLoading: StateFlow<Boolean> = _isLoading
 
+        private val _inputText = MutableStateFlow("")
+        val inputText: StateFlow<String> = _inputText
+
         init {
             _messages.add(ChatMessage("COACH", "GREETINGS TRADER. I AM YOUR AI COACH. HOW CAN I ASSIST YOUR TERMINAL OPERATIONS TODAY?"))
+        }
+
+        fun setInputText(text: String) {
+            _inputText.value = text
         }
 
         fun sendMessage(text: String) {
@@ -46,7 +53,12 @@ class AICoachViewModel
                         _messages[lastIdx] = ChatMessage("COACH", responseText)
                     }
                 } catch (e: Exception) {
-                    _messages.add(ChatMessage("COACH", "[ERROR] SIGNAL LOST: ${e.message}"))
+                    val errorMsg = if (e.message?.contains("blocked") == true) {
+                        "ACCESS_DENIED: Application identity verification failed. Ensure API key restrictions include this package name and SHA-1 certificate."
+                    } else {
+                        "SIGNAL LOST: ${e.message}"
+                    }
+                    _messages.add(ChatMessage("COACH", "[ERROR] $errorMsg"))
                 } finally {
                     _isLoading.value = false
                 }

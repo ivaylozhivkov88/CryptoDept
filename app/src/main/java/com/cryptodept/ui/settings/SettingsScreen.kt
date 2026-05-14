@@ -161,13 +161,13 @@ fun SettingsScreen(
                         .fillMaxWidth()
                         .border(
                             1.dp,
-                            Color.Red,
+                            colors.error,
                             androidx.compose.foundation.shape
                                 .RoundedCornerShape(2.dp),
-                        ).background(Color.Red.copy(alpha = 0.1f))
+                        ).background(colors.error.copy(alpha = 0.1f))
                         .padding(12.dp),
             ) {
-                Text(warning, color = Color.Red, fontFamily = FontFamily.Monospace, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Text(warning, color = colors.error, fontFamily = FontFamily.Monospace, fontSize = 12.sp, fontWeight = FontWeight.Bold)
             }
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -206,11 +206,13 @@ fun SettingsScreen(
                         text = if (isPro) "CRYPTODEPT PRO ACTIVE" else "CRYPTODEPT FREE TIER",
                         color = if (isPro) colors.primary else colors.amber,
                         fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace,
                         fontSize = 14.sp,
                     )
                     Text(
                         text = if (isPro) "Unlimited Terminal Access" else "Limited to 3 Tracked Coins",
                         color = colors.dimText,
+                        fontFamily = FontFamily.Monospace,
                         fontSize = 10.sp,
                     )
                 }
@@ -278,7 +280,7 @@ fun SettingsScreen(
         ) {
             Column {
                 Text("RESTART_TUTORIAL", color = colors.primary, fontFamily = FontFamily.Monospace, fontSize = 14.sp)
-                Text("Reset first-run onboarding sequence", color = colors.dimText, fontSize = 10.sp)
+                Text("Reset first-run onboarding sequence", color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 10.sp)
             }
         }
 
@@ -391,7 +393,7 @@ fun SettingRow(
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(label, color = colors.primary, fontFamily = FontFamily.Monospace, fontSize = 14.sp)
-            Text(desc, color = colors.dimText, fontSize = 10.sp)
+            Text(desc, color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 10.sp)
         }
         Switch(
             checked = checked,

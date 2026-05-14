@@ -13,10 +13,12 @@ import javax.inject.Singleton
 @Singleton
 class GeminiCoachService
     @Inject
-    constructor() : AIProvider {
-        private val model =
+    constructor(
+        private val remoteConfig: com.cryptodept.data.remoteconfig.RemoteConfigService
+    ) : AIProvider {
+        private val model by lazy {
             GenerativeModel(
-                modelName = "gemini-1.5-flash-latest",
+                modelName = remoteConfig.getGeminiModel(),
                 apiKey = BuildConfig.GEMINI_API_KEY,
                 systemInstruction =
                     content {
@@ -28,6 +30,7 @@ class GeminiCoachService
                         )
                     },
             )
+        }
 
         override suspend fun analyzeJournal(
             trades: List<TradeJournal>,

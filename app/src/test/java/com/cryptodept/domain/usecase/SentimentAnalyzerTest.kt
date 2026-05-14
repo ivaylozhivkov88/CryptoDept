@@ -2,8 +2,7 @@ package com.cryptodept.domain.usecase
 
 import com.cryptodept.data.api.RssNewsParser
 import com.google.common.truth.Truth.assertThat
-import io.mockk.coEvery
-import io.mockk.mockk
+import io.mockk.*
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -14,6 +13,11 @@ class SentimentAnalyzerTest {
 
     @Before
     fun setup() {
+        mockkStatic(android.util.Log::class)
+        every { android.util.Log.d(any<String>(), any<String>()) } returns 0
+        every { android.util.Log.i(any<String>(), any<String>()) } returns 0
+        every { android.util.Log.e(any<String>(), any<String>()) } returns 0
+
         rssParser = mockk()
         analyzer = SentimentAnalyzer(rssParser)
     }

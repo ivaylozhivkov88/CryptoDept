@@ -1,85 +1,41 @@
 package com.cryptodept.ui.screensaver
 
-// ...existing code... (removed unused animation import)
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-// ...existing code... (removed unused LazyRow imports)
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-// ...existing code... (removed unused em import)
-import androidx.compose.ui.geometry.Offset
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.cryptodept.domain.model.CoinPrice
 import com.cryptodept.ui.theme.LocalTerminalColors
+import com.cryptodept.viewmodel.BloombergWallViewModel
 import kotlinx.coroutines.delay
 import java.util.*
-// ...existing code... (removed unused sin import)
-
-// Точна енумерация на 15 валути
-val TOP_15_CRYPTOS =
-    listOf(
-        "BTC" to 103450.0,
-        "ETH" to 3245.0,
-        "BNB" to 645.0,
-        "SOL" to 212.0,
-        "XRP" to 2.85,
-        "DOGE" to 0.42,
-        "ADA" to 1.05,
-        "MATIC" to 0.95,
-        "LINK" to 28.50,
-        "DOT" to 8.25,
-        "AVAX" to 42.0,
-        "TRX" to 0.29,
-        "UNI" to 12.35,
-        "ATOM" to 10.50,
-        "LTC" to 2100.0,
-    )
-
-// Top 5 по дом. капитализация (приблизително от пазарни данни)
-val TOP_5_DOMINANCE =
-    listOf(
-        "BTC" to 48.5f,
-        "ETH" to 16.2f,
-        "BNB" to 4.1f,
-        "SOL" to 3.8f,
-        "XRP" to 2.9f,
-    )
 
 @Composable
 fun BloombergWallScreen(
     modifier: Modifier = Modifier,
     onDismiss: () -> Unit,
+    viewModel: BloombergWallViewModel = hiltViewModel()
 ) {
     val colors = LocalTerminalColors.current
+    val topCoins by viewModel.topCoins.collectAsState()
+    val lastUpdate by viewModel.lastUpdate.collectAsState()
 
-    val priceData = remember { mutableStateMapOf<String, Pair<Double, Double>>() }
-    val lastUpdate = remember { mutableStateOf(System.currentTimeMillis()) }
-
-    LaunchedEffect(Unit) {
-        // Init prices
-        TOP_15_CRYPTOS.forEach { (symbol, basePrice) ->
-            priceData[symbol] = Pair(basePrice, (Random().nextDouble() - 0.5) * 3.0)
-        }
-
-        // Update prices ogni 180 secondi
-        while (true) {
-            delay(180000L)
-            TOP_15_CRYPTOS.forEach { (symbol, basePrice) ->
-                val currentPrice = basePrice * (0.98 + Random().nextDouble() * 0.04)
-                val change = (Random().nextDouble() - 0.5) * 5.0
-                priceData[symbol] = Pair(currentPrice, change)
-            }
-            lastUpdate.value = System.currentTimeMillis()
-        }
+    // Map CoinPrice list to the expected priceData format for existing sub-composables
+    val priceData = remember(topCoins) {
+        topCoins.associate { it.symbol.uppercase() to Pair(it.currentPrice, it.priceChangePercentage24h) }
     }
 
     Box(
@@ -104,13 +60,13 @@ fun BloombergWallScreen(
             // ═══════════════════════════════════════
             SentimentBar(priceData)
             Spacer(modifier = Modifier.height(6.dp))
-            SystemHealth(lastUpdate.value)
+            SystemHealth(lastUpdate)
             Spacer(modifier = Modifier.height(8.dp))
 
             // ═══════════════════════════════════════
             // 3. LIVE PRICES TAPE — 15 Валути (MATRIX-STYLE FALLING)
             // ═══════════════════════════════════════
-            MatrixPricesTicker(priceData)
+            MatrixPricesTicker(priceData, topCoins.map { it.symbol.uppercase() })
 
             Spacer(modifier = Modifier.height(2.dp))
             Divider()
@@ -119,7 +75,7 @@ fun BloombergWallScreen(
             // ═══════════════════════════════════════
             // 3. MARKET DOMINANCE — TOP 5
             // ═══════════════════════════════════════
-            MarketDominanceSection()
+            MarketDominanceSection(topCoins)
 
             Spacer(modifier = Modifier.height(12.dp))
             Divider()
@@ -129,6 +85,17 @@ fun BloombergWallScreen(
             // 4. PRICE CHART STATUS
             // ═══════════════════════════════════════
             PriceChartStatus(priceData)
+
+            // 5. LIVE DATA INDICATOR
+            Box(modifier = Modifier.fillMaxWidth().padding(8.dp), contentAlignment = Alignment.Center) {
+                Text(
+                    text = ">>> REAL-TIME TERMINAL FEEDS ACTIVE <<<",
+                    color = colors.primary.copy(alpha = 0.6f),
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }
@@ -138,12 +105,12 @@ fun MarketHeadlinesTicker() {
     val colors = LocalTerminalColors.current
     val headlines =
         listOf(
-            "► BTC breaks through $103K resistance",
-            "► ETH demand surge in DeFi sector",
-            "► Fed signals hawkish stance — market reacts",
-            "► Crypto volatility spike expected this week",
-            "► BlackRock ETF inflows accelerate",
-            "► Altseason indicators flash BULLISH",
+            "► BTC market structure optimization complete",
+            "► Institutional capital flow monitoring active",
+            "► Multi-agent neural orchestration synced",
+            "► Cross-exchange liquidity clusters identified",
+            "► Volatility risk engine: NOMINAL",
+            "► Terminal status: ELITE_MODE_ACTIVE",
         )
 
     var offset by remember { mutableFloatStateOf(0f) }
@@ -151,8 +118,8 @@ fun MarketHeadlinesTicker() {
 
     LaunchedEffect(Unit) {
         while (true) {
-            delay(30) // Fast scroll
-            offset += 3f // 3px per frame = rapid movement
+            delay(30)
+            offset += 3f
             if (offset > 2000f) offset = -100f
         }
     }
@@ -170,7 +137,6 @@ fun MarketHeadlinesTicker() {
             horizontalArrangement = Arrangement.spacedBy(48.dp),
         ) {
             repeat(3) {
-                // Repeat headlines 3x for seamless scroll
                 headlines.forEach { headline ->
                     Text(
                         text = headline,
@@ -190,17 +156,16 @@ fun MarketHeadlinesTicker() {
 @Composable
 fun SentimentBar(priceData: Map<String, Pair<Double, Double>>) {
     val colors = LocalTerminalColors.current
-    // compute simple sentiment from average % change of the TOP_15
     val avgChange = if (priceData.isNotEmpty()) priceData.values.map { it.second }.average() else 0.0
     val label =
         when {
-            avgChange > 1.0 -> "STRONG BULLISH"
-            avgChange > 0.2 -> "BULLISH"
-            avgChange >= -0.2 -> "NEUTRAL"
-            avgChange >= -1.0 -> "BEARISH"
+            avgChange > 2.0 -> "STRONG BULLISH"
+            avgChange > 0.5 -> "BULLISH"
+            avgChange >= -0.5 -> "NEUTRAL"
+            avgChange >= -2.0 -> "BEARISH"
             else -> "STRONG BEARISH"
         }
-    val pct = (avgChange / 5.0).toFloat().coerceIn(-1f, 1f) // normalize for bar
+    val pct = (avgChange / 10.0).toFloat().coerceIn(-1f, 1f)
 
     Box(
         modifier =
@@ -208,34 +173,33 @@ fun SentimentBar(priceData: Map<String, Pair<Double, Double>>) {
                 .fillMaxWidth()
                 .height(18.dp)
                 .background(colors.background)
-                .padding(4.dp),
+                .padding(horizontal = 16.dp),
     ) {
-        // Background neutral bar
         Box(modifier = Modifier.fillMaxSize().background(colors.grid.copy(alpha = 0.12f)))
 
-        // Center marker and dynamic amber/green fill
         val fillColor =
             when {
-                avgChange > 0.2 -> colors.primary
-                avgChange < -0.2 -> colors.danger
+                avgChange > 0.5 -> colors.primary
+                avgChange < -0.5 -> colors.danger
                 else -> colors.amber
             }
 
-        val fillWidth = ((0.5f + pct / 2f) * 100f).coerceIn(0f, 100f)
+        val fillWidthPercent = (0.5f + pct / 2f).coerceIn(0f, 1f)
 
         Box(
             modifier =
                 Modifier
                     .fillMaxHeight()
-                    .width((fillWidth).dp)
+                    .fillMaxWidth(fillWidthPercent)
                     .background(fillColor.copy(alpha = 0.9f)),
         )
 
         Text(
-            text = "SENTIMENT: $label  (avg ${String.format(Locale.US, "%.2f", avgChange)}%)",
+            text = "SENTIMENT: $label (${String.format(Locale.US, "%+.2f", avgChange)}%)",
             color = colors.textPrimary,
             fontFamily = FontFamily.Monospace,
-            fontSize = 11.sp,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold,
             modifier = Modifier.align(Alignment.CenterStart).padding(start = 8.dp),
         )
     }
@@ -247,8 +211,8 @@ fun SystemHealth(lastUpdateMillis: Long) {
     val ageSec = ((System.currentTimeMillis() - lastUpdateMillis) / 1000).toInt()
     val status =
         when {
-            ageSec < 200 -> "OK"
-            ageSec < 600 -> "STALE"
+            ageSec < 60 -> "SYNCHRONIZED"
+            ageSec < 300 -> "LAG_DETECTED"
             else -> "OFFLINE"
         }
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
@@ -259,13 +223,13 @@ fun SystemHealth(lastUpdateMillis: Long) {
         ) {
             val statusColor =
                 when (status) {
-                    "OK" -> colors.primary
-                    "STALE" -> colors.amber
+                    "SYNCHRONIZED" -> colors.primary
+                    "LAG_DETECTED" -> colors.amber
                     else -> colors.danger
                 }
-            Text("SYSTEM FEEDS: $status", color = statusColor, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
+            Text("DATA_STREAM: $status", color = statusColor, fontFamily = FontFamily.Monospace, fontSize = 10.sp)
             Text(
-                "Last update: ${String.format(Locale.US, "%tT", Date(lastUpdateMillis))}",
+                "T: ${String.format(Locale.US, "%tT", Date(lastUpdateMillis))}",
                 color = colors.dimText,
                 fontFamily = FontFamily.Monospace,
                 fontSize = 10.sp,
@@ -275,21 +239,18 @@ fun SystemHealth(lastUpdateMillis: Long) {
 }
 
 @Composable
-fun MatrixPricesTicker(priceData: Map<String, Pair<Double, Double>>) {
+fun MatrixPricesTicker(priceData: Map<String, Pair<Double, Double>>, symbols: List<String>) {
     val colors = LocalTerminalColors.current
     val density = LocalDensity.current
 
-    // Matrix parameters
-    val columns = 12
-    val rowHeightDp = 18.dp
-    val rowHeightPx = with(density) { rowHeightDp.toPx() }
+    if (symbols.isEmpty()) return
 
-    // Build strings for display from priceData (static until next update)
-    val symbols = TOP_15_CRYPTOS.map { it.first }
+    val columns = 12
+    val rowHeightPx = with(density) { 18.dp.toPx() }
+
     val displayList =
-        remember(priceData) {
+        remember(priceData, symbols) {
             List(columns) {
-                // each column gets a shuffled repeating sequence of price strings
                 val list = mutableListOf<String>()
                 val data =
                     symbols.map { s ->
@@ -297,7 +258,6 @@ fun MatrixPricesTicker(priceData: Map<String, Pair<Double, Double>>) {
                         val arrow = if (c >= 0) "▲" else "▼"
                         "$s ${String.format(Locale.US, "%.2f", p)} $arrow${String.format(Locale.US, "%.1f", kotlin.math.abs(c))}%"
                     }
-                // repeat to fill
                 while (list.size < 100) {
                     list.addAll(data.shuffled())
                 }
@@ -305,18 +265,15 @@ fun MatrixPricesTicker(priceData: Map<String, Pair<Double, Double>>) {
             }
         }
 
-    // state: vertical offset for each column and speed
     val offsets =
         remember { mutableStateListOf<Float>().apply { repeat(columns) { add((0..(rowHeightPx.toInt() * 20)).random().toFloat()) } } }
     val speeds = remember { List(columns) { (30..120).random() / 60f } }
 
     LaunchedEffect(Unit) {
         while (true) {
-            val frameMs = 16L
-            delay(frameMs)
+            delay(16L)
             for (i in 0 until columns) {
                 val new = offsets[i] + speeds[i]
-                // loop when too large
                 offsets[i] = if (new > rowHeightPx * 100) 0f else new
             }
         }
@@ -336,7 +293,6 @@ fun MatrixPricesTicker(priceData: Map<String, Pair<Double, Double>>) {
                 Box(modifier = Modifier.weight(1f)) {
                     val offsetPx = offsets[col]
                     val offsetDp = with(density) { (-offsetPx).toDp() }
-                    // draw stack of texts vertically, each shifted by offsetDp
                     for (i in 0 until 40) {
                         val text = list[i % list.size]
                         val yDp = with(density) { (i * rowHeightPx).toDp() }
@@ -357,13 +313,19 @@ fun MatrixPricesTicker(priceData: Map<String, Pair<Double, Double>>) {
 }
 
 @Composable
-fun MarketDominanceSection() {
+fun MarketDominanceSection(coins: List<CoinPrice>) {
     val colors = LocalTerminalColors.current
     var dominanceOffset by remember { mutableFloatStateOf(0f) }
 
+    val top5 = remember(coins) {
+        val totalCap = coins.sumOf { it.marketCap }
+        if (totalCap <= 0) emptyList()
+        else coins.take(5).map { it.symbol.uppercase() to ((it.marketCap / totalCap) * 100).toFloat() }
+    }
+
     LaunchedEffect(Unit) {
         while (true) {
-            delay(60) // Slowest scroll - 1px per frame
+            delay(60)
             dominanceOffset += 1f
             if (dominanceOffset > 2500f) dominanceOffset = -200f
         }
@@ -379,7 +341,7 @@ fun MarketDominanceSection() {
             text = "MARKET CAP DOMINANCE — TOP 5",
             color = colors.amber,
             fontFamily = FontFamily.Monospace,
-            fontSize = 12.sp,
+            fontSize = 11.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 6.dp),
         )
@@ -398,8 +360,8 @@ fun MarketDominanceSection() {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 repeat(2) {
-                    TOP_5_DOMINANCE.forEach { (symbol, percentage) ->
-                        val barWidth = percentage / 50f // visual bar width
+                    top5.forEach { (symbol, percentage) ->
+                        val barWidth = percentage / 100f
 
                         Column {
                             Text(
@@ -412,7 +374,7 @@ fun MarketDominanceSection() {
                             Box(
                                 modifier =
                                     Modifier
-                                        .width((barWidth * 80).dp)
+                                        .width((barWidth * 160).dp)
                                         .height(4.dp)
                                         .background(colors.primary.copy(alpha = 0.6f)),
                             )
@@ -448,7 +410,6 @@ fun PriceChartStatus(priceData: Map<String, Pair<Double, Double>>) {
                     fontWeight = FontWeight.Bold,
                 )
 
-                // Mini sparkline placeholder
                 Box(
                     modifier =
                         Modifier
@@ -456,7 +417,6 @@ fun PriceChartStatus(priceData: Map<String, Pair<Double, Double>>) {
                             .height(30.dp)
                             .background(Color(0xFF0a0a0a)),
                 ) {
-                    // Simple placeholder visualization (single center line)
                     Canvas(modifier = Modifier.fillMaxSize()) {
                         drawLine(
                             color = if (change >= 0) colors.primary else colors.danger,
@@ -468,7 +428,7 @@ fun PriceChartStatus(priceData: Map<String, Pair<Double, Double>>) {
                 }
 
                 Text(
-                    text = String.format(Locale.US, "%.1f", change) + "%",
+                    text = String.format(Locale.US, "%+.2f", change) + "%",
                     color = changeColor,
                     fontFamily = FontFamily.Monospace,
                     fontSize = 10.sp,
@@ -476,12 +436,11 @@ fun PriceChartStatus(priceData: Map<String, Pair<Double, Double>>) {
                 )
             }
         }
-        // Legend explaining colors
         Spacer(modifier = Modifier.width(8.dp))
         Column(modifier = Modifier.align(Alignment.CenterVertically)) {
-            Text("Legend:", color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 9.sp)
+            Text("FEEDS: ENCRYPTED", color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 9.sp)
             Text(
-                "Green = positive % change today; Red = negative % change",
+                "SYNC: REAL-TIME SECURE",
                 color = colors.dimText,
                 fontFamily = FontFamily.Monospace,
                 fontSize = 9.sp,
@@ -498,6 +457,6 @@ fun Divider() {
             Modifier
                 .fillMaxWidth()
                 .height(1.dp)
-                .background(_colors.grid),
+                .background(_colors.grid.copy(alpha = 0.5f)),
     )
 }

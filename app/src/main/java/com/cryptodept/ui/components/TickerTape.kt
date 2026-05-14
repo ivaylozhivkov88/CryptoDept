@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -78,7 +79,7 @@ fun TickerTape(
             modifier
                 .fillMaxWidth()
                 .height(28.dp)
-                .background(Color(0xFF0A0A0A))
+                .background(colors.background)
                 .semantics { contentDescription = accessibilityDescription }
                 .testTag("TickerTape"),
     ) {
@@ -93,8 +94,8 @@ fun TickerTape(
                     when (item) {
                         is TickerItem.Price -> {
                             val coin = item.coin
-                            // Use solid red/green for trend, but primary for text
-                            val trendColor = if (coin.priceChangePercentage24h >= 0) Color(0xFF00FF41) else Color(0xFFFF3B30)
+                            // Use theme-aware colors for trend
+                            val trendColor = if (coin.priceChangePercentage24h >= 0) colors.primary else colors.error
                             val symbol = if (coin.priceChangePercentage24h >= 0) "▲" else "▼"
 
                             Text(
@@ -102,11 +103,13 @@ fun TickerTape(
                                 color = colors.primary,
                                 fontSize = TerminalConfig.UI.FONT_SIZE_SMALL,
                                 fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Monospace,
                             )
                             Text(
                                 text = "$symbol${String.format(Locale.US, "%.2f", kotlin.math.abs(coin.priceChangePercentage24h))}%",
                                 color = trendColor,
                                 fontSize = TerminalConfig.UI.FONT_SIZE_SMALL,
+                                fontFamily = FontFamily.Monospace,
                             )
                         }
                         is TickerItem.Stat -> {
@@ -114,6 +117,7 @@ fun TickerTape(
                                 text = item.text,
                                 color = colors.primary,
                                 fontSize = TerminalConfig.UI.FONT_SIZE_SMALL,
+                                fontFamily = FontFamily.Monospace,
                             )
                         }
                     }

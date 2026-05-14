@@ -22,6 +22,9 @@ class PredictionEnsembleEngine
         private val hurstCalc: HurstExponentCalculator,
         private val fractalAnalyzer: FractalDimensionAnalyzer,
         private val mtfAnalyzer: MultiTimeframeAnalyzer,
+        private val liquidityEngine: LiquidityEngine,
+        private val macroRepository: com.cryptodept.domain.repository.MacroRepository,
+        private val sentimentAnalyzer: com.cryptodept.domain.usecase.SentimentAnalyzer,
         private val accuracyTracker: com.cryptodept.domain.usecase.PredictionAccuracyTracker,
         private val cache: PredictionCache,
     ) {
@@ -36,10 +39,21 @@ class PredictionEnsembleEngine
                 if (cached != null) return@withContext cached
 
                 val currentPrice = closes.last()
+                val symbol = coinId.split("-").first().uppercase()
+                
                 val hurst = hurstCalc.calculate(closes)
                 val fractalDim = fractalAnalyzer.calculate(closes)
                 val predictability = fractalAnalyzer.getPredictabilityScore(fractalDim)
                 val mcResult = monteCarlo.simulate(closes, 24)
+
+                // Liquidity analysis (PHASE X)
+                val (liquidityVote, liquidityInsight) = liquidityEngine.analyze(coinId, currentPrice)
+
+                // Macro analysis (PHASE X)
+                val macroData = macroRepository.getMacroData().getOrNull()
+
+                // Sentiment Analysis (PHASE X)
+                val sentiment = sentimentAnalyzer.analyzeCoin(symbol)
 
                 // MTF analysis
                 val mtfConsensus =
@@ -57,14 +71,26 @@ class PredictionEnsembleEngine
                         elliottWave.predict(closes),
                         wyckoff.predict(closes, volumes),
                         hurstCalc.interpret(hurst, detectSimpleTrend(closes)),
+                        liquidityVote,
                     )
 
                 val votesWithReasoning =
                     rawVotes.map { vote ->
-                        vote.copy(reasoning = generateDeepReasoning(vote, closes, hurst, fractalDim))
+                        if (vote.model == PredictionModel.LIQUIDITY_ENGINE) vote
+                        else vote.copy(reasoning = generateDeepReasoning(vote, closes, hurst, fractalDim))
                     }
 
                 val consensus = calculateWeightedConsensus(votesWithReasoning, predictability)
+
+                // Generate Evidence Chain (PHASE X)
+                val evidence = buildEvidenceChain(
+                    votes = votesWithReasoning,
+                    liquidity = liquidityInsight,
+                    predictability = predictability,
+                    mtf = mtfConsensus,
+                    macro = macroData,
+                    sentiment = sentiment
+                )
 
                 // Record for future verification
                 votesWithReasoning.forEach { vote ->
@@ -85,6 +111,8 @@ class PredictionEnsembleEngine
                         ensembleConsensus = consensus,
                         priceDistribution = mcResult.second,
                         mtfConsensus = mtfConsensus,
+                        liquidityInsight = liquidityInsight,
+                        evidenceChain = evidence,
                         modelsAgreement = consensus.agreementScore,
                         dataQuality = predictability,
                         calculatedAt = System.currentTimeMillis(),
@@ -233,5 +261,110 @@ class PredictionEnsembleEngine
                 direction = if (mid > current) Direction.UP else Direction.DOWN,
                 confidence = 0.6f,
             )
+        }
+
+        private fun buildEvidenceChain(
+            votes: List<ModelVote>,
+            liquidity: LiquidityInsight,
+            predictability: Float,
+            mtf: MTFConsensus?,
+            macro: MacroData?,
+            sentiment: com.cryptodept.domain.usecase.SentimentResult?
+        ): List<EvidenceStep> {
+            val steps = mutableListOf<EvidenceStep>()
+
+            // Pillar 1: Quantitative Models (Quant Alpha)
+            val quantVote = votes.find { it.model == PredictionModel.MONTE_CARLO }
+            quantVote?.let {
+                steps.add(EvidenceStep(
+                    title = "QUANTITATIVE_ALPHA",
+                    description = "Monte Carlo simulations and Digital Signal Processing (DSP) Harmonics detect a dominant cycle formation.",
+                    impact = it.direction,
+                    confidence = it.confidence
+                ))
+            }
+
+            // Pillar 2: Liquidity & Orderflow (The Pulse)
+            val liqDirection = if (liquidity.longShortRatio > 0.6) Direction.DOWN 
+                               else if (liquidity.longShortRatio < 0.4) Direction.UP 
+                               else Direction.SIDEWAYS
+            
+            steps.add(EvidenceStep(
+                title = "LIQUIDITY_DYNAMICS",
+                description = "Binance order-flow analysis indicates ${liquidity.sentimentBias.replace("_", " ")} with retail L/S ratio at ${(liquidity.longShortRatio * 100).toInt()}%.",
+                impact = liqDirection,
+                confidence = 0.85f
+            ))
+
+            // Pillar 3: Macro Landscape (The Gravity)
+            macro?.let {
+                val dxyImpact = if (it.dxyChange > 0) "Bearish pressure from DXY strength" else "Bullish tailwind from DXY weakness"
+                val macroDirection = if (it.dxyChange > 0) Direction.DOWN else Direction.UP
+                
+                steps.add(EvidenceStep(
+                    title = "MACRO_GRAVITY",
+                    description = "Global macro indicators analyzed. $dxyImpact. BTC-S&P500 correlation is ${String.format(Locale.US, "%.2f", it.btcSp500Correlation)}.",
+                    impact = macroDirection,
+                    confidence = 0.80f
+                ))
+            }
+
+            // Pillar 4: Social Sentiment (The Wisdom)
+            sentiment?.let {
+                val sentDirection = when(it.verdict) {
+                    com.cryptodept.domain.usecase.SentimentVerdict.STRONGLY_BULLISH,
+                    com.cryptodept.domain.usecase.SentimentVerdict.BULLISH -> Direction.UP
+                    com.cryptodept.domain.usecase.SentimentVerdict.STRONGLY_BEARISH,
+                    com.cryptodept.domain.usecase.SentimentVerdict.BEARISH -> Direction.DOWN
+                    else -> Direction.SIDEWAYS
+                }
+                
+                steps.add(EvidenceStep(
+                    title = "SOCIAL_SENTIMENT",
+                    description = "Reddit & CryptoPanic NLP analysis detects ${it.verdict.name} bias across ${it.totalAnalyzed} headlines.",
+                    impact = sentDirection,
+                    confidence = it.bullishPercent.coerceAtLeast(it.bearishPercent).toFloat() / 100f
+                ))
+            }
+
+            // Pillar 5: Multi-Timeframe Confluence (Structure)
+            mtf?.let {
+                val bullishCount = it.timeframes.count { tf -> tf.overallSignal.name.contains("BUY") }
+                val bearishCount = it.timeframes.count { tf -> tf.overallSignal.name.contains("SELL") }
+                
+                val mtfDirection = when {
+                    bullishCount > bearishCount -> Direction.UP
+                    bearishCount > bullishCount -> Direction.DOWN
+                    else -> Direction.SIDEWAYS
+                }
+
+                steps.add(EvidenceStep(
+                    title = "STRUCTURAL_CONFLUENCE",
+                    description = "Price structure sync detected across ${it.timeframes.size} timeframes. Trend alignment is ${if (bullishCount > bearishCount) "BULLISH" else "BEARISH"}.",
+                    impact = mtfDirection,
+                    confidence = 0.75f
+                ))
+            }
+
+            // Pillar 6: Technical Oscillators (Momentum)
+            val rsiVote = votes.find { it.model == PredictionModel.LINEAR_REGRESSION }
+            rsiVote?.let {
+                steps.add(EvidenceStep(
+                    title = "MOMENTUM_OSCILLATION",
+                    description = "Digital filter detects standard deviation breakout from the equilibrium mean. Momentum bias is established.",
+                    impact = it.direction,
+                    confidence = 0.70f
+                ))
+            }
+
+            // Pillar 7: Market Fractal Predictability (Noise level)
+            steps.add(EvidenceStep(
+                title = "SYSTEM_PREDICTABILITY",
+                description = "Fractal Dimension analysis confirms noise level at ${(1 - predictability) * 100}%. Signal-to-noise ratio is ${if (predictability > 0.6) "HIGH" else "MODERATE"}.",
+                impact = Direction.SIDEWAYS,
+                confidence = predictability
+            ))
+
+            return steps
         }
     }

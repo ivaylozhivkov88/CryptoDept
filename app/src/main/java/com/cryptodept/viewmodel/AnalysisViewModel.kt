@@ -56,9 +56,12 @@ class AnalysisViewModel @Inject constructor(
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AnalysisUiState.Loading)
 
     fun loadAnalysis(coinId: String) {
-        // Handle both "bitcoin" (ID) and "BTC" (Symbol)
-        val cleanId = coinId.lowercase()
-        _selectedCoin.value = if (cleanId == "btc") "bitcoin" else if (cleanId == "eth") "ethereum" else cleanId
+        viewModelScope.launch {
+            delay(500) // Visual confirmation of reload
+            // Handle both "bitcoin" (ID) and "BTC" (Symbol)
+            val cleanId = coinId.lowercase()
+            _selectedCoin.value = if (cleanId == "btc") "bitcoin" else if (cleanId == "eth") "ethereum" else cleanId
+        }
     }
 
     val trackedCoins: StateFlow<List<String>> = observeAnalysisHistory()

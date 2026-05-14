@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.Dialog
 import com.cryptodept.R
 import com.cryptodept.ui.theme.LocalTerminalColors
@@ -71,19 +72,20 @@ fun TutorialStartDialog(onStart: () -> Unit, onSkip: () -> Unit) {
                     Spacer(Modifier.width(12.dp))
                     Button(
                         onClick = onStart,
-                        modifier = Modifier.height(44.dp).wrapContentWidth(),
+                        modifier = Modifier.size(44.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = colors.primary,
                             contentColor = colors.background
                         ),
                         shape = RectangleShape,
-                        contentPadding = PaddingValues(horizontal = 16.dp)
+                        contentPadding = PaddingValues(0.dp)
                     ) {
                         Text(
                             text = stringResource(R.string.tutorial_start_yes),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Monospace
+                            fontFamily = FontFamily.Monospace,
+                            textAlign = TextAlign.Center
                         )
                     }
                 }

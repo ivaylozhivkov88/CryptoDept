@@ -96,7 +96,7 @@ class MarketsViewModel
             }
         }
 
-        private fun refreshData() {
+        fun refreshData() {
             viewModelScope.launch(Dispatchers.IO) {
                 cryptoRepository
                     .refreshPrices()

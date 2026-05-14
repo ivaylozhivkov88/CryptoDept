@@ -12,13 +12,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cryptodept.domain.model.CalendarEvent
+import com.cryptodept.ui.theme.LocalTerminalColors
 import com.cryptodept.viewmodel.CalendarViewModel
 import java.util.*
 
@@ -26,35 +27,36 @@ import java.util.*
 fun CalendarScreen(viewModel: CalendarViewModel = hiltViewModel()) {
     val events by viewModel.filteredEvents.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val colors = LocalTerminalColors.current
 
     Box(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(Color.Black)
+                .background(colors.background)
                 .padding(16.dp),
     ) {
         Column(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .border(1.dp, Color(0xFF00FF41), RectangleShape),
+                    .border(1.dp, colors.grid, RectangleShape),
         ) {
             HeaderSection(onHotToggle = { viewModel.toggleHotOnly() })
 
             if (isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = Color(0xFF00FF41))
+                    CircularProgressIndicator(color = colors.primary)
                 }
             } else if (events.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(">>> NO UPCOMING EVENTS FOUND", color = Color.Gray, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)
+                    Text(">>> NO UPCOMING EVENTS FOUND", color = colors.dimText, fontFamily = FontFamily.Monospace)
                 }
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     items(events) { event ->
                         CalendarEventItem(event)
-                        HorizontalDivider(color = Color(0xFF00FF41).copy(alpha = 0.2f), thickness = 0.5.dp)
+                        HorizontalDivider(color = colors.grid.copy(alpha = 0.2f), thickness = 0.5.dp)
                     }
                 }
             }
@@ -64,6 +66,7 @@ fun CalendarScreen(viewModel: CalendarViewModel = hiltViewModel()) {
 
 @Composable
 fun HeaderSection(onHotToggle: () -> Unit) {
+    val colors = LocalTerminalColors.current
     Row(
         modifier =
             Modifier
@@ -74,24 +77,25 @@ fun HeaderSection(onHotToggle: () -> Unit) {
     ) {
         Text(
             text = ">>> CRYPTO CALENDAR",
-            color = Color(0xFF00FF41),
-            fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+            color = colors.primary,
+            fontFamily = FontFamily.Monospace,
             fontWeight = FontWeight.Bold,
             fontSize = 16.sp,
         )
         Text(
             text = "[HOT ONLY]",
-            color = Color.Gray,
-            fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+            color = colors.dimText,
+            fontFamily = FontFamily.Monospace,
             fontSize = 12.sp,
             modifier = Modifier.clickable { onHotToggle() },
         )
     }
-    HorizontalDivider(color = Color(0xFF00FF41), thickness = 1.dp)
+    HorizontalDivider(color = colors.grid, thickness = 1.dp)
 }
 
 @Composable
 fun CalendarEventItem(event: CalendarEvent) {
+    val colors = LocalTerminalColors.current
     val dayLabel =
         when (event.daysUntil) {
             0 -> "🔥 TODAY"
@@ -102,30 +106,30 @@ fun CalendarEventItem(event: CalendarEvent) {
     Column(modifier = Modifier.padding(12.dp)) {
         Text(
             text = dayLabel,
-            color = if (event.daysUntil <= 1) Color(0xFFFF3B30) else Color(0xFFFFB000),
-            fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+            color = if (event.daysUntil <= 1) colors.error else colors.amber,
+            fontFamily = FontFamily.Monospace,
             fontSize = 10.sp,
             fontWeight = FontWeight.Bold,
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = "${event.coins.joinToString(", ")} — ${event.title}",
-            color = Color.White,
-            fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+            color = colors.textPrimary,
+            fontFamily = FontFamily.Monospace,
             fontWeight = FontWeight.Bold,
             fontSize = 14.sp,
         )
-        Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(
                 text = "Category: ${event.category}",
-                color = Color.Gray,
-                fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                color = colors.dimText,
+                fontFamily = FontFamily.Monospace,
                 fontSize = 11.sp,
             )
             Text(
                 text = "Hot Score: ${String.format(Locale.US, "%.1f", event.hotScore)}",
-                color = if (event.isHot) Color(0xFF00FF41) else Color.Gray,
-                fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                color = if (event.isHot) colors.primary else colors.dimText,
+                fontFamily = FontFamily.Monospace,
                 fontSize = 11.sp,
             )
         }

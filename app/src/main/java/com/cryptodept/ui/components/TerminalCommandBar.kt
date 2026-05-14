@@ -46,7 +46,6 @@ fun TerminalCommandBar(
 ) {
     val soundManager = LocalTerminalAudioManager.current
     val colors = LocalTerminalColors.current
-    val hapticManager = LocalHapticManager.current
     val analytics = LocalAnalyticsManager.current
     val scope = rememberCoroutineScope()
 
@@ -76,6 +75,7 @@ fun TerminalCommandBar(
         modifier = modifier
             .fillMaxWidth()
             .background(Color.Black)
+            .imePadding() // Ensure it moves with keyboard
     ) {
         if (showTooltip && command.isEmpty()) {
             Text(
@@ -150,7 +150,6 @@ fun TerminalCommandBar(
                                 if (commandHistory.size > 10) commandHistory.removeAt(10)
                             }
                             scope.launch {
-                                hapticManager?.tick()
                                 analytics?.logCommandUsed(cmdToExecute)
                                 onCommandEntered(cmdToExecute)
                                 command = ""

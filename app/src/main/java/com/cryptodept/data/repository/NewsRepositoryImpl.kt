@@ -50,22 +50,24 @@ class NewsRepositoryImpl
                 val cryptoPanicDeferred = async {
                     if (BuildConfig.CRYPTOPANIC_API_KEY.isNotBlank()) {
                         runCatching {
-                            val query = currencies ?: "BTC,ETH,XRP,SOL,ADA"
-                            newsApi.getCryptoPanicNews(currencies = query).results.map { res ->
-                                val sentiment = when {
-                                    res.votes.positive > res.votes.negative -> NewsSentiment.BULLISH
-                                    res.votes.negative > res.votes.positive -> NewsSentiment.BEARISH
-                                    else -> NewsSentiment.NEUTRAL
+                            withTimeout(10000) {
+                                val query = currencies ?: "BTC,ETH,XRP,SOL,ADA"
+                                newsApi.getCryptoPanicNews(currencies = query).results.map { res ->
+                                    val sentiment = when {
+                                        res.votes.positive > res.votes.negative -> NewsSentiment.BULLISH
+                                        res.votes.negative > res.votes.positive -> NewsSentiment.BEARISH
+                                        else -> NewsSentiment.NEUTRAL
+                                    }
+                                    NewsItem(
+                                        id = res.id.toString(),
+                                        title = res.title,
+                                        url = res.url,
+                                        source = res.domain,
+                                        publishedAt = parseIsoDate(res.createdAt),
+                                        sentiment = sentiment,
+                                        currencies = (res.currencies?.map { it.code } ?: emptyList()).toImmutableList(),
+                                    )
                                 }
-                                NewsItem(
-                                    id = res.id.toString(),
-                                    title = res.title,
-                                    url = res.url,
-                                    source = res.domain,
-                                    publishedAt = parseIsoDate(res.createdAt),
-                                    sentiment = sentiment,
-                                    currencies = (res.currencies?.map { it.code } ?: emptyList()).toImmutableList(),
-                                )
                             }
                         }.getOrDefault(emptyList())
                     } else emptyList()
@@ -73,38 +75,46 @@ class NewsRepositoryImpl
 
                 val coinGeckoDeferred = async {
                     runCatching {
-                        coinGeckoApi.getNews().data.map { res ->
-                            NewsItem(
-                                id = res.url.hashCode().toString(),
-                                title = res.title,
-                                url = res.url,
-                                source = res.newsSource,
-                                publishedAt = res.updatedAt * 1000,
-                                sentiment = sentimentScorer.analyze(res.title),
-                                currencies = detectCurrencies(res.title).toImmutableList(),
-                            )
+                        withTimeout(10000) {
+                            coinGeckoApi.getNews().data.map { res ->
+                                NewsItem(
+                                    id = res.url.hashCode().toString(),
+                                    title = res.title,
+                                    url = res.url,
+                                    source = res.newsSource,
+                                    publishedAt = res.updatedAt * 1000,
+                                    sentiment = sentimentScorer.analyze(res.title),
+                                    currencies = detectCurrencies(res.title).toImmutableList(),
+                                )
+                            }
                         }
                     }.getOrDefault(emptyList())
                 }
 
                 val rssDeferred = async {
                     runCatching {
-                        rssParser.fetchAllSources().map { rss ->
-                            NewsItem(
-                                id = rss.link.hashCode().toString(),
-                                title = rss.title,
-                                url = rss.link,
-                                source = rss.source,
-                                publishedAt = parseRssDate(rss.pubDate),
-                                sentiment = sentimentScorer.analyze(rss.title),
-                                currencies = detectCurrencies(rss.title).toImmutableList(),
-                            )
+                        withTimeout(10000) {
+                            rssParser.fetchAllSources().map { rss ->
+                                NewsItem(
+                                    id = rss.link.hashCode().toString(),
+                                    title = rss.title,
+                                    url = rss.link,
+                                    source = rss.source,
+                                    publishedAt = parseRssDate(rss.pubDate),
+                                    sentiment = sentimentScorer.analyze(rss.title),
+                                    currencies = detectCurrencies(rss.title).toImmutableList(),
+                                )
+                            }
                         }
                     }.getOrDefault(emptyList())
                 }
 
                 val redditDeferred = async {
-                    runCatching { redditClient.fetchCryptoReddit() }.getOrDefault(emptyList())
+                    runCatching {
+                        withTimeout(10000) {
+                            redditClient.fetchCryptoReddit()
+                        }
+                    }.getOrDefault(emptyList())
                 }
 
                 val results = awaitAll(cryptoPanicDeferred, coinGeckoDeferred, rssDeferred, redditDeferred)

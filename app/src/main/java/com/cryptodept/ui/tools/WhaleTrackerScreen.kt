@@ -12,6 +12,9 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cryptodept.domain.model.Blockchain
 import com.cryptodept.domain.model.WhaleTransaction
@@ -45,11 +48,12 @@ fun WhaleTrackerScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = ">>> WHALE_ACTIVITY_TRACKER",
+                text = ">>> WHALE TRACKER",
                 color = colors.primary,
                 fontFamily = FontFamily.Monospace,
                 fontSize = TerminalConfig.UI.FONT_SIZE_HEADER,
                 fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f)
             )
 
             if (isRefreshing) {
@@ -59,13 +63,15 @@ fun WhaleTrackerScreen(
                     strokeWidth = TerminalConfig.UI.BORDER_WIDTH * 2,
                 )
             } else {
-                Text(
-                    text = TerminalConfig.Strings.REFRESH,
-                    color = colors.primary,
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = TerminalConfig.UI.FONT_SIZE_NORMAL,
-                    modifier = Modifier.clickable { viewModel.refresh() },
-                )
+                OutlinedButton(
+                    onClick = { viewModel.refresh() },
+                    border = BorderStroke(1.dp, colors.primary),
+                    shape = RectangleShape,
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                    modifier = Modifier.height(28.dp)
+                ) {
+                    Text("REFRESH", color = colors.primary, fontFamily = FontFamily.Monospace, fontSize = 10.sp)
+                }
             }
         }
 
@@ -135,6 +141,7 @@ fun WhaleTxCard(tx: WhaleTransaction) {
                     text = "${TerminalFormatter.formatPrice(tx.amount)} ${tx.symbol}",
                     color = colors.primary,
                     fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Monospace,
                     fontSize = TerminalConfig.UI.FONT_SIZE_LARGE,
                 )
                 Text(
@@ -152,12 +159,16 @@ fun WhaleTxCard(tx: WhaleTransaction) {
                 color = colors.dimText,
                 fontSize = TerminalConfig.UI.FONT_SIZE_SMALL,
                 fontFamily = FontFamily.Monospace,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
             Text(
                 text = "TO:   ${TerminalFormatter.formatShortAddress(tx.toAddress)}",
                 color = colors.dimText,
                 fontSize = TerminalConfig.UI.FONT_SIZE_SMALL,
                 fontFamily = FontFamily.Monospace,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
 
             Spacer(modifier = Modifier.height(TerminalConfig.UI.SPACER_MEDIUM))
@@ -166,11 +177,13 @@ fun WhaleTxCard(tx: WhaleTransaction) {
                 Text(
                     text = "BLOCKCHAIN: $blockchainLabel",
                     color = colors.dimText,
+                    fontFamily = FontFamily.Monospace,
                     fontSize = TerminalConfig.UI.FONT_SIZE_MICRO,
                 )
                 Text(
                     text = sdf.format(Date(tx.timestamp)),
                     color = colors.dimText,
+                    fontFamily = FontFamily.Monospace,
                     fontSize = TerminalConfig.UI.FONT_SIZE_MICRO,
                 )
             }

@@ -1,19 +1,41 @@
 package com.cryptodept.domain.usecase
 
-import com.cryptodept.domain.model.SetupVerdict
-import com.cryptodept.domain.model.TradeDirectionType
+import com.cryptodept.domain.model.*
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
+import org.junit.Before
 import org.junit.Test
+import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 
 class TradePlannerEngineTest {
-    private val taEngine = mock<TechnicalAnalysisEngine>()
+    private val taEngine = mock(TechnicalAnalysisEngine::class.java)
     private val riskEngine = RiskScoreEngine()
-    private val mtfAnalyzer = mock<MultiTimeframeAnalyzer>()
-    private val hapticManager = mock<com.cryptodept.util.HapticManager>()
+    private val mtfAnalyzer = mock(MultiTimeframeAnalyzer::class.java)
+    private val hapticManager = mock(com.cryptodept.util.HapticManager::class.java)
 
     private val tradePlanner = TradePlannerEngine(taEngine, riskEngine, mtfAnalyzer, hapticManager)
+
+    @Before
+    fun setup() {
+        val mtfReport =
+            MTFConsensus(
+                timeframes = listOf(
+                    TimeframeSignal("4H", TrendDirection.UP, 50.0, MTFMacdSignal.BULLISH, EmaSignal.ABOVE_ALL, OverallSignal.BUY, 42),
+                    TimeframeSignal("1D", TrendDirection.UP, 50.0, MTFMacdSignal.BULLISH, EmaSignal.ABOVE_ALL, OverallSignal.BUY, 30),
+                    TimeframeSignal("1W", TrendDirection.UP, 50.0, MTFMacdSignal.BULLISH, EmaSignal.ABOVE_ALL, OverallSignal.BUY, 13)
+                ),
+                bullishCount = 3,
+                bearishCount = 0,
+                neutralCount = 0,
+                consensus = OverallSignal.BUY,
+                interpretation = "Strong buy",
+                tradingBias = "LONG"
+            )
+        runBlocking {
+            `when`(mtfAnalyzer.analyze("BTC")).thenReturn(mtfReport)
+        }
+    }
 
     @Test
     fun testStrongBullishSetup() =

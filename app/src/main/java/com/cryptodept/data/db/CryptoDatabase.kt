@@ -17,7 +17,7 @@ import androidx.room.TypeConverters
         NetworkHealthEntity::class,
         IntelligenceBriefingEntity::class,
     ],
-    version = 11,
+    version = 1,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)

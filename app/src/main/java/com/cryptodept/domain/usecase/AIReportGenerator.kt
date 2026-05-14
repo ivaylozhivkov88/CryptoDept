@@ -21,12 +21,15 @@ import javax.inject.Singleton
 @Singleton
 class AIReportGenerator
     @Inject
-    constructor() {
+    constructor(
+        private val remoteConfig: com.cryptodept.data.remoteconfig.RemoteConfigService
+    ) {
+        private val GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/"
+        
+        private fun getApiUrl(): String = "$GEMINI_BASE_URL${remoteConfig.getGeminiModel()}:generateContent"
+        private fun getStreamUrl(): String = "$GEMINI_BASE_URL${remoteConfig.getGeminiModel()}:streamGenerateContent"
+
         companion object {
-            private const val GEMINI_API_URL =
-                "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
-            private const val GEMINI_STREAM_URL =
-                "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent"
             private const val MAX_TOKENS = 2000
         }
 
@@ -135,7 +138,7 @@ class AIReportGenerator
                 val request =
                     Request
                         .Builder()
-                        .url("$GEMINI_API_URL?key=$apiKey")
+                        .url("${getApiUrl()}?key=$apiKey")
                         .post(gson.toJson(requestBody).toRequestBody("application/json".toMediaType()))
                         .build()
 
@@ -182,7 +185,7 @@ class AIReportGenerator
                 )
 
                 val request = Request.Builder()
-                    .url("$GEMINI_STREAM_URL?alt=sse&key=$apiKey")
+                    .url("${getStreamUrl()}?alt=sse&key=$apiKey")
                     .post(gson.toJson(requestBody).toRequestBody("application/json".toMediaType()))
                     .build()
 

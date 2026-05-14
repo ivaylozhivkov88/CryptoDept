@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -30,7 +31,7 @@ class ContentStudioViewModel
         private val newsletterBuilder: NewsletterPromptBuilder,
         private val aiProvider: AIProvider,
     ) : ViewModel() {
-        private val _uiState = MutableStateFlow<ContentStudioUiState>(ContentStudioUiState.Idle)
+        private val _uiState = MutableStateFlow(ContentStudioUiState())
         val uiState: StateFlow<ContentStudioUiState> = _uiState.asStateFlow()
 
         private val _generatedPrompt = MutableStateFlow("")
@@ -105,7 +106,7 @@ class ContentStudioViewModel
             val prompt = _generatedPrompt.value
             if (prompt.isBlank()) return
 
-            _uiState.value = ContentStudioUiState.Loading
+            _uiState.update { it.copy(isLoading = true, error = null) }
             _aiResponse.value = ""
 
             viewModelScope.launch {
@@ -113,11 +114,20 @@ class ContentStudioViewModel
                     aiProvider.sendMessage(prompt).collectLatest { chunk ->
                         _aiResponse.value += chunk
                     }
-                    _uiState.value = ContentStudioUiState.Success
+                    _uiState.update { it.copy(isLoading = false) }
                 } catch (e: Exception) {
-                    _uiState.value = ContentStudioUiState.Error(e.message ?: "AI Error")
+                    _uiState.update { it.copy(isLoading = false, error = e.message ?: "AI Error") }
                 }
             }
+        }
+
+        fun sendPromptToAiCoach(prompt: String) {
+            if (prompt.isBlank()) return
+            _uiState.update { it.copy(pendingNavigationToAiCoach = prompt) }
+        }
+
+        fun navigationConsumed() {
+            _uiState.update { it.copy(pendingNavigationToAiCoach = null) }
         }
     }
 
@@ -134,14 +144,8 @@ enum class ContentTemplate(
     NEWSLETTER("Newsletter Digest"),
 }
 
-sealed class ContentStudioUiState {
-    object Idle : ContentStudioUiState()
-
-    object Loading : ContentStudioUiState()
-
-    object Success : ContentStudioUiState()
-
-    data class Error(
-        val message: String,
-    ) : ContentStudioUiState()
-}
+data class ContentStudioUiState(
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    val pendingNavigationToAiCoach: String? = null,
+)

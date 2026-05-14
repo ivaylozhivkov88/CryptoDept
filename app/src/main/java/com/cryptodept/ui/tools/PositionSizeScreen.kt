@@ -10,6 +10,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cryptodept.domain.model.PositionSizeResult
 import com.cryptodept.ui.components.TerminalCard
@@ -109,8 +111,24 @@ fun PositionSizeScreen(
         Spacer(modifier = Modifier.height(TerminalConfig.UI.SPACER_LARGE + TerminalConfig.UI.SPACER_MEDIUM))
 
         // RESULT SECTION
-        result?.let { res ->
-            CalculationResultView(res)
+        if (result != null) {
+            CalculationResultView(result!!)
+        } else {
+            // Placeholder for Guided Tour
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp)
+                    .border(1.dp, colors.grid, RectangleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = ">>> AWAITING_CALCULATION_PARAMETERS",
+                    color = colors.dimText,
+                    fontSize = 11.sp,
+                    fontFamily = FontFamily.Monospace
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(TerminalConfig.UI.SPACER_LARGE + TerminalConfig.UI.SPACER_MEDIUM))
@@ -135,7 +153,7 @@ fun PositionSizeScreen(
 @Composable
 fun CalculationResultView(res: PositionSizeResult) {
     val colors = LocalTerminalColors.current
-    val gradeColor = Color(res.grade.color)
+    val gradeColor = if (res.grade == com.cryptodept.domain.model.PositionGrade.POOR || res.grade == com.cryptodept.domain.model.PositionGrade.INVALID) colors.error else colors.primary
 
     Column(
         modifier =

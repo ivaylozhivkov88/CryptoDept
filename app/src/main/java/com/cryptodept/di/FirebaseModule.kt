@@ -1,6 +1,7 @@
 package com.cryptodept.di
 
 import com.cryptodept.R
+import com.cryptodept.data.datastore.PreferencesService
 import com.google.firebase.Firebase
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.analytics
@@ -13,6 +14,8 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import javax.inject.Singleton
 
 @Module
@@ -24,7 +27,13 @@ object FirebaseModule {
 
     @Provides
     @Singleton
-    fun provideCrashlytics(): FirebaseCrashlytics = Firebase.crashlytics
+    fun provideCrashlytics(preferences: PreferencesService): FirebaseCrashlytics {
+        val crashlytics = Firebase.crashlytics
+        // GDPR Compliance: Set collection enabled based on user consent
+        val isEnabled = runBlocking { preferences.crashlyticsConsent.first() }
+        crashlytics.setCrashlyticsCollectionEnabled(isEnabled)
+        return crashlytics
+    }
 
     @Provides
     @Singleton

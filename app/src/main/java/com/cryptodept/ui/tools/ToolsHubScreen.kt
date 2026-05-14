@@ -37,26 +37,29 @@ fun ToolsHubScreen(
 ) {
     val colors = LocalTerminalColors.current
     val isAdmin by settingsViewModel.isAdmin.collectAsState()
+    val billingViewModel: com.cryptodept.viewmodel.BillingViewModel = hiltViewModel()
+    val isPro by billingViewModel.billingManager.isPro.collectAsState()
 
     val allTools =
         listOf(
-            ToolItem("POSITION SIZER", "Risk-based calculator", Icons.Default.Build, Screen.PositionSizer.route, targetId = TutorialTargetId.TOOLS_POSITION_SIZER),
-            ToolItem("WHALE TRACKER", "On-chain activity", Icons.Default.Notifications, Screen.WhaleTracker.route, targetId = TutorialTargetId.TOOLS_WHALE_TRACKER),
-            ToolItem("ENTRY ANALYZER", "Optimal entry zones", Icons.Default.Search, Screen.EntryAnalysis.route, targetId = TutorialTargetId.TOOLS_ENTRY_ANALYZER),
-            ToolItem("MULTI-TIMEFRAME", "All TFs at a glance", Icons.AutoMirrored.Filled.List, Screen.MtfAnalysis.route, targetId = TutorialTargetId.TOOLS_MTF_ANALYZER),
-            ToolItem("TRADE PLANNER", "Pre-trade checklist", Icons.Default.Check, Screen.TradePlanner.route, targetId = TutorialTargetId.TOOLS_TRADE_PLANNER),
-            ToolItem("PSYCHOLOGY", "Tilt & emotion monitor", Icons.Default.Face, Screen.Psychology.route, targetId = TutorialTargetId.TOOLS_PSYCHOLOGY),
-            ToolItem("JOURNAL", "Trade history", Icons.Default.Star, Screen.Journal.route),
-            ToolItem("PERFORMANCE", "Personal trade stats", Icons.Default.ThumbUp, Screen.Performance.route),
-            ToolItem("BACKTESTER", "Strategy simulation", Icons.Default.Refresh, Screen.Backtester.route, targetId = TutorialTargetId.TOOLS_BACKTESTER),
-            ToolItem("DEFI", "TVL & Yield monitor", Icons.Default.Info, Screen.DeFi.route),
+            ToolItem("POSITION SIZER", "Risk-based calculator", Icons.Default.Build, Screen.PositionSizer.route, proOnly = true, targetId = TutorialTargetId.TOOLS_POSITION_SIZER),
+            ToolItem("WHALE TRACKER", "On-chain activity", Icons.Default.Notifications, Screen.WhaleTracker.route, proOnly = true, targetId = TutorialTargetId.TOOLS_WHALE_TRACKER),
+            ToolItem("ENTRY ANALYZER", "Optimal entry zones", Icons.Default.Search, Screen.EntryAnalysis.route, proOnly = true, targetId = TutorialTargetId.TOOLS_ENTRY_ANALYZER),
+            ToolItem("MULTI-TIMEFRAME", "All TFs at a glance", Icons.AutoMirrored.Filled.List, Screen.MtfAnalysis.route, proOnly = true, targetId = TutorialTargetId.TOOLS_MTF_ANALYZER),
+            ToolItem("TRADE PLANNER", "Pre-trade checklist", Icons.Default.Check, Screen.TradePlanner.route, proOnly = true, targetId = TutorialTargetId.TOOLS_TRADE_PLANNER),
+            ToolItem("PSYCHOLOGY", "Tilt & emotion monitor", Icons.Default.Face, Screen.Psychology.route, proOnly = true, targetId = TutorialTargetId.TOOLS_PSYCHOLOGY),
+            ToolItem("JOURNAL", "Trade history", Icons.Default.Star, Screen.Journal.route, proOnly = true),
+            ToolItem("PERFORMANCE", "Personal trade stats", Icons.Default.ThumbUp, Screen.Performance.route, proOnly = true),
+            ToolItem("BACKTESTER", "Strategy simulation", Icons.Default.Refresh, Screen.Backtester.route, proOnly = true, targetId = TutorialTargetId.TOOLS_BACKTESTER),
+            ToolItem("DEFI", "TVL & Yield monitor", Icons.Default.Info, Screen.DeFi.route, proOnly = true),
+            ToolItem("PREDICT", "AI Prediction Engine", Icons.Default.Star, Screen.Prediction.route, proOnly = true),
             ToolItem("HALVING", "Bitcoin cycle analyzer", Icons.Default.DateRange, Screen.Seasonal.route),
-            ToolItem("SIGNALS", "Signal composer", Icons.Default.Add, Screen.SignalComposer.route),
+            ToolItem("SIGNALS", "Signal composer", Icons.Default.Add, Screen.SignalComposer.route, proOnly = true),
             ToolItem("CONTENT STUDIO", "AI Content Generator", Icons.Default.Create, Screen.ContentStudio.route, adminOnly = true),
             ToolItem("SETTINGS", "Terminal config", Icons.Default.Settings, Screen.Settings.route),
         )
 
-    val tools = allTools.filter { !it.adminOnly || isAdmin }
+    val tools = allTools.filter { (!it.adminOnly || isAdmin) && (!it.proOnly || isPro) }
 
     Column(
         modifier =
@@ -168,5 +171,6 @@ data class ToolItem(
     val icon: ImageVector,
     val route: String,
     val adminOnly: Boolean = false,
+    val proOnly: Boolean = false,
     val targetId: TutorialTargetId? = null,
 )

@@ -13,7 +13,6 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.appcheck.appCheck
 import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 import dagger.hilt.android.HiltAndroidApp
-import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -40,10 +39,11 @@ class CryptoDeptApplication :
         remoteConfigService.fetchAndActivate { }
         socketLifecycleService.init()
         createNotificationChannels()
-        scheduleDailyBriefing()
+        DailyBriefingWorker.schedule(this)
         CryptoDataSyncWorker.schedule(this)
         com.cryptodept.service.NewsSyncWorker.schedule(this)
         com.cryptodept.service.AgentWatchdogWorker.schedule(this)
+        com.cryptodept.service.AccuracyVerificationWorker.schedule(this)
     }
 
     private fun setupCrashlytics() {
@@ -54,39 +54,6 @@ class CryptoDeptApplication :
                 .recordException(throwable)
             originalHandler?.uncaughtException(thread, throwable)
         }
-    }
-
-    private fun scheduleDailyBriefing() {
-        val briefingRequest =
-            PeriodicWorkRequestBuilder<DailyBriefingWorker>(24, TimeUnit.HOURS)
-                .setInitialDelay(calculateDelayUntil8AM(), TimeUnit.MILLISECONDS)
-                .setConstraints(
-                    Constraints
-                        .Builder()
-                        .setRequiredNetworkType(NetworkType.CONNECTED)
-                        .setRequiresBatteryNotLow(true)
-                        .build(),
-                ).build()
-
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            "daily_briefing",
-            ExistingPeriodicWorkPolicy.KEEP,
-            briefingRequest,
-        )
-    }
-
-    private fun calculateDelayUntil8AM(): Long {
-        val calendar = Calendar.getInstance()
-        val now = calendar.timeInMillis
-        calendar.set(Calendar.HOUR_OF_DAY, 8)
-        calendar.set(Calendar.MINUTE, 0)
-        calendar.set(Calendar.SECOND, 0)
-        calendar.set(Calendar.MILLISECOND, 0)
-
-        if (calendar.timeInMillis <= now) {
-            calendar.add(Calendar.DAY_OF_YEAR, 1)
-        }
-        return calendar.timeInMillis - now
     }
 
     override val workManagerConfiguration: Configuration

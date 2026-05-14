@@ -19,9 +19,29 @@ class DerivativesRepositoryImpl
         private val binanceApi: BinanceFuturesApi,
         private val coinglassApi: CoinglassApi,
     ) : DerivativesRepository {
+        private fun resolveBinanceSymbol(symbol: String): String {
+            val base = when (symbol.uppercase()) {
+                "BITCOIN" -> "BTC"
+                "ETHEREUM" -> "ETH"
+                "LITECOIN" -> "LTC"
+                "RIPPLE" -> "XRP"
+                "BINANCECOIN" -> "BNB"
+                "SOLANA" -> "SOL"
+                "CARDANO" -> "ADA"
+                "DOGECOIN" -> "DOGE"
+                "TRON" -> "TRX"
+                "POLKADOT" -> "DOT"
+                "CHAINLINK" -> "LINK"
+                "AVALANCHE" -> "AVAX"
+                "POLYGON" -> "MATIC"
+                else -> symbol.uppercase()
+            }
+            return if (base.endsWith("USDT")) base else "${base}USDT"
+        }
+
         override suspend fun getFundingRate(symbol: String): Result<FundingRateData> =
             try {
-                val binanceSymbol = if (symbol.endsWith("USDT")) symbol else "${symbol}USDT"
+                val binanceSymbol = resolveBinanceSymbol(symbol)
                 val binanceResponse = binanceApi.getFundingRate(binanceSymbol)
                 val coinglassResponse =
                     try {
@@ -55,7 +75,7 @@ class DerivativesRepositoryImpl
 
         override suspend fun getOpenInterest(symbol: String): Result<OpenInterestData> =
             try {
-                val binanceSymbol = if (symbol.endsWith("USDT")) symbol else "${symbol}USDT"
+                val binanceSymbol = resolveBinanceSymbol(symbol)
                 val oi = binanceApi.getOpenInterest(binanceSymbol)
                 val hist = binanceApi.getOpenInterestHistory(binanceSymbol)
 
@@ -117,7 +137,7 @@ class DerivativesRepositoryImpl
 
         override suspend fun getLongShortRatio(symbol: String): Result<Pair<Double, Double>> =
             try {
-                val binanceSymbol = if (symbol.endsWith("USDT")) symbol else "${symbol}USDT"
+                val binanceSymbol = resolveBinanceSymbol(symbol)
                 val ratio = binanceApi.getLongShortRatio(binanceSymbol).lastOrNull()
                 val long = ratio?.longAccount?.toDouble() ?: 0.5
                 val short = ratio?.shortAccount?.toDouble() ?: 0.5

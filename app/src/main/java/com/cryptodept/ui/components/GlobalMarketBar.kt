@@ -99,7 +99,7 @@ private fun MarketItem(
     value: String,
 ) {
     val colors = LocalTerminalColors.current
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 4.dp)) {
         Text(text = "$label: ", color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
         Text(text = value, color = colors.amber, fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
     }

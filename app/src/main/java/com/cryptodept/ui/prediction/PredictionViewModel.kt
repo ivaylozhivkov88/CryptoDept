@@ -31,8 +31,8 @@ class PredictionViewModel
                 .getHistoryPagingData()
                 .cachedIn(viewModelScope)
 
-        private val _uiState = MutableStateFlow<AnalysisUiState>(AnalysisUiState.Idle)
-        val uiState: StateFlow<AnalysisUiState> = _uiState
+        private val _uiState = MutableStateFlow<PredictUiState>(PredictUiState.Idle)
+        val uiState: StateFlow<PredictUiState> = _uiState
 
         private val _accuracyStats = MutableStateFlow<Map<String, Float>>(emptyMap())
         val accuracyStats: StateFlow<Map<String, Float>> = _accuracyStats
@@ -58,6 +58,8 @@ class PredictionViewModel
             listOf(
                 "ESTABLISHING_SECURE_CONNECTION",
                 "FETCHING_HISTORICAL_DATA_PACKETS",
+                "INTERROGATING_BINANCE_LIQUIDITY_POOLS", // PHASE X
+                "SCANNING_OPEN_INTEREST_ANOMALIES", // PHASE X
                 "CALCULATING_HURST_EXPONENT",
                 "ANALYZING_FRACTAL_DIMENSION",
                 "RUNNING_MONTE_CARLO_SIMULATIONS",
@@ -70,7 +72,7 @@ class PredictionViewModel
         fun startDeepAnalysis(coinId: String) {
             viewModelScope.launch {
                 val currentLogs = mutableListOf<String>()
-                _uiState.value = AnalysisUiState.Loading(currentLogs.toList(), 0f)
+                _uiState.value = PredictUiState.Loading(currentLogs.toList(), 0f)
 
                 try {
                     val history =
@@ -78,7 +80,7 @@ class PredictionViewModel
                             repository.getOHLCData(coinId, days = 30)
                         }
                     if (history.isEmpty()) {
-                        _uiState.value = AnalysisUiState.Error("INSUFFICIENT_DATA_FOR_ANALYSIS")
+                        _uiState.value = PredictUiState.Error("INSUFFICIENT_DATA_FOR_ANALYSIS")
                         return@launch
                     }
 
@@ -88,7 +90,7 @@ class PredictionViewModel
                     analysisSteps.forEachIndexed { index, step ->
                         currentLogs.add(step)
                         val progress = (index + 1).toFloat() / analysisSteps.size
-                        _uiState.value = AnalysisUiState.Loading(currentLogs.toList(), progress)
+                        _uiState.value = PredictUiState.Loading(currentLogs.toList(), progress)
                         val typingDelay = (step.length * 10L) + 100L
                         delay(typingDelay)
                     }
@@ -97,9 +99,9 @@ class PredictionViewModel
                         withContext(Dispatchers.Default) {
                             ensembleEngine.generatePrediction(coinId, closes, volumes)
                         }
-                    _uiState.value = AnalysisUiState.Success(result)
+                    _uiState.value = PredictUiState.Success(result)
                 } catch (e: Exception) {
-                    _uiState.value = AnalysisUiState.Error("SYSTEM_CRASH: ${e.localizedMessage}")
+                    _uiState.value = PredictUiState.Error("SYSTEM_CRASH: ${e.localizedMessage}")
                 }
             }
         }
@@ -141,6 +143,23 @@ class PredictionViewModel
                     append("DISSENTER_MODELS: ${consensus.dissenterModels.joinToString(", ") { it.displayName }}\n")
                 }
                 append("\n")
+
+                // LIQUIDITY DATA (PHASE X)
+                prediction.liquidityInsight?.let { liq ->
+                    append(">>> LIQUIDITY_&_ORDERFLOW\n")
+                    append("OPEN_INTEREST: $${String.format(Locale.US, "%.1f", liq.openInterest / 1_000_000)}M (${String.format(Locale.US, "%.1f", liq.openInterestChange24h)}% change)\n")
+                    append("FUNDING_RATE: ${String.format(Locale.US, "%.4f", liq.fundingRate)}%\n")
+                    append("SENTIMENT_BIAS: ${liq.sentimentBias}\n\n")
+                }
+
+                // EVIDENCE CHAIN (PHASE X)
+                if (prediction.evidenceChain.isNotEmpty()) {
+                    append(">>> ORACLE_EVIDENCE_CHAIN\n")
+                    prediction.evidenceChain.forEachIndexed { index, step ->
+                        append("${index + 1}. ${step.title}: ${step.impact.name} (${(step.confidence * 100).toInt()}%)\n")
+                    }
+                    append("\n")
+                }
 
                 // THE VERDICT
                 append(">>> THE_CRYPTODEPT_VERDICT\n")
@@ -212,23 +231,23 @@ class PredictionViewModel
         }
 
         fun reset() {
-            _uiState.value = AnalysisUiState.Idle
+            _uiState.value = PredictUiState.Idle
         }
     }
 
-sealed class AnalysisUiState {
-    object Idle : AnalysisUiState()
+sealed class PredictUiState {
+    object Idle : PredictUiState()
 
     data class Loading(
         val logs: List<String>,
         val progress: Float,
-    ) : AnalysisUiState()
+    ) : PredictUiState()
 
     data class Success(
         val prediction: PricePrediction,
-    ) : AnalysisUiState()
+    ) : PredictUiState()
 
     data class Error(
         val message: String,
-    ) : AnalysisUiState()
+    ) : PredictUiState()
 }

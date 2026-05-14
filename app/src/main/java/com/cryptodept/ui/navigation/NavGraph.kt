@@ -85,10 +85,12 @@ fun NavGraph(
                 ),
         ) { backStackEntry ->
             val coinId = backStackEntry.arguments?.getString("coinId") ?: "bitcoin"
-            AnalysisScreen(
-                coinId = coinId,
-                navController = navController,
-            )
+            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
+                AnalysisScreen(
+                    coinId = coinId,
+                    navController = navController,
+                )
+            }
         }
 
         composable(Screen.ToolsHub.route) {
@@ -120,53 +122,81 @@ fun NavGraph(
                 viewModel.setInitialParams(coin, entry, entry * 0.95, entry * 1.10)
             }
 
-            TradePlannerScreen(
-                viewModel = viewModel,
-                onBack = { navController.popBackStack() },
-                onSendToSizer = { e, sl, tp ->
-                    // Future: pass entry, sl, tp as navigation arguments
-                    navController.navigate(Screen.PositionSizer.route)
-                },
-            )
+            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
+                TradePlannerScreen(
+                    viewModel = viewModel,
+                    onBack = { navController.popBackStack() },
+                    onSendToSizer = { e, sl, tp ->
+                        navController.navigate(Screen.PositionSizer.route)
+                    },
+                )
+            }
         }
 
         composable(Screen.EntryAnalysis.route) {
-            EntryAnalyzerScreen(
-                onBack = { navController.popBackStack() },
-                onUseInPlanner = { coin, entry, sl, tp ->
-                    navController.navigate("trade_planner?coin=$coin&entry=${entry.toFloat()}")
-                },
-                onNavigateToMarkets = {
-                    navController.navigate(Screen.Markets.route)
-                }
-            )
+            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
+                EntryAnalyzerScreen(
+                    onBack = { navController.popBackStack() },
+                    onUseInPlanner = { coin, entry, sl, tp ->
+                        navController.navigate("trade_planner?coin=$coin&entry=${entry.toFloat()}")
+                    },
+                    onNavigateToMarkets = {
+                        navController.navigate(Screen.Markets.route)
+                    }
+                )
+            }
         }
 
-        composable(Screen.Portfolio.route) { PortfolioScreen(navController) }
-        composable(Screen.AICoach.route) {
-            ProGate(onLocked = {
-                com.cryptodept.ui.paywall
-                    .PaywallScreen()
-            }) {
-                com.cryptodept.ui.ai
-                    .AICoachScreen()
+        composable(Screen.Portfolio.route) { 
+            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
+                PortfolioScreen(navController) 
+            }
+        }
+        
+        composable(
+            route = "ai_coach?initialPrompt={initialPrompt}",
+            arguments = listOf(navArgument("initialPrompt") {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            })
+        ) { backStackEntry ->
+            val initialPrompt = backStackEntry.arguments?.getString("initialPrompt")?.let {
+                java.net.URLDecoder.decode(it, "UTF-8")
+            }
+            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
+                com.cryptodept.ui.ai.AICoachScreen(
+                    initialPrompt = initialPrompt
+                )
             }
         }
 
         composable(Screen.MtfAnalysis.route) {
-            MTFScreen(
-                onBack = { navController.popBackStack() },
-                onGoToDashboard = { navController.navigate(Screen.Dashboard.route) },
-                onNavigateToMarkets = { navController.navigate(Screen.Markets.route) }
-            )
+            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
+                MTFScreen(
+                    onBack = { navController.popBackStack() },
+                    onGoToDashboard = { navController.navigate(Screen.Dashboard.route) },
+                    onNavigateToMarkets = { navController.navigate(Screen.Markets.route) }
+                )
+            }
         }
 
         composable(Screen.PositionSizer.route) {
-            PositionSizeScreen(onBack = { navController.popBackStack() })
+            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
+                PositionSizeScreen(onBack = { navController.popBackStack() })
+            }
         }
 
         composable(Screen.WhaleTracker.route) {
-            WhaleTrackerScreen(onBack = { navController.popBackStack() })
+            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
+                WhaleTrackerScreen(onBack = { navController.popBackStack() })
+            }
+        }
+
+        composable(Screen.Prediction.route) {
+            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
+                com.cryptodept.ui.prediction.PredictionHubScreen(onBack = { navController.popBackStack() })
+            }
         }
 
         composable(Screen.ContentStudio.route) {
@@ -174,36 +204,83 @@ fun NavGraph(
             val isAdmin by settingsViewModel.isAdmin.collectAsState()
             
             if (isAdmin) {
-                com.cryptodept.ui.ai.ContentStudioScreen(onBack = { navController.popBackStack() })
+                com.cryptodept.ui.ai.ContentStudioScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToAiCoach = { prompt ->
+                        val encoded = java.net.URLEncoder.encode(prompt, "UTF-8")
+                        navController.navigate("ai_coach?initialPrompt=$encoded")
+                    }
+                )
             } else {
-                // Access denied UI or redirect
                 Box(modifier = androidx.compose.ui.Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
                     androidx.compose.material3.Text("ADMIN ACCESS REQUIRED", color = androidx.compose.ui.graphics.Color.Red)
                 }
             }
         }
 
-        composable(Screen.Risk.route) { RiskScoreScreen() }
-        composable(Screen.Psychology.route) { PsychologyScreen(onBack = { navController.popBackStack() }) }
-        composable(Screen.Correlation.route) { CorrelationScreen(onBack = { navController.popBackStack() }) }
-        composable(Screen.Briefing.route) { DailyBriefingScreen() }
-        composable(Screen.Derivatives.route) { DerivativesScreen() }
-        composable(Screen.Calendar.route) { CalendarScreen() }
-        composable(Screen.Macro.route) { MacroScreen() }
+        composable(Screen.Risk.route) { 
+            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
+                RiskScoreScreen() 
+            }
+        }
+        
+        composable(Screen.Psychology.route) { 
+            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
+                PsychologyScreen(onBack = { navController.popBackStack() }) 
+            }
+        }
+        
+        composable(Screen.Correlation.route) { 
+            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
+                CorrelationScreen(onBack = { navController.popBackStack() }) 
+            }
+        }
+        
+        composable(Screen.Briefing.route) { 
+            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
+                DailyBriefingScreen() 
+            }
+        }
+        
+        composable(Screen.Derivatives.route) { 
+            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
+                DerivativesScreen() 
+            }
+        }
+        
+        composable(Screen.Calendar.route) { 
+            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
+                CalendarScreen() 
+            }
+        }
+        
+        composable(Screen.Macro.route) { 
+            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
+                MacroScreen() 
+            }
+        }
+        
         composable(Screen.Alerts.route) {
-            AlertsScreen(onNavigateToBuilder = { navController.navigate("alert_builder") })
+            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
+                AlertsScreen(onNavigateToBuilder = { navController.navigate("alert_builder") })
+            }
         }
+        
         composable("alert_builder") {
-            com.cryptodept.ui.alerts.builder
-                .CompositeAlertBuilderScreen(onBack = { navController.popBackStack() })
+            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
+                com.cryptodept.ui.alerts.builder.CompositeAlertBuilderScreen(onBack = { navController.popBackStack() })
+            }
         }
+        
         composable(Screen.FearGreed.route) { FearGreedScreen() }
-        composable(Screen.Indicators.route) { IndicatorsScreen(navController) }
+        composable(Screen.Indicators.route) { 
+            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
+                IndicatorsScreen(navController) 
+            }
+        }
+        
         composable(Screen.Backtester.route) {
-            ProGate(onLocked = {
-                com.cryptodept.ui.paywall
-                    .PaywallScreen()
-            }) {
+            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
                 BacktesterScreen(onBack = { navController.popBackStack() })
             }
         }
@@ -224,30 +301,49 @@ fun NavGraph(
             CoinDetailScreen(coinId = coinId)
         }
 
-        // Всички останали дестинации остават същите...
-        composable(Screen.Signals.route) { SignalsScreen() }
+        composable(Screen.Signals.route) { 
+            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
+                SignalsScreen() 
+            }
+        }
+        
         composable(Screen.News.route) {
             val viewModel: NewsViewModel = hiltViewModel()
             NewsScreen(viewModel = viewModel)
         }
+        
         composable(Screen.Settings.route) { SettingsScreen(onBack = { navController.popBackStack() }) }
-        composable(Screen.Journal.route) { TradeJournalScreen() }
+        
+        composable(Screen.Journal.route) { 
+            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
+                TradeJournalScreen() 
+            }
+        }
+        
         composable(Screen.SignalComposer.route) {
-            com.cryptodept.ui.signals.composer
-                .SignalComposerScreen(onBack = { navController.popBackStack() })
+            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
+                com.cryptodept.ui.signals.composer.SignalComposerScreen(onBack = { navController.popBackStack() })
+            }
         }
+        
         composable(Screen.Seasonal.route) {
-            com.cryptodept.ui.seasonal
-                .SeasonalScreen(onBack = { navController.popBackStack() })
+            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
+                com.cryptodept.ui.seasonal.SeasonalScreen(onBack = { navController.popBackStack() })
+            }
         }
+        
         composable(Screen.DeFi.route) {
-            com.cryptodept.ui.defi
-                .DeFiScreen(onBack = { navController.popBackStack() })
+            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
+                com.cryptodept.ui.defi.DeFiScreen(onBack = { navController.popBackStack() })
+            }
         }
+        
         composable(Screen.Performance.route) {
-            com.cryptodept.ui.performance
-                .PerformanceScreen(onBack = { navController.popBackStack() })
+            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
+                com.cryptodept.ui.performance.PerformanceScreen(onBack = { navController.popBackStack() })
+            }
         }
+        
         composable(Screen.Achievements.route) {
             val viewModel: com.cryptodept.viewmodel.AchievementsViewModel = hiltViewModel()
             com.cryptodept.ui.achievements.AchievementsScreen(
@@ -255,6 +351,7 @@ fun NavGraph(
                 onBack = { navController.popBackStack() },
             )
         }
+        
         composable(
             route = Screen.Comparison.route,
             arguments =
@@ -271,12 +368,15 @@ fun NavGraph(
         ) { backStackEntry ->
             val c1 = backStackEntry.arguments?.getString("coin1") ?: "bitcoin"
             val c2 = backStackEntry.arguments?.getString("coin2") ?: "ethereum"
-            com.cryptodept.ui.comparison
-                .ComparisonScreen(coin1Id = c1, coin2Id = c2, onBack = { navController.popBackStack() })
+            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
+                com.cryptodept.ui.comparison.ComparisonScreen(coin1Id = c1, coin2Id = c2, onBack = { navController.popBackStack() })
+            }
         }
 
         composable(Screen.AgentHub.route) {
-            com.cryptodept.ui.agents.AgentHubScreen(navController = navController)
+            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
+                com.cryptodept.ui.agents.AgentHubScreen(navController = navController)
+            }
         }
     }
 }

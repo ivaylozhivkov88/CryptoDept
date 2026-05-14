@@ -7,16 +7,11 @@ import javax.inject.Singleton
 
 @Singleton
 class BinancePriceSource @Inject constructor(
-    private val api: BinanceFuturesApi
+    private val api: BinanceFuturesApi,
+    private val symbolResolver: com.cryptodept.util.SymbolResolver
 ) : PriceDataSource {
     override suspend fun getOHLCData(coinId: String, days: Int): List<OHLCData> {
-        val symbol = when(coinId.lowercase()) {
-            "bitcoin" -> "BTCUSDT"
-            "ethereum" -> "ETHUSDT"
-            "ripple" -> "XRPUSDT"
-            "solana" -> "SOLUSDT"
-            else -> "${coinId.uppercase()}USDT"
-        }
+        val symbol = symbolResolver.toBinanceSymbol(coinId)
         
         return try {
             val interval = if (days <= 2) "1h" else "1d"

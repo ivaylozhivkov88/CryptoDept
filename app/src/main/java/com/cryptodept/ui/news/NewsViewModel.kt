@@ -27,6 +27,9 @@ class NewsViewModel
         private val _isLoading = MutableStateFlow(false)
         val isLoading: StateFlow<Boolean> = _isLoading
 
+        private val _error = MutableStateFlow<String?>(null)
+        val error: StateFlow<String?> = _error
+
         private val _currentFilter = MutableStateFlow("ALL")
         val currentFilter: StateFlow<String> = _currentFilter
 
@@ -67,10 +70,14 @@ class NewsViewModel
         fun refresh() {
             viewModelScope.launch {
                 _isLoading.value = true
+                _error.value = null
                 try {
-                    newsRepository.refreshNews()
+                    val result = newsRepository.refreshNews()
+                    if (result.isFailure) {
+                        _error.value = result.exceptionOrNull()?.message ?: "FETCH_ERROR"
+                    }
                 } catch (e: Exception) {
-                    // Log error
+                    _error.value = e.message ?: "SYSTEM_ERROR"
                 } finally {
                     _isLoading.value = false
                 }

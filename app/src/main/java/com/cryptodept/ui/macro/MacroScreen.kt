@@ -10,7 +10,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -18,6 +17,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cryptodept.domain.model.MacroCorrelation
 import com.cryptodept.domain.model.MacroData
+import com.cryptodept.ui.theme.LocalTerminalColors
 import com.cryptodept.viewmodel.MacroUiState
 import com.cryptodept.viewmodel.MacroViewModel
 import java.util.*
@@ -25,25 +25,26 @@ import java.util.*
 @Composable
 fun MacroScreen(viewModel: MacroViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
+    val colors = LocalTerminalColors.current
 
     Box(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(Color.Black)
+                .background(colors.background)
                 .padding(16.dp),
     ) {
         when (val uiState = state) {
             is MacroUiState.Loading -> {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center),
-                    color = Color(0xFF00FF41),
+                    color = colors.primary,
                 )
             }
             is MacroUiState.Error -> {
                 Text(
                     text = ">>> ERROR: ${uiState.message}",
-                    color = Color.Red,
+                    color = colors.error,
                     fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
                     modifier = Modifier.align(Alignment.Center),
                 )
@@ -60,23 +61,24 @@ fun MacroContent(
     data: MacroData,
     correlations: List<MacroCorrelation>,
 ) {
+    val colors = LocalTerminalColors.current
     LazyColumn(
         modifier =
             Modifier
                 .fillMaxSize()
-                .border(1.dp, Color(0xFF00FF41), RectangleShape),
+                .border(1.dp, colors.primary, RectangleShape),
     ) {
         item {
             Box(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                 Text(
                     text = ">>> MACRO CORRELATION MONITOR",
-                    color = Color(0xFF00FF41),
+                    color = colors.primary,
                     fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                 )
             }
-            HorizontalDivider(color = Color(0xFF00FF41), thickness = 1.dp)
+            HorizontalDivider(color = colors.primary, thickness = 1.dp)
         }
 
         item {
@@ -85,7 +87,7 @@ fun MacroContent(
                 MacroAssetRow("GOLD (GLD)", data.goldPrice, data.goldChange)
                 MacroAssetRow("DXY (UUP)", data.dxyPrice, data.dxyChange)
             }
-            HorizontalDivider(color = Color(0xFF00FF41), thickness = 1.dp)
+            HorizontalDivider(color = colors.primary, thickness = 1.dp)
         }
 
         item {
@@ -95,7 +97,7 @@ fun MacroContent(
                     CorrelationRow("BTC / ${corr.asset}", corr.correlation, corr.description)
                 }
             }
-            HorizontalDivider(color = Color(0xFF00FF41), thickness = 1.dp)
+            HorizontalDivider(color = colors.primary, thickness = 1.dp)
         }
 
         item {
@@ -107,7 +109,7 @@ fun MacroContent(
                     } else {
                         "DXY is RISING → BEARISH pressure for BTC (Liquidity contraction)"
                     }
-                Text(text = dxyText, color = Color.White, fontFamily = com.cryptodept.ui.theme.JetBrainsMono, fontSize = 12.sp)
+                Text(text = dxyText, color = colors.textPrimary, fontFamily = com.cryptodept.ui.theme.JetBrainsMono, fontSize = 12.sp)
 
                 Spacer(modifier = Modifier.height(12.dp))
 
@@ -115,7 +117,7 @@ fun MacroContent(
                 primaryCorr?.let {
                     Text(
                         text = "PRIMARY DRIVER: ${it.asset} (${String.format(Locale.US, "%.2f", it.correlation)})",
-                        color = Color(0xFF00FF41),
+                        color = colors.primary,
                         fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
@@ -133,20 +135,21 @@ fun MacroAssetRow(
     price: Double,
     change: Double,
 ) {
+    val colors = LocalTerminalColors.current
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Text(text = label.padEnd(15), color = Color.Gray, fontFamily = com.cryptodept.ui.theme.JetBrainsMono, fontSize = 12.sp)
+        Text(text = label.padEnd(15), color = colors.dimText, fontFamily = com.cryptodept.ui.theme.JetBrainsMono, fontSize = 12.sp)
         Text(
             text = "$${String.format(Locale.US, "%.2f", price)}",
-            color = Color.White,
+            color = colors.textPrimary,
             fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
             fontSize = 12.sp,
         )
         Text(
             text = "${if (change >= 0) "+" else ""}${String.format(Locale.US, "%.2f", change)}%",
-            color = if (change >= 0) Color(0xFF00FF41) else Color(0xFFFF3B30),
+            color = if (change >= 0) colors.primary else colors.error,
             fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
             fontSize = 12.sp,
         )
@@ -159,16 +162,17 @@ fun CorrelationRow(
     correlation: Double,
     description: String,
 ) {
+    val colors = LocalTerminalColors.current
     val barColor =
         when {
-            correlation > 0.6 -> Color(0xFF00FF41)
-            correlation < -0.6 -> Color(0xFFFF3B30)
-            else -> Color(0xFFFFB000)
+            correlation > 0.6 -> colors.primary
+            correlation < -0.6 -> colors.error
+            else -> colors.amber
         }
 
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
-            Text(text = label, color = Color.Gray, fontSize = 12.sp, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)
+            Text(text = label, color = colors.dimText, fontSize = 12.sp, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)
             Text(
                 text = "${if (correlation >= 0) "+" else ""}${String.format(Locale.US, "%.2f", correlation)}",
                 color = barColor,
@@ -181,7 +185,7 @@ fun CorrelationRow(
                 Modifier
                     .fillMaxWidth()
                     .height(8.dp)
-                    .border(0.5.dp, Color.Gray, RectangleShape),
+                    .border(0.5.dp, colors.grid, RectangleShape),
         ) {
             // Map -1..1 to 0..1
             val progress = (correlation + 1) / 2
@@ -195,7 +199,7 @@ fun CorrelationRow(
         }
         Text(
             text = description,
-            color = Color.Gray,
+            color = colors.dimText,
             fontSize = 10.sp,
             fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
             modifier = Modifier.padding(top = 4.dp),
@@ -205,16 +209,17 @@ fun CorrelationRow(
 
 @Composable
 private fun SectionHeader(title: String) {
+    val colors = LocalTerminalColors.current
     Box(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .background(Color(0xFF111111))
+                .background(colors.surface)
                 .padding(vertical = 4.dp, horizontal = 8.dp),
     ) {
         Text(
             text = "═ $title " + "═".repeat(20),
-            color = Color(0xFF00FF41),
+            color = colors.primary,
             fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
             fontSize = 12.sp,
         )

@@ -33,6 +33,7 @@ class BillingViewModel
         fun loadSubscriptions() {
             viewModelScope.launch {
                 _isLoading.value = true
+                kotlinx.coroutines.delay(800)
                 _subscriptions.value = billingService.querySubscriptions()
                 _isLoading.value = false
             }

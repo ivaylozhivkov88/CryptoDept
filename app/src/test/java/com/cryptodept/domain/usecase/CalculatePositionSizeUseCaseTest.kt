@@ -49,11 +49,11 @@ class CalculatePositionSizeUseCaseTest {
                 portfolioSize = 10000.0,
                 riskPercent = 2.0,
                 entryPrice = 50000.0,
-                stopLossPrice = 49500.0, // Only 1% stop
-                takeProfitPrice = 50250.0, // Only 0.5% profit target
+                stopLossPrice = 49500.0, // 500 dist
+                takeProfitPrice = 50600.0, // 600 dist -> 1.2 RR
                 currentRiskScore = 50,
             )
-        assertEquals("Grade should be POOR for RR < 1.5", PositionGrade.POOR, poorRatio.grade)
+        assertEquals("Grade should be POOR for RR between 1.0 and 1.5", PositionGrade.POOR, poorRatio.grade)
 
         val excellentRatio =
             calculatePositionSize(

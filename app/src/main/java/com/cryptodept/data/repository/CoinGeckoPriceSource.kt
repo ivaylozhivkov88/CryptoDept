@@ -7,11 +7,47 @@ import javax.inject.Singleton
 
 @Singleton
 class CoinGeckoPriceSource @Inject constructor(
-    private val api: CoinGeckoApi
+    private val api: CoinGeckoApi,
+    private val symbolResolver: com.cryptodept.util.SymbolResolver
 ) : PriceDataSource {
+    private fun normalizeDays(days: Int): String {
+        return when {
+            days <= 1 -> "1"
+            days <= 7 -> "7"
+            days <= 14 -> "14"
+            days <= 30 -> "30"
+            days <= 90 -> "90"
+            days <= 180 -> "180"
+            days <= 365 -> "365"
+            else -> "max"
+        }
+    }
+
+    private fun resolveCoinGeckoId(id: String): String {
+        return when (id.uppercase()) {
+            "BTC" -> "bitcoin"
+            "ETH" -> "ethereum"
+            "BNB" -> "binancecoin"
+            "SOL" -> "solana"
+            "XRP" -> "ripple"
+            "DOGE" -> "dogecoin"
+            "ADA" -> "cardano"
+            "TRX" -> "tron"
+            "MATIC" -> "matic-network"
+            "DOT" -> "polkadot"
+            "LTC" -> "litecoin"
+            "AVAX" -> "avalanche-2"
+            "LINK" -> "chainlink"
+            "UNI" -> "uniswap"
+            "ATOM" -> "cosmos"
+            else -> id.lowercase()
+        }
+    }
+
     override suspend fun getOHLCData(coinId: String, days: Int): List<OHLCData> {
         return try {
-            val response = api.getCoinOHLC(coinId, "usd", days.toString())
+            val normalizedId = symbolResolver.toCoinGeckoId(coinId)
+            val response = api.getCoinOHLC(normalizedId, "usd", normalizeDays(days))
             response.mapNotNull { item ->
                 if (item.size >= 5) {
                     OHLCData(
@@ -31,8 +67,9 @@ class CoinGeckoPriceSource @Inject constructor(
 
     override suspend fun getCurrentPrice(coinId: String): Double? {
         return try {
-            val response = api.getSimplePrice(coinId, "usd")
-            response[coinId]?.get("usd")
+            val normalizedId = resolveCoinGeckoId(coinId)
+            val response = api.getSimplePrice(normalizedId, "usd")
+            response[normalizedId]?.get("usd")
         } catch (e: Exception) {
             null
         }

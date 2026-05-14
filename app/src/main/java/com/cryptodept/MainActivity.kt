@@ -37,6 +37,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import androidx.compose.ui.platform.LocalContext
+import com.cryptodept.ui.components.ComposeErrorBoundary
 import com.cryptodept.ui.onboarding.OnboardingScreen
 import com.cryptodept.ui.screensaver.*
 import com.cryptodept.ui.theme.*
@@ -98,10 +99,17 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        
+        // Refresh subscription/pass status on start
+        preferencesService.checkProStatus()
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         enableEdgeToEdge()
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = false
+            isAppearanceLightNavigationBars = false
+        }
         checkNotificationPermission()
 
         lifecycleScope.launch {
@@ -245,10 +253,12 @@ class MainActivity : ComponentActivity() {
                                                 com.cryptodept.ui.components.OfflineBanner()
                                             }
                                             GlobalMarketBar()
-                                            NavGraph(
-                                                navController = navController,
-                                                preferencesService = preferencesService,
-                                            )
+                                            ComposeErrorBoundary {
+                                                NavGraph(
+                                                    navController = navController,
+                                                    preferencesService = preferencesService,
+                                                )
+                                            }
                                         }
                                         CRTOverlay()
                                     }

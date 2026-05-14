@@ -99,15 +99,15 @@ fun TradePlannerScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         // ANALYSIS RESULTS
-        setup?.let { res ->
-            VerdictView(res)
+        if (setup != null) {
+            VerdictView(setup!!)
             Spacer(modifier = Modifier.height(24.dp))
-            ChecklistView(res)
+            ChecklistView(setup!!)
 
             Spacer(modifier = Modifier.height(24.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(
-                    onClick = { onSendToSizer(res.entryPrice, res.stopLoss, res.takeProfit) },
+                    onClick = { onSendToSizer(setup!!.entryPrice, setup!!.stopLoss, setup!!.takeProfit) },
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(containerColor = colors.amber, contentColor = colors.background),
                     shape = RectangleShape,
@@ -122,6 +122,22 @@ fun TradePlannerScreen(
                 ) {
                     Text("SAVE TO JOURNAL", fontSize = 11.sp, color = colors.primary)
                 }
+            }
+        } else {
+            // Placeholder for Guided Tour
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp)
+                    .border(1.dp, colors.grid, RectangleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = ">>> AWAITING_TRADE_SETUP_DATA",
+                    color = colors.dimText,
+                    fontSize = 11.sp,
+                    fontFamily = FontFamily.Monospace
+                )
             }
         }
 
@@ -350,6 +366,7 @@ fun VerdictRow(
     description: String,
     color: Color,
 ) {
+    val colors = LocalTerminalColors.current
     Column(
         modifier =
             Modifier
@@ -360,6 +377,6 @@ fun VerdictRow(
     ) {
         Text(score, color = color, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
         Text("→ $verdict", color = color, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-        Text(description, color = Color.Gray, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+        Text(description, color = colors.dimText, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
     }
 }

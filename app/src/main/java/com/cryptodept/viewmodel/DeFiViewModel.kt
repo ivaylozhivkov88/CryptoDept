@@ -35,6 +35,7 @@ class DeFiViewModel @Inject constructor(
     fun loadData() {
         viewModelScope.launch {
             _uiState.value = DeFiUiState.Loading
+            kotlinx.coroutines.delay(500)
             try {
                 withContext(Dispatchers.IO) {
                     val protocols = async { repository.getTopProtocols() }

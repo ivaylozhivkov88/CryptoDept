@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -28,6 +30,7 @@ class BillingService
         private val analyticsManager: com.cryptodept.util.AnalyticsService,
     ) : PurchasesUpdatedListener {
         private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+        private var connectionDeferred = CompletableDeferred<Unit>()
 
         private val _isPro = MutableStateFlow(false)
         val isPro: StateFlow<Boolean> =
@@ -50,19 +53,30 @@ class BillingService
         }
 
         fun startConnection() {
+            if (billingClient.isReady) {
+                if (!connectionDeferred.isCompleted) connectionDeferred.complete(Unit)
+                return
+            }
+            
+            if (connectionDeferred.isCompleted) {
+                connectionDeferred = CompletableDeferred()
+            }
+
             billingClient.startConnection(
                 object : BillingClientStateListener {
                     override fun onBillingSetupFinished(billingResult: BillingResult) {
                         if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                             analyticsManager.log("Billing setup finished successfully")
+                            connectionDeferred.complete(Unit)
                             queryPurchases()
                         } else {
                             analyticsManager.log("Billing setup failed: ${billingResult.debugMessage}")
+                            connectionDeferred.complete(Unit) // Complete even if fail to unblock queries
                         }
                     }
 
                     override fun onBillingServiceDisconnected() {
-                        // Try to restart connection on next use or with exponential backoff
+                        if (!connectionDeferred.isCompleted) connectionDeferred.complete(Unit)
                     }
                 },
             )
@@ -89,29 +103,47 @@ class BillingService
         }
 
         suspend fun querySubscriptions(): List<ProductDetails> {
-            val productList =
-                listOf(
-                    QueryProductDetailsParams.Product
-                        .newBuilder()
-                        .setProductId("pro_monthly")
-                        .setProductType(BillingClient.ProductType.SUBS)
-                        .build(),
-                    QueryProductDetailsParams.Product
-                        .newBuilder()
-                        .setProductId("pro_yearly")
-                        .setProductType(BillingClient.ProductType.SUBS)
-                        .build(),
-                )
+            if (!billingClient.isReady) {
+                startConnection()
+                // Wait up to 5 seconds for connection
+                withTimeoutOrNull(5000) {
+                    connectionDeferred.await()
+                }
+            }
 
-            val params =
-                QueryProductDetailsParams
-                    .newBuilder()
-                    .setProductList(productList)
+            if (!billingClient.isReady) return emptyList()
+
+            val inAppProducts = listOf("pro-1d", "pro-3d", "pro-7d")
+            val subProducts = listOf("pro-30d", "pro-90d", "pro-1y")
+
+            val inAppList = inAppProducts.map { id ->
+                QueryProductDetailsParams.Product.newBuilder()
+                    .setProductId(id)
+                    .setProductType(BillingClient.ProductType.INAPP)
                     .build()
+            }
+
+            val subList = subProducts.map { id ->
+                QueryProductDetailsParams.Product.newBuilder()
+                    .setProductId(id)
+                    .setProductType(BillingClient.ProductType.SUBS)
+                    .build()
+            }
 
             return try {
-                val result = billingClient.queryProductDetails(params)
-                result.productDetailsList ?: emptyList()
+                val inAppResult = if (inAppList.isNotEmpty()) {
+                    billingClient.queryProductDetails(
+                        QueryProductDetailsParams.newBuilder().setProductList(inAppList).build()
+                    ).productDetailsList ?: emptyList()
+                } else emptyList()
+
+                val subResult = if (subList.isNotEmpty()) {
+                    billingClient.queryProductDetails(
+                        QueryProductDetailsParams.newBuilder().setProductList(subList).build()
+                    ).productDetailsList ?: emptyList()
+                } else emptyList()
+
+                inAppResult + subResult
             } catch (e: Exception) {
                 analyticsManager.recordException(e, "Error querying subscriptions")
                 emptyList()
@@ -128,22 +160,21 @@ class BillingService
                     putString("product_id", productDetails.productId)
                 },
             )
-            val offerToken = productDetails.subscriptionOfferDetails?.firstOrNull()?.offerToken ?: return
+            
+            val paramsBuilder = BillingFlowParams.ProductDetailsParams.newBuilder()
+                .setProductDetails(productDetails)
+            
+            // Subscriptions require an offer token, In-app purchases do not.
+            if (productDetails.productType == BillingClient.ProductType.SUBS) {
+                val offerToken = productDetails.subscriptionOfferDetails?.firstOrNull()?.offerToken
+                if (offerToken != null) {
+                    paramsBuilder.setOfferToken(offerToken)
+                }
+            }
 
-            val productDetailsParamsList =
-                listOf(
-                    BillingFlowParams.ProductDetailsParams
-                        .newBuilder()
-                        .setProductDetails(productDetails)
-                        .setOfferToken(offerToken)
-                        .build(),
-                )
-
-            val billingFlowParams =
-                BillingFlowParams
-                    .newBuilder()
-                    .setProductDetailsParamsList(productDetailsParamsList)
-                    .build()
+            val billingFlowParams = BillingFlowParams.newBuilder()
+                .setProductDetailsParamsList(listOf(paramsBuilder.build()))
+                .build()
 
             billingClient.launchBillingFlow(activity, billingFlowParams)
         }
@@ -161,6 +192,15 @@ class BillingService
 
         private fun handlePurchase(purchase: Purchase) {
             if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
+                // Handle One-Time Passes
+                purchase.products.forEach { productId ->
+                    when (productId) {
+                        "pro-1d" -> preferencesService.setProExpiry(1)
+                        "pro-3d" -> preferencesService.setProExpiry(3)
+                        "pro-7d" -> preferencesService.setProExpiry(7)
+                    }
+                }
+
                 if (!purchase.isAcknowledged) {
                     val acknowledgePurchaseParams =
                         AcknowledgePurchaseParams
@@ -171,6 +211,8 @@ class BillingService
                     scope.launch {
                         val result = billingClient.acknowledgePurchase(acknowledgePurchaseParams)
                         if (result.responseCode == BillingClient.BillingResponseCode.OK) {
+                            // If it's a subscription, queryPurchases will eventually update _isPro.value
+                            // For immediate feedback:
                             _isPro.value = true
                         }
                     }

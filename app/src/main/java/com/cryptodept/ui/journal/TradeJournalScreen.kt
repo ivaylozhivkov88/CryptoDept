@@ -13,11 +13,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cryptodept.domain.model.*
+import com.cryptodept.ui.theme.LocalTerminalColors
 import com.cryptodept.viewmodel.JournalViewModel
 import java.text.SimpleDateFormat
 import java.util.*
@@ -25,7 +27,7 @@ import java.util.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TradeJournalScreen(viewModel: JournalViewModel = hiltViewModel()) {
-    val colors = com.cryptodept.ui.theme.LocalTerminalColors.current
+    val colors = LocalTerminalColors.current
     val uiState by viewModel.uiState.collectAsState()
     val trades by viewModel.allTrades.collectAsState()
     val stats by viewModel.journalStats.collectAsState()
@@ -58,7 +60,12 @@ fun TradeJournalScreen(viewModel: JournalViewModel = hiltViewModel()) {
                         .JournalSkeleton()
                 }
                 is JournalViewModel.JournalUiState.Error -> {
-                    Text(text = "[ERROR] ${state.message}", color = colors.danger, modifier = Modifier.align(Alignment.Center))
+                    Text(
+                        text = "[ERROR] ${state.message}", 
+                        color = colors.danger, 
+                        fontFamily = FontFamily.Monospace,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
                 }
                 is JournalViewModel.JournalUiState.Success -> {
                     LazyColumn(
@@ -80,9 +87,9 @@ fun TradeJournalScreen(viewModel: JournalViewModel = hiltViewModel()) {
                             item {
                                 Text(
                                     ">>> NO OPEN POSITIONS",
-                                    color = Color.Gray,
+                                    color = colors.dimText,
                                     modifier = Modifier.padding(16.dp),
-                                    fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                                    fontFamily = FontFamily.Monospace,
                                 )
                             }
                         } else {
@@ -114,70 +121,74 @@ fun TradeJournalScreen(viewModel: JournalViewModel = hiltViewModel()) {
 
 @Composable
 fun HeaderSection() {
+    val colors = LocalTerminalColors.current
     Box(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
         Text(
             text = ">>> TRADE JOURNAL",
-            color = Color(0xFF00FF41),
-            fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+            color = colors.primary,
+            fontFamily = FontFamily.Monospace,
             fontWeight = FontWeight.Bold,
             fontSize = 16.sp,
         )
     }
-    HorizontalDivider(color = Color(0xFF00FF41), thickness = 1.dp)
+    HorizontalDivider(color = colors.grid, thickness = 1.dp)
 }
 
 @Composable
 fun StatsSection(stats: JournalStats) {
+    val colors = LocalTerminalColors.current
     Column(modifier = Modifier.padding(16.dp)) {
         Text(
-            "═ STATISTICS " + "═".repeat(30),
-            color = Color(0xFF00FF41),
+            "═ STATISTICS " + "═".repeat(20),
+            color = colors.primary,
             fontSize = 12.sp,
-            fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+            fontFamily = FontFamily.Monospace,
         )
         Spacer(modifier = Modifier.height(8.dp))
-        Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             StatRow("WIN RATE:", "${String.format(Locale.US, "%.1f", stats.winRate)}%")
             StatRow("TOTAL TRADES:", stats.totalTrades.toString())
         }
-        Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             StatRow("AVG R:R:", "${String.format(Locale.US, "%.1f", stats.averageRR)}:1")
-            // We can add more stats here if needed
         }
         StatRow(
             "TOTAL P&L:",
             "${if (stats.averagePnL >= 0) "+" else ""}$${String.format(Locale.US, "%,.0f", stats.averagePnL)}",
-            if (stats.averagePnL >= 0) Color(0xFF00FF41) else Color(0xFFFF3B30),
+            if (stats.averagePnL >= 0) colors.primary else colors.error,
         )
     }
-    HorizontalDivider(color = Color(0xFF00FF41), thickness = 1.dp)
+    HorizontalDivider(color = colors.grid, thickness = 1.dp)
 }
 
 @Composable
 fun StatRow(
     label: String,
     value: String,
-    valueColor: Color = Color.White,
+    valueColor: Color? = null,
 ) {
+    val colors = LocalTerminalColors.current
+    val resolvedColor = valueColor ?: colors.textPrimary
     Row {
-        Text(text = label.padEnd(14), color = Color.Gray, fontSize = 12.sp, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)
-        Text(text = value, color = valueColor, fontSize = 12.sp, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)
+        Text(text = label.padEnd(14), color = colors.dimText, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+        Text(text = value, color = resolvedColor, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
     }
 }
 
 @Composable
 fun SectionDivider(title: String) {
+    val colors = LocalTerminalColors.current
     Box(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .background(Color(0xFF111111))
+                .background(colors.surface)
                 .padding(vertical = 4.dp, horizontal = 8.dp),
     ) {
         Text(
-            text = "═ $title " + "═".repeat(20),
-            color = Color(0xFF00FF41),
-            fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+            text = "═ $title " + "═".repeat(15),
+            color = colors.primary,
+            fontFamily = FontFamily.Monospace,
             fontSize = 12.sp,
         )
     }
@@ -188,37 +199,38 @@ fun TradeItem(
     trade: TradeJournal,
     onClose: (Double) -> Unit,
 ) {
-    val dateStr = SimpleDateFormat("MMM dd", Locale.getDefault()).format(Date(trade.entryTime))
+    val colors = LocalTerminalColors.current
+    val dateStr = SimpleDateFormat("MMM dd", Locale.US).format(Date(trade.entryTime))
     val isWin = trade.status == TradeStatus.CLOSED_WIN
     val isLoss = trade.status == TradeStatus.CLOSED_LOSS
     val accentColor =
         if (trade.status == TradeStatus.OPEN) {
-            Color.White
+            colors.textPrimary
         } else if (isWin) {
-            Color(0xFF00FF41)
+            colors.primary
         } else if (isLoss) {
-            Color(0xFFFF3B30)
+            colors.error
         } else {
-            Color.Gray
+            colors.dimText
         }
 
     Column(modifier = Modifier.padding(12.dp)) {
-        Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(
                 text = "${if (trade.direction == TradeDirection.LONG) "▲" else "▼"} ${trade.direction} ${trade.symbol}",
                 color = accentColor,
-                fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.Bold,
             )
-            Text(text = dateStr, color = Color.Gray, fontSize = 10.sp, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)
+            Text(text = dateStr, color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
         }
         Text(
             text =
                 "Entry: $${String.format(Locale.US, "%,.2f", trade.entryPrice)}" +
                     if (trade.exitPrice != null) " Exit: $${String.format(Locale.US, "%,.2f", trade.exitPrice)}" else "",
-            color = Color.Gray,
+            color = colors.dimText,
             fontSize = 12.sp,
-            fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+            fontFamily = FontFamily.Monospace,
         )
         if (trade.pnlPercent != null) {
             Text(
@@ -227,9 +239,9 @@ fun TradeItem(
                     "%.2f",
                     trade.pnlPercent,
                 )}% ($${String.format(Locale.US, "%,.2f", trade.pnlUsd)})",
-                color = if (trade.pnlPercent >= 0) Color(0xFF00FF41) else Color(0xFFFF3B30),
+                color = if (trade.pnlPercent >= 0) colors.primary else colors.error,
                 fontSize = 12.sp,
-                fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                fontFamily = FontFamily.Monospace,
             )
         }
 
@@ -239,29 +251,29 @@ fun TradeItem(
                 TextField(
                     value = exitPriceInput,
                     onValueChange = { exitPriceInput = it },
-                    placeholder = { Text("Exit Price", fontSize = 10.sp) },
+                    placeholder = { Text("Exit Price", fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
                     modifier = Modifier.weight(1f).height(48.dp),
                     colors =
                         TextFieldDefaults.colors(
                             focusedContainerColor = Color.Transparent,
                             unfocusedContainerColor = Color.Transparent,
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White,
+                            focusedTextColor = colors.textPrimary,
+                            unfocusedTextColor = colors.textPrimary,
                         ),
                     singleLine = true,
                 )
                 Button(
                     onClick = { exitPriceInput.toDoubleOrNull()?.let { onClose(it) } },
                     shape = RectangleShape,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent, contentColor = Color(0xFF00FF41)),
-                    modifier = Modifier.border(1.dp, Color(0xFF00FF41), RectangleShape),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent, contentColor = colors.primary),
+                    modifier = Modifier.border(1.dp, colors.primary, RectangleShape),
                 ) {
-                    Text("[CLOSE]", fontSize = 10.sp, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)
+                    Text("[CLOSE]", fontSize = 10.sp, fontFamily = FontFamily.Monospace)
                 }
             }
         }
     }
-    HorizontalDivider(color = Color(0xFF00FF41).copy(alpha = 0.2f), thickness = 0.5.dp)
+    HorizontalDivider(color = colors.grid.copy(alpha = 0.3f), thickness = 0.5.dp)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -270,7 +282,8 @@ fun AddTradeBottomSheet(
     onDismiss: () -> Unit,
     onSave: (TradeJournal) -> Unit,
 ) {
-    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = Color(0xFF111111), shape = RectangleShape) {
+    val colors = LocalTerminalColors.current
+    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = colors.surface, shape = RectangleShape) {
         var symbol by remember { mutableStateOf("BTC") }
         var direction by remember { mutableStateOf(TradeDirection.LONG) }
         var entryPrice by remember { mutableStateOf("") }
@@ -279,39 +292,44 @@ fun AddTradeBottomSheet(
         Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
             Text(
                 ">>> NEW TRADE",
-                color = Color(0xFF00FF41),
-                fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                color = colors.primary,
+                fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.Bold,
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Simple inputs
             OutlinedTextField(
                 value = symbol,
                 onValueChange = { symbol = it },
-                label = { Text("Symbol") },
+                label = { Text("Symbol", fontFamily = FontFamily.Monospace) },
                 modifier = Modifier.fillMaxWidth(),
+                textStyle = androidx.compose.ui.text.TextStyle(fontFamily = FontFamily.Monospace)
             )
-            Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceEvenly) {
+            Row(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
                 TextButton(onClick = {
                     direction = TradeDirection.LONG
-                }, modifier = Modifier.border(if (direction == TradeDirection.LONG) 1.dp else 0.dp, Color(0xFF00FF41))) {
-                    Text("LONG", color = if (direction == TradeDirection.LONG) Color(0xFF00FF41) else Color.Gray)
+                }, modifier = Modifier.border(if (direction == TradeDirection.LONG) 1.dp else 0.dp, colors.primary)) {
+                    Text("LONG", color = if (direction == TradeDirection.LONG) colors.primary else colors.dimText, fontFamily = FontFamily.Monospace)
                 }
                 TextButton(onClick = {
                     direction = TradeDirection.SHORT
-                }, modifier = Modifier.border(if (direction == TradeDirection.SHORT) 1.dp else 0.dp, Color(0xFF00FF41))) {
-                    Text("SHORT", color = if (direction == TradeDirection.SHORT) Color(0xFF00FF41) else Color.Gray)
+                }, modifier = Modifier.border(if (direction == TradeDirection.SHORT) 1.dp else 0.dp, colors.primary)) {
+                    Text("SHORT", color = if (direction == TradeDirection.SHORT) colors.primary else colors.dimText, fontFamily = FontFamily.Monospace)
                 }
             }
-            OutlinedTextField(value = entryPrice, onValueChange = {
-                entryPrice = it
-            }, label = { Text("Entry Price") }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(
+                value = entryPrice, 
+                onValueChange = { entryPrice = it }, 
+                label = { Text("Entry Price", fontFamily = FontFamily.Monospace) }, 
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = androidx.compose.ui.text.TextStyle(fontFamily = FontFamily.Monospace)
+            )
             OutlinedTextField(
                 value = quantity,
                 onValueChange = { quantity = it },
-                label = { Text("Quantity") },
+                label = { Text("Quantity", fontFamily = FontFamily.Monospace) },
                 modifier = Modifier.fillMaxWidth(),
+                textStyle = androidx.compose.ui.text.TextStyle(fontFamily = FontFamily.Monospace)
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -346,9 +364,9 @@ fun AddTradeBottomSheet(
                 },
                 modifier = Modifier.fillMaxWidth().height(50.dp),
                 shape = RectangleShape,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00FF41), contentColor = Color.Black),
+                colors = ButtonDefaults.buttonColors(containerColor = colors.primary, contentColor = colors.background),
             ) {
-                Text("[SAVE TRADE]", fontWeight = FontWeight.Bold, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)
+                Text("[SAVE TRADE]", fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
             }
             Spacer(modifier = Modifier.height(32.dp))
         }

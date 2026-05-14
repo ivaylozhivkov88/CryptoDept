@@ -23,7 +23,7 @@ class TerminalAudioManager
         private val soundPool: SoundPool
         private val sounds = mutableMapOf<String, Int>()
 
-        private var isEnabled = true
+        private var isEnabled = false
         private var currentVolume = 0.5f
         private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 

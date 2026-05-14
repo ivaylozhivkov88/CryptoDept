@@ -41,10 +41,11 @@ fun PaywallScreen(
         analytics?.logProPaywallSeen()
     }
 
-    // Auto-select yearly if available
+    // Auto-select best value (yearly) if available
     LaunchedEffect(subscriptions) {
-        if (selectedProduct == null) {
-            selectedProduct = subscriptions.find { it.productId == "pro_yearly" }
+        if (subscriptions.isNotEmpty()) {
+            selectedProduct = subscriptions.find { it.productId == "pro-1y" }
+                ?: subscriptions.find { it.productId == "pro-30d" }
                 ?: subscriptions.firstOrNull()
         }
     }
@@ -53,9 +54,10 @@ fun PaywallScreen(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(Color.Black)
+                .background(Color.Black.copy(alpha = 1.0f)) // Strictly opaque
                 .padding(24.dp)
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(rememberScrollState())
+                .clickable(enabled = false) { /* Block touches from passing through */ },
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -108,29 +110,84 @@ fun PaywallScreen(
         Spacer(modifier = Modifier.height(40.dp))
 
         if (isLoading) {
-            CircularProgressIndicator(color = colors.primary)
+            LinearProgressIndicator(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                color = colors.primary,
+                trackColor = colors.grid
+            )
+        }
+
+        if (isLoading && subscriptions.isEmpty()) {
+            Box(modifier = Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
+                Text("CONNECTING_TO_MARKET_GATEWAY...", color = colors.primary, fontFamily = FontFamily.Monospace, fontSize = 12.sp)
+            }
+        } else if (subscriptions.isEmpty()) {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    "UNABLE TO FETCH PRODUCTS",
+                    color = colors.danger,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 12.sp
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    "Check your internet connection or Google Play status.",
+                    color = colors.dimText,
+                    fontSize = 10.sp,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = { viewModel.loadSubscriptions() },
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
+                    shape = RectangleShape
+                ) {
+                    Text("RETRY CONNECTION", fontWeight = FontWeight.Bold)
+                }
+            }
         } else {
             // Pricing Options
             subscriptions.forEach { product ->
-                val isYearly = product.productId == "pro_yearly"
                 val isSelected = selectedProduct?.productId == product.productId
-                val price =
+                val label = when(product.productId) {
+                    "pro-1d" -> "1 DAY ACCESS"
+                    "pro-3d" -> "3 DAYS ACCESS"
+                    "pro-7d" -> "1 WEEK ACCESS"
+                    "pro-30d" -> "MONTHLY OPERATOR"
+                    "pro-90d" -> "QUARTERLY COMMAND"
+                    "pro-1y" -> "ANNUAL INTELLIGENCE"
+                    else -> product.name
+                }
+                
+                val savingText = when(product.productId) {
+                    "pro-90d" -> "SAVE 33% VS MONTHLY"
+                    "pro-1y" -> "SAVE 42% — BEST VALUE"
+                    else -> null
+                }
+
+                val price = if (product.productType == "subs") {
                     product.subscriptionOfferDetails
                         ?.firstOrNull()
                         ?.pricingPhases
                         ?.pricingPhaseList
                         ?.firstOrNull()
                         ?.formattedPrice ?: "N/A"
+                } else {
+                    product.oneTimePurchaseOfferDetails?.formattedPrice ?: "N/A"
+                }
 
                 Box(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp)
+                            .padding(vertical = 4.dp)
                             .border(1.dp, if (isSelected) colors.primary else colors.grid, RectangleShape)
                             .background(if (isSelected) colors.primary.copy(alpha = 0.1f) else Color.Transparent)
                             .clickable { selectedProduct = product }
-                            .padding(16.dp),
+                            .padding(12.dp),
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -139,26 +196,26 @@ fun PaywallScreen(
                     ) {
                         Column {
                             Text(
-                                text = if (isYearly) "ANNUAL PLAN" else "MONTHLY PLAN",
+                                text = label,
                                 color = if (isSelected) colors.primary else colors.textPrimary,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 14.sp,
+                                fontSize = 13.sp,
                             )
-                            if (isYearly) {
-                                Text("SAVE 33% COMPARED TO MONTHLY", color = colors.amber, fontSize = 10.sp)
+                            savingText?.let {
+                                Text(it, color = colors.amber, fontSize = 9.sp)
                             }
                         }
                         Text(
                             text = price,
                             color = colors.primary,
                             fontWeight = FontWeight.Black,
-                            fontSize = 16.sp,
+                            fontSize = 15.sp,
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Text(
                 text = "7-DAY FREE TRIAL | CANCEL ANYTIME",
@@ -183,7 +240,7 @@ fun PaywallScreen(
                         containerColor = colors.primary,
                         contentColor = colors.background,
                     ),
-                enabled = selectedProduct != null,
+                enabled = subscriptions.isNotEmpty(), // Allow Google Play to handle selection errors
             ) {
                 Text("UNLOCK PRO ACCESS →", fontWeight = FontWeight.Bold)
             }

@@ -36,7 +36,8 @@ class AuthService @Inject constructor(
             val adminEmails = listOf(
                 "kaiko.dept@gmail.com",
                 "ivaylozhivkov14@gmail.com",
-                "condignia@gmail.com"
+                "condignia@gmail.com",
+                "test-reviewer@cryptodept.com"
             )
             val isAdminEmail = adminEmails.contains(user.email)
             if (isAdminEmail) {

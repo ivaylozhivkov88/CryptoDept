@@ -11,7 +11,9 @@ data class PricePrediction(
     val prediction7d: PriceTarget,
     val ensembleConsensus: EnsembleConsensus,
     val priceDistribution: PriceDistribution,
-    val mtfConsensus: MTFConsensus? = null, // Добавено
+    val mtfConsensus: MTFConsensus? = null,
+    val liquidityInsight: LiquidityInsight? = null,
+    val evidenceChain: List<EvidenceStep> = emptyList(), // PHASE X
     val modelsAgreement: Float,
     val dataQuality: Float,
     val calculatedAt: Long = System.currentTimeMillis(),
@@ -54,6 +56,22 @@ data class PriceDistribution(
     val skewness: Double,
 )
 
+data class LiquidityInsight(
+    val openInterest: Double,
+    val openInterestChange24h: Double,
+    val fundingRate: Double,
+    val longShortRatio: Double,
+    val majorLiquidationLevels: List<Double>,
+    val sentimentBias: String,
+)
+
+data class EvidenceStep(
+    val title: String,
+    val description: String,
+    val impact: Direction, // UP/DOWN/SIDEWAYS
+    val confidence: Float,
+)
+
 enum class Direction { STRONG_UP, UP, SIDEWAYS, DOWN, STRONG_DOWN }
 
 enum class PredictionModel(
@@ -67,4 +85,5 @@ enum class PredictionModel(
     WYCKOFF_PHASE("Wyckoff Method", 0.15f),
     FRACTAL_ANALYSIS("Fractal Dimension", 0.10f),
     HURST_EXPONENT("Hurst Exponent", 0.15f),
+    LIQUIDITY_ENGINE("Liquidity Engine", 0.25f), // PHASE X
 }

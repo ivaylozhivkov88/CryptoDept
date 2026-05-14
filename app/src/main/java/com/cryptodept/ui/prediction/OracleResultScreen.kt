@@ -1,6 +1,5 @@
 package com.cryptodept.ui.prediction
 
-import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
@@ -13,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,29 +23,33 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.cryptodept.domain.model.*
+import com.cryptodept.ui.theme.LocalTerminalColors
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun DeepAnalysisResultScreen(
+fun OracleResultScreen(
     prediction: PricePrediction,
     modelVotes: Map<PredictionModel, ModelVote>,
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
+    val colors = LocalTerminalColors.current
     val coroutineScope = rememberCoroutineScope()
     var showCopyToast by remember { mutableStateOf(false) }
 
     val preferencesService = remember { com.cryptodept.data.datastore.PreferencesService(context, com.cryptodept.util.SecurePrefsService(context)) }
     val isAdmin by preferencesService.isAdmin.collectAsState(initial = false)
     val marketingAgent = remember { MarketingStrategist() }
+    val predictionViewModel: PredictionViewModel = hiltViewModel()
 
     Box(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.95f)),
+                .background(colors.background.copy(alpha = 0.95f)),
     ) {
         LazyColumn(
             modifier =
@@ -61,14 +65,14 @@ fun DeepAnalysisResultScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = "DEEP_QUANT_ANALYSIS_V2.1",
-                        color = Color(0xFF00FF41),
+                        text = ">>> THE_ORACLE_PROTOCOL_V4.0",
+                        color = colors.primary,
                         fontFamily = FontFamily.Monospace,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                     )
                     IconButton(onClick = onDismiss) {
-                        Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White)
+                        Icon(Icons.Default.Close, contentDescription = "Close", tint = colors.textPrimary)
                     }
                 }
             }
@@ -78,11 +82,29 @@ fun DeepAnalysisResultScreen(
                 ConsensusHeader(prediction)
             }
 
+            // CONSENSUS MAP (PHASE X)
+            item {
+                OracleConsensusMap(prediction.ensembleConsensus.modelVotes)
+            }
+
+            // EVIDENCE CHAIN (PHASE X)
+            if (prediction.evidenceChain.isNotEmpty()) {
+                item {
+                    Text(
+                        text = ">>> CHAIN_OF_EVIDENCE",
+                        color = colors.dimText,
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily.Monospace,
+                    )
+                    EvidenceChainPanel(prediction.evidenceChain)
+                }
+            }
+
             // PRICE DISTRIBUTION
             item {
                 Text(
                     text = ">>> PRICE_PROBABILITY_DISTRIBUTION (24H)",
-                    color = Color.White.copy(alpha = 0.6f),
+                    color = colors.dimText,
                     fontSize = 10.sp,
                     fontFamily = FontFamily.Monospace,
                     modifier = Modifier.padding(top = 8.dp),
@@ -90,12 +112,25 @@ fun DeepAnalysisResultScreen(
                 ProbabilityScale(prediction)
             }
 
+            // LIQUIDITY INSIGHTS (PHASE X)
+            prediction.liquidityInsight?.let { insight ->
+                item {
+                    Text(
+                        text = ">>> LIQUIDITY_&_ORDERFLOW_INSIGHTS",
+                        color = colors.dimText,
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily.Monospace,
+                    )
+                    LiquidityInsightPanel(insight)
+                }
+            }
+
             // MTF TABLE
             prediction.mtfConsensus?.let { mtf ->
                 item {
                     Text(
                         text = ">>> MULTI_TIMEFRAME_CONFLUENCE",
-                        color = Color.White.copy(alpha = 0.6f),
+                        color = colors.dimText,
                         fontSize = 10.sp,
                         fontFamily = FontFamily.Monospace,
                     )
@@ -107,7 +142,7 @@ fun DeepAnalysisResultScreen(
             item {
                 Text(
                     text = ">>> ENSEMBLE_MODEL_VOTES",
-                    color = Color.White.copy(alpha = 0.6f),
+                    color = colors.dimText,
                     fontSize = 10.sp,
                     fontFamily = FontFamily.Monospace,
                 )
@@ -115,13 +150,13 @@ fun DeepAnalysisResultScreen(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .border(1.dp, Color.DarkGray)
+                            .border(1.dp, colors.grid)
                             .padding(horizontal = 12.dp),
                 ) {
                     modelVotes.forEach { (model, vote) ->
                         ExpandableModelRow(model.displayName, vote)
                         if (model != modelVotes.keys.last()) {
-                            HorizontalDivider(color = Color.DarkGray, thickness = 0.5.dp)
+                            HorizontalDivider(color = colors.grid, thickness = 0.5.dp)
                         }
                     }
                 }
@@ -130,7 +165,7 @@ fun DeepAnalysisResultScreen(
             item {
                 Spacer(modifier = Modifier.height(32.dp))
                 DataQualityFooter(prediction)
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(100.dp)) // Ensuring FABs don't cover content
             }
         }
 
@@ -158,8 +193,8 @@ fun DeepAnalysisResultScreen(
                         }
                     },
                     modifier = Modifier.size(56.dp),
-                    containerColor = Color(0xFF00FF41),
-                    contentColor = Color.Black,
+                    containerColor = colors.primary,
+                    contentColor = colors.background,
                     shape = RoundedCornerShape(4.dp),
                 ) {
                     Text("FB", fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
@@ -180,12 +215,31 @@ fun DeepAnalysisResultScreen(
                         }
                     },
                     modifier = Modifier.size(56.dp),
-                    containerColor = Color.White,
-                    contentColor = Color.Black,
+                    containerColor = colors.textPrimary,
+                    contentColor = colors.background,
                     shape = RoundedCornerShape(4.dp),
                 ) {
                     Text("AI", fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                 }
+            }
+
+            // PUBLIC SHARE BUTTON (Visible to everyone)
+            FloatingActionButton(
+                onClick = {
+                    val shareText = predictionViewModel.generateShareText(prediction)
+                    val sendIntent = Intent().apply {
+                        action = Intent.ACTION_SEND
+                        putExtra(Intent.EXTRA_TEXT, shareText)
+                        type = "text/plain"
+                    }
+                    context.startActivity(Intent.createChooser(sendIntent, "Share Quant Report"))
+                },
+                modifier = Modifier.size(56.dp),
+                containerColor = colors.primary.copy(alpha = 0.8f),
+                contentColor = colors.background,
+                shape = RoundedCornerShape(4.dp),
+            ) {
+                Icon(Icons.Default.Share, contentDescription = "Share", modifier = Modifier.size(24.dp))
             }
         }
 
@@ -210,12 +264,13 @@ fun Toast(
     message: String,
     modifier: Modifier = Modifier,
 ) {
+    val colors = LocalTerminalColors.current
     Box(
         modifier =
             modifier
-                .background(Color(0xFF00FF41), RoundedCornerShape(4.dp))
+                .background(colors.primary, RoundedCornerShape(4.dp))
                 .padding(horizontal = 16.dp, vertical = 8.dp),
     ) {
-        Text(message, color = Color.Black, fontSize = 12.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+        Text(message, color = colors.background, fontSize = 12.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
     }
 }

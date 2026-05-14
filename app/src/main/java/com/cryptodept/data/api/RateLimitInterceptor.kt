@@ -22,34 +22,37 @@ class RateLimitInterceptor : Interceptor {
         val host = chain.request().url.host
         val limit = limits[host] ?: return chain.proceed(chain.request())
 
-        val now = System.currentTimeMillis()
         val window = 60_000L
 
+        var waitMs = 0L
         val timestamps = requestTimestamps.getOrPut(host) { ArrayDeque() }
         synchronized(timestamps) {
             // Clear old timestamps
-            while (timestamps.isNotEmpty() && now - (timestamps.peekFirst() ?: 0L) > window) {
+            while (timestamps.isNotEmpty() && System.currentTimeMillis() - (timestamps.peekFirst() ?: 0L) > window) {
                 timestamps.removeFirst()
             }
 
             if (timestamps.size >= limit) {
-                val waitMs = window - (now - (timestamps.peekFirst() ?: 0L)) + 100
-                if (waitMs > 0) {
-                    Thread.sleep(waitMs)
-                }
+                waitMs = window - (System.currentTimeMillis() - (timestamps.peekFirst() ?: 0L)) + 100
+            } else {
+                timestamps.addLast(System.currentTimeMillis())
             }
-
-            timestamps.addLast(System.currentTimeMillis())
         }
 
-        var response = chain.proceed(chain.request())
+        if (waitMs > 0) {
+            // Sleep outside the synchronized block to avoid monitor contention
+            Thread.sleep(waitMs)
+            return intercept(chain) // Re-check limits after sleeping
+        }
+
+        val response = chain.proceed(chain.request())
 
         // Handle 429 with exponential backoff
         if (response.code == 429) {
             val retryAfter = response.header("Retry-After")?.toLongOrNull()?.times(1000) ?: 60_000L
             response.close()
             Thread.sleep(retryAfter)
-            response = chain.proceed(chain.request())
+            return intercept(chain)
         }
 
         return response

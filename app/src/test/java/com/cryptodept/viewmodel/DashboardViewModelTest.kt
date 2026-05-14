@@ -13,6 +13,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.*
 import org.junit.After
@@ -30,6 +31,7 @@ class DashboardViewModelTest {
     private val logService: DashboardLogService = mockk(relaxed = true)
     private val analytics: AnalyticsService = mockk(relaxed = true)
     private val preferencesService: PreferencesService = mockk(relaxed = true)
+    private val agentCoordinator: MultiAgentCoordinator = mockk(relaxed = true)
 
     private lateinit var viewModel: DashboardViewModel
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -46,8 +48,10 @@ class DashboardViewModelTest {
             lastUpdated = System.currentTimeMillis()
         ))
         every { observeTickerUseCase() } returns flowOf(prices)
-        every { preferencesService.isAdmin } returns flowOf(false)
+        every { preferencesService.isAdmin } returns MutableStateFlow(false)
+        every { preferencesService.isPro } returns MutableStateFlow(false)
         every { preferencesService.focusModeEnabled } returns flowOf(false)
+        every { riskEngine.currentScore } returns MutableStateFlow(50)
         coEvery { getNetworkHealthUseCase() } returns Result.success(
             NetworkHealth("80 EH/s", "10 vB", "20 Gwei", 50, "Neutral")
         )
@@ -62,7 +66,8 @@ class DashboardViewModelTest {
             riskEngine,
             logService,
             analytics,
-            preferencesService
+            preferencesService,
+            agentCoordinator
         )
     }
 
@@ -89,7 +94,7 @@ class DashboardViewModelTest {
         val vm = DashboardViewModel(
             observeTickerUseCase, getNetworkHealthUseCase, refreshPricesUseCase,
             getActionRecommendationUseCase, aiGenerator, riskEngine, logService,
-            analytics, preferencesService
+            analytics, preferencesService, agentCoordinator
         )
         
         vm.focusModeEnabled.test {

@@ -39,7 +39,6 @@ fun AnalysisScreen(
     coinId: String,
     navController: androidx.navigation.NavController,
     viewModel: AnalysisViewModel = hiltViewModel(),
-    predictionViewModel: PredictionViewModel = hiltViewModel(),
 ) {
     val colors = LocalTerminalColors.current
     val context = LocalContext.current
@@ -47,14 +46,9 @@ fun AnalysisScreen(
     val trackedCoins by viewModel.trackedCoins.collectAsStateWithLifecycle()
     val aiReport by viewModel.aiReport.collectAsStateWithLifecycle()
     val isAiStreaming by viewModel.isAiStreaming.collectAsStateWithLifecycle()
-    val predictionState by predictionViewModel.uiState.collectAsStateWithLifecycle()
 
     var showHelp by remember { mutableStateOf(false) }
     var showBreakdown by remember { mutableStateOf(false) }
-
-    val billingViewModel: com.cryptodept.viewmodel.BillingViewModel = hiltViewModel()
-    val isPro by billingViewModel.billingManager.isPro.collectAsStateWithLifecycle()
-    var showPaywall by remember { mutableStateOf(false) }
 
     LaunchedEffect(coinId) {
         viewModel.loadAnalysis(coinId)
@@ -181,15 +175,39 @@ fun AnalysisScreen(
 
                 when (val uiState = state) {
                     is AnalysisUiState.Loading -> {
-                        com.cryptodept.ui.components.skeletons
-                            .AnalysisSkeleton()
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.fillMaxWidth().padding(top = 32.dp)
+                        ) {
+                            Text(
+                                text = ">>> ANALYZING_SYSTEM_DATA...",
+                                color = colors.primary,
+                                fontFamily = FontFamily.Monospace,
+                                fontSize = 14.sp,
+                                modifier = Modifier.padding(bottom = 16.dp)
+                            )
+                            LinearProgressIndicator(
+                                modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
+                                color = colors.primary,
+                                trackColor = colors.grid
+                            )
+                            com.cryptodept.ui.components.skeletons.AnalysisSkeleton()
+                        }
                     }
                     is AnalysisUiState.Success -> {
+                        // MINI CHART FOR SCANNER LOOK
+                        val prices = uiState.result.ohlcData.map { it.close }
+                        if (prices.isNotEmpty()) {
+                            Box(modifier = Modifier.fillMaxWidth().height(100.dp).padding(vertical = 8.dp)) {
+                                com.cryptodept.ui.components.SimpleLineChart(
+                                    data = uiState.result.ohlcData,
+                                    lineColor = if (prices.last() > prices.first()) colors.primary else colors.danger
+                                )
+                            }
+                        }
+
                         AnalysisContentV2(
                             state = uiState,
-                            isPro = isPro,
-                            onRunDeepScan = { id -> predictionViewModel.startDeepAnalysis(id) },
-                            onShowPaywall = { showPaywall = true },
                             onShowBreakdown = { showBreakdown = true },
                         )
                     }
@@ -212,43 +230,6 @@ fun AnalysisScreen(
                     }
                 })
             }
-        }
-
-        // --- OVERLAYS (Cover entire screen) ---
-
-        if (showPaywall) {
-            com.cryptodept.ui.paywall
-                .PaywallScreen(onDismiss = { showPaywall = false })
-        }
-
-        when (val pState = predictionState) {
-            is com.cryptodept.ui.prediction.AnalysisUiState.Loading -> {
-                Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.9f))) {
-                    com.cryptodept.ui.prediction
-                        .AnalysisLoadingScreen(pState)
-                }
-            }
-            is com.cryptodept.ui.prediction.AnalysisUiState.Success -> {
-                Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-                    com.cryptodept.ui.prediction.DeepAnalysisResultScreen(
-                        prediction = pState.prediction,
-                        modelVotes = pState.prediction.ensembleConsensus.modelVotes,
-                        onDismiss = { predictionViewModel.reset() },
-                    )
-                }
-                BackHandler { predictionViewModel.reset() }
-            }
-            is com.cryptodept.ui.prediction.AnalysisUiState.Error -> {
-                AlertDialog(
-                    onDismissRequest = { predictionViewModel.reset() },
-                    containerColor = colors.background,
-                    modifier = Modifier.border(1.dp, colors.danger, RectangleShape),
-                    title = { Text(">>> SYSTEM ERROR", color = colors.danger, fontFamily = FontFamily.Monospace) },
-                    text = { Text(pState.message, color = colors.primary, fontFamily = FontFamily.Monospace) },
-                    confirmButton = { TextButton(onClick = { predictionViewModel.reset() }) { Text("DISMISS", color = colors.primary) } },
-                )
-            }
-            else -> {}
         }
     }
 }
@@ -318,9 +299,6 @@ fun AssetSelector(
 @Composable
 fun AnalysisContentV2(
     state: AnalysisUiState.Success,
-    isPro: Boolean,
-    onRunDeepScan: (String) -> Unit,
-    onShowPaywall: () -> Unit,
     onShowBreakdown: () -> Unit,
 ) {
     val colors = LocalTerminalColors.current
@@ -333,51 +311,64 @@ fun AnalysisContentV2(
             else -> colors.amber
         }
 
-    Box(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .border(
-                    2.dp,
-                    signalColor,
-                    RectangleShape,
-                ).background(signalColor.copy(alpha = 0.1f))
-                .padding(16.dp)
-                .tutorialTarget(TutorialTargetId.ANALYSIS_AI_VERDICT)
-                .semantics {
-                    contentDescription = "Asset signal is ${signal.strength.name}"
-                },
-        contentAlignment = Alignment.Center,
+    // NEW TECHNICAL HEADER (Scanner style, not Oracle style)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, colors.grid)
+            .background(colors.grid.copy(alpha = 0.05f))
+            .padding(12.dp)
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = signal.strength.name.replace("_", " "),
-                color = signalColor,
-                fontFamily = FontFamily.Monospace,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Black,
-            )
-            Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text("SCANNER_VERDICT:", color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
                 Text(
-                    text = "CONFIDENCE: ${String.format(Locale.US, "%.0f", signal.confidence * 100)}%",
-                    color = signalColor.copy(alpha = 0.7f),
+                    text = signal.strength.name.replace("_", " "),
+                    color = signalColor,
                     fontFamily = FontFamily.Monospace,
-                    fontSize = 12.sp,
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "[WHY?]",
-                    color = colors.primary,
-                    fontSize = 12.sp,
-                    fontFamily = FontFamily.Monospace,
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable { onShowBreakdown() },
+                )
+            }
+            Column(horizontalAlignment = Alignment.End) {
+                Text("CONFIDENCE:", color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                Text(
+                    text = "${String.format(Locale.US, "%.0f", signal.confidence * 100)}%",
+                    color = signalColor,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
                 )
             }
         }
+        
+        Spacer(modifier = Modifier.height(12.dp))
+        HorizontalDivider(color = colors.grid.copy(alpha = 0.2f))
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(
+                text = "RSI: ${String.format(Locale.US, "%.2f", result.rsiValue)}",
+                color = colors.textPrimary,
+                fontSize = 11.sp,
+                fontFamily = FontFamily.Monospace
+            )
+            Text(
+                text = "[ VIEW_TRACE_LOGS ]",
+                color = colors.primary,
+                fontSize = 11.sp,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.clickable { onShowBreakdown() },
+            )
+        }
     }
 
-    Spacer(modifier = Modifier.height(16.dp))
+    Spacer(modifier = Modifier.height(24.dp))
 
     Text(">>> INDICATOR_MATRIX", color = colors.dimText, fontSize = 12.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.tutorialTarget(TutorialTargetId.ANALYSIS_INDICATORS))
     result.compositeSignal.indicators.forEach { ind ->
@@ -423,41 +414,6 @@ fun AnalysisContentV2(
     }
 
     Spacer(modifier = Modifier.height(24.dp))
-
-    OutlinedButton(
-        onClick = {
-            if (isPro) {
-                val normalizedId =
-                    when (result.coinId.lowercase()) {
-                        "btc" -> "bitcoin"
-                        "eth" -> "ethereum"
-                        "xrp" -> "ripple"
-                        "sol" -> "solana"
-                        "ada" -> "cardano"
-                        "dot" -> "polkadot"
-                        "ltc" -> "litecoin"
-                        "link" -> "chainlink"
-                        "matic" -> "matic-network"
-                        "avax" -> "avalanche-2"
-                        "trx" -> "tron"
-                        "xlm" -> "stellar"
-                        "atom" -> "cosmos"
-                        "shib" -> "shiba-inu"
-                        "doge" -> "dogecoin"
-                        else -> result.coinId.lowercase()
-                    }
-                onRunDeepScan(normalizedId)
-            } else {
-                onShowPaywall()
-            }
-        },
-        modifier = Modifier.fillMaxWidth().height(56.dp).tutorialTarget(TutorialTargetId.ANALYSIS_DEEP_SCAN),
-        border = BorderStroke(1.dp, colors.primary),
-        shape = RectangleShape,
-        colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.primary),
-    ) {
-        Text("> RUN_DEEP_QUANT_SCAN", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-    }
 }
 
 @Composable
@@ -483,8 +439,8 @@ fun SentimentSection(sentiment: com.cryptodept.domain.usecase.SentimentResult?) 
     ) {
         Column {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("VERDICT:", color = colors.dimText, fontSize = 10.sp)
-                Text(sentiment.verdict.name, color = verdictColor, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text("VERDICT:", color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                Text(sentiment.verdict.name, color = verdictColor, fontWeight = FontWeight.Bold, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -517,15 +473,16 @@ fun SentimentSection(sentiment: com.cryptodept.domain.usecase.SentimentResult?) 
             }
 
             Row(modifier = Modifier.fillMaxWidth().padding(top = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("BULL: ${sentiment.bullishPercent}%", color = colors.primary, fontSize = 9.sp)
-                Text("NEUT: ${sentiment.neutralPercent}%", color = colors.amber, fontSize = 9.sp)
-                Text("BEAR: ${sentiment.bearishPercent}%", color = colors.danger, fontSize = 9.sp)
+                Text("BULL: ${sentiment.bullishPercent}%", color = colors.primary, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+                Text("NEUT: ${sentiment.neutralPercent}%", color = colors.amber, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+                Text("BEAR: ${sentiment.bearishPercent}%", color = colors.danger, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
             }
 
             Text(
                 "DATA_POINTS_ANALYZED: ${sentiment.totalAnalyzed}",
                 color = colors.grid,
                 fontSize = 8.sp,
+                fontFamily = FontFamily.Monospace,
                 modifier = Modifier.padding(top = 4.dp),
             )
         }

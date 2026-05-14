@@ -165,8 +165,8 @@ fun SignalRow(coinSignal: CoinSignal) {
 
     val strengthColor =
         when (signal.strength) {
-            SignalStrength.STRONG_BUY, SignalStrength.BUY -> GreenPrimary
-            SignalStrength.STRONG_SELL, SignalStrength.SELL -> TerminalRed
+            SignalStrength.STRONG_BUY, SignalStrength.BUY -> colors.primary
+            SignalStrength.STRONG_SELL, SignalStrength.SELL -> colors.error
             else -> colors.dimText
         }
 
@@ -186,12 +186,14 @@ fun SignalRow(coinSignal: CoinSignal) {
                 text = "⚡ NEW_SIGNAL: ${coinSignal.coinId.uppercase()}",
                 color = colors.primary,
                 fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Monospace,
                 fontSize = 14.sp,
             )
             Text(
                 text = signal.strength.name.replace("_", " "),
                 color = strengthColor,
                 fontWeight = FontWeight.Black,
+                fontFamily = FontFamily.Monospace,
                 fontSize = 12.sp,
             )
         }
@@ -202,13 +204,14 @@ fun SignalRow(coinSignal: CoinSignal) {
             signal.indicators.forEach { ind ->
                 val indColor =
                     when (ind.sentiment) {
-                        Sentiment.BULLISH -> GreenPrimary
-                        Sentiment.BEARISH -> TerminalRed
+                        Sentiment.BULLISH -> colors.primary
+                        Sentiment.BEARISH -> colors.error
                         else -> colors.dimText
                     }
                 Text(
                     text = "${ind.name}: ${ind.value}  ",
                     color = indColor,
+                    fontFamily = FontFamily.Monospace,
                     fontSize = 10.sp,
                 )
             }
@@ -221,12 +224,13 @@ fun SignalRow(coinSignal: CoinSignal) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.tutorialTarget(TutorialTargetId.SIGNALS_PERFORMANCE)
         ) {
-            Text("CONFIDENCE: ", color = colors.dimText, fontSize = 10.sp)
+            Text("CONFIDENCE: ", color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
             val dots = (signal.confidence * 10).toInt().coerceIn(0, 10)
             Text(
                 text = "█".repeat(dots) + "░".repeat(10 - dots) + " ${(signal.confidence * 100).toInt()}%",
                 color = colors.primary,
                 fontSize = 10.sp,
+                fontFamily = FontFamily.Monospace
             )
         }
     }

@@ -11,14 +11,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.cryptodept.domain.model.CoinPrice
-import com.cryptodept.ui.components.TerminalErrorOverlay
+import com.cryptodept.ui.components.EmptyState
+import com.cryptodept.ui.components.ErrorState
 import com.cryptodept.ui.components.TerminalLoadingSkeleton
 import com.cryptodept.ui.tutorial.tutorialTarget
 import com.cryptodept.domain.tutorial.TutorialTargetId
@@ -49,6 +52,7 @@ fun MarketsScreen(
             color = colors.primary,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily.Monospace,
             modifier = Modifier
                 .padding(bottom = 8.dp)
                 .tutorialTarget(TutorialTargetId.MARKETS_GLOBAL_STATS),
@@ -63,19 +67,31 @@ fun MarketsScreen(
                 }
             }
             is MarketsUiState.Success -> {
-                MarketsList(
-                    coins = state.coins,
-                    sentimentMap = sentimentMap,
-                    onCoinClick = { coinId ->
-                        navController.navigate(Screen.CoinDetail.createRoute(coinId))
-                    },
-                    onToggleTracking = { coinId ->
-                        viewModel.toggleTracking(coinId)
-                    },
-                )
+                if (state.coins.isEmpty()) {
+                    EmptyState(
+                        title = "NO_MARKETS_DATA",
+                        description = "Market feed is currently empty. Pull to refresh or check your trackers.",
+                        actionLabel = "REFRESH_FEED",
+                        onAction = { viewModel.refreshData() }
+                    )
+                } else {
+                    MarketsList(
+                        coins = state.coins,
+                        sentimentMap = sentimentMap,
+                        onCoinClick = { coinId ->
+                            navController.navigate(Screen.CoinDetail.createRoute(coinId))
+                        },
+                        onToggleTracking = { coinId ->
+                            viewModel.toggleTracking(coinId)
+                        },
+                    )
+                }
             }
             is MarketsUiState.Error -> {
-                TerminalErrorOverlay(message = state.message, onRetry = { viewModel.loadMarkets() })
+                ErrorState(
+                    message = state.message,
+                    onRetry = { viewModel.loadMarkets() }
+                )
             }
         }
 
@@ -110,10 +126,10 @@ fun MarketsList(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Spacer(modifier = Modifier.width(32.dp)) // Space for star icon
-                Text(" ASSET", modifier = Modifier.weight(1f), color = colors.dimText, fontSize = 10.sp)
-                Text("PRICE ", modifier = Modifier.weight(1f), color = colors.dimText, fontSize = 10.sp)
-                Text("24H_CHG ", modifier = Modifier.weight(0.8f), color = colors.dimText, fontSize = 10.sp)
-                Text("SENT ", modifier = Modifier.weight(0.5f), color = colors.dimText, fontSize = 10.sp)
+                Text(" ASSET", modifier = Modifier.weight(1f), color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                Text("PRICE ", modifier = Modifier.weight(1f), color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                Text("24H_CHG ", modifier = Modifier.weight(0.8f), color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                Text("SENT ", modifier = Modifier.weight(0.5f), color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
             }
         }
         items(coins) { coin ->
@@ -158,14 +174,28 @@ fun MarketRow(
         )
 
         Column(modifier = Modifier.weight(1f)) {
-            Text(coin.symbol.uppercase(), color = colors.primary, fontWeight = FontWeight.Bold)
-            Text(coin.name.uppercase(), color = colors.dimText, fontSize = 10.sp)
+            Text(
+                coin.symbol.uppercase(), 
+                color = colors.primary, 
+                fontWeight = FontWeight.Bold, 
+                fontFamily = FontFamily.Monospace,
+                maxLines = 1
+            )
+            Text(
+                coin.name.uppercase(), 
+                color = colors.dimText, 
+                fontSize = 10.sp, 
+                fontFamily = FontFamily.Monospace,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
 
         Text(
             text = "$${String.format(Locale.US, "%.2f", coin.currentPrice)}",
             modifier = Modifier.weight(1f),
             color = colors.primary,
+            fontFamily = FontFamily.Monospace
         )
 
         val trendColor = if (coin.priceChangePercentage24h >= 0) colors.primary else colors.error
@@ -177,6 +207,7 @@ fun MarketRow(
             )}%",
             modifier = Modifier.weight(0.8f),
             color = trendColor,
+            fontFamily = FontFamily.Monospace
         )
 
         if (sentiment != null) {
@@ -196,6 +227,7 @@ fun MarketRow(
                 color = sentimentColor,
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Monospace
             )
         } else {
             Spacer(modifier = Modifier.weight(0.5f))

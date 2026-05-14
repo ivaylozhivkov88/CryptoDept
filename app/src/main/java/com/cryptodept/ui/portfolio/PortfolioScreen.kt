@@ -148,6 +148,7 @@ fun PortfolioContent(
                     color = colors.dimText,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Monospace,
                     modifier = Modifier.padding(bottom = 8.dp),
                 )
             }
@@ -165,7 +166,7 @@ fun PortfolioContent(
             shape = RectangleShape,
             colors = ButtonDefaults.buttonColors(containerColor = colors.primary, contentColor = colors.background),
         ) {
-            Text("[+ ADD POSITION]", fontWeight = FontWeight.Bold)
+            Text("[+ ADD POSITION]", fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
         }
     }
 }
@@ -278,7 +279,7 @@ fun AddPositionDialog(
         text = {
             Column {
                 if (trackedCoins.isNotEmpty()) {
-                    Text("COIN SELECTOR:", color = colors.dimText, fontSize = 10.sp)
+                    Text("COIN SELECTOR:", color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
                     ScrollableTabRow(
                         selectedTabIndex = selectedCoinIdx,
                         containerColor = colors.background,
@@ -290,7 +291,7 @@ fun AddPositionDialog(
                             Tab(
                                 selected = selectedCoinIdx == index,
                                 onClick = { selectedCoinIdx = index },
-                                text = { Text(symbol, fontSize = 10.sp) },
+                                text = { Text(symbol, fontSize = 10.sp, fontFamily = FontFamily.Monospace) },
                             )
                         }
                     }
@@ -301,7 +302,7 @@ fun AddPositionDialog(
                 OutlinedTextField(
                     value = quantity,
                     onValueChange = { quantity = it },
-                    label = { Text("QUANTITY", color = colors.dimText) },
+                    label = { Text("QUANTITY", color = colors.dimText, fontFamily = FontFamily.Monospace) },
                     textStyle = TextStyle(color = colors.primary, fontFamily = FontFamily.Monospace),
                     colors =
                         OutlinedTextFieldDefaults.colors(
@@ -315,7 +316,7 @@ fun AddPositionDialog(
                 OutlinedTextField(
                     value = price,
                     onValueChange = { price = it },
-                    label = { Text("AVG ENTRY PRICE", color = colors.dimText) },
+                    label = { Text("AVG ENTRY PRICE", color = colors.dimText, fontFamily = FontFamily.Monospace) },
                     textStyle = TextStyle(color = colors.primary, fontFamily = FontFamily.Monospace),
                     colors =
                         OutlinedTextFieldDefaults.colors(

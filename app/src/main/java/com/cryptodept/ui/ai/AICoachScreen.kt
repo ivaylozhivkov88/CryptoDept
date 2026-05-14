@@ -26,12 +26,21 @@ import com.cryptodept.viewmodel.AICoachViewModel
 import com.cryptodept.viewmodel.ChatMessage
 
 @Composable
-fun AICoachScreen(viewModel: AICoachViewModel = hiltViewModel()) {
+fun AICoachScreen(
+    viewModel: AICoachViewModel = hiltViewModel(),
+    initialPrompt: String? = null
+) {
     val colors = LocalTerminalColors.current
     val messages = viewModel.messages
     val isLoading by viewModel.isLoading.collectAsState()
-    var inputText by remember { mutableStateOf("") }
+    val inputText by viewModel.inputText.collectAsState()
     val listState = rememberLazyListState()
+
+    LaunchedEffect(initialPrompt) {
+        if (!initialPrompt.isNullOrBlank()) {
+            viewModel.setInputText(initialPrompt)
+        }
+    }
 
     LaunchedEffect(messages.size) {
         if (messages.isNotEmpty()) {
@@ -104,7 +113,7 @@ fun AICoachScreen(viewModel: AICoachViewModel = hiltViewModel()) {
             Text("YOU> ", color = colors.amber, fontFamily = FontFamily.Monospace, fontSize = 14.sp)
             BasicTextField(
                 value = inputText,
-                onValueChange = { inputText = it },
+                onValueChange = { viewModel.setInputText(it) },
                 modifier = Modifier.weight(1f),
                 textStyle = TextStyle(color = colors.primary, fontFamily = FontFamily.Monospace, fontSize = 14.sp),
                 cursorBrush = SolidColor(colors.primary),
@@ -113,7 +122,7 @@ fun AICoachScreen(viewModel: AICoachViewModel = hiltViewModel()) {
                     KeyboardActions(onSend = {
                         if (inputText.isNotBlank()) {
                             viewModel.sendMessage(inputText)
-                            inputText = ""
+                            viewModel.setInputText("")
                         }
                     }),
             )

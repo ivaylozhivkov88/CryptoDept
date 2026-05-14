@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cryptodept.domain.model.OHLCData
 import com.cryptodept.ui.theme.JetBrainsMono
+import com.cryptodept.ui.theme.LocalTerminalColors
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -24,9 +25,11 @@ import java.util.Locale
 fun SimpleLineChart(
     data: List<OHLCData>,
     modifier: Modifier = Modifier,
-    lineColor: Color = Color(0xFF00FF41)
+    lineColor: Color? = null
 ) {
     if (data.isEmpty()) return
+    val colors = LocalTerminalColors.current
+    val resolvedLineColor = lineColor ?: colors.primary
 
     // Ensure data is sorted by timestamp for a correct timeline
     val sortedData = remember(data) { data.sortedBy { it.timestamp } }
@@ -37,7 +40,7 @@ fun SimpleLineChart(
     val range = (maxPrice - minPrice).coerceAtLeast(0.0001)
 
     val labelStyle = TextStyle(
-        color = Color.Gray,
+        color = colors.dimText,
         fontSize = 8.sp,
         fontFamily = JetBrainsMono
     )
@@ -59,7 +62,7 @@ fun SimpleLineChart(
             
             // Draw horizontal grid line
             drawLine(
-                color = Color.Gray.copy(alpha = 0.15f),
+                color = colors.grid.copy(alpha = 0.15f),
                 start = Offset(0f, y),
                 end = Offset(chartWidth, y),
                 strokeWidth = 1f
@@ -96,7 +99,7 @@ fun SimpleLineChart(
 
         drawPath(
             path = path,
-            color = lineColor,
+            color = resolvedLineColor,
             style = Stroke(width = 2f)
         )
 
@@ -125,9 +128,11 @@ fun SimpleLineChart(
 fun SimpleSparkline(
     prices: List<Double>,
     modifier: Modifier = Modifier,
-    color: Color = Color(0xFF00FF41)
+    color: Color? = null
 ) {
     if (prices.isEmpty()) return
+    val colors = LocalTerminalColors.current
+    val resolvedColor = color ?: colors.primary
 
     Canvas(modifier = modifier.fillMaxSize()) {
         val maxPrice = prices.maxOrNull() ?: 1.0
@@ -150,7 +155,7 @@ fun SimpleSparkline(
 
         drawPath(
             path = path,
-            color = color,
+            color = resolvedColor,
             style = Stroke(width = 1.5.dp.toPx())
         )
     }

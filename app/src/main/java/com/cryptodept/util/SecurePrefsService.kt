@@ -57,6 +57,18 @@ class SecurePrefsService
             defaultValue: Boolean = false,
         ): Boolean = sharedPreferences.getBoolean(key, defaultValue)
 
+        fun saveLong(
+            key: String,
+            value: Long,
+        ) {
+            sharedPreferences.edit().putLong(key, value).apply()
+        }
+
+        fun getLong(
+            key: String,
+            defaultValue: Long = 0L,
+        ): Long = sharedPreferences.getLong(key, defaultValue)
+
         fun remove(key: String) {
             sharedPreferences.edit().remove(key).apply()
         }

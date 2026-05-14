@@ -192,7 +192,7 @@ fun LpSimulator(
             colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
             shape = RectangleShape
         ) {
-            Text("RUN_SIMULATION", color = Color.Black, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Text("RUN_SIMULATION", color = colors.background, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
         }
 
         result?.let {

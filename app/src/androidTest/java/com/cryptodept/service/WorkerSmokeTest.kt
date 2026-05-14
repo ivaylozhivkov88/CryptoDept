@@ -4,17 +4,15 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.runner.AndroidJUnit4
 import androidx.work.Configuration
-import androidx.work.WorkManager
 import androidx.work.testing.SynchronousExecutor
 import androidx.work.testing.WorkManagerTestInitHelper
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class AlertAndBriefingWorkerSmokeTest {
+class WorkerSmokeTest {
     private lateinit var context: Context
 
     @Before
@@ -33,20 +31,50 @@ class AlertAndBriefingWorkerSmokeTest {
     @Test
     fun testAlertWorkerCanBeScheduled() {
         try {
-            AlertWorker.schedule(context)
+            CryptoDataSyncWorker.schedule(context)
             assertTrue(true)
         } catch (e: Exception) {
-            throw AssertionError("AlertWorker.schedule() should not throw: ${e.message}", e)
+            throw AssertionError("CryptoDataSyncWorker.schedule() should not throw: ${e.message}", e)
         }
     }
 
     @Test
     fun testBriefingWorkerScheduling() {
         try {
-            val workManager = WorkManager.getInstance(context)
-            assertNotNull(workManager)
+            DailyBriefingWorker.schedule(context)
+            assertTrue(true)
         } catch (e: Exception) {
-            throw AssertionError("WorkManager initialization failed: ${e.message}", e)
+            throw AssertionError("DailyBriefingWorker.schedule() should not throw: ${e.message}", e)
+        }
+    }
+
+    @Test
+    fun testNewsWorkerScheduling() {
+        try {
+            NewsSyncWorker.schedule(context)
+            assertTrue(true)
+        } catch (e: Exception) {
+            throw AssertionError("NewsSyncWorker.schedule() should not throw: ${e.message}", e)
+        }
+    }
+
+    @Test
+    fun testAgentWatchdogWorkerScheduling() {
+        try {
+            AgentWatchdogWorker.schedule(context)
+            assertTrue(true)
+        } catch (e: Exception) {
+            throw AssertionError("AgentWatchdogWorker.schedule() should not throw: ${e.message}", e)
+        }
+    }
+
+    @Test
+    fun testAccuracyVerificationWorkerScheduling() {
+        try {
+            AccuracyVerificationWorker.schedule(context)
+            assertTrue(true)
+        } catch (e: Exception) {
+            throw AssertionError("AccuracyVerificationWorker.schedule() should not throw: ${e.message}", e)
         }
     }
 

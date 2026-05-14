@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cryptodept.domain.model.PerformanceStats
+import com.cryptodept.ui.components.EmptyState
 import com.cryptodept.ui.components.TerminalErrorOverlay
 import com.cryptodept.ui.components.TerminalLoadingSkeleton
 import com.cryptodept.ui.theme.JetBrainsMono
@@ -65,6 +66,18 @@ fun PerformanceScreen(
             }
             is PerformanceUiState.Success -> {
                 PerformanceContent(state.stats, state.aiInsights)
+            }
+            is PerformanceUiState.Empty -> {
+                EmptyState(
+                    title = "NO_TRADING_HISTORY",
+                    description = "Close at least one trade in your Journal to see performance analytics.",
+                    asciiArt = """
+                        [ LOGS: EMPTY ]
+                        [ DATA: NONE  ]
+                    """.trimIndent(),
+                    actionLabel = "GO TO JOURNAL",
+                    onAction = { /* Navigate to Journal if needed */ }
+                )
             }
             is PerformanceUiState.Error -> {
                 TerminalErrorOverlay(message = state.message, onRetry = { viewModel.loadPerformance() })

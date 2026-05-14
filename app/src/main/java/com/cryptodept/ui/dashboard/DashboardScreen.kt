@@ -36,6 +36,7 @@ import com.cryptodept.ui.tutorial.tutorialTarget
 import com.cryptodept.domain.tutorial.TutorialTargetId
 import com.cryptodept.ui.components.*
 import com.cryptodept.ui.effects.GlitchEffect
+import com.cryptodept.ui.components.skeletons.DashboardSkeleton
 import com.cryptodept.ui.navigation.Screen
 import com.cryptodept.ui.theme.*
 import com.cryptodept.util.toPercentage
@@ -125,7 +126,15 @@ fun DashboardScreen(
 
             HorizontalDivider(color = colors.grid, thickness = TerminalConfig.UI.BORDER_WIDTH)
 
-            if (focusModeEnabled) {
+            if (uiState is DashboardUiState.Error) {
+                TerminalErrorOverlay(
+                    message = (uiState as DashboardUiState.Error).message,
+                    onRetry = { viewModel.refresh() },
+                    modifier = Modifier.padding(16.dp)
+                )
+            } else if (uiState is DashboardUiState.Loading) {
+                DashboardSkeleton(modifier = Modifier.fillMaxSize())
+            } else if (focusModeEnabled) {
                 DashboardFocusView(
                     uiState = uiState,
                     networkHealth = networkHealth,
@@ -238,9 +247,6 @@ fun DashboardScreen(
                     HorizontalDivider(color = colors.grid, thickness = 1.dp, modifier = Modifier.padding(vertical = 2.dp))
                 }
 
-                QuickAccessPanel(navController)
-                HorizontalDivider(color = colors.grid, thickness = 1.dp, modifier = Modifier.padding(vertical = 2.dp))
-
                 // AI SUMMARY BANNER
                 val agentStatuses by viewModel.agentStatuses.collectAsStateWithLifecycle()
                 val aiSummary by viewModel.aiSummary.collectAsStateWithLifecycle()
@@ -249,46 +255,44 @@ fun DashboardScreen(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .heightIn(max = 110.dp)
                             .border(1.dp, colors.primary)
                             .background(colors.primary.copy(alpha = 0.05f))
-                            .padding(horizontal = 8.dp, vertical = 6.dp)
+                            .padding(8.dp)
                             .onTargetPositioned { targetRects[TutorialStep.AI_NARRATIVE] = it }
                             .tutorialTarget(TutorialTargetId.DASH_AI_NARRATIVE)
                             .testTag("AiSummaryBanner"),
                 ) {
                     Column {
-                        // AGENT STATUS BAR - COMPACT
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                        // AGENT STATUS BAR - WRAPPING
+                        @OptIn(ExperimentalLayoutApi::class)
+                        FlowRow(
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                agentStatuses.forEach { (id, status) ->
-                                    val statusColor = when(status) {
-                                        AgentStatus.SCANNING -> colors.amber
-                                        AgentStatus.SUCCESS -> colors.primary
-                                        else -> colors.dimText
-                                    }
-                                    val statusText = when(status) {
-                                        AgentStatus.SCANNING -> "SCAN"
-                                        AgentStatus.SUCCESS -> "ACT"
-                                        else -> "RDY"
-                                    }
-                                    Text(
-                                        text = "[$id:$statusText]",
-                                        color = statusColor,
-                                        fontSize = 7.sp,
-                                        fontFamily = FontFamily.Monospace,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                            agentStatuses.forEach { (id, status) ->
+                                val statusColor = when(status) {
+                                    AgentStatus.SCANNING -> colors.amber
+                                    AgentStatus.SUCCESS -> colors.primary
+                                    else -> colors.dimText
                                 }
+                                val statusText = when(status) {
+                                    AgentStatus.SCANNING -> "SCAN"
+                                    AgentStatus.SUCCESS -> "ACT"
+                                    else -> "RDY"
+                                }
+                                Text(
+                                    text = "[$id:$statusText]",
+                                    color = statusColor,
+                                    fontSize = 7.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Bold
+                                )
                             }
                             
-                            // [LIVE] INDICATOR
+                            // [LIVE] INDICATOR - AT THE END OF THE FLOW
                              Text(
-                                text = "[LIVE]",
+                                text = "[LIVE_FEED]",
                                 color = colors.primary,
                                 fontSize = 7.sp,
                                 fontFamily = FontFamily.Monospace,
@@ -404,6 +408,11 @@ fun DashboardScreen(
                         "MTF" -> navController.navigate(Screen.MtfAnalysis.route)
                         "PSYCH" -> navController.navigate(Screen.Psychology.route)
                         "DERIVS" -> navController.navigate(Screen.Derivatives.route)
+                        "GODMODE" -> {
+                            if (parts.size > 1 && parts[1] == "ON") {
+                                viewModel.activateGodMode()
+                            }
+                        }
                         "COMPARE" -> {
                             val c1 = if (parts.size > 1) parts[1].lowercase() else "bitcoin"
                             val c2 = if (parts.size > 2) parts[2].lowercase() else "ethereum"
@@ -448,65 +457,6 @@ fun DashboardScreen(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-fun QuickAccessPanel(navController: NavController) {
-    val colors = LocalTerminalColors.current
-    Column(modifier = Modifier.fillMaxWidth().padding(2.dp)) {
-        Text(
-            text = ">>> QUICK ACCESS ENGINE",
-            color = colors.dimText,
-            fontSize = 10.sp,
-            fontFamily = FontFamily.Monospace,
-            fontWeight = FontWeight.Bold,
-        )
-        FlowRow(
-            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-             ) {
-            QuickAccessButton("SIZER", Screen.PositionSizer.route, navController)
-            QuickAccessButton("PLANNER", Screen.TradePlanner.route, navController)
-            QuickAccessButton("ENTRY", Screen.EntryAnalysis.route, navController)
-            QuickAccessButton("MTF", Screen.MtfAnalysis.route, navController)
-            QuickAccessButton("PSYCH", Screen.Psychology.route, navController)
-            QuickAccessButton("RISK", Screen.Risk.route, navController)
-            QuickAccessButton("DERIVS", Screen.Derivatives.route, navController)
-            QuickAccessButton("JOURNAL", Screen.Journal.route, navController)
-        }
-    }
-}
-
-@Composable
-fun QuickAccessButton(
-    label: String,
-    route: String,
-    navController: NavController,
-) {
-    val colors = LocalTerminalColors.current
-    val hapticService = com.cryptodept.ui.components.LocalHapticManager.current
-    Box(
-        modifier =
-            Modifier
-                .minimumInteractiveComponentSize() // Ensures 48dp touch target
-                .border(1.dp, colors.primary, RectangleShape)
-                .clickable(
-                    onClickLabel = "Open $label",
-                    onClick = {
-                        hapticService?.lightTick()
-                        navController.navigate(route)
-                    },
-                ).padding(horizontal = 12.dp, vertical = 8.dp),
-    ) {
-        Text(
-            text = "[$label]",
-            color = colors.primary,
-            fontSize = 11.sp,
-            fontFamily = FontFamily.Monospace,
-        )
-    }
-}
-
 @Composable
 fun NetworkHealthPanel(
     health: com.cryptodept.domain.model.NetworkHealth,
@@ -535,11 +485,15 @@ fun NetworkHealthPanel(
             fontWeight = FontWeight.Bold,
         )
         Spacer(modifier = Modifier.height(4.dp))
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            NetworkStat("BTC HASHRATE", health.btcHashrate)
-            NetworkStat("ETH GAS", health.ethGas)
-            NetworkStat("FEAR/GREED", "${health.fearGreedIndex}")
-            NetworkStat("SOCIAL PULSE", "${health.socialPulse} (${health.socialPulseLabel.take(4)})")
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(modifier = Modifier.weight(1f)) { NetworkStat("BTC HASH", health.btcHashrate) }
+            Box(modifier = Modifier.weight(1f)) { NetworkStat("ETH GAS", health.ethGas) }
+            Box(modifier = Modifier.weight(1f)) { NetworkStat("SENTIMENT", "${health.fearGreedIndex}") }
+            Box(modifier = Modifier.weight(1.2f)) { NetworkStat("SOCIAL", "${health.socialPulse} (${health.socialPulseLabel.take(4)})") }
         }
     }
 }
@@ -745,7 +699,7 @@ fun FearGreedPieChart3D(
                     val textStr = "${value.toInt()}%"
                     val textLayoutResult = textMeasurer.measure(
                         text = textStr,
-                        style = TextStyle(color = Color.Black, fontSize = 10.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                        style = TextStyle(color = colors.background, fontSize = 10.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
                     )
                     val textX = (width / 2) + (Math.cos(rad) * width / 4).toFloat() - (textLayoutResult.size.width / 2)
                     val textY = (height / 2) + (Math.sin(rad) * height / 4).toFloat() - (textLayoutResult.size.height / 2)
@@ -763,7 +717,7 @@ fun FearGreedPieChart3D(
                     val textStr = "${100 - value.toInt()}%"
                     val textLayoutResult = textMeasurer.measure(
                         text = textStr,
-                        style = TextStyle(color = Color.Black, fontSize = 10.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
+                        style = TextStyle(color = colors.background, fontSize = 10.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
                     )
                     val textX = (width / 2) + (Math.cos(rad) * width / 4).toFloat() - (textLayoutResult.size.width / 2)
                     val textY = (height / 2) + (Math.sin(rad) * height / 4).toFloat() - (textLayoutResult.size.height / 2)

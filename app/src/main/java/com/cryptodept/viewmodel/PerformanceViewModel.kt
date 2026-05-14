@@ -15,6 +15,7 @@ import javax.inject.Inject
 
 sealed class PerformanceUiState {
     object Loading : PerformanceUiState()
+    object Empty : PerformanceUiState()
 
     data class Success(
         val stats: PerformanceStats,
@@ -43,11 +44,16 @@ class PerformanceViewModel
         fun loadPerformance() {
             viewModelScope.launch {
                 _uiState.value = PerformanceUiState.Loading
+                kotlinx.coroutines.delay(500)
                 calculatePerformance()
                     .onSuccess { stats ->
                         generateAiInsights(stats)
                     }.onFailure {
-                        _uiState.value = PerformanceUiState.Error(it.message ?: "STATS_CALCULATION_FAILED")
+                        if (it.message == "NO_CLOSED_TRADES") {
+                            _uiState.value = PerformanceUiState.Empty
+                        } else {
+                            _uiState.value = PerformanceUiState.Error(it.message ?: "STATS_CALCULATION_FAILED")
+                        }
                     }
             }
         }

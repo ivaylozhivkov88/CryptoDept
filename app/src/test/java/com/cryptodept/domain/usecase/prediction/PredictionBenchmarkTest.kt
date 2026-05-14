@@ -1,11 +1,20 @@
 package com.cryptodept.domain.usecase.prediction
 
+import io.mockk.every
+import io.mockk.mockkStatic
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import kotlin.system.measureTimeMillis
 
 class PredictionBenchmarkTest {
+
+    @Before
+    fun setup() {
+        mockkStatic(android.util.Log::class)
+        every { android.util.Log.d(any<String>(), any<String>()) } returns 0
+    }
     
     @Test
     fun `FFT predictor benchmark under 100ms`() = runBlocking {

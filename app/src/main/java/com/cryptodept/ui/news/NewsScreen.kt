@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -23,6 +24,8 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.cryptodept.domain.model.NewsItem
 import com.cryptodept.domain.model.NewsSentiment
+import com.cryptodept.ui.components.EmptyState
+import com.cryptodept.ui.components.ErrorState
 import com.cryptodept.ui.theme.*
 import java.util.*
 
@@ -31,6 +34,7 @@ fun NewsScreen(viewModel: NewsViewModel) {
     val news by viewModel.news.collectAsStateWithLifecycle()
     val pagingNews = viewModel.pagingNews.collectAsLazyPagingItems()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val error by viewModel.error.collectAsStateWithLifecycle()
     val currentFilter by viewModel.currentFilter.collectAsStateWithLifecycle()
     val colors = LocalTerminalColors.current
     val context = LocalContext.current
@@ -80,32 +84,60 @@ fun NewsScreen(viewModel: NewsViewModel) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (isLoading) {
-            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                Text("FETCHING WIRE DATA...", color = colors.primary, fontFamily = FontFamily.Monospace)
+        when {
+            isLoading -> {
+                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                    Text("FETCHING WIRE DATA...", color = colors.primary, fontFamily = FontFamily.Monospace)
+                }
             }
-        } else {
-            LazyColumn(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                if (currentFilter == "ALL") {
-                    items(
-                        count = pagingNews.itemCount,
-                        key = pagingNews.itemKey { it.url },
-                    ) { index ->
-                        pagingNews[index]?.let { item ->
+            error != null -> {
+                ErrorState(
+                    message = error!!,
+                    onRetry = { viewModel.refresh() },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            currentFilter == "ALL" && pagingNews.itemCount == 0 -> {
+                EmptyState(
+                    title = "NO_NEWS_TRANSMISSIONS",
+                    description = "The wire is silent. Check your connection or refresh the feed.",
+                    actionLabel = "REFRESH_FEED",
+                    onAction = { viewModel.refresh() },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            currentFilter != "ALL" && news.isEmpty() -> {
+                EmptyState(
+                    title = "NO_MATCHING_DATA",
+                    description = "No news found for filter: $currentFilter",
+                    actionLabel = "CLEAR_FILTER",
+                    onAction = { viewModel.setFilter("ALL") },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            else -> {
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    if (currentFilter == "ALL") {
+                        items(
+                            count = pagingNews.itemCount,
+                            key = pagingNews.itemKey { it.url },
+                        ) { index ->
+                            pagingNews[index]?.let { item ->
+                                NewsCard(item) {
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(item.url))
+                                    context.startActivity(intent)
+                                }
+                            }
+                        }
+                    } else {
+                        items(news, key = { it.url }) { item ->
                             NewsCard(item) {
                                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(item.url))
                                 context.startActivity(intent)
                             }
-                        }
-                    }
-                } else {
-                    items(news, key = { it.url }) { item ->
-                        NewsCard(item) {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(item.url))
-                            context.startActivity(intent)
                         }
                     }
                 }
@@ -119,7 +151,7 @@ fun NewsScreen(viewModel: NewsViewModel) {
             shape = RectangleShape,
             colors = ButtonDefaults.buttonColors(containerColor = colors.primary, contentColor = colors.background),
         ) {
-            Text("[REFRESH FEED]", fontWeight = FontWeight.Bold)
+            Text("[REFRESH FEED]", fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
         }
     }
 }
@@ -171,7 +203,7 @@ fun NewsCard(
                     fontFamily = FontFamily.Monospace,
                 )
             }
-            Text(text = timeStr, color = colors.dimText, fontSize = 10.sp)
+            Text(text = timeStr, color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -182,6 +214,8 @@ fun NewsCard(
             fontSize = 14.sp,
             lineHeight = 18.sp,
             fontFamily = FontFamily.Monospace,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -196,6 +230,9 @@ fun NewsCard(
                 color = colors.dimText,
                 fontSize = 10.sp,
                 fontFamily = FontFamily.Monospace,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
             )
 
             Text(

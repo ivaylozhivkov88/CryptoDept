@@ -70,17 +70,32 @@ class RssNewsParser
                 Request
                     .Builder()
                     .url(source.url)
-                    .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+                    .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                    .header("Accept", "application/xml,application/xhtml+xml,text/html;q=0.9,image/webp,*/*;q=0.8")
+                    .header("Accept-Language", "en-US,en;q=0.5")
+                    .header("Connection", "keep-alive")
                     .build()
 
             val items = mutableListOf<RssItem>()
 
             try {
                 val response = okHttpClient.newCall(request).execute()
+                if (!response.isSuccessful) {
+                    Log.w("RSS_HTTP", "Source ${source.name} returned code ${response.code}")
+                    response.close()
+                    return emptyList()
+                }
                 val xml = response.body?.string() ?: return emptyList()
                 response.close()
 
+                // Robust check if we got HTML instead of XML (common in 403 or Cloudflare challenges)
+                if (xml.trim().startsWith("<!DOCTYPE html", true) || xml.trim().startsWith("<html", true)) {
+                    Log.w("RSS_PARSER", "Source ${source.name} returned HTML instead of XML. Skipping.")
+                    return emptyList()
+                }
+
                 val factory = XmlPullParserFactory.newInstance()
+                factory.isNamespaceAware = false // Faster and more resilient for RSS
                 val parser = factory.newPullParser()
                 parser.setInput(StringReader(xml))
 

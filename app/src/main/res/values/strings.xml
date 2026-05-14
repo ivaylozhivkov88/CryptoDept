@@ -24,15 +24,15 @@
     <string name="tutorial_chapter_markets">>>> CHAPTER 2: MARKETS</string>
     <string name="tutorial_chapter_analysis">>>> CHAPTER 3: ANALYSIS</string>
     <string name="tutorial_chapter_tools">>>> CHAPTER 4: TRADER TOOLS</string>
-    <string name="tutorial_chapter_signals">>>> CHAPTER 5: AI SIGNALS</string>
+    <string name="tutorial_chapter_signals">>>> CHAPTER 5: AI INSIGHTS</string>
     <string name="tutorial_chapter_alerts">>>> CHAPTER 6: ALERTS</string>
     <string name="tutorial_chapter_settings">>>> CHAPTER 7: SETTINGS</string>
 
     <!-- Tour controls -->
     <string name="tutorial_start_question">>>> INITIATE GUIDED SYSTEM TOUR? &lt;&lt;&lt;</string>
     <string name="tutorial_start_body">A 33-step interactive walkthrough of all CryptoDept modules.\n\nEstimated duration: 3 minutes.</string>
-    <string name="tutorial_start_yes">[YES, START TOUR]</string>
-    <string name="tutorial_start_no">[SKIP — I KNOW WHAT I\'M DOING]</string>
+    <string name="tutorial_start_yes">GO !</string>
+    <string name="tutorial_start_no">[SKIP - I KNOW WHAT I\'M DOING]</string>
     <string name="tutorial_skip">[SKIP_TOUR]</string>
     <string name="tutorial_next">[NEXT &gt;&gt;]</string>
     <string name="tutorial_previous">[&lt;&lt; PREV]</string>
@@ -122,11 +122,11 @@
     <string name="tutorial_tools_8_message">See which coins move together. Critical for portfolio diversification.</string>
 
     <!-- ============= SIGNALS (3) ============= -->
-    <string name="tutorial_sig_1_title">[26] AI_SIGNALS_FEED</string>
-    <string name="tutorial_sig_1_message">Curated trade ideas from the ensemble engines. Updated every 15 minutes.</string>
+    <string name="tutorial_sig_1_title">[26] AI_INSIGHTS_FEED</string>
+    <string name="tutorial_sig_1_message">Curated data models from the ensemble engines. Updated periodically.</string>
 
-    <string name="tutorial_sig_2_title">[27] SIGNAL_COMPOSER</string>
-    <string name="tutorial_sig_2_message">Build your own custom signals from indicator combinations.</string>
+    <string name="tutorial_sig_2_title">[27] INSIGHT_COMPOSER</string>
+    <string name="tutorial_sig_2_message">Build your own custom data filters from indicator combinations.</string>
 
     <string name="tutorial_sig_3_title">[28] PERFORMANCE_TRACKER</string>
     <string name="tutorial_sig_3_message">Audit your signal accuracy. Win rate, average R, longest streak.</string>

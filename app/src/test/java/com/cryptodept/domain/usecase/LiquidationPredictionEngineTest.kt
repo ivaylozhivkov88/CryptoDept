@@ -19,9 +19,9 @@ class LiquidationPredictionEngineTest {
             shortLiquidations24h = 0.0,
             dominantSide = "LONGS",
             heatmapLevels = listOf(
-                LiquidationLevel(61000.0, 0.0, 200_000_000.0, true), // Significant short squeeze
-                LiquidationLevel(59000.0, 150_000_000.0, 0.0, true), // Significant long squeeze
-                LiquidationLevel(70000.0, 0.0, 500_000_000.0, true), // Significant but far
+                LiquidationLevel(60800.0, 0.0, 200_000_000.0, true), // 1.33% dist
+                LiquidationLevel(59000.0, 150_000_000.0, 0.0, true), // 1.66% dist
+                LiquidationLevel(70000.0, 0.0, 500_000_000.0, true), // Far
                 LiquidationLevel(60100.0, 0.0, 10_000.0, false), // Not significant
             ),
             timestamp = 0L
@@ -30,9 +30,9 @@ class LiquidationPredictionEngineTest {
         val result = engine.predictMagneticZones(currentPrice, data)
 
         assertEquals(3, result.size)
-        assertEquals(59000.0, result[0].price, 0.1) // Closest is 59000 (1.6% dist)
-        assertEquals(61000.0, result[1].price, 0.1) // Next is 61000 (1.6% dist)
-        assertEquals(70000.0, result[2].price, 0.1) // Far one
+        assertEquals(60800.0, result[0].price, 0.1) 
+        assertEquals(59000.0, result[1].price, 0.1) 
+        assertEquals(70000.0, result[2].price, 0.1)
     }
 
     @Test

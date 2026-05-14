@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -20,6 +21,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.cryptodept.domain.model.FundingRateData
 import com.cryptodept.domain.model.LiquidationData
 import com.cryptodept.domain.model.OpenInterestData
+import com.cryptodept.ui.theme.LocalTerminalColors
 import com.cryptodept.viewmodel.DerivativesUiState
 import com.cryptodept.viewmodel.DerivativesViewModel
 import java.util.*
@@ -27,26 +29,27 @@ import java.util.*
 @Composable
 fun DerivativesScreen(viewModel: DerivativesViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
+    val colors = LocalTerminalColors.current
 
     Box(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(Color.Black)
+                .background(colors.background)
                 .padding(16.dp),
     ) {
         when (val uiState = state) {
             is DerivativesUiState.Loading -> {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center),
-                    color = Color(0xFF00FF41),
+                    color = colors.primary,
                 )
             }
             is DerivativesUiState.Error -> {
                 Text(
                     text = ">>> ERROR: ${uiState.message}",
-                    color = Color.Red,
-                    fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                    color = colors.error,
+                    fontFamily = FontFamily.Monospace,
                     modifier = Modifier.align(Alignment.Center),
                 )
             }
@@ -73,11 +76,12 @@ fun DerivativesContent(
     magneticZones: List<com.cryptodept.domain.model.MagneticZone>,
     onCoinSelect: (String) -> Unit,
 ) {
+    val colors = LocalTerminalColors.current
     LazyColumn(
         modifier =
             Modifier
                 .fillMaxSize()
-                .border(1.dp, Color(0xFF00FF41), RectangleShape),
+                .border(1.dp, colors.grid, RectangleShape),
     ) {
         item {
             Row(
@@ -89,27 +93,35 @@ fun DerivativesContent(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = ">>> DERIVATIVES TERMINAL",
-                    color = Color(0xFF00FF41),
-                    fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                    text = ">>> DERIVATIVES",
+                    color = colors.primary,
+                    fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
+                    modifier = Modifier.weight(1f)
                 )
-                Row {
+                Row(
+                    modifier = Modifier.wrapContentWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
                     listOf("BTC", "ETH", "XRP").forEach { symbol ->
-                        Text(
-                            text = "[$symbol]",
-                            color = if (funding.symbol == symbol) Color(0xFF00FF41) else Color.Gray,
-                            fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
-                            modifier =
-                                Modifier
-                                    .padding(horizontal = 4.dp)
-                                    .clickable { onCoinSelect(symbol) },
-                        )
+                        Box(
+                            modifier = Modifier
+                                .border(1.dp, if (funding.symbol == symbol) colors.primary else colors.grid)
+                                .clickable { onCoinSelect(symbol) }
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = symbol,
+                                color = if (funding.symbol == symbol) colors.primary else colors.dimText,
+                                fontFamily = FontFamily.Monospace,
+                                fontSize = 11.sp
+                            )
+                        }
                     }
                 }
             }
-            HorizontalDivider(color = Color(0xFF00FF41), thickness = 1.dp)
+            HorizontalDivider(color = colors.grid, thickness = 1.dp)
         }
 
         // --- FUNDING RATE ---
@@ -118,28 +130,28 @@ fun DerivativesContent(
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
                     "EXPLANATION: Periodic payments between longs and shorts. Positive = Longs pay Shorts (Bullish sentiment). Negative = Shorts pay Longs (Bearish sentiment).",
-                    color = Color.Gray,
+                    color = colors.dimText,
                     fontSize = 10.sp,
-                    fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                    fontFamily = FontFamily.Monospace,
                     modifier = Modifier.padding(bottom = 8.dp),
                 )
                 Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
-                    Text("BINANCE:", color = Color.Gray, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)
+                    Text("BINANCE:", color = colors.dimText, fontFamily = FontFamily.Monospace)
                     Text(
                         "${String.format(Locale.US, "%.4f", funding.binanceRate)}%",
-                        color = Color.White,
-                        fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                        color = colors.textPrimary,
+                        fontFamily = FontFamily.Monospace,
                     )
                     Text(
                         if (funding.rateLevel.isBullishWarning) "⚠ ELEVATED" else "NORMAL",
-                        color = if (funding.rateLevel.isBullishWarning) Color(0xFFFFB000) else Color(0xFF00FF41),
-                        fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                        color = if (funding.rateLevel.isBullishWarning) colors.amber else colors.primary,
+                        fontFamily = FontFamily.Monospace,
                     )
                 }
                 Text(
                     "AGGREGATE: ${String.format(Locale.US, "%.4f", funding.aggregatedRate)}%",
-                    color = Color.Gray,
-                    fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                    color = colors.dimText,
+                    fontFamily = FontFamily.Monospace,
                     fontSize = 12.sp,
                 )
 
@@ -150,7 +162,7 @@ fun DerivativesContent(
                         Modifier
                             .fillMaxWidth()
                             .height(12.dp)
-                            .border(0.5.dp, Color.Gray, RectangleShape),
+                            .border(0.5.dp, colors.grid, RectangleShape),
                 ) {
                     val normalized = (funding.binanceRate + 0.1) / 0.2 // map -0.1..0.1 to 0..1
                     Box(
@@ -158,16 +170,16 @@ fun DerivativesContent(
                             Modifier
                                 .fillMaxWidth(normalized.toFloat().coerceIn(0f, 1f))
                                 .fillMaxHeight()
-                                .background(if (funding.binanceRate > 0.05) Color(0xFFFF3B30) else Color(0xFF00FF41)),
+                                .background(if (funding.binanceRate > 0.05) colors.error else colors.primary),
                     )
                 }
                 Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
-                    Text("-0.1%", color = Color.Gray, fontSize = 10.sp, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)
-                    Text("0%", color = Color.Gray, fontSize = 10.sp, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)
-                    Text("+0.1%", color = Color.Gray, fontSize = 10.sp, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)
+                    Text("-0.1%", color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                    Text("0%", color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                    Text("+0.1%", color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
                 }
             }
-            HorizontalDivider(color = Color(0xFF00FF41), thickness = 1.dp)
+            HorizontalDivider(color = colors.grid, thickness = 1.dp)
         }
 
         // --- OPEN INTEREST ---
@@ -176,18 +188,18 @@ fun DerivativesContent(
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
                     "EXPLANATION: Total number of outstanding derivative contracts. Rising OI with Rising Price = Strong Bullish Trend. Falling OI = Trend exhaustion.",
-                    color = Color.Gray,
+                    color = colors.dimText,
                     fontSize = 10.sp,
-                    fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                    fontFamily = FontFamily.Monospace,
                     modifier = Modifier.padding(bottom = 8.dp),
                 )
                 if (oi != null) {
                     Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
-                        Text("CURRENT OI:", color = Color.Gray, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)
+                        Text("CURRENT OI:", color = colors.dimText, fontFamily = FontFamily.Monospace)
                         Text(
                             "$${String.format(Locale.US, "%,.1fB", oi.openInterestUsd / 1_000_000_000)}",
-                            color = Color.White,
-                            fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                            color = colors.textPrimary,
+                            fontFamily = FontFamily.Monospace,
                         )
                         Text(
                             "(${if (oi.openInterestChange24h > 0) "+" else ""}${String.format(
@@ -195,22 +207,22 @@ fun DerivativesContent(
                                 "%.1f",
                                 oi.openInterestChange24h,
                             )}%)",
-                            color = if (oi.openInterestChange24h > 0) Color(0xFF00FF41) else Color(0xFFFF3B30),
-                            fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                            color = if (oi.openInterestChange24h > 0) colors.primary else colors.error,
+                            fontFamily = FontFamily.Monospace,
                         )
                     }
                     Text(
                         "TREND: ${oi.trend.name.replace("_", " ")}",
-                        color = Color(0xFF00FF41),
-                        fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                        color = colors.primary,
+                        fontFamily = FontFamily.Monospace,
                         fontSize = 12.sp,
                         modifier = Modifier.padding(top = 8.dp),
                     )
                 } else {
-                    Text("OI DATA UNAVAILABLE", color = Color.Gray, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)
+                    Text("OI DATA UNAVAILABLE", color = colors.dimText, fontFamily = FontFamily.Monospace)
                 }
             }
-            HorizontalDivider(color = Color(0xFF00FF41), thickness = 1.dp)
+            HorizontalDivider(color = colors.grid, thickness = 1.dp)
         }
 
         // --- LIQUIDATIONS ---
@@ -219,26 +231,26 @@ fun DerivativesContent(
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
                     "EXPLANATION: Forced closing of leveraged positions. High liquidations often mark local bottoms (Longs) or tops (Shorts).",
-                    color = Color.Gray,
+                    color = colors.dimText,
                     fontSize = 10.sp,
-                    fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                    fontFamily = FontFamily.Monospace,
                     modifier = Modifier.padding(bottom = 8.dp),
                 )
                 if (liq != null) {
-                    LiquidationBar("LONGS", liq.longLiquidations24h, Color(0xFFFF3B30))
-                    LiquidationBar("SHORTS", liq.shortLiquidations24h, Color(0xFF00FF41))
+                    LiquidationBar("LONGS", liq.longLiquidations24h, colors.error)
+                    LiquidationBar("SHORTS", liq.shortLiquidations24h, colors.primary)
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         "DOMINANT: ${liq.dominantSide} GETTING SQUEEZED",
-                        color = Color.White,
-                        fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                        color = colors.textPrimary,
+                        fontFamily = FontFamily.Monospace,
                         fontSize = 12.sp,
                     )
                 } else {
-                    Text("LIQUIDATION DATA UNAVAILABLE", color = Color.Gray, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)
+                    Text("LIQUIDATION DATA UNAVAILABLE", color = colors.dimText, fontFamily = FontFamily.Monospace)
                 }
             }
-            HorizontalDivider(color = Color(0xFF00FF41), thickness = 1.dp)
+            HorizontalDivider(color = colors.grid, thickness = 1.dp)
         }
 
         // --- LIQUIDATION LEVELS ---
@@ -255,12 +267,12 @@ fun DerivativesContent(
                     ) {
                         Text(
                             text = if (level.isSignificant) "⚠ " else "  ",
-                            color = Color(0xFFFFB000),
+                            color = colors.amber,
                         )
                         Text(
                             text = "$${String.format(Locale.US, "%,.0f", level.price)}".padEnd(12),
-                            color = Color.White,
-                            fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                            color = colors.textPrimary,
+                            fontFamily = FontFamily.Monospace,
                             fontSize = 12.sp,
                         )
                         Text(
@@ -269,14 +281,14 @@ fun DerivativesContent(
                                 "%,.0fM",
                                 (level.longLiquidationUsd + level.shortLiquidationUsd) / 1_000_000,
                             )}",
-                            color = if (level.longLiquidationUsd > level.shortLiquidationUsd) Color(0xFFFF3B30) else Color(0xFF00FF41),
-                            fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                            color = if (level.longLiquidationUsd > level.shortLiquidationUsd) colors.error else colors.primary,
+                            fontFamily = FontFamily.Monospace,
                             fontSize = 12.sp,
                         )
                     }
                 }
             }
-            HorizontalDivider(color = Color(0xFF00FF41), thickness = 1.dp)
+            HorizontalDivider(color = colors.grid, thickness = 1.dp)
         }
 
         // --- FUNDING HEATMAP ---
@@ -295,14 +307,15 @@ fun DerivativesContent(
 
 @Composable
 fun MagneticZonesSection(zones: List<com.cryptodept.domain.model.MagneticZone>) {
+    val colors = LocalTerminalColors.current
     SectionHeader("MAGNETIC LIQUIDATION ZONES (PREDICTED)")
     Column(modifier = Modifier.padding(16.dp)) {
         if (zones.isEmpty()) {
             Text(
                 "NO SIGNIFICANT ZONES DETECTED",
-                color = Color.Gray,
+                color = colors.dimText,
                 fontSize = 12.sp,
-                fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                fontFamily = FontFamily.Monospace,
             )
         }
         zones.forEach { zone ->
@@ -315,20 +328,20 @@ fun MagneticZonesSection(zones: List<com.cryptodept.domain.model.MagneticZone>) 
             ) {
                 Text(
                     text = "$${String.format(Locale.US, "%,.0f", zone.price)}",
-                    color = Color.White,
-                    fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                    color = colors.textPrimary,
+                    fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold,
                 )
                 Text(
                     text = "${if (zone.distancePercent > 0) "+" else ""}${String.format(Locale.US, "%.2f", zone.distancePercent)}%",
-                    color = if (zone.distancePercent > 0) Color(0xFF00FF41) else Color(0xFFFF3B30),
-                    fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                    color = if (zone.distancePercent > 0) colors.primary else colors.error,
+                    fontFamily = FontFamily.Monospace,
                 )
                 Text(
                     text = zone.type.name.replace("_", " "),
-                    color = if (zone.type == com.cryptodept.domain.model.LiquidationType.SHORT_SQUEEZE_POTENTIAL) Color(0xFF00FF41) else Color(0xFFFF3B30),
+                    color = if (zone.type == com.cryptodept.domain.model.LiquidationType.SHORT_SQUEEZE_POTENTIAL) colors.primary else colors.error,
                     fontSize = 10.sp,
-                    fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                    fontFamily = FontFamily.Monospace,
                 )
             }
         }
@@ -340,6 +353,7 @@ fun FundingHeatmapSection(
     heatmap: List<com.cryptodept.domain.model.FundingHeatmapItem>,
     onCoinSelect: (String) -> Unit,
 ) {
+    val colors = LocalTerminalColors.current
     SectionHeader("FUNDING HEATMAP (BINANCE | BYBIT | OKX)")
     Column(modifier = Modifier.padding(8.dp)) {
         heatmap.forEach { item ->
@@ -354,8 +368,8 @@ fun FundingHeatmapSection(
             ) {
                 Text(
                     text = item.symbol.padEnd(6),
-                    color = Color.White,
-                    fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                    color = colors.textPrimary,
+                    fontFamily = FontFamily.Monospace,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                 )
@@ -370,14 +384,15 @@ fun FundingHeatmapSection(
 
 @Composable
 fun ExchangeRateCell(rate: Double) {
+    val colors = LocalTerminalColors.current
     val color =
         when {
-            rate > 0.1 -> Color(0xFFFF3B30) // Extreme Positive
-            rate > 0.05 -> Color(0xFFFF9500)
-            rate > 0.01 -> Color(0xFFFFCC00)
+            rate > 0.1 -> colors.error // Extreme Positive
+            rate > 0.05 -> colors.amber
+            rate > 0.01 -> colors.amber.copy(alpha = 0.8f)
             rate < -0.05 -> Color(0xFF007AFF) // Extreme Negative (Deep Blue)
             rate < -0.01 -> Color(0xFF5AC8FA)
-            else -> Color(0xFF00FF41) // Neutral Green
+            else -> colors.primary // Neutral Green
         }
 
     Box(
@@ -393,24 +408,25 @@ fun ExchangeRateCell(rate: Double) {
             text = "${String.format(Locale.US, "%.3f", rate)}%",
             color = color,
             fontSize = 10.sp,
-            fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+            fontFamily = FontFamily.Monospace,
         )
     }
 }
 
 @Composable
 fun SectionHeader(title: String) {
+    val colors = LocalTerminalColors.current
     Box(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .background(Color(0xFF111111))
+                .background(colors.surface)
                 .padding(vertical = 4.dp, horizontal = 8.dp),
     ) {
         Text(
-            text = "═ $title " + "═".repeat(20),
-            color = Color(0xFF00FF41),
-            fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+            text = "═ $title " + "═".repeat(15),
+            color = colors.primary,
+            fontFamily = FontFamily.Monospace,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
         )
@@ -423,14 +439,15 @@ fun LiquidationBar(
     amount: Double,
     color: Color,
 ) {
+    val colors = LocalTerminalColors.current
     Column(modifier = Modifier.padding(vertical = 4.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
-            Text(label, color = Color.Gray, fontSize = 10.sp, fontFamily = com.cryptodept.ui.theme.JetBrainsMono)
+            Text(label, color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
             Text(
                 "$${String.format(Locale.US, "%,.0fM", amount / 1_000_000)}",
                 color = color,
                 fontSize = 10.sp,
-                fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                fontFamily = FontFamily.Monospace,
             )
         }
         Box(
@@ -438,7 +455,7 @@ fun LiquidationBar(
                 Modifier
                     .fillMaxWidth()
                     .height(8.dp)
-                    .border(0.5.dp, Color.Gray, RectangleShape),
+                    .border(0.5.dp, colors.grid, RectangleShape),
         ) {
             Box(
                 modifier =

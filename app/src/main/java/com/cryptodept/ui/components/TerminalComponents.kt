@@ -5,7 +5,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -98,34 +99,48 @@ fun TerminalErrorOverlay(
     onRetry: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
+    val colors = LocalTerminalColors.current
+    val scope = rememberCoroutineScope()
+    var isRetrying by remember { mutableStateOf(false) }
+
     Column(
         modifier =
             modifier
                 .fillMaxWidth()
-                .border(1.dp, Color(0xFFFF3B30), RectangleShape)
+                .border(1.dp, colors.error, RectangleShape)
                 .padding(12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text(
             text = "ERROR",
-            color = Color(0xFFFF3B30),
+            color = colors.error,
             fontSize = 11.sp,
             fontFamily = FontFamily.Monospace,
         )
         Text(
-            text = message.ifBlank { "Unknown error" },
-            color = Color(0xFFFF8A80),
+            text = if (isRetrying) ">>> REBOOTING_DATA_LINK..." else message.ifBlank { "Unknown error" },
+            color = colors.error.copy(alpha = 0.8f),
             fontSize = 12.sp,
             fontFamily = FontFamily.Monospace,
         )
         if (onRetry != null) {
             TextButton(
-                onClick = onRetry,
+                onClick = {
+                    if (!isRetrying) {
+                        isRetrying = true
+                        scope.launch {
+                            kotlinx.coroutines.delay(800)
+                            onRetry()
+                            isRetrying = false
+                        }
+                    }
+                },
+                enabled = !isRetrying,
                 shape = RectangleShape,
-                colors = ButtonDefaults.textButtonColors(contentColor = WallStreetGreen),
-                modifier = Modifier.border(1.dp, WallStreetGreen, RectangleShape),
+                colors = ButtonDefaults.textButtonColors(contentColor = if (isRetrying) colors.dimText else colors.primary),
+                modifier = Modifier.border(1.dp, if (isRetrying) colors.dimText else colors.primary, RectangleShape),
             ) {
-                Text("RETRY", fontFamily = FontFamily.Monospace)
+                Text(if (isRetrying) "WAIT..." else "RETRY", fontFamily = FontFamily.Monospace)
             }
         }
     }

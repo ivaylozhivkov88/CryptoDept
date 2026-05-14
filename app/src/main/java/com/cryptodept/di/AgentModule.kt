@@ -38,4 +38,23 @@ object AgentModule {
     @Provides
     @Singleton
     fun provideMarketNarrator(): MarketNarrator = MarketNarrator()
+
+    @Provides
+    @Singleton
+    fun provideSystemAuditor(): SystemAuditor = SystemAuditor()
+
+    @Provides
+    @Singleton
+    fun provideFiscalTreasury(): FiscalTreasury = FiscalTreasury()
+
+    @Provides
+    @Singleton
+    fun providePriceOracle(): PriceOracle = PriceOracle()
+
+    @Provides
+    @Singleton
+    fun provideDataIntegrityAgent(
+        api: com.cryptodept.data.api.CoinGeckoApi,
+        repository: com.cryptodept.domain.repository.CryptoRepository
+    ): com.cryptodept.domain.agent.DataIntegrityAgent = com.cryptodept.domain.agent.DataIntegrityAgent(api, repository)
 }

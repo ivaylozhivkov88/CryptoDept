@@ -43,11 +43,11 @@ fun AlertsScreen(
             FloatingActionButton(
                 onClick = onNavigateToBuilder,
                 containerColor = colors.primary,
-                contentColor = Color.Black,
+                contentColor = colors.background,
                 shape = RectangleShape,
                 modifier = Modifier.tutorialTarget(TutorialTargetId.ALERTS_COMPOSITE_BUILDER)
             ) {
-                Text("+", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                Text("+", fontSize = 24.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
             }
         },
     ) { innerPadding ->
@@ -147,7 +147,7 @@ fun SwipeToDeleteWrapper(
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = "Delete",
-                    tint = Color.Black,
+                    tint = LocalTerminalColors.current.background,
                 )
             }
         },

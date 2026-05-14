@@ -25,6 +25,7 @@ class RemoteConfigService
                     "terminal_amber_force" to false,
                     "news_source_url" to "https://cryptocurrency.cv/api/news",
                     "min_app_version" to 1,
+                    "gemini_model_name" to "gemini-1.5-flash",
                 )
             remoteConfig.setDefaultsAsync(defaults)
         }
@@ -38,4 +39,6 @@ class RemoteConfigService
         fun getAmberForce(): Boolean = remoteConfig.getBoolean("terminal_amber_force")
 
         fun getNewsUrl(): String = remoteConfig.getString("news_source_url")
+
+        fun getGeminiModel(): String = remoteConfig.getString("gemini_model_name")
     }

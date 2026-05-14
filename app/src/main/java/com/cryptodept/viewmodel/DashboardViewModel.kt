@@ -84,7 +84,11 @@ class DashboardViewModel @Inject constructor(
         observeTickerUseCase(),
         preferencesService.isAdmin
     ) { prices, isAdmin ->
-        DashboardUiState.Success(prices, isAdmin) as DashboardUiState
+        if (prices.isEmpty()) {
+            DashboardUiState.Error("NO_MARKET_DATA: CHECK_CONNECTION")
+        } else {
+            DashboardUiState.Success(prices, isAdmin)
+        }
     }.onStart {
         analytics.logScreenView("DASHBOARD")
         fetchNetworkHealth()
@@ -101,6 +105,14 @@ class DashboardViewModel @Inject constructor(
     fun setAdminStatus(enabled: Boolean) {
         viewModelScope.launch {
             preferencesService.setAdminStatus(enabled)
+        }
+    }
+
+    fun activateGodMode() {
+        viewModelScope.launch {
+            preferencesService.setAdminStatus(true)
+            preferencesService.setPowerUserMode(true)
+            // If you have a setProStatus in preferencesService, call it here too.
         }
     }
 
@@ -147,7 +159,10 @@ class DashboardViewModel @Inject constructor(
             _agentStatuses.value = mapOf(
                 "SENTINEL" to AgentStatus.SCANNING,
                 "SCOUT" to AgentStatus.READY,
-                "PULSE" to AgentStatus.READY
+                "PULSE" to AgentStatus.READY,
+                "SYSTRACE" to AgentStatus.READY,
+                "QUANT" to AgentStatus.READY,
+                "FISCAL" to AgentStatus.READY
             )
             
             val prices = (uiState.value as? DashboardUiState.Success)?.prices ?: emptyList()
@@ -176,19 +191,28 @@ class DashboardViewModel @Inject constructor(
             )
 
             // Simulate agentic scan for UI reveal
-            delay(800)
+            delay(500)
             _agentStatuses.value = _agentStatuses.value.toMutableMap().apply { 
                 put("SENTINEL", AgentStatus.SUCCESS)
                 put("SCOUT", AgentStatus.SCANNING)
+                put("SYSTRACE", AgentStatus.SCANNING)
             }
-            delay(600)
+            delay(400)
             _agentStatuses.value = _agentStatuses.value.toMutableMap().apply { 
                 put("SCOUT", AgentStatus.SUCCESS)
+                put("SYSTRACE", AgentStatus.SUCCESS)
                 put("PULSE", AgentStatus.SCANNING)
+                put("FISCAL", AgentStatus.SCANNING)
             }
-            delay(700)
+            delay(500)
             _agentStatuses.value = _agentStatuses.value.toMutableMap().apply { 
                 put("PULSE", AgentStatus.SUCCESS)
+                put("FISCAL", AgentStatus.SUCCESS)
+                put("QUANT", AgentStatus.SCANNING)
+            }
+            delay(400)
+            _agentStatuses.value = _agentStatuses.value.toMutableMap().apply { 
+                put("QUANT", AgentStatus.SUCCESS)
             }
 
             val report = agentCoordinator.runOrchestration(snapshot)

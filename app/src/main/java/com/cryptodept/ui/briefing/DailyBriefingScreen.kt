@@ -17,12 +17,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cryptodept.domain.usecase.DailyBriefingGenerator
-import com.cryptodept.ui.theme.WallStreetGreen
+import com.cryptodept.ui.theme.LocalTerminalColors
 import com.cryptodept.viewmodel.BriefingUiState
 import com.cryptodept.viewmodel.BriefingViewModel
 
@@ -30,26 +31,27 @@ import com.cryptodept.viewmodel.BriefingViewModel
 fun DailyBriefingScreen(viewModel: BriefingViewModel = hiltViewModel()) {
     val state by viewModel.briefingState.collectAsState()
     val context = LocalContext.current
+    val colors = LocalTerminalColors.current
 
     Box(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(Color.Black)
+                .background(colors.background)
                 .padding(16.dp),
     ) {
         when (val uiState = state) {
             is BriefingUiState.Loading -> {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center),
-                    color = WallStreetGreen,
+                    color = colors.primary,
                 )
             }
             is BriefingUiState.Error -> {
                 Text(
                     text = ">>> ERROR: ${uiState.message}",
-                    color = Color.Red,
-                    fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                    color = colors.error,
+                    fontFamily = FontFamily.Monospace,
                     modifier = Modifier.align(Alignment.Center),
                 )
             }
@@ -75,12 +77,12 @@ fun DailyBriefingScreen(viewModel: BriefingViewModel = hiltViewModel()) {
                             context.startActivity(Intent.createChooser(sendIntent, "Share Market Briefing"))
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = WallStreetGreen, contentColor = Color.Black),
+                        colors = ButtonDefaults.buttonColors(containerColor = colors.primary, contentColor = colors.background),
                         shape = RectangleShape,
                     ) {
                         Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("SHARE GLOBAL VIDEO PROMPT", fontWeight = FontWeight.Bold)
+                        Spacer(Modifier.width(8.dp))
+                        Text("SHARE GLOBAL VIDEO PROMPT", fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                     }
                 }
             }
@@ -110,11 +112,12 @@ fun BriefingContent(
     briefing: DailyBriefingGenerator.DailyBriefing,
     onRefresh: () -> Unit,
 ) {
+    val colors = LocalTerminalColors.current
     LazyColumn(
         modifier =
             Modifier
                 .fillMaxSize()
-                .border(1.dp, Color(0xFF00FF41), RectangleShape),
+                .border(1.dp, colors.grid, RectangleShape),
     ) {
         item {
             Row(
@@ -127,8 +130,8 @@ fun BriefingContent(
             ) {
                 Text(
                     text = ">>> DAILY MARKET BRIEFING",
-                    color = Color(0xFF00FF41),
-                    fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                    color = colors.primary,
+                    fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                 )
@@ -137,50 +140,50 @@ fun BriefingContent(
                     colors =
                         ButtonDefaults.buttonColors(
                             containerColor = Color.Transparent,
-                            contentColor = Color(0xFF00FF41),
+                            contentColor = colors.primary,
                         ),
                     shape = RectangleShape,
-                    modifier = Modifier.border(1.dp, Color(0xFF00FF41), RectangleShape),
+                    modifier = Modifier.border(1.dp, colors.primary, RectangleShape),
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
                 ) {
-                    Text("[REGENERATE]", fontFamily = com.cryptodept.ui.theme.JetBrainsMono)
+                    Text("[REGENERATE]", fontFamily = FontFamily.Monospace)
                 }
             }
             Text(
                 text = briefing.date,
-                color = Color(0xFF00FF41).copy(alpha = 0.7f),
-                fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                color = colors.primary.copy(alpha = 0.7f),
+                fontFamily = FontFamily.Monospace,
                 fontSize = 12.sp,
                 modifier = Modifier.padding(horizontal = 8.dp),
             )
-            HorizontalDivider(color = Color(0xFF00FF41), thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
+            HorizontalDivider(color = colors.grid, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
         }
 
         item {
             Column(modifier = Modifier.padding(8.dp)) {
                 Text(
                     text = "MARKET SUMMARY:",
-                    color = Color(0xFFFFB000),
-                    fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                    color = colors.amber,
+                    fontFamily = FontFamily.Monospace,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                 )
                 Text(
                     text = briefing.marketSentence,
-                    color = Color.White,
-                    fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                    color = colors.textPrimary,
+                    fontFamily = FontFamily.Monospace,
                     fontSize = 14.sp,
                     modifier = Modifier.padding(top = 4.dp),
                 )
             }
-            HorizontalDivider(color = Color(0xFF00FF41), thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
+            HorizontalDivider(color = colors.grid, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
         }
 
         item {
             Text(
                 text = "KEY METRICS:",
-                color = Color(0xFF00FF41),
-                fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                color = colors.primary,
+                fontFamily = FontFamily.Monospace,
                 modifier = Modifier.padding(horizontal = 8.dp),
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -196,42 +199,42 @@ fun BriefingContent(
             ) {
                 Text(
                     text = metric.label.padEnd(15),
-                    color = Color.Gray,
-                    fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                    color = colors.dimText,
+                    fontFamily = FontFamily.Monospace,
                     fontSize = 12.sp,
                 )
                 Text(
                     text = metric.value,
-                    color = Color.White,
-                    fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                    color = colors.textPrimary,
+                    fontFamily = FontFamily.Monospace,
                     fontSize = 12.sp,
                 )
                 Text(
                     text = metric.change ?: "",
-                    color = if (metric.sentiment == "BULLISH") Color(0xFF00FF41) else Color(0xFFFF3B30),
-                    fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                    color = if (metric.sentiment == "BULLISH") colors.primary else colors.error,
+                    fontFamily = FontFamily.Monospace,
                     fontSize = 12.sp,
                 )
                 Text(
                     text = metric.sentiment,
                     color =
                         when (metric.sentiment) {
-                            "BULLISH" -> Color(0xFF00FF41)
-                            "BEARISH" -> Color(0xFFFF3B30)
-                            else -> Color(0xFFFFB000)
+                            "BULLISH" -> colors.primary
+                            "BEARISH" -> colors.error
+                            else -> colors.amber
                         },
-                    fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                    fontFamily = FontFamily.Monospace,
                     fontSize = 10.sp,
                 )
             }
         }
 
         item {
-            HorizontalDivider(color = Color(0xFF00FF41), thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
+            HorizontalDivider(color = colors.grid, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
             Text(
                 text = "⚠ ALERTS (${briefing.topAlerts.size}):",
-                color = Color(0xFFFFB000),
-                fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                color = colors.amber,
+                fontFamily = FontFamily.Monospace,
                 modifier = Modifier.padding(horizontal = 8.dp),
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -240,9 +243,9 @@ fun BriefingContent(
         items(briefing.topAlerts) { alert ->
             val color =
                 when (alert.severity) {
-                    DailyBriefingGenerator.AlertSeverity.CRITICAL -> Color(0xFFFF3B30)
-                    DailyBriefingGenerator.AlertSeverity.WARNING -> Color(0xFFFFB000)
-                    DailyBriefingGenerator.AlertSeverity.INFO -> Color(0xFF00FF41)
+                    DailyBriefingGenerator.AlertSeverity.CRITICAL -> colors.error
+                    DailyBriefingGenerator.AlertSeverity.WARNING -> colors.amber
+                    DailyBriefingGenerator.AlertSeverity.INFO -> colors.primary
                 }
             Column(
                 modifier =
@@ -255,31 +258,31 @@ fun BriefingContent(
                 Text(
                     text = "[${alert.severity.name}] ${alert.title}",
                     color = color,
-                    fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                    fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold,
                     fontSize = 12.sp,
                 )
                 Text(
                     text = alert.detail,
                     color = color.copy(alpha = 0.8f),
-                    fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                    fontFamily = FontFamily.Monospace,
                     fontSize = 11.sp,
                 )
             }
         }
 
         item {
-            HorizontalDivider(color = Color(0xFF00FF41), thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
+            HorizontalDivider(color = colors.grid, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
             Text(
                 text = "RECOMMENDATION:",
-                color = Color(0xFF00FF41),
-                fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                color = colors.primary,
+                fontFamily = FontFamily.Monospace,
                 modifier = Modifier.padding(horizontal = 8.dp),
             )
             Text(
                 text = briefing.tradingSuggestion,
-                color = Color.White,
-                fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
+                color = colors.textPrimary,
+                fontFamily = FontFamily.Monospace,
                 fontSize = 14.sp,
                 modifier = Modifier.padding(8.dp),
             )

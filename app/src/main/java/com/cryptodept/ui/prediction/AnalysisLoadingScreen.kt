@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 
 @Composable
-fun AnalysisLoadingScreen(state: AnalysisUiState.Loading) {
+fun AnalysisLoadingScreen(state: PredictUiState.Loading) {
     val listState = rememberLazyListState()
 
     // Automatic scroll for each new log
@@ -35,11 +35,19 @@ fun AnalysisLoadingScreen(state: AnalysisUiState.Loading) {
                 .padding(16.dp),
     ) {
         Text(
-            text = ">>> QUANTUM_CORE_SCANNER_V3",
+            text = ">>> THE_ORACLE_PROTOCOL_V4.0",
             color = Color(0xFF00FF41),
             fontFamily = FontFamily.Monospace,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "PREDICT_ENGINE_ACTIVE: ENSEMBLE_V2.1",
+            color = Color(0xFF00FF41).copy(alpha = 0.6f),
+            fontFamily = FontFamily.Monospace,
+            fontSize = 10.sp,
         )
 
         Spacer(modifier = Modifier.height(24.dp))
