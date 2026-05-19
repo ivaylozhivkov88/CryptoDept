@@ -96,4 +96,10 @@ sealed class Screen(
     object Achievements : Screen("achievements", "ACHIEVEMENTS", "🏆")
 
     object AgentHub : Screen("agent_hub", "AGENT HUB", "🤖")
+
+    object Glossary : Screen("glossary")
+
+    object Paywall : Screen("paywall?reason={reason}") {
+        fun createRoute(reason: String = "general") = "paywall?reason=$reason"
+    }
 }

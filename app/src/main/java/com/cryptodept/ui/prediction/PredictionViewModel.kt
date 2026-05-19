@@ -7,9 +7,13 @@ import androidx.paging.cachedIn
 import com.cryptodept.data.db.PredictionAccuracyEntity
 import com.cryptodept.domain.model.PricePrediction
 import com.cryptodept.domain.repository.CryptoRepository
+import com.cryptodept.domain.prediction.ConfidenceMetrics
+import com.cryptodept.domain.prediction.HistoricalAccuracy
+import com.cryptodept.domain.usecase.prediction.CalculateConfidenceMetricsUseCase
 import com.cryptodept.domain.usecase.prediction.PredictionEnsembleEngine
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -25,7 +29,44 @@ class PredictionViewModel
         private val ensembleEngine: PredictionEnsembleEngine,
         private val repository: CryptoRepository,
         private val accuracyTracker: com.cryptodept.domain.usecase.PredictionAccuracyTracker,
+        private val calculateConfidenceUseCase: CalculateConfidenceMetricsUseCase,
+        private val generateReport: com.cryptodept.domain.usecase.GenerateAnalysisReportUseCase,
     ) : ViewModel() {
+
+        private val _aiReport = MutableStateFlow<String?>(null)
+        val aiReport: StateFlow<String?> = _aiReport.asStateFlow()
+
+        private val _isAiStreaming = MutableStateFlow(false)
+        val isAiStreaming: StateFlow<Boolean> = _isAiStreaming.asStateFlow()
+
+        fun generateAIReport(prediction: PricePrediction) {
+            viewModelScope.launch {
+                try {
+                    _aiReport.value = ""
+                    _isAiStreaming.value = true
+                    generateReport.execute(prediction, _confidenceMetrics.value)
+                        .onCompletion { _isAiStreaming.value = false }
+                        .catch { e -> 
+                            val message = e.localizedMessage ?: "UNKNOWN_AI_FAILURE"
+                            val errorNote = if (message.contains("blocked", ignoreCase = true)) {
+                                "\n\nNOTE: API Key is restricted. Ensure your Package Name (com.cryptodept) and SHA-1 fingerprint are registered in Google AI Studio."
+                            } else ""
+                            _aiReport.value = ">>> ERROR_STREAM_INTERRUPTED: $message$errorNote"
+                            _isAiStreaming.value = false
+                        }
+                        .collect { chunk ->
+                            _aiReport.value = (_aiReport.value ?: "") + chunk
+                        }
+                } catch (e: Exception) {
+                    _aiReport.value = ">>> CRITICAL_SYSTEM_ERROR: ${e.localizedMessage}"
+                    _isAiStreaming.value = false
+                }
+            }
+        }
+
+        fun dismissAiReport() {
+            _aiReport.value = null
+        }
         val history: Flow<PagingData<PredictionAccuracyEntity>> =
             accuracyTracker
                 .getHistoryPagingData()
@@ -36,6 +77,9 @@ class PredictionViewModel
 
         private val _accuracyStats = MutableStateFlow<Map<String, Float>>(emptyMap())
         val accuracyStats: StateFlow<Map<String, Float>> = _accuracyStats
+
+        private val _confidenceMetrics = MutableStateFlow<ConfidenceMetrics?>(null)
+        val confidenceMetrics: StateFlow<ConfidenceMetrics?> = _confidenceMetrics
 
         init {
             loadAccuracyStats()
@@ -87,28 +131,59 @@ class PredictionViewModel
                     val closes = history.map { it.close }
                     val volumes = history.map { it.volume }
 
+                    // Start heavy computation in background immediately
+                    val resultDeferred = async(Dispatchers.Default) {
+                        ensembleEngine.generatePrediction(coinId, closes, volumes)
+                    }
+
+                    // Animate logs while computation is running
                     analysisSteps.forEachIndexed { index, step ->
                         currentLogs.add(step)
-                        val progress = (index + 1).toFloat() / analysisSteps.size
+                        // Progress reaches 90% through logs, last 10% is for finishing the result
+                        val progress = ((index + 1).toFloat() / analysisSteps.size) * 0.9f
                         _uiState.value = PredictUiState.Loading(currentLogs.toList(), progress)
-                        val typingDelay = (step.length * 10L) + 100L
+                        
+                        // Slightly faster typing for better UX
+                        val typingDelay = (step.length * 8L) + 80L
                         delay(typingDelay)
                     }
 
-                    val result =
-                        withContext(Dispatchers.Default) {
-                            ensembleEngine.generatePrediction(coinId, closes, volumes)
-                        }
+                    // Ensure we wait for the result if computation takes longer than logs
+                    val result = resultDeferred.await()
+                    
+                    _uiState.value = PredictUiState.Loading(currentLogs.toList(), 1.0f)
+                    delay(300) // Small pause at 100% for visual completion
+                    
                     _uiState.value = PredictUiState.Success(result)
+                    loadConfidenceMetrics(coinId, result)
                 } catch (e: Exception) {
                     _uiState.value = PredictUiState.Error("SYSTEM_CRASH: ${e.localizedMessage}")
                 }
             }
         }
 
+        private fun loadConfidenceMetrics(coinId: String, prediction: PricePrediction) {
+            viewModelScope.launch {
+                val metrics = calculateConfidenceUseCase.forEnsemble(
+                    coinId = coinId,
+                    consensus = prediction.ensembleConsensus,
+                    currentPrice = prediction.currentPrice,
+                    volatility24h = prediction.priceChange24h / 100.0, // Rough estimate if volatility is not directly available
+                    lastDataUpdateMs = prediction.timestamp,
+                    dataPointCount = 30 // Based on the 30 days history fetch
+                )
+                _confidenceMetrics.value = metrics
+            }
+        }
+
+        suspend fun getModelAccuracy(coinId: String, modelName: String): HistoricalAccuracy? {
+            return calculateConfidenceUseCase.forSingleModel(coinId, modelName)
+        }
+
         fun generateShareText(prediction: PricePrediction): String =
             buildString {
-                val coinId = prediction.coinId
+                val resolver = com.cryptodept.util.SymbolResolver()
+                val coinId = resolver.toDisplayName(prediction.coinId)
                 val currentPrice = String.format(Locale.US, "%.2f", prediction.currentPrice)
                 val consensus = prediction.ensembleConsensus
                 val consensusPercent = (consensus.overallConfidence * 100).toInt()

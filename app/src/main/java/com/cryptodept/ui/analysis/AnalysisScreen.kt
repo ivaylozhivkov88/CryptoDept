@@ -2,7 +2,6 @@ package com.cryptodept.ui.analysis
 
 import android.content.Context
 import android.content.Intent
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -20,13 +19,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.res.stringResource
+import com.cryptodept.R
 import com.cryptodept.domain.model.*
 import com.cryptodept.ui.tutorial.tutorialTarget
 import com.cryptodept.domain.tutorial.TutorialTargetId
-import com.cryptodept.ui.components.StreamingText
-import com.cryptodept.ui.components.TechnicalBreakdownSheet
-import com.cryptodept.ui.components.TerminalErrorOverlay
-import com.cryptodept.ui.components.TerminalHelpDialog
+import com.cryptodept.ui.components.*
+import com.cryptodept.domain.tier.FeatureKey
 import com.cryptodept.ui.navigation.Screen
 import com.cryptodept.ui.prediction.PredictionViewModel
 import com.cryptodept.ui.theme.*
@@ -87,14 +86,16 @@ fun AnalysisScreen(
                         text = aiReport!!,
                         isStreaming = isAiStreaming,
                         textColor = colors.textPrimary,
-                        fontSize = 13.sp
+                        fontSize = 13.sp,
                     )
                 }
             },
             confirmButton = {
-                TextButton(onClick = {
-                    shareAnalysis(context, aiReport!!)
-                }) {
+                TextButton(
+                    onClick = {
+                        shareAnalysis(context, aiReport!!)
+                    }
+                ) {
                     Text("SHARE", color = colors.primary, fontFamily = FontFamily.Monospace)
                 }
             },
@@ -134,7 +135,7 @@ fun AnalysisScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = ">>> TERMINAL_DEPT_V3",
+                        text = stringResource(R.string.analysis_header),
                         color = colors.primary,
                         fontFamily = FontFamily.Monospace,
                         fontSize = 14.sp,
@@ -180,7 +181,7 @@ fun AnalysisScreen(
                             modifier = Modifier.fillMaxWidth().padding(top = 32.dp)
                         ) {
                             Text(
-                                text = ">>> ANALYZING_SYSTEM_DATA...",
+                                text = stringResource(R.string.analysis_analyzing),
                                 color = colors.primary,
                                 fontFamily = FontFamily.Monospace,
                                 fontSize = 14.sp,
@@ -196,12 +197,13 @@ fun AnalysisScreen(
                     }
                     is AnalysisUiState.Success -> {
                         // MINI CHART FOR SCANNER LOOK
-                        val prices = uiState.result.ohlcData.map { it.close }
-                        if (prices.isNotEmpty()) {
+                        if (uiState.result.ohlcData.isNotEmpty()) {
+                            val prices = uiState.result.ohlcData
+                            val isBullish = prices.last().close > prices.first().close
                             Box(modifier = Modifier.fillMaxWidth().height(100.dp).padding(vertical = 8.dp)) {
-                                com.cryptodept.ui.components.SimpleLineChart(
-                                    data = uiState.result.ohlcData,
-                                    lineColor = if (prices.last() > prices.first()) colors.primary else colors.danger
+                                SimpleLineChart(
+                                    data = prices,
+                                    lineColor = if (isBullish) colors.primary else colors.danger
                                 )
                             }
                         }
@@ -209,6 +211,11 @@ fun AnalysisScreen(
                         AnalysisContentV2(
                             state = uiState,
                             onShowBreakdown = { showBreakdown = true },
+                            onPredictClick = { navController.navigate(Screen.Prediction.route) },
+                            onDeepScanClick = {
+                                viewModel.loadAnalysis(coinId)
+                                viewModel.generateAIReport(uiState.result)
+                            }
                         )
                     }
                     is AnalysisUiState.Error -> {
@@ -218,43 +225,6 @@ fun AnalysisScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
-
-            // Pinned Bottom Bar
-            Box(modifier = Modifier.padding(16.dp).imePadding()) {
-                com.cryptodept.ui.components.TerminalCommandBar(onCommandEntered = { cmd ->
-                    val parts = cmd.uppercase().split(" ")
-                    when (parts[0]) {
-                        "HELP" -> showHelp = true
-                        "LOGOUT" -> viewModel.setAdminStatus(false)
-                        else -> handleGlobalCommand(cmd, navController)
-                    }
-                })
-            }
-        }
-    }
-}
-
-fun handleGlobalCommand(
-    cmd: String,
-    navController: androidx.navigation.NavController,
-) {
-    val parts = cmd.uppercase().split(" ")
-    when (parts[0]) {
-        "HELP" -> { /* Open Help */ }
-        "ALERTS" -> navController.navigate("alerts")
-        "NEWS" -> navController.navigate("news")
-        "MATRIX" -> navController.navigate(Screen.Correlation.route)
-        "SETTINGS" -> navController.navigate("settings")
-        "RISK" -> navController.navigate("risk")
-        "BACK" -> navController.popBackStack()
-        "DASHBOARD" -> navController.navigate("dashboard")
-        "CHART" -> {
-            val coin = if (parts.size > 1) parts[1].lowercase() else "bitcoin"
-            navController.navigate("charts/$coin")
-        }
-        "ANALYSIS" -> {
-            val coin = if (parts.size > 1) parts[1].lowercase() else "bitcoin"
-            navController.navigate("analysis?coinId=$coin")
         }
     }
 }
@@ -300,6 +270,8 @@ fun AssetSelector(
 fun AnalysisContentV2(
     state: AnalysisUiState.Success,
     onShowBreakdown: () -> Unit,
+    onPredictClick: () -> Unit,
+    onDeepScanClick: () -> Unit,
 ) {
     val colors = LocalTerminalColors.current
     val result = state.result
@@ -317,6 +289,7 @@ fun AnalysisContentV2(
             .fillMaxWidth()
             .border(1.dp, colors.grid)
             .background(colors.grid.copy(alpha = 0.05f))
+            .tutorialTarget(TutorialTargetId.ANALYSIS_AI_VERDICT)
             .padding(12.dp)
     ) {
         Row(
@@ -325,7 +298,10 @@ fun AnalysisContentV2(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                Text("SCANNER_VERDICT:", color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = stringResource(R.string.analysis_verdict), color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                    FeatureHelpIcon(feature = FeatureKey.DAILY_AI_PICK, iconSize = 10.dp)
+                }
                 Text(
                     text = signal.strength.name.replace("_", " "),
                     color = signalColor,
@@ -335,7 +311,7 @@ fun AnalysisContentV2(
                 )
             }
             Column(horizontalAlignment = Alignment.End) {
-                Text("CONFIDENCE:", color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                Text(text = stringResource(R.string.analysis_confidence), color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
                 Text(
                     text = "${String.format(Locale.US, "%.0f", signal.confidence * 100)}%",
                     color = signalColor,
@@ -343,6 +319,10 @@ fun AnalysisContentV2(
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                 )
+                
+                // TRACK RECORD BADGE
+                Spacer(modifier = Modifier.height(4.dp))
+                ModelAccuracyBadge(modelName = "Ensemble", coinId = state.result.coinId)
             }
         }
         
@@ -370,7 +350,7 @@ fun AnalysisContentV2(
 
     Spacer(modifier = Modifier.height(24.dp))
 
-    Text(">>> INDICATOR_MATRIX", color = colors.dimText, fontSize = 12.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.tutorialTarget(TutorialTargetId.ANALYSIS_INDICATORS))
+    Text(text = stringResource(R.string.analysis_matrix), color = colors.dimText, fontSize = 12.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.tutorialTarget(TutorialTargetId.ANALYSIS_INDICATORS))
     result.compositeSignal.indicators.forEach { ind ->
         val indColor =
             when (ind.sentiment) {
@@ -405,11 +385,39 @@ fun AnalysisContentV2(
         Spacer(modifier = Modifier.height(16.dp))
     }
 
-    Text(">>> FIBONACCI_RETRACEMENT", color = colors.dimText, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+    Text(text = stringResource(R.string.analysis_fibonacci), color = colors.dimText, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
     result.fibonacci.forEach { (level, price) ->
         Row(modifier = Modifier.fillMaxWidth().padding(vertical = 1.dp), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(level, color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 12.sp)
             Text("$${String.format(Locale.US, "%.2f", price)}", color = colors.amber, fontFamily = FontFamily.Monospace, fontSize = 12.sp)
+        }
+    }
+
+    Spacer(modifier = Modifier.height(24.dp))
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            OutlinedButton(
+                onClick = onPredictClick,
+                modifier = Modifier.fillMaxWidth().tutorialTarget(TutorialTargetId.ANALYSIS_PREDICTION),
+                shape = RectangleShape,
+                border = BorderStroke(1.dp, colors.primary)
+            ) {
+                Text(stringResource(R.string.analysis_predict_btn), color = colors.primary, fontSize = 10.sp)
+            }
+            FeatureHelpIcon(feature = FeatureKey.PREDICTION_ENGINES_6, modifier = Modifier.align(Alignment.CenterHorizontally))
+        }
+
+        Button(
+            onClick = onDeepScanClick,
+            modifier = Modifier.weight(1f).tutorialTarget(TutorialTargetId.ANALYSIS_DEEP_SCAN),
+            shape = RectangleShape,
+            colors = ButtonDefaults.buttonColors(containerColor = colors.primary)
+        ) {
+            Text(stringResource(R.string.analysis_deep_scan_btn), color = colors.background, fontSize = 10.sp)
         }
     }
 
@@ -432,7 +440,7 @@ fun SentimentSection(sentiment: com.cryptodept.domain.usecase.SentimentResult?) 
             else -> colors.amber
         }
 
-    Text(">>> MARKET_SENTIMENT (REDDIT/CRYPTO_PANIC)", color = colors.dimText, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+    Text(text = stringResource(R.string.analysis_sentiment_title), color = colors.dimText, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
 
     Box(
         modifier = Modifier.fillMaxWidth().border(1.dp, colors.grid).padding(12.dp),
@@ -479,7 +487,7 @@ fun SentimentSection(sentiment: com.cryptodept.domain.usecase.SentimentResult?) 
             }
 
             Text(
-                "DATA_POINTS_ANALYZED: ${sentiment.totalAnalyzed}",
+                text = stringResource(R.string.analysis_data_points, sentiment.totalAnalyzed),
                 color = colors.grid,
                 fontSize = 8.sp,
                 fontFamily = FontFamily.Monospace,

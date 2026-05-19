@@ -93,22 +93,6 @@ class ComponentTests {
     }
 
     @Test
-    fun testTerminalCommandBarInput() {
-        var commandEntered = ""
-
-        composeTestRule.setContent {
-            CryptoDeptTheme {
-                TerminalCommandBar(onCommandEntered = { commandEntered = it })
-            }
-        }
-
-        composeTestRule.onNodeWithTag("TerminalInput").performTextInput("HELP")
-        composeTestRule.onNodeWithTag("TerminalInput").performImeAction()
-
-        assert(commandEntered == "HELP")
-    }
-
-    @Test
     fun testSentimentBadgeDisplay() {
         composeTestRule.setContent {
             CryptoDeptTheme {
@@ -206,26 +190,9 @@ class ComponentTests {
 
     @Test
     fun testMiniHeatmapRendering() {
-        val prices =
-            listOf(
-                CoinPrice(
-                    id = "bitcoin",
-                    symbol = "BTC",
-                    name = "Bitcoin",
-                    currentPrice = 60000.0,
-                    priceChange24h = 0.0,
-                    priceChangePercentage24h = 6.0,
-                    marketCap = 0.0,
-                    totalVolume = 0.0,
-                    high24h = 0.0,
-                    low24h = 0.0,
-                    lastUpdated = 0,
-                ),
-            )
-
         composeTestRule.setContent {
             CryptoDeptTheme {
-                MiniHeatmap(prices = prices)
+                MiniHeatmap()
             }
         }
 

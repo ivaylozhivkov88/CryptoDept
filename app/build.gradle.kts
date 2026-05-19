@@ -16,13 +16,14 @@ plugins {
 android {
     namespace = "com.cryptodept"
     compileSdk = 35
+    ndkVersion = "27.0.12077924" // Експлицитно указване на NDK за символите
 
     defaultConfig {
         applicationId = "com.cryptodept"
         minSdk = 26
         targetSdk = 35
-        versionCode = 8
-        versionName = "1.0.52"
+        versionCode = 17
+        versionName = "1.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -44,6 +45,7 @@ android {
         buildConfigField("String", "ALPHA_VANTAGE_API_KEY", "\"${getSecret("ALPHA_VANTAGE_API_KEY")}\"")
         buildConfigField("String", "COINMARKETCAL_API_KEY", "\"${getSecret("COINMARKETCAL_API_KEY")}\"")
         buildConfigField("String", "GEMINI_API_KEY", "\"${getSecret("GEMINI_API_KEY")}\"")
+        buildConfigField("String", "GEMINI_API_KEY_ALT", "\"${getSecret("GEMINI_API_KEY_ALT")}\"")
         buildConfigField("String", "HELIUS_API_KEY", "\"${getSecret("HELIUS_API_KEY")}\"")
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${getSecret("GOOGLE_WEB_CLIENT_ID")}\"")
     }
@@ -73,7 +75,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
-            isShrinkResources = true
+            isShrinkResources = false
             ndk {
                 debugSymbolLevel = "full"
             }
@@ -99,6 +101,13 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+
+    packaging {
+        jniLibs {
+            // Гарантира, че дебъг символите на native библиотеките (като SQLCipher) се пазят
+            keepDebugSymbols.add("**/*.so")
+        }
     }
 }
 
@@ -182,8 +191,10 @@ dependencies {
     // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
+    implementation(libs.firebase.inapp.messaging)
     implementation(libs.firebase.messaging)
     implementation(libs.firebase.appcheck)
+    debugImplementation(libs.firebase.appcheck.debug)
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.perf)
     implementation(libs.firebase.config)
@@ -198,6 +209,10 @@ dependencies {
 
     // Play Review
     implementation(libs.play.review.ktx)
+
+    // Play App Update
+    implementation(libs.play.app.update)
+    implementation(libs.play.app.update.ktx)
 
     // Image Loading
     implementation(libs.coil.compose)

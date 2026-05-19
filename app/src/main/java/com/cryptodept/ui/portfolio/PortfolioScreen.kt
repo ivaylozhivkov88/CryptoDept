@@ -76,19 +76,6 @@ fun PortfolioScreen(
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        com.cryptodept.ui.components.TerminalCommandBar(
-            onCommandEntered = { cmd ->
-                val parts = cmd.uppercase().split(" ")
-                when (parts[0]) {
-                    "HELP" -> showHelp = true
-                    "LOGOUT" -> viewModel.setAdminStatus(false)
-                    else ->
-                        com.cryptodept.ui.analysis
-                            .handleGlobalCommand(cmd, navController)
-                }
-            },
-        )
     }
 
     if (showAddDialog) {

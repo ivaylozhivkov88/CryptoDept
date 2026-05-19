@@ -15,6 +15,7 @@ data class NewsEntity(
     val publishedAt: Long,
     val sentiment: String,
     val currencies: String,
+    val imageUrl: String? = null,
 ) {
     fun toDomain() =
         NewsItem(
@@ -25,6 +26,7 @@ data class NewsEntity(
             publishedAt = publishedAt,
             sentiment = NewsSentiment.valueOf(sentiment),
             currencies = if (currencies.isBlank()) kotlinx.collections.immutable.persistentListOf() else currencies.split(",").toImmutableList(),
+            imageUrl = imageUrl,
         )
 
     companion object {
@@ -37,6 +39,7 @@ data class NewsEntity(
                 publishedAt = item.publishedAt,
                 sentiment = item.sentiment.name,
                 currencies = item.currencies.joinToString(","),
+                imageUrl = item.imageUrl,
             )
     }
 }

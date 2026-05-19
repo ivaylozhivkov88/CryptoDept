@@ -11,7 +11,6 @@ import javax.inject.Singleton
 @Singleton
 class MultiAgentCoordinator @Inject constructor(
     private val sentinel: TechnicalSentinel,
-    private val scout: WhaleScout,
     private val pulse: SentimentPulse,
     private val fbi: OversightSentinel,
     private val integrity: DataIntegrityAgent,
@@ -20,14 +19,12 @@ class MultiAgentCoordinator @Inject constructor(
     suspend fun runOrchestration(snapshot: MarketDataSnapshot): AgentReport = coroutineScope {
         withTimeoutOrNull(15000) {
             val sentinelJob = async { sentinel.analyze(snapshot) }
-            val scoutJob = async { scout.analyze(snapshot) }
             val pulseJob = async { pulse.analyze(snapshot) }
             val fbiJob = async { fbi.analyze(snapshot) }
             val integrityJob = async { integrity.analyze(snapshot) }
 
             // We wait for all but if they take too long, withTimeoutOrNull returns null
             sentinelJob.await()
-            scoutJob.await()
             pulseJob.await()
             fbiJob.await()
             integrityJob.await()

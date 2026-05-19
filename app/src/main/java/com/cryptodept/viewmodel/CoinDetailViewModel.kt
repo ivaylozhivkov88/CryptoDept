@@ -39,11 +39,21 @@ class CoinDetailViewModel
                 _uiState.value = CoinDetailUiState.Loading
 
                 val detailResult = repository.getCoinDetail(coinId)
-                val ohlc = repository.getOHLCData(coinId, 30)
+                val rawOhlc = repository.getOHLCData(coinId, 30)
+                
+                // Group by date to ensure only one entry per day (Historical Tab fix)
+                val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
+                val distinctOhlc = rawOhlc
+                    .groupBy { sdf.format(java.util.Date(it.timestamp)) }
+                    .map { (_, entries) -> 
+                        // Take the last entry of the day or calculate a daily candle
+                        entries.last() 
+                    }
+                    .sortedBy { it.timestamp }
 
                 detailResult
                     .onSuccess { detail ->
-                        _uiState.value = CoinDetailUiState.Success(detail, ohlc)
+                        _uiState.value = CoinDetailUiState.Success(detail, distinctOhlc)
                     }.onFailure { error ->
                         _uiState.value = CoinDetailUiState.Error(error.message ?: "Unknown error")
                     }

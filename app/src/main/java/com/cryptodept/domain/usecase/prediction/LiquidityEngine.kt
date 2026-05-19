@@ -5,6 +5,8 @@ import com.cryptodept.domain.model.LiquidityInsight
 import com.cryptodept.domain.model.ModelVote
 import com.cryptodept.domain.model.PredictionModel
 import com.cryptodept.domain.repository.DerivativesRepository
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -13,11 +15,16 @@ import javax.inject.Singleton
 class LiquidityEngine @Inject constructor(
     private val derivativesRepository: DerivativesRepository
 ) {
-    suspend fun analyze(symbol: String, currentPrice: Double): Pair<ModelVote, LiquidityInsight> {
-        val oiResult = derivativesRepository.getOpenInterest(symbol)
-        val fundingResult = derivativesRepository.getFundingRate(symbol)
-        val ratioResult = derivativesRepository.getLongShortRatio(symbol)
-        val liquidations = derivativesRepository.getLiquidationData(symbol).getOrNull()
+    suspend fun analyze(symbol: String, currentPrice: Double): Pair<ModelVote, LiquidityInsight> = coroutineScope {
+        val oiDeferred = async { derivativesRepository.getOpenInterest(symbol) }
+        val fundingDeferred = async { derivativesRepository.getFundingRate(symbol) }
+        val ratioDeferred = async { derivativesRepository.getLongShortRatio(symbol) }
+        val liquidationsDeferred = async { derivativesRepository.getLiquidationData(symbol) }
+
+        val oiResult = oiDeferred.await()
+        val fundingResult = fundingDeferred.await()
+        val ratioResult = ratioDeferred.await()
+        val liquidations = liquidationsDeferred.await().getOrNull()
 
         val oi = oiResult.getOrNull()?.openInterestUsd ?: 0.0
         val oiChange = oiResult.getOrNull()?.openInterestChange24h ?: 0.0
@@ -60,7 +67,7 @@ class LiquidityEngine @Inject constructor(
             reasoning = generateReasoning(insight, direction)
         )
 
-        return vote to insight
+        vote to insight
     }
 
     private fun generateReasoning(insight: LiquidityInsight, direction: Direction): String {

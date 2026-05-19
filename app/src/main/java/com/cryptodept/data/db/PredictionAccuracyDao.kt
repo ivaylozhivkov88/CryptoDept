@@ -48,4 +48,24 @@ interface PredictionAccuracyDao {
     """,
     )
     fun getModelAccuracy(model: String): Flow<Double?>
+
+    @Query(
+        """
+        SELECT * FROM prediction_accuracy 
+        WHERE coinId = :coinId 
+        ORDER BY predictedAt DESC 
+        LIMIT :limit
+    """,
+    )
+    suspend fun getRecentForCoin(coinId: String, limit: Int): List<PredictionAccuracyEntity>
+
+    @Query(
+        """
+        SELECT * FROM prediction_accuracy 
+        WHERE coinId = :coinId AND model = :model 
+        ORDER BY predictedAt DESC 
+        LIMIT :limit
+    """,
+    )
+    suspend fun getRecentForCoinAndModel(coinId: String, model: String, limit: Int): List<PredictionAccuracyEntity>
 }

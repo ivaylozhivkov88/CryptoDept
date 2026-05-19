@@ -1,84 +1,77 @@
-# 🧠 CRYPTODEPT TERMINAL v6.0
-## [ WORLD #1 ELITE CRYPTO INTELLIGENCE PROTOCOL ]
+# 🧠 CryptoDept Intelligence Terminal
+## Level 1.1 | Multi-Agent Market Orchestration System
 
-![Banner](https://img.shields.io/badge/INTELLIGENCE-9.90%2F10-00FF41?style=for-the-badge&logo=probot&logoColor=00FF41)
-![Security](https://img.shields.io/badge/SECURITY-SQLCipher_Encrypted-blue?style=for-the-badge&logo=anchor&logoColor=white)
-![Stack](https://img.shields.io/badge/TECH_STACK-Kotlin_Compose_Hilt-orange?style=for-the-badge&logo=kotlin&logoColor=white)
-
-> **"In a world of noise, we provide the signal. Authorized Access Only."**
+> "Data is the new liquidity. Hype is the noise. We filter the noise."
 
 ---
 
-## 🛰️ THE MISSION
-**CryptoDept** is not just a tracker. It is an autonomous battle station for market analysis that combines quantum algorithms with multi-agent artificial intelligence (Multi-Agent Orchestration). The goal is clear: **Full domination over market uncertainty.**
+### 📡 SYSTEM STATUS: [MISSION_CRITICAL]
+CryptoDept is not just an application; it is a **synthetic intelligence terminal** for high-frequency market awareness. It combines deep on-chain monitoring with an ensemble of 6 mathematical forecasting engines and real-time AI narrative synthesis.
+
+[![Engine](https://img.shields.io/badge/Intelligence-Multi--Agent_Core-00FF41?style=for-the-badge&logo=android)]()
+[![Security](https://img.shields.io/badge/Database-SQLCipher_Hardened-blue?style=for-the-badge)]()
+[![Network](https://img.shields.io/badge/Feed-Direct_RPC_Link-orange?style=for-the-badge)]()
 
 ---
 
-## 🛠️ THE INTELLIGENCE PROTOCOL (Multi-Agent Layer)
-The application is governed by the **Intelligence Unit**, composed of highly specialized AI agents:
+### 🛠️ CORE INTELLIGENCE BLOCKS
 
-| AGENT | DOMAIN | MISSION |
-|---|---|---|
-| **[AGENT-SENTINEL]** | Technical Analysis | Mathematical precision, RSI confluences, EMA breakouts. |
-| **[AGENT-SCOUT]** | On-chain Ghost Whale | Tracking large capital flows (BTC/ETH/SOL) in real-time. |
-| **[AGENT-PULSE]** | Sentiment Analysis | Social psychology analysis (Reddit, News, Fear & Greed). |
-| **[AGENT-CORE]** | Narrative Orchestrator | Synthesizing all data into a single strategic report. |
-| **[AGENT-FBI]** | Oversight Sentinel | Monitoring for anomalies, market traps, and data integrity. |
+#### 🕵️ [AGENT-SCOUT] Ghost Whale Monitoring
+Direct RPC integration with Bitcoin, Ethereum, and Solana mainnets.
+*   **Threshold:** $500,000+ USD per transaction.
+*   **Intelligence Base:** Etherscan, Helius, Mempool.space.
+*   **Capabilities:** Identification of "Smart Money" accumulation vs. retail distribution.
 
----
+#### 🔮 [AGENT-QUANT] Multi-Model Oracle
+An ensemble forecasting system that executes 6 independent statistical models:
+*   **FFT Analysis:** Cycle detection in the frequency domain.
+*   **Monte Carlo:** Multi-path probability distribution.
+*   **Wyckoff Logic:** Institutional phase identification.
+*   **Elliott Wave:** Fractal structure validation.
+*   **Hurst Exponent:** Persistence vs. Mean Reversion scoring.
+*   **Linear Regression:** Dynamic trend projection.
+*   *Transparent Accuracy Badges display historical performance for every signal.*
 
-## 💎 CORE FEATURES (The Elite Edge)
+#### 🎙️ [AGENT-NARRATOR] Live Narrative Synthesis
+Powered by **Google Gemini 1.5 Flash**, the system converts billions of data points into a readable, streaming executive briefing. It bridges the gap between raw numbers and actionable strategy.
 
-### 🌊 Whale Tracker (Real-Time)
-Direct link to the blockchain mainnet. We detect transactions over **$500k** before the market has reacted. 
-- *Tech:* SSE (Server-Sent Events) & WebSockets.
-
-### 🧠 AI Market Narrative (Streaming)
-Don't wait for results. Watch AI "think" in real-time through our **Streaming Neural Link**.
-- *Tech:* SSE Integration with Google Gemini 1.5 Flash.
-
-### 🤖 Autonomous Agent Hub
-Dedicated command center for autonomous briefings. Agents monitor anomalies 24/7 and log evidence for your review.
-
-### 🛡️ Hardened Security
-Your data is protected with military precision. 
-- **SQLCipher** for the database.
-- **Certificate Pinning** to prevent Man-in-the-middle attacks.
-- **Root & Tamper Detection** — if the device is compromised, the terminal locks down.
-
-### ⚡ Technical Excellence
-- **Architecture:** Clean Architecture + MVI.
-- **Dependency Injection:** Hilt (Dagger).
-- **UI:** 100% Jetpack Compose (CRT Terminal Aesthetic).
-- **Offline-First:** Powerful caching and Room DB.
+#### ⚖️ [AGENT-AUDITOR] The Trader's Toolkit
+*   **Position Sizer:** Risk-weighted leverage calculator.
+*   **MTF Analyzer:** Multi-timeframe confluence matrix.
+*   **Psychology Coach:** Automatic terminal lock during periods of detected emotional volatility (Tilt Protection).
+*   **DeFi Intelligence:** Real-time yield monitoring via DefiLlama.
 
 ---
 
-## 🧑‍💻 FOR OPERATORS (Developers)
+### 🏗️ TECHNICAL SPECIFICATIONS
 
-### Prerequisites
-- Android Studio Ladybug (2024.2.1+)
-- Kotlin 2.0+
-- JDK 17+
-
-### ProGuard & Obfuscation
-All critical classes are secured via **R8/ProGuard** rules to prevent decompilation of agent logic.
-
----
-
-## 📈 STRATEGIC ROADMAP
-The project moves according to a strict **MASTERPLAN v6.0**.
-1. [✅] **Phase Q:** Streaming AI Narratives
-2. [✅] **Phase R:** Data Integrity & History
-3. [🏗️] **Phase S:** Autonomous Agent Overseer (In Progress)
+| Layer | Protocol / Technology |
+| :--- | :--- |
+| **Interface** | Jetpack Compose (CRT-Phosphor Engine) |
+| **Orchestration** | Clean Architecture (Domain-Driven Design) |
+| **Logic Flux** | Kotlin Coroutines + Reactive Flows |
+| **Hardened Vault** | SQLCipher AES-256 Local Encryption |
+| **Market Gateway** | Retrofit + OkHttp + Certificate Pinner |
+| **Stability** | RootBeer + Tamper Detection + Compose Error Boundaries |
 
 ---
 
-## 📞 CONTACT THE ARCHITECT
-If you are ready to become part of the elite or have questions about the protocol:
-- **Terminal Status:** OPTIMIZED
-- **Encryption:** ACTIVE
-- **Mode:** WORLD_CLASS_READY
+### 🛡️ OPERATIONAL CONSTRAINTS (DISCLAIMER)
+1.  **NO FINANCIAL ADVICE:** This terminal provides data-driven insights only.
+2.  **RISK ACKNOWLEDGMENT:** Market forecasting is probabilistic. Past accuracy does not guarantee future results.
+3.  **SOURCE RELIABILITY:** On-chain data is descriptive of historical movement, not a guarantee of future intent.
 
 ---
-*Created by CryptoDept Intelligence Unit | © 2026 | World #1 Elite Mode*
+
+### 💳 ACCESS PROTOCOLS
+*   **Level 0 (Free):** Core Dashboard + Market Feed + Daily AI Briefing.
+*   **Pro Operator:** Full access to Whale Tracker, Oracle Ensemble, and the complete Trader Toolkit.
+    *   *Flexible Passes available (1/3/7 days) or full Command Subscriptions (Monthly/Quarterly/Annual).*
+
+---
+
+### 📡 CONNECT
+*   **Terminal Issues:** [GitHub Issue Tracker]
+*   **Direct Link:** [vaylo_zhivkov@abv.bg]
+
+*"Built by a solo architect using Agentic AI-Assisted Engineering. Optimized for those who trade with intent."*

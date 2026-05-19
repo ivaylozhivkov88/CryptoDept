@@ -10,7 +10,7 @@ interface DefiLlamaApi {
 
     @GET
     suspend fun getYields(
-        @Url url: String = "https://yields.llama.fi/pools",
+        @Url url: String,
     ): YieldResponseDto
 }
 

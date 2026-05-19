@@ -16,6 +16,7 @@ class RunDeepAnalysisUseCase
         private val chartRepository: ChartRepository,
         private val taEngine: TechnicalAnalysisEngine,
         private val sentimentAnalyzer: SentimentAnalyzer,
+        private val demoMode: com.cryptodept.util.DemoModeProvider,
     ) {
         suspend fun execute(
             coinId: String,
@@ -23,6 +24,41 @@ class RunDeepAnalysisUseCase
         ): Result<DeepAnalysisResult> =
             withContext(Dispatchers.Default) {
                 try {
+                    if (demoMode.isActive()) {
+                        val d = demoMode.getDemoAnalysis()
+                        return@withContext Result.success(
+                            DeepAnalysisResult(
+                                coinId = d.coinSymbol,
+                                compositeSignal = CompositeSignal(
+                                    strength = SignalStrength.BUY,
+                                    bullishCount = 4,
+                                    bearishCount = 1,
+                                    neutralCount = 1,
+                                    indicators = listOf(
+                                        IndicatorStatus("RSI", String.format(Locale.US, "%.1f", d.rsi), Sentiment.NEUTRAL),
+                                        IndicatorStatus("MACD", d.macdLabel, Sentiment.BULLISH),
+                                        IndicatorStatus("EMA50", "SUPPORT", Sentiment.BULLISH)
+                                    ),
+                                    confidence = d.confidence
+                                ),
+                                currentPrice = d.currentPrice,
+                                ohlcData = emptyList(),
+                                patterns = emptyList(),
+                                fibonacci = mapOf("0.618" to d.currentPrice * 0.98, "0.5" to d.currentPrice * 0.95),
+                                rsiValue = d.rsi,
+                                sentiment = SentimentResult(
+                                    symbol = d.coinSymbol,
+                                    verdict = SentimentVerdict.BULLISH,
+                                    bullishPercent = 65,
+                                    bearishPercent = 15,
+                                    neutralPercent = 20,
+                                    totalAnalyzed = 142
+                                ),
+                                traces = emptyList()
+                            )
+                        )
+                    }
+
                     val normalizedId =
                         when (coinId.lowercase()) {
                             "btc" -> "bitcoin"

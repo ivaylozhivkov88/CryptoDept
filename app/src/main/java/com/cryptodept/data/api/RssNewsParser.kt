@@ -24,6 +24,7 @@ class RssNewsParser
             val description: String,
             val source: String,
             val category: String = "",
+            val imageUrl: String? = null,
         )
 
         data class RssSource(
@@ -34,7 +35,15 @@ class RssNewsParser
 
         private val RSS_SOURCES =
             listOf(
-                RssSource("CryptoPanic", "https://cryptopanic.com/news/rss/", "Aggregator"),
+                RssSource(
+                    "CryptoPanic",
+                    if (com.cryptodept.BuildConfig.CRYPTOPANIC_API_KEY.isNotEmpty()) {
+                        "https://cryptopanic.com/news/rss/?auth_token=${com.cryptodept.BuildConfig.CRYPTOPANIC_API_KEY}"
+                    } else {
+                        "https://cryptopanic.com/news/rss/"
+                    },
+                    "Aggregator"
+                ),
                 RssSource("CoinTelegraph", "https://cointelegraph.com/rss", "General"),
                 RssSource("The Block", "https://www.theblock.co/rss.xml", "Institutional"),
                 RssSource("Decrypt", "https://decrypt.co/feed", "General"),
@@ -106,6 +115,7 @@ class RssNewsParser
                 var link = ""
                 var pubDate = ""
                 var description = ""
+                var imageUrl: String? = null
 
                 while (eventType != XmlPullParser.END_DOCUMENT) {
                     val tagName = parser.name
@@ -116,14 +126,21 @@ class RssNewsParser
                                 link = ""
                                 pubDate = ""
                                 description = ""
+                                imageUrl = null
+                            }
+                            // Extract image from media:content or enclosure
+                            if (tagName == "media:content" || tagName == "enclosure") {
+                                val url = parser.getAttributeValue(null, "url")
+                                if (url != null && (url.contains(".jpg") || url.contains(".png") || url.contains(".webp"))) {
+                                    imageUrl = url
+                                }
                             }
                         }
                         XmlPullParser.END_TAG -> {
                             if (tagName == "item" && title.isNotEmpty()) {
-                                items.add(RssItem(title, link, pubDate, description, source.name, source.category))
+                                items.add(RssItem(title, link, pubDate, description, source.name, source.category, imageUrl))
                             }
                         }
-                        XmlPullParser.TEXT -> {} // Не ни трябва тук
                     }
 
                     // Използваме nextText() за сигурност вътре в START_TAG

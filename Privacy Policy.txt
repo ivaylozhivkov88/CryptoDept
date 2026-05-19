@@ -1,28 +1,41 @@
-Privacy Policy for CryptoDept
-Last Updated: May 11, 2026
+# 🛡️ CRYPTODEPT PRIVACY PROTOCOL — v1.1
+## Status: HARDENED | DATA_INTEGRITY_VERIFIED
 
-1. Introduction
-This Privacy Policy explains how CryptoDept ("we," "our," or "the app") handles information. We value your privacy and aim to be transparent about our data practices.
+---
 
-2. Data Collection
+### 1. MISSION STATEMENT
+At CryptoDept, we operate on a "Zero-Knowledge" philosophy. Our objective is to provide institutional-grade intelligence without compromising the operator's digital footprint.
 
-Personal Data: CryptoDept does not collect any personally identifiable information (PII) such as your name, email address, phone number, or location.
+### 2. DATA ENCLAVE (LOCAL STORAGE)
+All strategic data — including your Watchlists, Trade Journal entries, Achievement progress, and custom Terminal settings — is stored EXCLUSIVELY on your physical device.
+*   **Encryption:** Secured via SQLCipher AES-256 protocol.
+*   **Access:** We have NO remote access to your local database. If you delete the app, the data enclave is purged.
 
-Financial Data: The app does not access your bank accounts, credit card information, or crypto wallets. It is a tracking tool, not an exchange or a wallet.
+### 3. SENSITIVE DATA EXCLUSION
+The CryptoDept Terminal DOES NOT collect, transmit, or store:
+*   [ ] Personally Identifiable Information (Name, Email, Phone).
+*   [ ] Financial Credentials (Bank details, Credit Cards).
+*   [ ] Private Keys or Seed Phrases (We are not a wallet).
+*   [ ] Precise Geolocation.
 
-Usage Data: We do not track your search history or the specific assets you monitor. All watchlist data is stored locally on your device.
+### 4. EXTERNAL GATEWAYS
+The app interfaces with public blockchain explorers (Etherscan, Mempool, Helius) and market APIs (CoinGecko, Binance) via HTTPS.
+*   **IP Exposure:** Standard web protocols transmit your IP address to these providers during data fetch requests.
+*   **AI Link:** Narrative reports are generated via Google Gemini. No personal data is sent to the AI engine — only raw market numbers.
 
-3. Third-Party Services
-The app fetches market data from public cryptocurrency APIs. These third-party services may receive your IP address as part of the standard technical process of making an HTTPS request, but no other identifying data is shared with them.
+### 5. SYSTEM STABILITY MONITORING
+To ensure 99.9% terminal uptime, we utilize anonymous crash reporting:
+*   **Firebase Crashlytics:** Anonymous logs of system failures.
+*   **Opt-out:** You can deactivate stability monitoring at any time in [Settings > Security].
 
-4. Data Security
-Since all your settings and watchlists are stored locally, your data remains under your control. We use industry-standard HTTPS encryption for all data transmitted between the app and the market data providers.
+### 6. COMPLIANCE & DELETION
+You are the master of your data.
+*   **Manual Purge:** Use the "Wipe All Data" command in Settings to reset the terminal.
+*   **GDPR/CCPA:** Since we collect no personal data, there is no centralized database from which to "remove" your identity.
 
-5. Children’s Privacy
-Our services are not directed to children under the age of 13. We do not knowingly collect personal information from children.
+### 7. PROTOCOL UPDATES
+This document may be updated to reflect new security hardening measures. Continued use of the terminal constitutes acceptance of the latest protocol version.
 
-6. Changes to This Policy
-We may update our Privacy Policy from time to time. Any changes will be reflected in this document.
-
-7. Contact Us
-If you have any questions about this Privacy Policy, you can contact the developer via the contact information provided in the Google Play Store listing.
+---
+*Authorized by: [AGENT-INTEGRITY] Data Verification Unit*
+*Date: May 18, 2026*

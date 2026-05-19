@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -44,7 +45,7 @@ fun TutorialTooltip(
         typedMessage = ""
         message.forEachIndexed { idx, _ ->
             typedMessage = message.substring(0, idx + 1)
-            delay(15L)  // 15ms per character — feels fast but readable
+            delay(15L)
         }
     }
 
@@ -54,11 +55,11 @@ fun TutorialTooltip(
             .border(
                 width = 1.dp,
                 color = colors.primary,
-                shape = RoundedCornerShape(8.dp)
+                shape = RectangleShape
             ),
-        shape = RoundedCornerShape(8.dp),
+        shape = RectangleShape,
         colors = CardDefaults.cardColors(
-            containerColor = colors.background.copy(alpha = 0.96f)
+            containerColor = colors.background.copy(alpha = 0.98f)
         )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -97,9 +98,9 @@ fun TutorialTooltip(
                 lineHeight = 18.sp
             )
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             HorizontalDivider(color = colors.primary.copy(alpha = 0.3f), thickness = 1.dp)
-            Spacer(Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             // Controls
             Row(
@@ -135,14 +136,14 @@ fun TutorialTooltip(
                     Spacer(Modifier.width(4.dp))
                     Button(
                         onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             onNext()
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = colors.primary,
                             contentColor = colors.background
                         ),
-                        shape = RoundedCornerShape(4.dp)
+                        shape = RectangleShape
                     ) {
                         Text(
                             text = stringResource(

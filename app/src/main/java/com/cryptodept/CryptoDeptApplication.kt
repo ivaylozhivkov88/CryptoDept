@@ -11,6 +11,7 @@ import com.cryptodept.util.NotificationChannels
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.appcheck.appCheck
+import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
 import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 import dagger.hilt.android.HiltAndroidApp
 import java.util.concurrent.TimeUnit
@@ -33,9 +34,15 @@ class CryptoDeptApplication :
         FirebaseApp.initializeApp(this)
         super.onCreate()
         setupCrashlytics()
-        Firebase.appCheck.installAppCheckProviderFactory(
-            PlayIntegrityAppCheckProviderFactory.getInstance(),
-        )
+        
+        // --- FIREBASE APP CHECK CONFIGURATION ---
+        val appCheckFactory = if (BuildConfig.DEBUG) {
+            DebugAppCheckProviderFactory.getInstance()
+        } else {
+            PlayIntegrityAppCheckProviderFactory.getInstance()
+        }
+        Firebase.appCheck.installAppCheckProviderFactory(appCheckFactory)
+
         remoteConfigService.fetchAndActivate { }
         socketLifecycleService.init()
         createNotificationChannels()

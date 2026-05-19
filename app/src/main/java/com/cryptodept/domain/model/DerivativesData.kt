@@ -1,12 +1,12 @@
 package com.cryptodept.domain.model
 
 data class FundingRateData(
-    val symbol: String, // "BTC"
+    val symbol: String,
     val markPrice: Double,
-    val binanceRate: Double, // Funding rate от Binance Futures
-    val aggregatedRate: Double, // Средна от всички борси
+    val binanceRate: Double,
+    val aggregatedRate: Double,
     val nextFundingTime: Long,
-    val rateLevel: FundingLevel, // Enum за интерпретация
+    val rateLevel: FundingLevel,
     val timestamp: Long,
 )
 
@@ -14,34 +14,34 @@ enum class FundingLevel(
     val description: String,
     val isBullishWarning: Boolean,
 ) {
-    VERY_HIGH("Extreme Bullish Sentiment — Crash Risk", true), // > 0.10%
-    HIGH("Elevated Bullish Sentiment — Caution", true), // 0.05% - 0.10%
-    NORMAL("Neutral Funding — Healthy Market", false), // -0.02% - 0.05%
-    LOW("Slight Bearish Sentiment", false), // -0.05% - -0.02%
-    VERY_LOW("Extreme Bearish Sentiment — Bounce Risk", false), // < -0.05%
+    VERY_HIGH("Extreme Bullish Sentiment — Crash Risk", true),
+    HIGH("Elevated Bullish Sentiment — Caution", true),
+    NORMAL("Neutral Funding — Healthy Market", false),
+    LOW("Slight Bearish Sentiment", false),
+    VERY_LOW("Extreme Bearish Sentiment — Bounce Risk", false),
 }
 
 data class OpenInterestData(
     val symbol: String,
     val openInterestUsd: Double,
-    val openInterestChange24h: Double, // % промяна
+    val openInterestChange24h: Double,
     val trend: OITrend,
-    val history: List<OHLCData>, // Reuse OHLCData с OI стойности
+    val history: List<OHLCData>,
     val timestamp: Long,
 )
 
 enum class OITrend {
-    RISING_WITH_PRICE, // Bullish confirmation
-    FALLING_WITH_PRICE, // Bearish confirmation
-    RISING_PRICE_FALLING, // Bearish divergence
-    FALLING_PRICE_RISING, // Bullish divergence
+    RISING_WITH_PRICE,
+    FALLING_WITH_PRICE,
+    RISING_PRICE_FALLING,
+    FALLING_PRICE_RISING,
 }
 
 data class LiquidationData(
     val symbol: String,
-    val longLiquidations24h: Double, // USD
-    val shortLiquidations24h: Double, // USD
-    val dominantSide: String, // "LONGS" или "SHORTS"
+    val longLiquidations24h: Double,
+    val shortLiquidations24h: Double,
+    val dominantSide: String,
     val heatmapLevels: List<LiquidationLevel>,
     val timestamp: Long,
 )
@@ -50,7 +50,7 @@ data class LiquidationLevel(
     val price: Double,
     val longLiquidationUsd: Double,
     val shortLiquidationUsd: Double,
-    val isSignificant: Boolean, // > $100M
+    val isSignificant: Boolean,
 )
 
 data class MacroData(
@@ -60,7 +60,7 @@ data class MacroData(
     val goldChange: Double,
     val dxyPrice: Double,
     val dxyChange: Double,
-    val btcSp500Correlation: Double, // -1.0 до 1.0
+    val btcSp500Correlation: Double,
     val btcGoldCorrelation: Double,
     val timestamp: Long,
 )
@@ -70,7 +70,7 @@ data class FundingHeatmapItem(
     val binanceRate: Double,
     val bybitRate: Double,
     val okxRate: Double,
-    val aggregatedRate: Double,
+    val averageRate: Double,
 )
 
 data class MagneticZone(
@@ -93,6 +93,13 @@ data class CalendarEvent(
     val hotScore: Double,
     val isHot: Boolean,
     val category: String,
-    val proofUrl: String?,
     val daysUntil: Int,
+)
+
+// NEW WRAPPER FOR PART 5
+data class DerivativesSnapshot(
+    val coinId: String,
+    val funding: FundingRateData?,
+    val openInterest: OpenInterestData?,
+    val liquidations: LiquidationData?,
 )

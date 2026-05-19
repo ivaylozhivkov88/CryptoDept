@@ -20,6 +20,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.cryptodept.domain.model.SetupVerdict
 import com.cryptodept.domain.model.TradeDirectionType
 import com.cryptodept.domain.model.TradeSetup
+import com.cryptodept.ui.components.SanityCheckDialog
+import com.cryptodept.ui.components.SanitySeverity
 import com.cryptodept.ui.components.TerminalInput
 import com.cryptodept.ui.theme.*
 import com.cryptodept.viewmodel.TradePlannerViewModel
@@ -38,6 +40,36 @@ fun TradePlannerScreen(
     val takeProfit by viewModel.takeProfit.collectAsState()
     val setup by viewModel.setup.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+
+    var showSanityCheck by remember { mutableStateOf(false) }
+
+    if (showSanityCheck) {
+        val riskRewardRatio = if (kotlin.math.abs(entryPrice - stopLoss) > 0.0) {
+            kotlin.math.abs(takeProfit - entryPrice) / kotlin.math.abs(entryPrice - stopLoss)
+        } else 0.0
+        
+        SanityCheckDialog(
+            title = "POOR_RISK_REWARD",
+            message = """
+                Your R:R is 1:${String.format(Locale.US, "%.2f", riskRewardRatio)}.
+                
+                Most successful traders aim for R:R ≥ 1:2.
+                With 1:1 R:R, you need 50%+ win rate to break even.
+                
+                Consider:
+                - Tighter stop loss
+                - Higher take profit target
+                - Different entry point
+            """.trimIndent(),
+            severity = SanitySeverity.WARNING,
+            confirmLabel = "PROCEED_ANYWAY",
+            onConfirm = { 
+                showSanityCheck = false
+                viewModel.analyzeSetup() 
+            },
+            onDismiss = { showSanityCheck = false },
+        )
+    }
 
     Column(
         modifier =
@@ -87,7 +119,17 @@ fun TradePlannerScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { viewModel.analyzeSetup() },
+            onClick = { 
+                val riskRewardRatio = if (kotlin.math.abs(entryPrice - stopLoss) > 0.0) {
+                    kotlin.math.abs(takeProfit - entryPrice) / kotlin.math.abs(entryPrice - stopLoss)
+                } else 0.0
+                
+                if (riskRewardRatio < 1.0) {
+                    showSanityCheck = true
+                } else {
+                    viewModel.analyzeSetup()
+                }
+            },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = colors.primary, contentColor = colors.background),
             shape = RectangleShape,

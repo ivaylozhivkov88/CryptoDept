@@ -4,6 +4,8 @@ import com.cryptodept.domain.model.*
 import com.cryptodept.domain.usecase.MultiTimeframeAnalyzer
 import com.cryptodept.util.AppConstants
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import java.util.Locale
 import javax.inject.Inject
@@ -33,35 +35,38 @@ class PredictionEnsembleEngine
             closes: List<Double>,
             volumes: List<Double>,
         ): PricePrediction =
-            withContext(Dispatchers.Default) {
+            coroutineScope {
                 // Check cache before calculation
                 val cached = cache.get(coinId, "main")
-                if (cached != null) return@withContext cached
+                if (cached != null) return@coroutineScope cached
 
                 val currentPrice = closes.last()
                 val symbol = coinId.split("-").first().uppercase()
-                
-                val hurst = hurstCalc.calculate(closes)
-                val fractalDim = fractalAnalyzer.calculate(closes)
-                val predictability = fractalAnalyzer.getPredictabilityScore(fractalDim)
-                val mcResult = monteCarlo.simulate(closes, 24)
 
-                // Liquidity analysis (PHASE X)
-                val (liquidityVote, liquidityInsight) = liquidityEngine.analyze(coinId, currentPrice)
-
-                // Macro analysis (PHASE X)
-                val macroData = macroRepository.getMacroData().getOrNull()
-
-                // Sentiment Analysis (PHASE X)
-                val sentiment = sentimentAnalyzer.analyzeCoin(symbol)
-
-                // MTF analysis
-                val mtfConsensus =
+                // Launch independent analysis tasks in parallel
+                val hurstAsync = async { hurstCalc.calculate(closes) }
+                val fractalDimAsync = async { fractalAnalyzer.calculate(closes) }
+                val mcResultAsync = async { monteCarlo.simulate(closes, 24) }
+                val liquidityAsync = async { liquidityEngine.analyze(coinId, currentPrice) }
+                val macroAsync = async { macroRepository.getMacroData().getOrNull() }
+                val sentimentAsync = async { sentimentAnalyzer.analyzeCoin(symbol) }
+                val mtfAsync = async {
                     try {
                         mtfAnalyzer.analyze(coinId)
                     } catch (e: Exception) {
                         null
                     }
+                }
+
+                // Wait for results
+                val hurst = hurstAsync.await()
+                val fractalDim = fractalDimAsync.await()
+                val predictability = fractalAnalyzer.getPredictabilityScore(fractalDim)
+                val mcResult = mcResultAsync.await()
+                val (liquidityVote, liquidityInsight) = liquidityAsync.await()
+                val macroData = macroAsync.await()
+                val sentiment = sentimentAsync.await()
+                val mtfConsensus = mtfAsync.await()
 
                 val rawVotes =
                     listOf(
@@ -119,7 +124,7 @@ class PredictionEnsembleEngine
                     )
 
                 cache.put(coinId, "main", result)
-                return@withContext result
+                return@coroutineScope result
             }
 
         private fun generateDeepReasoning(

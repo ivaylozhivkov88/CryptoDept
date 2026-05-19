@@ -1,6 +1,5 @@
 package com.cryptodept.ui.dashboard
 
-import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -8,43 +7,51 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.draw.alpha
+import com.cryptodept.R
 import com.cryptodept.domain.model.CoinPrice
 import com.cryptodept.domain.model.AgentStatus
 import com.cryptodept.ui.components.StreamingText
 import com.cryptodept.ui.tutorial.tutorialTarget
 import com.cryptodept.domain.tutorial.TutorialTargetId
 import com.cryptodept.ui.components.*
+import com.cryptodept.ui.components.AppUpdateBanner
 import com.cryptodept.ui.effects.GlitchEffect
 import com.cryptodept.ui.components.skeletons.DashboardSkeleton
 import com.cryptodept.ui.navigation.Screen
 import com.cryptodept.ui.theme.*
-import com.cryptodept.util.toPercentage
 import com.cryptodept.util.TerminalConfig
 import com.cryptodept.viewmodel.DashboardUiState
 import com.cryptodept.viewmodel.DashboardViewModel
-import com.cryptodept.viewmodel.TutorialStep
 import java.util.Locale
+
+import com.cryptodept.domain.tier.AccessTier
+import com.cryptodept.ui.dashboard.cards.*
+import com.cryptodept.ui.navigation.navigateToPaywall
+import com.cryptodept.domain.model.WhaleSignal
+import com.cryptodept.domain.usecase.prediction.DailyAIPick
+import com.cryptodept.util.toCurrency
+import com.cryptodept.util.toPercentage
 
 @Composable
 fun DashboardScreen(
@@ -52,526 +59,260 @@ fun DashboardScreen(
     viewModel: DashboardViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val tier by viewModel.currentTier.collectAsStateWithLifecycle()
     val networkHealth by viewModel.networkHealth.collectAsStateWithLifecycle()
+    val macroIntelligence by viewModel.macroIntelligence.collectAsStateWithLifecycle()
     val events by viewModel.events.collectAsStateWithLifecycle()
     val isAiStreaming by viewModel.isAiStreaming.collectAsStateWithLifecycle()
-    val tutorialStep by viewModel.tutorialStep.collectAsStateWithLifecycle()
-    val focusModeEnabled by viewModel.focusModeEnabled.collectAsStateWithLifecycle()
+    val aiSummary by viewModel.aiSummary.collectAsStateWithLifecycle()
+    val agentStatuses by viewModel.agentStatuses.collectAsStateWithLifecycle()
+    val broadcastMessage by viewModel.broadcastMessage.collectAsStateWithLifecycle()
     
-    val targetRects = remember { mutableStateMapOf<TutorialStep, androidx.compose.ui.geometry.Rect>() }
-
-    val soundService = LocalTerminalAudioManager.current
-
-    LaunchedEffect(uiState) {
-        if (uiState is DashboardUiState.Error) {
-            soundService?.playAlert()
-        }
-    }
-
-    var showHelp by remember { mutableStateOf(false) }
-    var showVersion by remember { mutableStateOf(false) }
-    var showAdviceDialog by remember { mutableStateOf(false) }
-    var adviceAction by remember { mutableStateOf("") }
-    var adviceExplanation by remember { mutableStateOf("") }
-    var adviceGlitchTrigger by remember { mutableStateOf<String?>(null) }
-
     val colors = LocalTerminalColors.current
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val activity = context as? android.app.Activity
 
-    val glitchTrigger =
-        remember(uiState is DashboardUiState.Success) {
-            if (uiState is DashboardUiState.Success) "LOAD_COMPLETE" else null
-        }
-
-    if (showHelp) {
-        TerminalHelpDialog(onDismiss = { showHelp = false })
-    }
-
-    if (showVersion) {
-        AlertDialog(
-            onDismissRequest = { showVersion = false },
-            containerColor = colors.background,
-            modifier = Modifier.border(TerminalConfig.UI.BORDER_WIDTH, colors.primary),
-            title = { Text("SYSTEM VERSION INFO", color = colors.primary, fontFamily = FontFamily.Monospace) },
-            text = {
-                Column {
-                    Text("CRYPTODEPT TERMINAL v3.0.4", color = colors.primary, fontFamily = FontFamily.Monospace)
-                    Text("BUILD: 2026.04.30.SUPREME", color = colors.primary, fontFamily = FontFamily.Monospace)
-                    Text("ENGINE: ENSEMBLE v2.1", color = colors.primary, fontFamily = FontFamily.Monospace)
-                    Text("STATUS: OPTIMIZED", color = colors.primary, fontFamily = FontFamily.Monospace)
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showVersion = false }) {
-                    Text("OK", color = colors.primary, fontFamily = FontFamily.Monospace)
-                }
-            },
-        )
-    }
-
-    GlitchEffect(trigger = glitchTrigger) {
+    GlitchEffect(trigger = if (uiState is DashboardUiState.Success) "LOAD" else null) {
         Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(colors.background)
-                    .padding(TerminalConfig.UI.DEFAULT_PADDING)
-                    .imePadding(),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(colors.background)
+                .padding(TerminalConfig.UI.DEFAULT_PADDING)
+                .imePadding(),
         ) {
             val currentPrices = if (uiState is DashboardUiState.Success) (uiState as DashboardUiState.Success).prices else emptyList()
-            TickerTape(
-                prices = currentPrices,
-                networkHealth = networkHealth,
-                modifier = Modifier.tutorialTarget(TutorialTargetId.DASH_PRICE_TICKER)
-            )
+            
+            // --- 0. APP UPDATE BANNER ---
+            activity?.let {
+                AppUpdateBanner(activity = it)
+            }
+
+            if (broadcastMessage.isNotEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
+                        .border(1.dp, colors.amber)
+                        .background(colors.amber.copy(alpha = 0.1f))
+                        .padding(8.dp)
+                ) {
+                    Text(
+                        text = ">>> BROADCAST: $broadcastMessage",
+                        color = colors.amber,
+                        fontSize = 11.sp,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            // --- 1. PRICE TICKER ---
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(35.dp)
+                        .tutorialTarget(TutorialTargetId.DASH_PRICE_TICKER)
+                ) {
+                    TickerTape(prices = currentPrices, networkHealth = networkHealth, modifier = Modifier.fillMaxSize())
+                }
+                FeatureHelpIcon(feature = com.cryptodept.domain.tier.FeatureKey.DASHBOARD_PRICE_TICKER)
+            }
 
             HorizontalDivider(color = colors.grid, thickness = TerminalConfig.UI.BORDER_WIDTH)
 
             if (uiState is DashboardUiState.Error) {
-                TerminalErrorOverlay(
-                    message = (uiState as DashboardUiState.Error).message,
-                    onRetry = { viewModel.refresh() },
-                    modifier = Modifier.padding(16.dp)
-                )
+                TerminalErrorOverlay(message = (uiState as DashboardUiState.Error).message, onRetry = { viewModel.refresh() })
             } else if (uiState is DashboardUiState.Loading) {
                 DashboardSkeleton(modifier = Modifier.fillMaxSize())
-            } else if (focusModeEnabled) {
-                DashboardFocusView(
-                    uiState = uiState,
-                    networkHealth = networkHealth,
-                    navController = navController
-                )
             } else {
-                networkHealth?.let { health ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                        horizontalArrangement = Arrangement.Center,
-                    ) {
-                        SentimentBadge(
-                            pulse = health.socialPulse,
-                            label = health.socialPulseLabel,
+                Column(modifier = Modifier.weight(1f)) {
+                    val successState = uiState as? DashboardUiState.Success
+                    
+                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                        DashboardMainContent(
+                            networkHealth = networkHealth,
+                            macroIntelligence = macroIntelligence,
+                            navController = navController,
+                            currentPrices = currentPrices,
+                            tier = tier,
+                            dailyPick = successState?.dailyPick
                         )
                     }
-                    HorizontalDivider(color = colors.grid, thickness = 1.dp)
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth().height(80.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = ">>> MARKET TERMINAL v3.0",
-                            color = colors.primary,
-                            fontFamily = FontFamily.Monospace,
-                            fontSize = 14.sp,
-                            modifier =
-                                Modifier
-                                    .testTag("TerminalHeader")
-                                    .onTargetPositioned { targetRects[TutorialStep.HEADER] = it }
-                                    .clickable(
-                                        onClickLabel = "View Market News",
-                                        onClick = { navController.navigate(Screen.News.route) },
-                                    ),
-                        )
-                        
-                        Spacer(modifier = Modifier.height(10.dp))
-                        
-                        Text(
-                            text = "SOURCES: MULTI-API",
-                            color = colors.amber,
-                            fontFamily = FontFamily.Monospace,
-                            fontSize = 10.sp,
-                        )
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .size(80.dp)
-                            .padding(end = 8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        networkHealth?.let { health ->
-                            FearGreedPieChart3D(
-                                value = health.fearGreedIndex.toFloat(),
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .tutorialTarget(TutorialTargetId.DASH_SENTIMENT_GAUGE)
-                            )
-                        }
-                    }
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        // WHAT SHOULD I DO NOW? button
-                        GlitchEffect(trigger = adviceGlitchTrigger) {
-                            TextButton(
-                                onClick = {
-                                    // trigger glitch and compute recommendation
-                                    adviceGlitchTrigger = System.currentTimeMillis().toString()
-                                    viewModel.computeActionRecommendation { action, explanation ->
-                                        adviceAction = action
-                                        adviceExplanation = explanation
-                                        showAdviceDialog = true
-                                    }
-                                },
-                                colors = ButtonDefaults.textButtonColors(contentColor = colors.primary),
-                                modifier = Modifier.onTargetPositioned { targetRects[TutorialStep.WHATS_NEXT] = it }
-                            ) {
-                                Text("[WHAT NOW?]", fontFamily = FontFamily.Monospace, fontSize = 11.sp)
-                            }
-                        }
-                    }
-                }
-
-                HorizontalDivider(color = colors.grid, thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
-
-                networkHealth?.let { health ->
-                    NetworkHealthPanel(
-                        health = health,
-                        modifier = Modifier
-                            .onTargetPositioned { targetRects[TutorialStep.NETWORK_HEALTH] = it }
-                            .tutorialTarget(TutorialTargetId.DASH_NETWORK_HEALTH),
-                        onClick = { navController.navigate(Screen.FearGreed.route) }
+                    DashboardFeedContent(
+                        events = events,
+                        isAiStreaming = isAiStreaming,
+                        aiSummary = aiSummary,
+                        tier = tier,
+                        shortPulse = successState?.shortPulse ?: "",
+                        whaleSignal = successState?.whaleSignal ?: WhaleSignal.NEUTRAL,
+                        navController = navController,
+                        modifier = Modifier.weight(1f)
                     )
-                    HorizontalDivider(color = colors.grid, thickness = 1.dp, modifier = Modifier.padding(vertical = 2.dp))
+                    
+                    // --- FOOTER STATUS INDICATORS ---
+                    AgentStatusBar(agentStatuses)
                 }
+            }
+        }
+    }
+}
 
-                val prices = (uiState as? DashboardUiState.Success)?.prices ?: emptyList()
-                if (prices.isNotEmpty()) {
-                    MarketDominanceBar(prices)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    MiniHeatmap(
-                        prices = prices,
-                        modifier = Modifier.tutorialTarget(TutorialTargetId.DASH_TOP_MOVERS)
-                    )
-                    HorizontalDivider(color = colors.grid, thickness = 1.dp, modifier = Modifier.padding(vertical = 2.dp))
-                }
-
-                // AI SUMMARY BANNER
-                val agentStatuses by viewModel.agentStatuses.collectAsStateWithLifecycle()
-                val aiSummary by viewModel.aiSummary.collectAsStateWithLifecycle()
-
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .border(1.dp, colors.primary)
-                            .background(colors.primary.copy(alpha = 0.05f))
-                            .padding(8.dp)
-                            .onTargetPositioned { targetRects[TutorialStep.AI_NARRATIVE] = it }
-                            .tutorialTarget(TutorialTargetId.DASH_AI_NARRATIVE)
-                            .testTag("AiSummaryBanner"),
-                ) {
-                    Column {
-                        // AGENT STATUS BAR - WRAPPING
-                        @OptIn(ExperimentalLayoutApi::class)
-                        FlowRow(
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            agentStatuses.forEach { (id, status) ->
-                                val statusColor = when(status) {
-                                    AgentStatus.SCANNING -> colors.amber
-                                    AgentStatus.SUCCESS -> colors.primary
-                                    else -> colors.dimText
-                                }
-                                val statusText = when(status) {
-                                    AgentStatus.SCANNING -> "SCAN"
-                                    AgentStatus.SUCCESS -> "ACT"
-                                    else -> "RDY"
-                                }
-                                Text(
-                                    text = "[$id:$statusText]",
-                                    color = statusColor,
-                                    fontSize = 7.sp,
-                                    fontFamily = FontFamily.Monospace,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                            
-                            // [LIVE] INDICATOR - AT THE END OF THE FLOW
-                             Text(
-                                text = "[LIVE_FEED]",
-                                color = colors.primary,
-                                fontSize = 7.sp,
-                                fontFamily = FontFamily.Monospace,
-                                fontWeight = FontWeight.Black
-                            )
-                        }
-
-                        StreamingText(
-                            text = if (aiSummary.isNotBlank()) "AI_NARRATIVE: $aiSummary" else "",
-                            isStreaming = isAiStreaming,
-                            modifier = Modifier.fillMaxWidth(),
-                            fontSize = 10.sp,
-                            placeholder = "AI_NARRATIVE: INITIALIZING..."
-                        )
-                    }
-                }
-
+@Composable
+fun DashboardMainContent(
+    networkHealth: com.cryptodept.domain.model.NetworkHealth?,
+    macroIntelligence: com.cryptodept.domain.model.MacroIntelligence?,
+    navController: NavController,
+    currentPrices: List<CoinPrice>,
+    tier: AccessTier,
+    dailyPick: DailyAIPick?
+) {
+    val colors = LocalTerminalColors.current
+    Column {
+        Row(
+            modifier = Modifier.fillMaxWidth().height(125.dp), // Height for dual gauges
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
+        ) {
+            Column(modifier = Modifier.weight(1f).padding(top = 4.dp)) {
+                Text(
+                    text = stringResource(R.string.dash_header), 
+                    color = colors.primary, 
+                    fontSize = 14.sp,
+                    modifier = Modifier.tutorialTarget(TutorialTargetId.DASH_NAV_DRAWER)
+                )
                 Spacer(modifier = Modifier.height(4.dp))
+                Text(text = stringResource(R.string.dash_sources), color = colors.amber, fontSize = 9.sp)
+            }
 
-                // TERMINAL EVENT LOG
+            // --- 2. DUAL RADAR GAUGE (Fear & Greed + Altcoin Season) ---
+            Row(
+                modifier = Modifier.weight(2f),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Fear & Greed
+                Box(modifier = Modifier.weight(1f).tutorialTarget(TutorialTargetId.DASH_SENTIMENT_GAUGE)) {
+                    networkHealth?.let { health ->
+                        FearGreedPieChart3D(value = health.fearGreedIndex.toFloat())
+                    }
+                }
+                
+                // Altcoin Season
+                Box(modifier = Modifier.weight(1f)) {
+                    macroIntelligence?.let { macro ->
+                        AltcoinSeasonGauge(value = macro.altcoinSeasonIndex.toFloat())
+                    }
+                }
+            }
+        }
+
+        // --- 3. THE PULSE ROW & BLOOD TICKER ---
+        if (macroIntelligence != null) {
+            MacroPulseRow(macroIntelligence)
+            Spacer(modifier = Modifier.height(4.dp))
+            LiquidationTicker(macroIntelligence.totalLiquidations1h)
+        }
+
+        HorizontalDivider(color = colors.grid, thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
+
+        // Daily AI Pick — Always available as a free tool on the dashboard (Task fix)
+        if (dailyPick != null) {
+            DailyAIPickCard(
+                coinSymbol = dailyPick.coinSymbol,
+                direction = dailyPick.direction,
+                confidencePercent = (dailyPick.confidence * 100).toInt(),
+                accuracyPercent = dailyPick.historicalAccuracy?.let { (it * 100).toInt() },
+                sampleSize = dailyPick.sampleSize,
+                onSeeAllPredictions = { 
+                    if (tier == AccessTier.ADMIN) {
+                        navController.navigate(Screen.Prediction.route)
+                    } else {
+                        navController.navigateToPaywall("predictions") 
+                    }
+                },
+            )
+            HorizontalDivider(color = colors.grid, thickness = 1.dp, modifier = Modifier.padding(vertical = 2.dp))
+        }
+    }
+}
+
+@Composable
+fun DashboardFeedContent(
+    events: List<com.cryptodept.domain.model.SystemEvent>,
+    isAiStreaming: Boolean,
+    aiSummary: String,
+    tier: AccessTier,
+    shortPulse: String,
+    whaleSignal: WhaleSignal,
+    navController: NavController,
+    modifier: Modifier = Modifier
+) {
+    val colors = LocalTerminalColors.current
+    Column(modifier = modifier) {
+        // AI Narrative section - Task 2.14: Priority sizing
+        when (tier) {
+            AccessTier.FREE -> {
+                AIPulseShortCard(
+                    summary = shortPulse,
+                    onUpgrade = { navController.navigateToPaywall("ai_narrative") },
+                    modifier = Modifier.weight(1f) // Push event log down
+                )
+            }
+            AccessTier.PRO, AccessTier.ADMIN -> {
+                // --- 3. AI NARRATIVE BOX (FULL) ---
                 Box(
                     modifier = Modifier
-                        .weight(2f)
+                        .fillMaxWidth()
+                        .weight(1.5f) // HIGHER PRIORITY (Task 2.14)
+                        .border(1.dp, colors.primary)
+                        .tutorialTarget(TutorialTargetId.DASH_AI_NARRATIVE),
+                ) {
+                    Column(modifier = Modifier.padding(8.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = stringResource(R.string.dash_ai_narrative_header), color = colors.primary, fontSize = 7.sp, fontWeight = FontWeight.Black)
+                            Spacer(modifier = Modifier.weight(1f))
+                            FeatureHelpIcon(feature = com.cryptodept.domain.tier.FeatureKey.DASHBOARD_AI_NARRATIVE_FULL, iconSize = 10.dp)
+                        }
+                        StreamingText(text = stringResource(R.string.dash_ai_narrative_prefix, aiSummary), isStreaming = isAiStreaming, modifier = Modifier.fillMaxWidth(), fontSize = 10.sp)
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        // Whale section / Event Log - Task 2.14: Lower priority
+        when (tier) {
+            AccessTier.FREE -> {
+                WhaleInsightCard(
+                    signal = whaleSignal,
+                    onLearnMore = { /* TODO: show educational dialog */ },
+                    onUpgrade = { navController.navigateToPaywall("whale_tracker") },
+                    modifier = Modifier.weight(0.8f) // Lower priority
+                )
+            }
+            AccessTier.PRO, AccessTier.ADMIN -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f) // LOWER PRIORITY than AI Narrative
                         .border(1.dp, colors.grid)
                         .padding(4.dp)
                         .tutorialTarget(TutorialTargetId.DASH_WHALE_FEED)
                 ) {
                     Column {
-                        Text(
-                            text = "--- SYSTEM_EVENT_LOG ---",
-                            color = colors.dimText,
-                            fontSize = 9.sp,
-                            fontFamily = FontFamily.Monospace,
-                            modifier = Modifier.padding(bottom = 4.dp),
-                        )
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize().padding(top = 4.dp),
-                            verticalArrangement = Arrangement.spacedBy(2.dp),
-                        ) {
-                            if (events.isEmpty()) {
-                                item {
-                                    Text(
-                                        ">>> WAITING FOR SYSTEM_DATA...",
-                                        color = colors.dimText,
-                                        fontSize = 9.sp,
-                                        fontFamily = FontFamily.Monospace
-                                    )
-                                }
-                            }
-                            items(events, key = { it.id }) { event ->
-                                EventLogRow(event)
-                            }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = stringResource(R.string.dash_event_log_header), color = colors.dimText, fontSize = 9.sp)
+                            Spacer(modifier = Modifier.weight(1f))
+                            FeatureHelpIcon(feature = com.cryptodept.domain.tier.FeatureKey.DASHBOARD_WHALE_FEED_LIVE, iconSize = 10.dp)
+                        }
+                        LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 4.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            items(events) { event -> EventLogRow(event) }
                         }
                     }
                 }
             }
-
-            TerminalCommandBar(
-                modifier = Modifier
-                    .onTargetPositioned { targetRects[TutorialStep.COMMAND_BAR] = it }
-                    .tutorialTarget(TutorialTargetId.DASH_QUICK_ACTIONS),
-                onCommandEntered = { cmd ->
-                    val cleanCmd = cmd.trim().removePrefix("/").uppercase()
-                    val parts = cleanCmd.split(" ")
-                    when (parts[0]) {
-                        "HELP", "MAN" -> showHelp = true
-                        "TUTORIAL" -> viewModel.startTutorial()
-                        "FOCUSMODE" -> {
-                            if (parts.size > 1) {
-                                when (parts[1]) {
-                                    "ON" -> viewModel.setFocusMode(true)
-                                    "OFF" -> viewModel.setFocusMode(false)
-                                    "TOGGLE" -> viewModel.setFocusMode(!focusModeEnabled)
-                                }
-                            } else {
-                                viewModel.setFocusMode(!focusModeEnabled)
-                            }
-                        }
-                        "ALERTS" -> navController.navigate(Screen.Alerts.route)
-                        "NEWS" -> navController.navigate(Screen.News.route)
-                        "MATRIX" -> navController.navigate(Screen.Correlation.route)
-                        "SETTINGS" -> navController.navigate(Screen.Settings.route)
-                        "CHART" ->
-                            if (parts.size > 1) {
-                                navController.navigate(
-                                    Screen.Charts.createRoute(parts[1].lowercase()),
-                                )
-                            } else {
-                                navController.navigate(Screen.Charts.createRoute("bitcoin"))
-                            }
-                        "ANALYSIS" ->
-                            if (parts.size > 1) {
-                                navController.navigate(
-                                    Screen.Analysis.createRoute(parts[1].lowercase()),
-                                )
-                            } else {
-                                navController.navigate(Screen.Analysis.createRoute("bitcoin"))
-                            }
-                        "RISK" -> navController.navigate(Screen.Risk.route)
-                        "BRIEF" -> navController.navigate(Screen.Briefing.route)
-                        "JOURNAL" -> navController.navigate(Screen.Journal.route)
-                        "TOOLS" -> navController.navigate(Screen.ToolsHub.route)
-                        "PREDICT" -> navController.navigate(Screen.Prediction.route)
-                        "PORTFOLIO" -> navController.navigate(Screen.Portfolio.route)
-                        "COACH" -> navController.navigate(Screen.AICoach.route)
-                        "BACK" -> navController.popBackStack()
-                        "VERSION" -> showVersion = true
-                        "LOGOUT" -> viewModel.setAdminStatus(false)
-                        "CLEAR" -> { /* Visually handled by CommandBar clearing input */ }
-                        "SIZER" -> navController.navigate(Screen.PositionSizer.route)
-                        "PLANNER" -> navController.navigate(Screen.TradePlanner.route)
-                        "ENTRY" -> navController.navigate(Screen.EntryAnalysis.route)
-                        "MTF" -> navController.navigate(Screen.MtfAnalysis.route)
-                        "PSYCH" -> navController.navigate(Screen.Psychology.route)
-                        "DERIVS" -> navController.navigate(Screen.Derivatives.route)
-                        "GODMODE" -> {
-                            if (parts.size > 1 && parts[1] == "ON") {
-                                viewModel.activateGodMode()
-                            }
-                        }
-                        "COMPARE" -> {
-                            val c1 = if (parts.size > 1) parts[1].lowercase() else "bitcoin"
-                            val c2 = if (parts.size > 2) parts[2].lowercase() else "ethereum"
-                            // Map short symbols to IDs if needed, but for now simple navigate
-                            navController.navigate(Screen.Comparison.createRoute(c1, c2))
-                        }
-                    }
-                },
-            )
-
-            if (showAdviceDialog) {
-                AlertDialog(
-                    onDismissRequest = { showAdviceDialog = false },
-                    title = { Text("ACTION RECOMMENDATION", color = colors.primary, fontFamily = FontFamily.Monospace) },
-                    text = {
-                        Column {
-                            Text("Recommendation: $adviceAction", color = colors.textPrimary, fontFamily = FontFamily.Monospace)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(adviceExplanation, color = colors.dimText, fontFamily = FontFamily.Monospace)
-                        }
-                    },
-                    confirmButton = {
-                        TextButton(onClick = { showAdviceDialog = false }) {
-                            Text("OK", color = colors.primary)
-                        }
-                    },
-                    containerColor = colors.background,
-                    textContentColor = colors.textPrimary,
-                )
-            }
-        }
-    }
-
-    tutorialStep?.let { step ->
-        ShowcaseOverlay(
-            targetCoordinates = targetRects[step],
-            text = step.text,
-            onNext = { viewModel.nextStep() },
-            onSkip = { viewModel.skipTutorial() },
-            isLastStep = step == TutorialStep.FINISHED
-        )
-    }
-}
-
-@Composable
-fun NetworkHealthPanel(
-    health: com.cryptodept.domain.model.NetworkHealth,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-) {
-    val colors = LocalTerminalColors.current
-    Column(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .border(1.dp, colors.grid)
-                .minimumInteractiveComponentSize()
-                .clickable(
-                    onClickLabel = "View Detailed Network Health",
-                    onClick = onClick
-                )
-                .padding(4.dp)
-                .testTag("NetworkHealthPanel"),
-    ) {
-        Text(
-            text = "SYSTEM NETWORK HEALTH:",
-            color = colors.dimText,
-            fontSize = 11.sp,
-            fontFamily = FontFamily.Monospace,
-            fontWeight = FontWeight.Bold,
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(modifier = Modifier.weight(1f)) { NetworkStat("BTC HASH", health.btcHashrate) }
-            Box(modifier = Modifier.weight(1f)) { NetworkStat("ETH GAS", health.ethGas) }
-            Box(modifier = Modifier.weight(1f)) { NetworkStat("SENTIMENT", "${health.fearGreedIndex}") }
-            Box(modifier = Modifier.weight(1.2f)) { NetworkStat("SOCIAL", "${health.socialPulse} (${health.socialPulseLabel.take(4)})") }
-        }
-    }
-}
-
-@Composable
-fun MarketDominanceBar(prices: List<CoinPrice>) {
-    val colors = LocalTerminalColors.current
-
-    val stats by remember(prices) {
-        derivedStateOf {
-            val totalMarketCap = prices.sumOf { it.currentPrice * 1000 }
-            val btcCap = prices.find { it.symbol.lowercase() == "btc" }?.let { it.currentPrice * 1000 } ?: 0.0
-            val ethCap = prices.find { it.symbol.lowercase() == "eth" }?.let { it.currentPrice * 1000 } ?: 0.0
-            val btcDom = if (totalMarketCap > 0) (btcCap / totalMarketCap).toFloat() else 0.4f
-            val ethDom = if (totalMarketCap > 0) (ethCap / totalMarketCap).toFloat() else 0.2f
-            Triple(btcDom, ethDom, totalMarketCap)
-        }
-    }
-
-    val btcDominance = stats.first
-    val ethDominance = stats.second
-
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            "DOMINANCE: BTC ${(btcDominance.toDouble() * 100).toPercentage(
-                decimals = 1,
-            )} | ETH ${(ethDominance.toDouble() * 100).toPercentage(decimals = 1)}",
-            color = colors.dimText,
-            fontSize = 10.sp,
-            fontFamily = FontFamily.Monospace,
-        )
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(4.dp)
-                    .background(colors.surface),
-        ) {
-            if (btcDominance > 0f) {
-                Box(modifier = Modifier.weight(btcDominance).fillMaxHeight().background(colors.amber))
-            }
-            if (ethDominance > 0f) {
-                Box(modifier = Modifier.weight(ethDominance).fillMaxHeight().background(colors.primary))
-            }
-            val otherDominance = (1f - btcDominance - ethDominance).coerceAtLeast(0f)
-            if (otherDominance > 0f) {
-                Box(modifier = Modifier.weight(otherDominance).fillMaxHeight().background(colors.grid))
-            }
-        }
-    }
-}
-
-@Composable
-fun MiniHeatmap(
-    prices: List<CoinPrice>,
-    modifier: Modifier = Modifier,
-) {
-    val colors = LocalTerminalColors.current
-    val topPrices = prices.take(10)
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-        topPrices.forEach { coin ->
-            val color =
-                when {
-                    coin.priceChangePercentage24h > 5 -> colors.primary
-                    coin.priceChangePercentage24h > 0 -> colors.primary.copy(alpha = 0.6f)
-                    coin.priceChangePercentage24h < -5 -> colors.danger
-                    else -> colors.danger.copy(alpha = 0.6f)
-                }
-            Box(
-                modifier =
-                    Modifier
-                        .weight(1f)
-                        .height(12.dp)
-                        .background(color),
-            )
         }
     }
 }
@@ -580,246 +321,259 @@ fun MiniHeatmap(
 fun EventLogRow(event: com.cryptodept.domain.model.SystemEvent) {
     val colors = LocalTerminalColors.current
     val timeStr = java.text.SimpleDateFormat("HH:mm:ss", Locale.US).format(java.util.Date(event.timestamp))
-
-    val color =
-        when (event.priority) {
-            com.cryptodept.domain.model.EventPriority.CRITICAL -> colors.danger
-            com.cryptodept.domain.model.EventPriority.HIGH -> colors.primary
-            com.cryptodept.domain.model.EventPriority.MEDIUM -> colors.amber
-            else -> colors.dimText
-        }
-
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 1.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // HEARTBEAT ANIMATION
-        if (event.message.contains("SCANNING") || event.message.contains("ANALYZING")) {
-            val infiniteTransition = rememberInfiniteTransition(label = "heartbeat")
-            val alpha by infiniteTransition.animateFloat(
-                initialValue = 0.2f,
-                targetValue = 1.0f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(600, easing = LinearEasing),
-                    repeatMode = RepeatMode.Reverse
-                ),
-                label = "alpha"
-            )
-            Box(
-                modifier = Modifier
-                    .size(4.dp)
-                    .background(colors.primary.copy(alpha = alpha), CircleShape)
-                    .padding(end = 4.dp)
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-        }
-
-        Text(
-            text = "[$timeStr]",
-            color = colors.dimText,
-            fontSize = 9.sp,
-            fontFamily = FontFamily.Monospace,
-            modifier = Modifier.padding(end = 6.dp),
-        )
-        Text(
-            text = event.message,
-            color = color,
-            fontSize = 9.sp,
-            fontFamily = FontFamily.Monospace,
-            lineHeight = 11.sp,
-            modifier = Modifier.weight(1f)
-        )
+    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 1.dp)) {
+        Text(text = "[$timeStr]", color = colors.dimText, fontSize = 9.sp, modifier = Modifier.padding(end = 6.dp))
+        Text(text = event.message, color = colors.primary, fontSize = 9.sp, modifier = Modifier.weight(1f))
     }
 }
 
 @Composable
-fun FearGreedPieChart3D(
+fun FearGreedPieChart3D(value: Float, modifier: Modifier = Modifier) {
+    val colors = LocalTerminalColors.current
+    
+    val verdict = when {
+        value <= 25 -> "EXTREME FEAR"
+        value <= 46 -> "FEAR"
+        value <= 54 -> "NEUTRAL"
+        value <= 75 -> "GREED"
+        else -> "EXTREME GREED"
+    }
+
+    val verdictColor = when {
+        value <= 46 -> colors.danger
+        value >= 55 -> colors.primary
+        else -> colors.amber
+    }
+
+    SemiCircleGauge(
+        value = value,
+        label = "SENTIMENT",
+        verdict = verdict,
+        verdictColor = verdictColor,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun AltcoinSeasonGauge(value: Float, modifier: Modifier = Modifier) {
+    val colors = LocalTerminalColors.current
+    
+    val verdict = when {
+        value <= 25 -> "BTC SEASON"
+        value <= 46 -> "BTC BIAS"
+        value <= 54 -> "NEUTRAL"
+        value <= 75 -> "ALT BIAS"
+        else -> "ALT SEASON"
+    }
+
+    val verdictColor = when {
+        value <= 46 -> colors.amber
+        value >= 55 -> colors.primary
+        else -> colors.dimText
+    }
+
+    SemiCircleGauge(
+        value = value,
+        label = "ALT_SEASON INDEX",
+        verdict = verdict,
+        verdictColor = verdictColor,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun SemiCircleGauge(
     value: Float,
+    label: String,
+    verdict: String,
+    verdictColor: Color,
     modifier: Modifier = Modifier
 ) {
     val colors = LocalTerminalColors.current
-    val density = LocalDensity.current
-    val textMeasurer = rememberTextMeasurer()
-
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                val sweepAngle = (value / 100f) * 360f
-                val remainingAngle = 360f - sweepAngle
-                
-                val width = size.width
-                val height = size.height * 0.7f
-                val depth = with(density) { 8.dp.toPx() }
-                
-                // Side of greed slice (Green)
-                drawArc(
-                    color = colors.primary.copy(alpha = 0.5f),
-                    startAngle = -90f,
-                    sweepAngle = sweepAngle,
-                    useCenter = true,
-                    topLeft = androidx.compose.ui.geometry.Offset(0f, depth),
-                    size = androidx.compose.ui.geometry.Size(width, height)
-                )
-                
-                // Side of fear slice (Red)
-                drawArc(
-                    color = colors.danger.copy(alpha = 0.5f),
-                    startAngle = -90f + sweepAngle,
-                    sweepAngle = remainingAngle,
-                    useCenter = true,
-                    topLeft = androidx.compose.ui.geometry.Offset(0f, depth),
-                    size = androidx.compose.ui.geometry.Size(width, height)
-                )
-
-                // Top greed slice
-                drawArc(
-                    color = colors.primary,
-                    startAngle = -90f,
-                    sweepAngle = sweepAngle,
-                    useCenter = true,
-                    topLeft = androidx.compose.ui.geometry.Offset(0f, 0f),
-                    size = androidx.compose.ui.geometry.Size(width, height)
-                )
-                
-                // Top fear slice
-                drawArc(
-                    color = colors.danger,
-                    startAngle = -90f + sweepAngle,
-                    sweepAngle = remainingAngle,
-                    useCenter = true,
-                    topLeft = androidx.compose.ui.geometry.Offset(0f, 0f),
-                    size = androidx.compose.ui.geometry.Size(width, height)
-                )
-
-                // Draw Percentages inside slices
-                // Greed %
-                if (sweepAngle > 30) {
-                    val greedMidAngle = -90f + (sweepAngle / 2f)
-                    val rad = Math.toRadians(greedMidAngle.toDouble())
-                    val textStr = "${value.toInt()}%"
-                    val textLayoutResult = textMeasurer.measure(
-                        text = textStr,
-                        style = TextStyle(color = colors.background, fontSize = 10.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
-                    )
-                    val textX = (width / 2) + (Math.cos(rad) * width / 4).toFloat() - (textLayoutResult.size.width / 2)
-                    val textY = (height / 2) + (Math.sin(rad) * height / 4).toFloat() - (textLayoutResult.size.height / 2)
-                    
-                    drawText(
-                        textLayoutResult = textLayoutResult,
-                        topLeft = androidx.compose.ui.geometry.Offset(textX, textY)
-                    )
-                }
-
-                // Fear %
-                if (remainingAngle > 30) {
-                    val fearMidAngle = -90f + sweepAngle + (remainingAngle / 2f)
-                    val rad = Math.toRadians(fearMidAngle.toDouble())
-                    val textStr = "${100 - value.toInt()}%"
-                    val textLayoutResult = textMeasurer.measure(
-                        text = textStr,
-                        style = TextStyle(color = colors.background, fontSize = 10.sp, fontWeight = FontWeight.Black, fontFamily = FontFamily.Monospace)
-                    )
-                    val textX = (width / 2) + (Math.cos(rad) * width / 4).toFloat() - (textLayoutResult.size.width / 2)
-                    val textY = (height / 2) + (Math.sin(rad) * height / 4).toFloat() - (textLayoutResult.size.height / 2)
-                    
-                    drawText(
-                        textLayoutResult = textLayoutResult,
-                        topLeft = androidx.compose.ui.geometry.Offset(textX, textY)
-                    )
-                }
-            }
-        }
-        
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Text("FEAR", color = colors.danger, fontSize = 8.sp, fontFamily = FontFamily.Monospace)
-            Text("GREED", color = colors.primary, fontSize = 8.sp, fontFamily = FontFamily.Monospace)
-        }
-    }
-}
-
-@Composable
-fun NetworkStat(
-    label: String,
-    value: String,
-) {
-    val colors = LocalTerminalColors.current
-    Column {
-        Text(label, color = colors.dimText, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
-        Text(value, color = colors.primary, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-    }
-}
-
-@Composable
-fun DashboardFocusView(
-    uiState: DashboardUiState,
-    networkHealth: com.cryptodept.domain.model.NetworkHealth?,
-    navController: NavController
-) {
-    val colors = LocalTerminalColors.current
-    val prices = (uiState as? DashboardUiState.Success)?.prices ?: emptyList()
     
-    Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        if (prices.isNotEmpty()) {
-            val btc = prices.find { it.symbol.lowercase() == "btc" }
-            btc?.let {
-                Text(
-                    text = "BTC / USD",
-                    color = colors.dimText,
-                    fontSize = 18.sp,
-                    fontFamily = FontFamily.Monospace
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier) {
+        Box(
+            modifier = Modifier.size(width = 110.dp, height = 70.dp), // Increased height for better centering
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val strokeWidth = 3.5.dp.toPx() 
+                val radius = (size.width / 2) - 15.dp.toPx()
+                val center = Offset(size.width / 2, size.height - 12.dp.toPx()) // Shifted center up
+
+                // 5 Color Segments (180 degrees total)
+                val segments = listOf(
+                    colors.danger,
+                    colors.danger.copy(alpha = 0.7f),
+                    colors.amber,
+                    colors.primary.copy(alpha = 0.7f),
+                    colors.primary
                 )
+                
+                val startBaseAngle = 180f
+                val sweepTotal = 180f
+                val segmentSweep = sweepTotal / segments.size
+                val gap = 4f
+                
+                segments.forEachIndexed { i, color ->
+                    drawArc(
+                        color = color,
+                        startAngle = startBaseAngle + (i * segmentSweep) + (gap / 2),
+                        sweepAngle = segmentSweep - gap,
+                        useCenter = false,
+                        topLeft = Offset(center.x - radius, center.y - radius),
+                        size = Size(radius * 2, radius * 2),
+                        style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                    )
+                }
+
+                // Pointer Dot (Black on the line - CMC style)
+                val indicatorAngle = 180f + (value / 100f * 180f)
+                val rad = Math.toRadians(indicatorAngle.toDouble())
+                val dotX = center.x + radius * Math.cos(rad).toFloat()
+                val dotY = center.y + radius * Math.sin(rad).toFloat()
+                
+                drawCircle(
+                    color = Color.Black,
+                    radius = 4.5.dp.toPx(),
+                    center = Offset(dotX, dotY)
+                )
+                drawCircle(
+                    color = Color.White,
+                    radius = 3.dp.toPx(),
+                    center = Offset(dotX, dotY),
+                    style = Stroke(width = 1.dp.toPx())
+                )
+            }
+            
+            // Central Value (Lowered for better readability - Task fix)
+            Column(
+                modifier = Modifier
+                    .padding(bottom = 4.dp)
+                    .offset(y = 12.dp), // MOVED DOWN (Task fix)
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Text(
-                    text = "$${String.format(Locale.US, "%,.2f", it.currentPrice)}",
-                    color = colors.primary,
-                    fontSize = 48.sp,
+                    text = "${value.toInt()}",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold
+                    fontSize = 18.sp
                 )
                 Text(
-                    text = "${if (it.priceChangePercentage24h >= 0) "+" else ""}${String.format(Locale.US, "%.2f", it.priceChangePercentage24h)}% (24H)",
-                    color = if (it.priceChangePercentage24h >= 0) colors.primary else colors.danger,
-                    fontSize = 20.sp,
-                    fontFamily = FontFamily.Monospace
+                    text = verdict,
+                    color = verdictColor,
+                    fontSize = 7.sp,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.ExtraBold
                 )
             }
         }
         
-        Spacer(modifier = Modifier.height(48.dp))
-        
-        networkHealth?.let { health ->
-            SentimentBadge(
-                pulse = health.socialPulse,
-                label = health.socialPulseLabel,
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = label,
+            color = colors.dimText,
+            fontSize = 8.sp,
+            fontFamily = FontFamily.Monospace,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(top = 2.dp)
+        )
+    }
+}
+
+@Composable
+fun MacroPulseRow(macro: com.cryptodept.domain.model.MacroIntelligence) {
+    val colors = LocalTerminalColors.current
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        MacroPulseItem(label = "BTC_DOM", value = macro.btcDominance.toPercentage(decimals = 1))
+        MacroPulseItem(label = "ETH_GAS", value = "${macro.ethGasGwei} GWEI")
+        MacroPulseItem(label = "GLOB_CAP", value = (macro.globalMarketCapUsd / 1_000_000_000_000.0).toCurrency(2) + "T")
+    }
+}
+
+@Composable
+fun MacroPulseItem(label: String, value: String) {
+    val colors = LocalTerminalColors.current
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(text = "$label: ", color = colors.dimText, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+        Text(text = value, color = colors.primary, fontSize = 9.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+    }
+}
+
+@Composable
+fun LiquidationTicker(liq: com.cryptodept.domain.model.LiquidationSnapshot) {
+    val colors = LocalTerminalColors.current
+    val totalM = (liq.totalUsd / 1_000_000.0).toCurrency(1)
+    
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(0.5.dp, colors.danger.copy(alpha = 0.3f))
+            .background(colors.danger.copy(alpha = 0.05f))
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = "FEAR_GREED_INDEX: ${health.fearGreedIndex}",
-                color = colors.amber,
+                text = ">>> [BLOOD_FEED] ", 
+                color = colors.danger, 
+                fontSize = 10.sp, 
+                fontWeight = FontWeight.Black, 
+                fontFamily = FontFamily.Monospace
+            )
+            Text(
+                text = "${totalM}M LIQUIDATED (LAST 1H) — LONGS: ${(liq.longsUsd/1_000_000.0).toCurrency(1)}M | SHORTS: ${(liq.shortsUsd/1_000_000.0).toCurrency(1)}M",
+                color = colors.textPrimary,
+                fontSize = 10.sp,
                 fontFamily = FontFamily.Monospace,
-                fontSize = 14.sp
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
             )
         }
-        
-        Spacer(modifier = Modifier.height(64.dp))
-        
+    }
+}
+
+@Composable
+private fun IndicatorLabel(label: String, color: Color, isActive: Boolean) {
+    val colors = LocalTerminalColors.current
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-            text = "[ FOCUS_MODE_ACTIVE ]",
-            color = colors.grid,
-            fontFamily = FontFamily.Monospace,
-            fontSize = 10.sp
+            text = label,
+            color = if (isActive) color else color.copy(alpha = 0.3f),
+            fontSize = 10.sp,
+            fontWeight = if (isActive) FontWeight.ExtraBold else FontWeight.Normal,
+            fontFamily = FontFamily.Monospace
         )
-        Text(
-            text = "TYPE 'FOCUSMODE OFF' TO RESTORE FULL TERMINAL",
-            color = colors.dimText,
-            fontFamily = FontFamily.Monospace,
-            fontSize = 9.sp
-        )
+        if (isActive) {
+            Box(
+                modifier = Modifier
+                    .padding(top = 2.dp)
+                    .size(width = 20.dp, height = 2.dp)
+                    .background(color)
+            )
+        }
+    }
+}
+
+@Composable
+fun AgentStatusBar(agentStatuses: Map<String, AgentStatus>) {
+    val colors = LocalTerminalColors.current
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        agentStatuses.forEach { (name, status) ->
+            val indicator = if (status == AgentStatus.SUCCESS) "●" else "○"
+            val color = if (status == AgentStatus.SUCCESS) colors.primary else colors.dimText
+            Text(
+                text = "$indicator $name",
+                color = color,
+                fontFamily = FontFamily.Monospace,
+                fontSize = 8.sp,
+            )
+        }
     }
 }

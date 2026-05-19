@@ -7,38 +7,42 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class RemoteConfigService
-    @Inject
-    constructor() {
-        private val remoteConfig = Firebase.remoteConfig
+class RemoteConfigService @Inject constructor() {
+    private val remoteConfig = Firebase.remoteConfig
 
-        init {
-            val configSettings =
-                remoteConfigSettings {
-                    minimumFetchIntervalInSeconds = 3600
-                }
-            remoteConfig.setConfigSettingsAsync(configSettings)
-
-            // Set default values
-            val defaults =
-                mapOf(
-                    "terminal_amber_force" to false,
-                    "news_source_url" to "https://cryptocurrency.cv/api/news",
-                    "min_app_version" to 1,
-                    "gemini_model_name" to "gemini-1.5-flash",
-                )
-            remoteConfig.setDefaultsAsync(defaults)
+    init {
+        val configSettings = remoteConfigSettings {
+            minimumFetchIntervalInSeconds = 3600
         }
+        remoteConfig.setConfigSettingsAsync(configSettings)
 
-        fun fetchAndActivate(onComplete: (Boolean) -> Unit) {
-            remoteConfig.fetchAndActivate().addOnCompleteListener { task ->
-                onComplete(task.isSuccessful)
-            }
-        }
-
-        fun getAmberForce(): Boolean = remoteConfig.getBoolean("terminal_amber_force")
-
-        fun getNewsUrl(): String = remoteConfig.getString("news_source_url")
-
-        fun getGeminiModel(): String = remoteConfig.getString("gemini_model_name")
+        // Set default values matching Firebase Console
+        val defaults = mapOf(
+            "min_version_code" to 14L,
+            "free_ai_limit_daily" to 2L,
+            "terminal_broadcast_msg" to "",
+            "whale_usd_threshold" to 500000L,
+            "pro_sale_active" to false,
+            "gemini_model_name" to "gemini-1.5-flash"
+        )
+        remoteConfig.setDefaultsAsync(defaults)
     }
+
+    fun fetchAndActivate(onComplete: (Boolean) -> Unit) {
+        remoteConfig.fetchAndActivate().addOnCompleteListener { task ->
+            onComplete(task.isSuccessful)
+        }
+    }
+
+    fun getMinVersionCode(): Int = remoteConfig.getLong("min_version_code").toInt()
+
+    fun getFreeAiLimitDaily(): Int = remoteConfig.getLong("free_ai_limit_daily").toInt()
+
+    fun getTerminalBroadcastMsg(): String = remoteConfig.getString("terminal_broadcast_msg")
+
+    fun getWhaleUsdThreshold(): Double = remoteConfig.getLong("whale_usd_threshold").toDouble()
+
+    fun isProSaleActive(): Boolean = remoteConfig.getBoolean("pro_sale_active")
+
+    fun getGeminiModel(): String = remoteConfig.getString("gemini_model_name")
+}

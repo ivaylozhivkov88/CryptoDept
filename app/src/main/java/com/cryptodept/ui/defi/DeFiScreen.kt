@@ -27,6 +27,7 @@ import com.cryptodept.domain.model.LpSimulationResult
 import com.cryptodept.ui.components.TerminalErrorOverlay
 import com.cryptodept.ui.components.TerminalLoadingSkeleton
 import com.cryptodept.ui.theme.LocalTerminalColors
+import com.cryptodept.util.TerminalConfig
 import com.cryptodept.viewmodel.DeFiUiState
 import com.cryptodept.viewmodel.DeFiViewModel
 import java.util.Locale
@@ -45,7 +46,7 @@ fun DeFiScreen(
             Modifier
                 .fillMaxSize()
                 .background(colors.background)
-                .padding(16.dp),
+                .padding(TerminalConfig.UI.DEFAULT_PADDING),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -56,7 +57,7 @@ fun DeFiScreen(
                 text = ">>> DEFI_INTELLIGENCE_HUB",
                 color = colors.primary,
                 fontFamily = FontFamily.Monospace,
-                fontSize = 18.sp,
+                fontSize = TerminalConfig.UI.FONT_SIZE_HEADER,
                 fontWeight = FontWeight.Bold,
             )
             IconButton(onClick = onBack) {
@@ -64,7 +65,7 @@ fun DeFiScreen(
             }
         }
 
-        HorizontalDivider(color = colors.grid, modifier = Modifier.padding(vertical = 12.dp))
+        HorizontalDivider(color = colors.grid, modifier = Modifier.padding(vertical = TerminalConfig.UI.SPACER_MEDIUM))
 
         when (val state = uiState) {
             is DeFiUiState.Loading -> {

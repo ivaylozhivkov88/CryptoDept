@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.cryptodept.ui.settings
 
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -9,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
@@ -16,8 +19,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cryptodept.BuildConfig
 import com.cryptodept.data.auth.AuthService
-import com.cryptodept.ui.components.AdminPasswordDialog
 import com.cryptodept.ui.components.TerminalCard
+import com.cryptodept.ui.components.FeatureHelpIcon
+import com.cryptodept.domain.tier.FeatureKey
+import com.cryptodept.ui.navigation.Screen
 import com.cryptodept.ui.tutorial.tutorialTarget
 import com.cryptodept.domain.tutorial.TutorialTargetId
 import com.cryptodept.ui.theme.LocalTerminalColors
@@ -40,9 +45,11 @@ interface SettingsScreenEntryPoint {
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit,
+    navController: androidx.navigation.NavController,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
+    val uriHandler = LocalUriHandler.current
     val entryPoint = remember(context) {
         EntryPointAccessors.fromApplication(context.applicationContext, SettingsScreenEntryPoint::class.java)
     }
@@ -64,7 +71,6 @@ fun SettingsScreen(
                     val signInResult = authService.signInWithGoogle(idToken)
                     isAuthenticating = false
                     if (signInResult.isSuccess) {
-                        viewModel.setAdminStatus(true)
                         snackbarHostState.showSnackbar("AUTHENTICATION_SUCCESSFUL: OPERATOR_LOGGED_IN")
                     } else {
                         snackbarHostState.showSnackbar("AUTHENTICATION_FAILED: ${signInResult.exceptionOrNull()?.message}")
@@ -80,39 +86,33 @@ fun SettingsScreen(
     }
 
     val colors = LocalTerminalColors.current
+    val tier by viewModel.tierAccessManager.currentTier.collectAsState()
+    val isPro = tier.isPaid
+    val isAdmin = tier.isAdmin
+    
     val soundEnabled by viewModel.soundsEnabled.collectAsState()
     val notificationsEnabled by viewModel.notificationsEnabled.collectAsState()
     val hapticEnabled by viewModel.hapticEnabled.collectAsState()
     val powerUserMode by viewModel.powerUserMode.collectAsState()
     val screensaverTimeout by viewModel.screensaverTimeout.collectAsState()
     val phosphorMode by viewModel.phosphorMode.collectAsState()
-    val isAdmin by viewModel.isAdmin.collectAsState()
     val securityWarning by viewModel.securityWarning.collectAsState()
+    val forceShowAllFeatures by viewModel.forceShowAllFeatures.collectAsState()
 
-    val billingViewModel: com.cryptodept.viewmodel.BillingViewModel = hiltViewModel()
-    val isPro by billingViewModel.billingManager.isPro.collectAsState()
+    var showPaywall by remember { mutableStateOf(false) }
 
-    var showAdminDialog by remember { mutableStateOf(false) }
-
-    // SECRET ADMIN TRIGGER: Tap the "SYSTEM_SETTINGS_V2" text 5 times
-    var adminTapCount by remember { mutableIntStateOf(0) }
-
-    if (showAdminDialog) {
-        AdminPasswordDialog(
-            onDismiss = { showAdminDialog = false },
-            onAuthorized = { viewModel.setAdminStatus(true) },
-            onGoogleSignIn = { idToken ->
-                coroutineScope.launch {
-                    val result = authService.signInWithGoogle(idToken)
-                    if (result.isSuccess) {
-                        viewModel.setAdminStatus(true)
-                        showAdminDialog = false
-                    }
-                }
-            }
-        )
+    if (showPaywall) {
+        androidx.compose.ui.window.Dialog(
+            onDismissRequest = { showPaywall = false },
+            properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            com.cryptodept.ui.paywall.PaywallScreen(
+                onDismiss = { showPaywall = false }
+            )
+        }
     }
 
+    // Scaffold with Snackbar
     Scaffold(
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState) { data ->
@@ -142,13 +142,6 @@ fun SettingsScreen(
             color = colors.primary,
             fontFamily = FontFamily.Monospace,
             fontSize = 18.sp,
-            modifier = Modifier.clickable {
-                adminTapCount++
-                if (adminTapCount >= 5) {
-                    showAdminDialog = true
-                    adminTapCount = 0
-                }
-            }
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -194,6 +187,7 @@ fun SettingsScreen(
                     .fillMaxWidth()
                     .border(1.dp, if (isPro) colors.primary else colors.amber, RectangleShape)
                     .background(if (isPro) colors.primary.copy(alpha = 0.05f) else colors.amber.copy(alpha = 0.05f))
+                    .tutorialTarget(TutorialTargetId.SETTINGS_TIER)
                     .padding(12.dp),
         ) {
             Row(
@@ -209,12 +203,18 @@ fun SettingsScreen(
                         fontFamily = FontFamily.Monospace,
                         fontSize = 14.sp,
                     )
-                    Text(
-                        text = if (isPro) "Unlimited Terminal Access" else "Limited to 3 Tracked Coins",
-                        color = colors.dimText,
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 10.sp,
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = if (isPro) "Unlimited Terminal Access (Max 30 Coins)" else "Limited to 10 Tracked Coins",
+                            color = colors.dimText,
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = 10.sp,
+                        )
+                        FeatureHelpIcon(
+                            feature = if (isPro) FeatureKey.WATCHLISTS_UNLIMITED else FeatureKey.WATCHLIST_SINGLE,
+                            iconSize = 10.dp
+                        )
+                    }
                 }
 
                 if (!isPro) {
@@ -222,7 +222,7 @@ fun SettingsScreen(
                         text = "[GO PRO]",
                         color = colors.amber,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.clickable { /* Trigger Paywall */ },
+                        modifier = Modifier.clickable { showPaywall = true },
                     )
                 }
             }
@@ -258,12 +258,36 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // PROGRESSIVE DISCLOSURE OVERRIDE
+        SettingRow("SHOW_ALL_FEATURES", "Override progressive disclosure", forceShowAllFeatures) {
+            viewModel.setForceShowAllFeatures(it)
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         // SCREENSAVER TIMEOUT
         val timeoutLabel = if (screensaverTimeout == 0) "OFF" else "${screensaverTimeout}min"
         SettingRow("SCREENSAVER", "Current timeout: $timeoutLabel", true) {
             val timeouts = listOf(0, 2, 5, 10, 30)
             val nextIdx = (timeouts.indexOf(screensaverTimeout) + 1) % timeouts.size
             viewModel.setScreensaverTimeout(timeouts[nextIdx])
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, colors.primary.copy(alpha = 0.2f), RectangleShape)
+                    .tutorialTarget(TutorialTargetId.SETTINGS_GLOSSARY)
+                    .clickable { navController.navigate(Screen.Glossary.route) }
+                    .padding(12.dp),
+        ) {
+            Column {
+                Text("CRYPTO_GLOSSARY", color = colors.primary, fontFamily = FontFamily.Monospace, fontSize = 14.sp)
+                Text("Learn key crypto and trading terms", color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 10.sp)
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -285,6 +309,70 @@ fun SettingsScreen(
         }
 
         Spacer(modifier = Modifier.height(32.dp))
+
+        // LEGAL & COMPLIANCE
+        Text(
+            text = ">>> LEGAL_&_COMPLIANCE",
+            color = colors.dimText,
+            fontSize = 12.sp,
+            fontFamily = FontFamily.Monospace,
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(1.dp, colors.primary.copy(alpha = 0.2f), RectangleShape)
+                .clickable { uriHandler.openUri("https://gist.githubusercontent.com/ivaylozhivkov88/147ca22ec93a2af3dd9224c69466af82/raw/") }
+                .padding(12.dp),
+        ) {
+            Column {
+                Text("PRIVACY_POLICY", color = colors.primary, fontFamily = FontFamily.Monospace, fontSize = 14.sp)
+                Text("Review how we handle your data", color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 10.sp)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(1.dp, colors.primary.copy(alpha = 0.2f), RectangleShape)
+                .clickable { uriHandler.openUri("https://gist.githubusercontent.com/ivaylozhivkov88/041f01cf7720f989358dd4e7125ba22f/raw/") }
+                .padding(12.dp),
+        ) {
+            Column {
+                Text("DELETE_ACCOUNT", color = colors.danger, fontFamily = FontFamily.Monospace, fontSize = 14.sp)
+                Text("Instructions for account removal", color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 10.sp)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // ADMIN CONSOLE (Visible only to authorized admins)
+        if (isAdmin) {
+            Text(
+                text = ">>> ADMIN_COMMAND_CENTER",
+                color = colors.danger,
+                fontSize = 12.sp,
+                fontFamily = FontFamily.Monospace,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, colors.danger, RectangleShape)
+                    .clickable { navController.navigate(com.cryptodept.ui.navigation.Screen.Prediction.route) }
+                    .padding(12.dp),
+            ) {
+                Column {
+                    Text("PREDICTION_TRACK_RECORD", color = colors.primary, fontFamily = FontFamily.Monospace, fontSize = 14.sp)
+                    Text("Historical AI accuracy metrics & stats", color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 10.sp)
+                }
+            }
+            Spacer(modifier = Modifier.height(32.dp))
+        }
 
         // --- GOOGLE AUTH SECTION ---
         Text(
@@ -358,7 +446,61 @@ fun SettingsScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // --- TEST/REVIEWER TOOLS ---
+        // Task 1.3: Button should be visible for reviewers in Play Store (Closed Test)
+        // but hidden in the final Production release.
+        if (com.cryptodept.util.TestModeFlag.IS_TEST_PERIOD) {
+            Text(
+                text = ">>> INTERNAL_TESTING_TOOLS",
+                color = colors.danger,
+                fontSize = 12.sp,
+                fontFamily = FontFamily.Monospace,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Toggle Admin Status
+                OutlinedButton(
+                    onClick = { viewModel.setAdminStatus(!isAdmin) },
+                    modifier = Modifier.weight(1f),
+                    shape = RectangleShape,
+                    border = BorderStroke(1.dp, colors.danger)
+                ) {
+                    Text(if (isAdmin) "REVOKE_ADMIN" else "GRANT_ADMIN", color = colors.danger, fontSize = 9.sp)
+                }
+
+                // Activate Pro (Simulation)
+                OutlinedButton(
+                    onClick = { viewModel.setProStatus(!isPro) },
+                    modifier = Modifier.weight(1f),
+                    shape = RectangleShape,
+                    border = BorderStroke(1.dp, colors.amber)
+                ) {
+                    Text(if (isPro) "REVOKE_PRO" else "ACTIVATE_PRO", color = colors.amber, fontSize = 9.sp)
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+
+        // VERSION INFO
+        androidx.compose.material3.Text(
+            text = "v${BuildConfig.VERSION_NAME} (build ${BuildConfig.VERSION_CODE})",
+            color = colors.dimText,
+            fontFamily = FontFamily.Monospace,
+            fontSize = 10.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedButton(
             onClick = onBack,

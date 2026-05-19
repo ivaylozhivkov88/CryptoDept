@@ -14,10 +14,16 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cryptodept.ui.theme.*
+import com.cryptodept.util.AnalyticsManager
+import com.cryptodept.util.HapticManager
+
+val LocalHapticManager = staticCompositionLocalOf<HapticManager?> { null }
+val LocalAnalyticsManager = staticCompositionLocalOf<AnalyticsManager?> { null }
 
 @Composable
 fun TerminalCard(
     title: String,
+    titleColor: Color = TextGray,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Column(
@@ -27,7 +33,7 @@ fun TerminalCard(
                 .border(1.dp, GridGray)
                 .padding(12.dp),
     ) {
-        Text(title, color = TextGray, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+        Text(title, color = titleColor, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
         Spacer(modifier = Modifier.height(8.dp))
         content()
     }

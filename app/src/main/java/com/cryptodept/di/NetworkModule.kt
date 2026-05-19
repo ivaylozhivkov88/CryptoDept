@@ -209,6 +209,11 @@ object NetworkModule {
     ): BinanceFuturesApi = retrofit.create(BinanceFuturesApi::class.java)
 
     @Provides @Singleton
+    fun provideBinanceFuturesService(
+        @Named("binance_futures") retrofit: Retrofit,
+    ): com.cryptodept.data.api.binance.BinanceFuturesService = retrofit.create(com.cryptodept.data.api.binance.BinanceFuturesService::class.java)
+
+    @Provides @Singleton
     @Named("binance_futures")
     fun provideBinanceFuturesRetrofit(
         @Named("PublicClient") okHttpClient: OkHttpClient,
@@ -299,6 +304,13 @@ object NetworkModule {
     ): DefiLlamaApi = createRetrofit(config.defiLlamaApiBaseUrl, client).create(DefiLlamaApi::class.java)
 
     @Provides @Singleton
+    fun provideDefiLlamaService(
+        @Named("PublicClient") client: OkHttpClient,
+        config: EndpointsConfig,
+    ): com.cryptodept.data.api.defillama.DefiLlamaService = 
+        createRetrofit(config.defiLlamaApiBaseUrl, client).create(com.cryptodept.data.api.defillama.DefiLlamaService::class.java)
+
+    @Provides @Singleton
     fun provideHeliusApi(
         @Named("PublicClient") client: OkHttpClient,
         config: EndpointsConfig,
@@ -309,6 +321,27 @@ object NetworkModule {
         @Named("PublicClient") client: OkHttpClient,
         config: EndpointsConfig,
     ): MempoolSpaceApi = createRetrofit(config.mempoolSpaceApiBaseUrl, client).create(MempoolSpaceApi::class.java)
+
+    @Provides @Singleton
+    fun provideEtherscanService(
+        @Named("PublicClient") client: OkHttpClient,
+        config: EndpointsConfig,
+    ): com.cryptodept.data.api.etherscan.EtherscanService = 
+        createRetrofit(config.etherscanBaseUrl, client).create(com.cryptodept.data.api.etherscan.EtherscanService::class.java)
+
+    @Provides @Singleton
+    fun provideMempoolService(
+        @Named("PublicClient") client: OkHttpClient,
+        config: EndpointsConfig,
+    ): com.cryptodept.data.api.mempool.MempoolService = 
+        createRetrofit(config.mempoolSpaceApiBaseUrl, client).create(com.cryptodept.data.api.mempool.MempoolService::class.java)
+
+    @Provides @Singleton
+    fun provideHeliusService(
+        @Named("PublicClient") client: OkHttpClient,
+        config: EndpointsConfig,
+    ): com.cryptodept.data.api.helius.HeliusService = 
+        createRetrofit(config.heliusApiBaseUrl, client).create(com.cryptodept.data.api.helius.HeliusService::class.java)
 
     @Provides @Singleton
     fun provideGson(): Gson = Gson()

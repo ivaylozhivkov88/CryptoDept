@@ -16,9 +16,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.cryptodept.domain.model.Blockchain
-import com.cryptodept.domain.model.WhaleTransaction
+import com.cryptodept.domain.model.WhaleTransactionV2
+import com.cryptodept.domain.model.WhaleSignificance
 import com.cryptodept.ui.components.TerminalCard
+import com.cryptodept.ui.components.skeletons.WhaleTxSkeleton
 import com.cryptodept.ui.theme.LocalTerminalColors
 import com.cryptodept.util.TerminalConfig
 import com.cryptodept.util.TerminalFormatter
@@ -36,11 +37,10 @@ fun WhaleTrackerScreen(
     val isRefreshing by viewModel.isRefreshing.collectAsState()
 
     Column(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .background(colors.background)
-                .padding(TerminalConfig.UI.DEFAULT_PADDING),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colors.background)
+            .padding(TerminalConfig.UI.DEFAULT_PADDING),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -48,7 +48,7 @@ fun WhaleTrackerScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = ">>> WHALE TRACKER",
+                text = ">>> WHALE TRACKER V2",
                 color = colors.primary,
                 fontFamily = FontFamily.Monospace,
                 fontSize = TerminalConfig.UI.FONT_SIZE_HEADER,
@@ -60,7 +60,7 @@ fun WhaleTrackerScreen(
                 CircularProgressIndicator(
                     modifier = Modifier.size(TerminalConfig.UI.ICON_SIZE_SMALL),
                     color = colors.primary,
-                    strokeWidth = TerminalConfig.UI.BORDER_WIDTH * 2,
+                    strokeWidth = 2.dp,
                 )
             } else {
                 OutlinedButton(
@@ -70,29 +70,49 @@ fun WhaleTrackerScreen(
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                     modifier = Modifier.height(28.dp)
                 ) {
-                    Text("REFRESH", color = colors.primary, fontFamily = FontFamily.Monospace, fontSize = 10.sp)
+                    Text("SCAN", color = colors.primary, fontFamily = FontFamily.Monospace, fontSize = 10.sp)
                 }
             }
         }
 
         Spacer(modifier = Modifier.height(TerminalConfig.UI.SPACER_LARGE))
 
-        if (transactions.isEmpty() && !isRefreshing) {
+        if (isRefreshing && transactions.isEmpty()) {
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(TerminalConfig.UI.SPACER_MEDIUM),
+            ) {
+                items(5) { WhaleTxSkeleton() }
+            }
+        } else if (transactions.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(
-                    "NO LARGE ON-CHAIN MOVES DETECTED RECENTLY",
-                    color = colors.dimText,
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = TerminalConfig.UI.FONT_SIZE_NORMAL,
-                )
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        "NO LARGE MOVES DETECTED ON-CHAIN",
+                        color = colors.dimText,
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = TerminalConfig.UI.FONT_SIZE_NORMAL,
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        "(Scanning for $500k+ moves on BTC/ETH/SOL)",
+                        color = colors.grid,
+                        fontSize = 9.sp,
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    TextButton(onClick = { viewModel.refresh() }) {
+                        Text("[ FORCE_SCAN ]", color = colors.primary, fontFamily = FontFamily.Monospace)
+                    }
+                }
             }
         } else {
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(TerminalConfig.UI.SPACER_MEDIUM),
             ) {
-                items(transactions, key = { it.id }) { tx ->
-                    WhaleTxCard(tx)
+                items(transactions, key = { it.hash }) { tx ->
+                    WhaleTxCardV2(tx)
                 }
             }
         }
@@ -111,30 +131,23 @@ fun WhaleTrackerScreen(
 }
 
 @Composable
-fun WhaleTxCard(tx: WhaleTransaction) {
+fun WhaleTxCardV2(tx: WhaleTransactionV2) {
     val colors = LocalTerminalColors.current
     val uriHandler = LocalUriHandler.current
     val sdf = remember { SimpleDateFormat("HH:mm:ss dd/MM", Locale.US) }
 
-    val blockchainLabel =
-        when (tx.blockchain) {
-            Blockchain.ETHEREUM -> "ETH"
-            Blockchain.SOLANA -> "SOL"
-            Blockchain.BITCOIN -> "BTC"
-        }
+    val sigColor = when (tx.significance) {
+        WhaleSignificance.MEGA -> colors.danger
+        WhaleSignificance.LARGE -> colors.amber
+        else -> colors.primary
+    }
 
-    TerminalCard(title = "TX: ${TerminalFormatter.formatShortAddress(tx.transactionHash)}") {
+    TerminalCard(
+        title = "${tx.significance.emoji} ${tx.significance.label}",
+        titleColor = sigColor
+    ) {
         Column(
-            modifier =
-                Modifier.clickable {
-                    val url =
-                        when (tx.blockchain) {
-                            Blockchain.ETHEREUM -> "https://etherscan.io/tx/${tx.transactionHash}"
-                            Blockchain.SOLANA -> "https://solscan.io/tx/${tx.transactionHash}"
-                            Blockchain.BITCOIN -> "https://mempool.space/tx/${tx.transactionHash}"
-                        }
-                    uriHandler.openUri(url)
-                },
+            modifier = Modifier.clickable { tx.explorerUrl?.let { uriHandler.openUri(it) } },
         ) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(
@@ -154,28 +167,20 @@ fun WhaleTxCard(tx: WhaleTransaction) {
 
             Spacer(modifier = Modifier.height(TerminalConfig.UI.SPACER_MEDIUM))
 
-            Text(
-                text = "FROM: ${TerminalFormatter.formatShortAddress(tx.fromAddress)}",
-                color = colors.dimText,
-                fontSize = TerminalConfig.UI.FONT_SIZE_SMALL,
-                fontFamily = FontFamily.Monospace,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = "TO:   ${TerminalFormatter.formatShortAddress(tx.toAddress)}",
-                color = colors.dimText,
-                fontSize = TerminalConfig.UI.FONT_SIZE_SMALL,
-                fontFamily = FontFamily.Monospace,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                val from = tx.fromOwner ?: TerminalFormatter.formatShortAddress(tx.fromAddress)
+                val to = tx.toOwner ?: TerminalFormatter.formatShortAddress(tx.toAddress)
+                
+                Text(from, color = if (tx.fromOwner != null) colors.amber else colors.dimText, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+                Text(" → ", color = colors.grid, fontSize = 11.sp)
+                Text(to, color = if (tx.toOwner != null) colors.amber else colors.dimText, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+            }
 
             Spacer(modifier = Modifier.height(TerminalConfig.UI.SPACER_MEDIUM))
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(
-                    text = "BLOCKCHAIN: $blockchainLabel",
+                    text = "BLOCKCHAIN: ${tx.blockchain.uppercase()}",
                     color = colors.dimText,
                     fontFamily = FontFamily.Monospace,
                     fontSize = TerminalConfig.UI.FONT_SIZE_MICRO,

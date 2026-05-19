@@ -23,25 +23,43 @@ import com.cryptodept.domain.model.Alert
 import com.cryptodept.domain.model.AlertDirection
 import com.cryptodept.ui.tutorial.tutorialTarget
 import com.cryptodept.domain.tutorial.TutorialTargetId
+import com.cryptodept.ui.navigation.navigateToPaywall
+import com.cryptodept.ui.components.FeatureHelpIcon
+import com.cryptodept.domain.tier.FeatureKey
+import com.cryptodept.domain.tier.AccessTier
+import com.cryptodept.domain.tier.TierAccessManager
 import com.cryptodept.ui.theme.*
+import com.cryptodept.util.TerminalConfig
 import com.cryptodept.viewmodel.AlertsViewModel
+import com.cryptodept.viewmodel.AlertCreationResult
+import kotlinx.coroutines.launch
 import java.util.*
 
 @Composable
 fun AlertsScreen(
     onNavigateToBuilder: () -> Unit,
+    onNavigateToPaywall: () -> Unit = {},
     viewModel: AlertsViewModel = hiltViewModel(),
 ) {
     val alerts by viewModel.alerts.collectAsState()
     val compositeAlerts by viewModel.compositeAlerts.collectAsState()
     val colors = LocalTerminalColors.current
+    val scope = rememberCoroutineScope()
+    var showLimitDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = colors.background,
         floatingActionButton = {
             FloatingActionButton(
-                onClick = onNavigateToBuilder,
+                onClick = {
+                    scope.launch {
+                        when (viewModel.canCreateNewAlert()) {
+                            AlertCreationResult.Allowed -> onNavigateToBuilder()
+                            is AlertCreationResult.LimitReached -> showLimitDialog = true
+                        }
+                    }
+                },
                 containerColor = colors.primary,
                 contentColor = colors.background,
                 shape = RectangleShape,
@@ -56,31 +74,69 @@ fun AlertsScreen(
                 Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .padding(16.dp),
+                    .padding(TerminalConfig.UI.DEFAULT_PADDING),
         ) {
-            Text(
-                text = ">>> ACTIVE_ALERT_DAEMONS",
-                color = colors.primary,
-                fontFamily = FontFamily.Monospace,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-            )
+            if (showLimitDialog) {
+                AlertDialog(
+                    onDismissRequest = { showLimitDialog = false },
+                    title = { 
+                        Text("Alert Limit Reached", fontFamily = FontFamily.Monospace, color = colors.primary) 
+                    },
+                    text = { 
+                        Text(
+                            text = "Free tier allows up to ${AlertsViewModel.FREE_TIER_ALERT_LIMIT} alerts.\n\n" +
+                                   "Upgrade to Pro for unlimited alerts + composite logic.",
+                            fontFamily = FontFamily.Monospace,
+                            color = colors.textPrimary
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            showLimitDialog = false
+                            onNavigateToPaywall()
+                        }) {
+                            Text("[ UPGRADE_TO_PRO ]", fontFamily = FontFamily.Monospace, color = colors.amber)
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showLimitDialog = false }) {
+                            Text("[ CLOSE ]", fontFamily = FontFamily.Monospace, color = colors.dimText)
+                        }
+                    },
+                    containerColor = colors.background,
+                    shape = RectangleShape
+                )
+            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = ">>> ACTIVE_ALERT_DAEMONS",
+                    color = colors.primary,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = TerminalConfig.UI.FONT_SIZE_HEADER,
+                    fontWeight = FontWeight.Bold,
+                )
+                val tier = viewModel.getCurrentTier()
+                FeatureHelpIcon(
+                    feature = if (tier.canAccess(AccessTier.PRO)) FeatureKey.ALERTS_UNLIMITED else FeatureKey.ALERTS_LIMITED_3
+                )
+            }
+
+            Spacer(modifier = Modifier.height(TerminalConfig.UI.SPACER_LARGE))
 
             if (alerts.isEmpty() && compositeAlerts.isEmpty()) {
                 Box(
                     modifier =
                         Modifier
                             .fillMaxSize()
-                            .border(1.dp, colors.grid, RectangleShape),
+                            .border(TerminalConfig.UI.BORDER_WIDTH, colors.grid, RectangleShape),
                     contentAlignment = androidx.compose.ui.Alignment.Center,
                 ) {
                     Text(
                         text = ">>> NO ACTIVE ALERTS FOUND\n>>> SCANNING_MODE: IDLE",
                         color = colors.dimText,
                         fontFamily = FontFamily.Monospace,
-                        fontSize = 14.sp,
+                        fontSize = TerminalConfig.UI.FONT_SIZE_MEDIUM,
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                     )
                 }
@@ -89,7 +145,7 @@ fun AlertsScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .tutorialTarget(TutorialTargetId.ALERTS_LIST),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(TerminalConfig.UI.SPACER_MEDIUM),
                 ) {
                     items(alerts, key = { it.id }) { alert ->
                         SwipeToDeleteWrapper(onDelete = { viewModel.deleteAlert(alert.id) }) {
@@ -188,16 +244,30 @@ fun AlertItem(alert: Alert) {
             )
         }
         Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = "TRIGGER: ${if (alert.direction == AlertDirection.ABOVE) "ABOVE" else "BELOW"} $${String.format(
-                Locale.US,
-                "%,.2f",
-                alert.targetPrice,
-            )}",
-            color = color,
-            fontFamily = FontFamily.Monospace,
-            fontSize = 12.sp,
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "TRIGGER: ${if (alert.direction == AlertDirection.ABOVE) "ABOVE" else "BELOW"} $${String.format(
+                    Locale.US,
+                    "%,.2f",
+                    alert.targetPrice,
+                )}",
+                color = color,
+                fontFamily = FontFamily.Monospace,
+                fontSize = 12.sp,
+            )
+            
+            Text(
+                text = "[PRIORITY: HIGH]",
+                color = colors.danger,
+                fontSize = 9.sp,
+                fontFamily = FontFamily.Monospace,
+                modifier = Modifier.tutorialTarget(TutorialTargetId.ALERTS_PRIORITY)
+            )
+        }
     }
 }
 

@@ -1,12 +1,14 @@
 package com.cryptodept.ui.paywall
 
 import android.app.Activity
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,12 +23,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.android.billingclient.api.ProductDetails
-import com.cryptodept.ui.components.AdminPasswordDialog
 import com.cryptodept.ui.theme.LocalTerminalColors
 import com.cryptodept.viewmodel.BillingViewModel
+import com.cryptodept.util.TestModeFlag
+import kotlinx.coroutines.launch
+import java.util.Locale
 
 @Composable
 fun PaywallScreen(
+    reason: String = "general",
     viewModel: BillingViewModel = hiltViewModel(),
     onDismiss: () -> Unit = {},
 ) {
@@ -34,233 +39,319 @@ fun PaywallScreen(
     val subscriptions by viewModel.subscriptions.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val context = LocalContext.current
-    val analytics = com.cryptodept.ui.components.LocalAnalyticsManager.current
+    val scope = rememberCoroutineScope()
     var selectedProduct by remember { mutableStateOf<ProductDetails?>(null) }
-
-    LaunchedEffect(Unit) {
-        analytics?.logProPaywallSeen()
-    }
 
     // Auto-select best value (yearly) if available
     LaunchedEffect(subscriptions) {
         if (subscriptions.isNotEmpty()) {
-            selectedProduct = subscriptions.find { it.productId == "pro-1y" }
-                ?: subscriptions.find { it.productId == "pro-30d" }
+            selectedProduct = subscriptions.find { it.productId == "pro_1y" }
+                ?: subscriptions.find { it.productId == "pro_30d" }
                 ?: subscriptions.firstOrNull()
         }
     }
 
-    Column(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 1.0f)) // Strictly opaque
-                .padding(24.dp)
-                .verticalScroll(rememberScrollState())
-                .clickable(enabled = false) { /* Block touches from passing through */ },
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+    LazyColumn(modifier = Modifier.fillMaxSize().background(colors.background)) {
+        
+        // === TOP BAR ===
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = ">>> ACCESS_CONTROL",
+                    color = colors.primary,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+                
+                if (TestModeFlag.SHOW_TEST_PURCHASE_BUTTON) {
+                    TextButton(onClick = { 
+                        scope.launch {
+                            viewModel.billingManager.setAdminOverride(true)
+                        }
+                    }) {
+                        Text("[DEBUG_UNLOCK]", color = colors.amber, fontSize = 10.sp)
+                    }
+                }
+
+                IconButton(onClick = onDismiss) {
+                    Text("[X]", color = colors.dimText, fontFamily = FontFamily.Monospace)
+                }
+            }
+        }
+
+        // === HEADER (personalized by reason) ===
+        item {
+            val pitchTitle = when (reason) {
+                "whale_tracker" -> "🐋 Unlock Live Whale Activity"
+                "predictions" -> "📊 Get All 6 AI Predictions"
+                "backtester" -> "🛠️ Unlock Strategy Backtester"
+                "derivatives" -> "📈 See Derivatives Data"
+                "defi" -> "🏦 Access DeFi Yields"
+                "alerts" -> "🔔 Unlimited Alerts"
+                "markets" -> "📋 Top 200 Markets"
+                "ai_narrative" -> "🤖 Full AI Narrative"
+                "watchlist" -> "⭐ Unlimited Watchlist"
+                else -> ">>> UPGRADE_TO_PRO"
+            }
+            
             Text(
-                text = ">>> CRYPTODEPT PRO",
+                text = pitchTitle,
+                color = colors.primary,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                modifier = Modifier.padding(16.dp),
+            )
+        }
+        
+        // === VALUE PROPS ===
+        item {
+            Text(
+                text = ">>> WHAT_PRO_UNLOCKS",
                 color = colors.amber,
                 fontFamily = FontFamily.Monospace,
-                fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
+                fontSize = 13.sp,
+                modifier = Modifier.padding(horizontal = 16.dp),
             )
+            Spacer(Modifier.height(8.dp))
+        }
+        
+        items(proValueProps) { prop ->
+            ValuePropRow(
+                icon = prop.icon,
+                title = prop.title,
+                description = prop.description,
+            )
+        }
+        
+        // === PRICING TIERS ===
+        item {
+            Spacer(Modifier.height(24.dp))
             Text(
-                text = "[X]",
-                color = colors.dimText,
-                modifier = Modifier.clickable { onDismiss() },
+                text = ">>> CHOOSE_YOUR_PLAN",
+                color = colors.amber,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold,
+                fontSize = 13.sp,
+                modifier = Modifier.padding(horizontal = 16.dp),
             )
+            Spacer(Modifier.height(8.dp))
         }
-
-        Text(
-            text = "UNLOCK THE FULL TERMINAL",
-            color = colors.primary,
-            fontFamily = FontFamily.Monospace,
-            fontSize = 12.sp,
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Start,
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // Feature List
-        val features =
-            listOf(
-                "Unlimited Tracked Coins",
-                "AI Trade Coach (Gemini 1.5)",
-                "Strategy Backtester Engine",
-                "Prediction Ensemble v2.1",
-                "Live Home Screen Widget",
-                "Priority API Data Streams",
-            )
-
-        features.forEach { feature ->
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text("✓", color = colors.primary, fontWeight = FontWeight.Bold, modifier = Modifier.width(24.dp))
-                Text(feature, color = colors.textPrimary, fontSize = 14.sp, fontFamily = FontFamily.Monospace)
-            }
-        }
-
-        Spacer(modifier = Modifier.height(40.dp))
-
-        if (isLoading) {
-            LinearProgressIndicator(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                color = colors.primary,
-                trackColor = colors.grid
-            )
-        }
-
+        
         if (isLoading && subscriptions.isEmpty()) {
-            Box(modifier = Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
-                Text("CONNECTING_TO_MARKET_GATEWAY...", color = colors.primary, fontFamily = FontFamily.Monospace, fontSize = 12.sp)
+            item {
+                Box(modifier = Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = colors.primary)
+                }
             }
         } else if (subscriptions.isEmpty()) {
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    "UNABLE TO FETCH PRODUCTS",
-                    color = colors.danger,
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = 12.sp
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    "Check your internet connection or Google Play status.",
-                    color = colors.dimText,
-                    fontSize = 10.sp,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = { viewModel.loadSubscriptions() },
-                    colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
-                    shape = RectangleShape
+            item {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text("RETRY CONNECTION", fontWeight = FontWeight.Bold)
+                    Text("MARKET GATEWAY OFFLINE", color = colors.danger, fontFamily = FontFamily.Monospace)
+                    Spacer(Modifier.height(8.dp))
+                    Button(onClick = { viewModel.loadSubscriptions() }, shape = RectangleShape) {
+                        Text("RETRY")
+                    }
                 }
             }
         } else {
-            // Pricing Options
-            subscriptions.forEach { product ->
+            items(subscriptions) { product ->
                 val isSelected = selectedProduct?.productId == product.productId
-                val label = when(product.productId) {
-                    "pro-1d" -> "1 DAY ACCESS"
-                    "pro-3d" -> "3 DAYS ACCESS"
-                    "pro-7d" -> "1 WEEK ACCESS"
-                    "pro-30d" -> "MONTHLY OPERATOR"
-                    "pro-90d" -> "QUARTERLY COMMAND"
-                    "pro-1y" -> "ANNUAL INTELLIGENCE"
-                    else -> product.name
+                PricingCard(
+                    product = product,
+                    isSelected = isSelected,
+                    onClick = { selectedProduct = product }
+                )
+            }
+
+            item {
+                Spacer(Modifier.height(16.dp))
+                Button(
+                    onClick = {
+                        selectedProduct?.let {
+                            viewModel.purchase(context as Activity, it)
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(56.dp),
+                    shape = RectangleShape,
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.primary, contentColor = colors.background)
+                ) {
+                    Text("ACTIVATE PRO ACCESS", fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                 }
                 
-                val savingText = when(product.productId) {
-                    "pro-90d" -> "SAVE 33% VS MONTHLY"
-                    "pro-1y" -> "SAVE 42% — BEST VALUE"
-                    else -> null
-                }
-
-                val price = if (product.productType == "subs") {
-                    product.subscriptionOfferDetails
-                        ?.firstOrNull()
-                        ?.pricingPhases
-                        ?.pricingPhaseList
-                        ?.firstOrNull()
-                        ?.formattedPrice ?: "N/A"
-                } else {
-                    product.oneTimePurchaseOfferDetails?.formattedPrice ?: "N/A"
-                }
-
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                            .border(1.dp, if (isSelected) colors.primary else colors.grid, RectangleShape)
-                            .background(if (isSelected) colors.primary.copy(alpha = 0.1f) else Color.Transparent)
-                            .clickable { selectedProduct = product }
-                            .padding(12.dp),
+                TextButton(
+                    onClick = { /* Restore logic */ },
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Column {
-                            Text(
-                                text = label,
-                                color = if (isSelected) colors.primary else colors.textPrimary,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 13.sp,
-                            )
-                            savingText?.let {
-                                Text(it, color = colors.amber, fontSize = 9.sp)
-                            }
-                        }
+                    Text("RESTORE PREVIOUS PURCHASES", color = colors.dimText, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+                }
+            }
+        }
+        
+        // === FREE TIER REASSURANCE ===
+        item {
+            Spacer(Modifier.height(24.dp))
+            Surface(
+                color = colors.primary.copy(alpha = 0.08f),
+                border = BorderStroke(1.dp, colors.primary),
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                shape = RectangleShape
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text(
+                        text = ">>> FREE_TIER_REMAINS_POWERFUL",
+                        color = colors.primary,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = "Even without Pro you get:\n" +
+                               "• Live prices (top 50 coins)\n" +
+                               "• Position Sizer (risk calculator)\n" +
+                               "• Daily AI Pick + market pulse\n" +
+                               "• News + sentiment + glossary\n" +
+                               "• 3 alerts + 1 watchlist (10 coins)\n\n" +
+                               "Upgrade ONLY if Pro features actively help you.",
+                        color = colors.textPrimary,
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 11.sp,
+                    )
+                }
+            }
+        }
+        
+        // === HONEST DISCLAIMERS ===
+        item {
+            Surface(
+                color = colors.background,
+                border = BorderStroke(1.dp, colors.amber),
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                shape = RectangleShape
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text(
+                        text = ">>> WHAT_WE_WONT_DO",
+                        color = colors.amber,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    listOf(
+                        "We won't promise '100x gains'",
+                        "We won't hide our prediction accuracy",
+                        "We won't sell your data",
+                        "We won't show ads",
+                        "We won't trap you in long subscriptions",
+                    ).forEach { line ->
                         Text(
-                            text = price,
-                            color = colors.primary,
-                            fontWeight = FontWeight.Black,
-                            fontSize = 15.sp,
+                            text = "• $line",
+                            color = colors.textPrimary,
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = 11.sp,
                         )
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "7-DAY FREE TRIAL | CANCEL ANYTIME",
-                color = colors.dimText,
-                fontSize = 10.sp,
-                textAlign = TextAlign.Center,
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = {
-                    selectedProduct?.let {
-                        analytics?.logProPurchased(it.productId)
-                        viewModel.purchase(context as Activity, it)
-                    }
-                },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                shape = RectangleShape,
-                colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor = colors.primary,
-                        contentColor = colors.background,
-                    ),
-                enabled = subscriptions.isNotEmpty(), // Allow Google Play to handle selection errors
-            ) {
-                Text("UNLOCK PRO ACCESS →", fontWeight = FontWeight.Bold)
-            }
-
-            TextButton(
-                onClick = { /* Restore purchases logic */ },
-                modifier = Modifier.padding(top = 8.dp),
-            ) {
-                Text("RESTORE PURCHASES", color = colors.dimText, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
-            }
         }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Text(
-            text = "Terms of Service & Privacy Policy apply.",
-            color = colors.grid,
-            fontSize = 9.sp,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth(),
-        )
+        
+        // === LEGAL DISCLAIMER ===
+        item {
+            Text(
+                text = "Cryptocurrency trading carries significant risk. " +
+                       "All AI predictions are statistical estimates, not financial advice. " +
+                       "Past performance does not predict future results. " +
+                       "Always do your own research.",
+                color = colors.dimText,
+                fontFamily = FontFamily.Monospace,
+                fontSize = 9.sp,
+                modifier = Modifier.padding(16.dp),
+                textAlign = TextAlign.Center
+            )
+            Spacer(Modifier.height(32.dp))
+        }
     }
 }
+
+@Composable
+private fun ValuePropRow(icon: String, title: String, description: String) {
+    val colors = LocalTerminalColors.current
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(icon, fontSize = 20.sp, modifier = Modifier.width(32.dp))
+        Column {
+            Text(title, color = colors.primary, fontWeight = FontWeight.Bold, fontSize = 13.sp, fontFamily = FontFamily.Monospace)
+            Text(description, color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+        }
+    }
+}
+
+@Composable
+private fun PricingCard(product: ProductDetails, isSelected: Boolean, onClick: () -> Unit) {
+    val colors = LocalTerminalColors.current
+    
+    val label = when(product.productId) {
+        "pro_1d" -> "1 DAY ACCESS"
+        "pro_3d" -> "3 DAYS ACCESS"
+        "pro_7d" -> "1 WEEK ACCESS"
+        "pro_30d" -> "MONTHLY OPERATOR"
+        "pro_90d" -> "QUARTERLY COMMAND"
+        "pro_1y" -> "ANNUAL INTELLIGENCE"
+        else -> product.name
+    }
+    
+    val price = if (product.productType == "subs") {
+        product.subscriptionOfferDetails?.firstOrNull()?.pricingPhases?.pricingPhaseList?.firstOrNull()?.formattedPrice ?: "N/A"
+    } else {
+        product.oneTimePurchaseOfferDetails?.formattedPrice ?: "N/A"
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .border(1.dp, if (isSelected) colors.primary else colors.grid, RectangleShape)
+            .background(if (isSelected) colors.primary.copy(alpha = 0.1f) else Color.Transparent)
+            .clickable { onClick() }
+            .padding(12.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(label, color = if (isSelected) colors.primary else colors.textPrimary, fontWeight = FontWeight.Bold, fontSize = 13.sp, fontFamily = FontFamily.Monospace)
+            Text(price, color = colors.primary, fontWeight = FontWeight.Black, fontSize = 15.sp, fontFamily = FontFamily.Monospace)
+        }
+    }
+}
+
+private data class ValuePropData(
+    val icon: String,
+    val title: String,
+    val description: String,
+)
+
+private val proValueProps = listOf(
+    ValuePropData("🐋", "Live Whale Tracker", "Real-time $500k+ transactions on BTC, ETH, SOL"),
+    ValuePropData("📊", "All 6 Prediction Engines", "With honest accuracy tracking per engine"),
+    ValuePropData("📈", "Real Derivatives Data", "Funding rates, open interest from Binance"),
+    ValuePropData("🛠️", "Pro Trader Toolkit", "Backtester, MTF analyzer, entry scorer"),
+    ValuePropData("🔔", "Unlimited Alerts", "With composite AND/OR logic"),
+    ValuePropData("📚", "DeFi + Macro Analysis", "DefiLlama yields, S&P correlation"),
+    ValuePropData("📋", "Top 200 Markets", "150 more coins + advanced filters"),
+    ValuePropData("📓", "Full Trade Journal", "Unlimited entries with detailed analytics"),
+)

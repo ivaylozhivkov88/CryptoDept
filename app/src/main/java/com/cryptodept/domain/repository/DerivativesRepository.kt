@@ -4,9 +4,12 @@ import com.cryptodept.domain.model.FundingHeatmapItem
 import com.cryptodept.domain.model.FundingRateData
 import com.cryptodept.domain.model.LiquidationData
 import com.cryptodept.domain.model.OpenInterestData
+import com.cryptodept.domain.model.DerivativesSnapshot
 import kotlinx.coroutines.flow.Flow
 
 interface DerivativesRepository {
+    suspend fun getDerivativesSnapshot(symbol: String): DerivativesSnapshot
+
     suspend fun getFundingRate(symbol: String): Result<FundingRateData>
 
     suspend fun getOpenInterest(symbol: String): Result<OpenInterestData>

@@ -19,6 +19,7 @@ import com.cryptodept.domain.model.SessionStats
 import com.cryptodept.ui.components.PsychologyLockOverlay
 import com.cryptodept.ui.components.TerminalCard
 import com.cryptodept.ui.theme.*
+import com.cryptodept.util.TerminalConfig
 import com.cryptodept.viewmodel.PsychologyUiState
 import com.cryptodept.viewmodel.PsychologyViewModel
 import java.util.Locale
@@ -37,18 +38,31 @@ fun PsychologyScreen(
                 Modifier
                     .fillMaxSize()
                     .background(Color.Black)
-                    .padding(16.dp)
+                    .padding(TerminalConfig.UI.DEFAULT_PADDING)
                     .verticalScroll(rememberScrollState()),
         ) {
             Text(
                 text = ">>> TRADER PSYCHOLOGY MONITOR",
                 color = WallStreetGreen,
                 fontFamily = FontFamily.Monospace,
-                fontSize = 14.sp,
+                fontSize = TerminalConfig.UI.FONT_SIZE_MEDIUM,
                 fontWeight = FontWeight.Bold,
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(TerminalConfig.UI.SPACER_LARGE + TerminalConfig.UI.SPACER_MEDIUM))
+
+            // HONEST MODE WARNING
+            TerminalCard(title = "⚠ SYSTEM_MODE: MANUAL") {
+                Text(
+                    text = "Psychology monitor is currently operating without direct exchange API access. Metrics are calculated based on manual trade entry and app session duration.",
+                    color = WallStreetAmber,
+                    fontSize = TerminalConfig.UI.FONT_SIZE_SMALL,
+                    lineHeight = TerminalConfig.UI.FONT_SIZE_MEDIUM,
+                    fontFamily = FontFamily.Monospace
+                )
+            }
+            
+            Spacer(Modifier.height(TerminalConfig.UI.SPACER_LARGE))
 
             when (val uiState = state) {
                 is PsychologyUiState.Loading -> {
@@ -62,10 +76,10 @@ fun PsychologyScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(TerminalConfig.UI.SPACER_LARGE * 2))
 
             TextButton(onClick = onBack, modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                Text("< BACK_TO_TOOLS", color = WallStreetGreen, fontFamily = FontFamily.Monospace)
+                Text(TerminalConfig.Strings.BACK_TO_TOOLS, color = WallStreetGreen, fontFamily = FontFamily.Monospace)
             }
         }
 

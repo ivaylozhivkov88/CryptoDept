@@ -2,6 +2,7 @@ package com.cryptodept.ui.seasonal
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -12,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -45,14 +47,20 @@ fun SeasonalScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = ">>> BITCOIN_HALVING_ANALYZER",
+                text = ">>> BITCOIN_HALVING",
                 color = colors.primary,
                 fontFamily = FontFamily.Monospace,
-                fontSize = 18.sp,
+                fontSize = 16.sp, // Slightly smaller
                 fontWeight = FontWeight.Bold,
             )
-            TextButton(onClick = onBack) {
-                Text("[BACK]", color = colors.primary, fontFamily = FontFamily.Monospace)
+            OutlinedButton(
+                onClick = onBack,
+                modifier = Modifier.height(30.dp),
+                shape = RectangleShape,
+                border = BorderStroke(1.dp, colors.primary),
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
+            ) {
+                Text("RETURN", color = colors.primary, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
             }
         }
 
@@ -96,7 +104,7 @@ fun SeasonalScreen(
                     Text(
                         text = "${(cycleInfo.progressToNextHalving * 100).toInt()}% TO NEXT HALVING",
                         modifier = Modifier.align(Alignment.Center),
-                        color = colors.textPrimary,
+                        color = Color.Black,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace,

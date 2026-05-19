@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "7e3f9d7d1b9d149a26eccea59fc9a979",
+    "identityHash": "4151e5a5e01c41a31581f39cc337046e",
     "entities": [
       {
         "tableName": "coins",
@@ -536,7 +536,7 @@
       },
       {
         "tableName": "news",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `url` TEXT NOT NULL, `source` TEXT NOT NULL, `publishedAt` INTEGER NOT NULL, `sentiment` TEXT NOT NULL, `currencies` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `url` TEXT NOT NULL, `source` TEXT NOT NULL, `publishedAt` INTEGER NOT NULL, `sentiment` TEXT NOT NULL, `currencies` TEXT NOT NULL, `imageUrl` TEXT, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -579,6 +579,11 @@
             "columnName": "currencies",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "imageUrl",
+            "columnName": "imageUrl",
+            "affinity": "TEXT"
           }
         ],
         "primaryKey": {
@@ -711,7 +716,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7e3f9d7d1b9d149a26eccea59fc9a979')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4151e5a5e01c41a31581f39cc337046e')"
     ]
   }
 }

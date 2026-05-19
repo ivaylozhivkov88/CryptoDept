@@ -2,7 +2,6 @@ package com.cryptodept.ui.tutorial
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -36,7 +35,7 @@ fun TutorialStartDialog(onStart: () -> Unit, onSkip: () -> Unit) {
                     .fillMaxWidth()
             ) {
                 Text(
-                    text = stringResource(R.string.tutorial_start_question),
+                    text = ">>> SYSTEM_TRAINING_AVAILABLE",
                     color = colors.primary,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
@@ -45,13 +44,35 @@ fun TutorialStartDialog(onStart: () -> Unit, onSkip: () -> Unit) {
                 Spacer(Modifier.height(12.dp))
                 HorizontalDivider(color = colors.primary.copy(alpha = 0.3f))
                 Spacer(Modifier.height(12.dp))
-                Text(
-                    text = stringResource(R.string.tutorial_start_body),
-                    color = colors.primary,
-                    fontSize = 13.sp,
-                    fontFamily = FontFamily.Monospace,
-                    lineHeight = 18.sp
-                )
+                
+                Column {
+                    Text(
+                        text = "Launch guided walkthrough?",
+                        fontFamily = FontFamily.Monospace,
+                        color = colors.textPrimary,
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Tour duration: ~3 minutes",
+                        fontFamily = FontFamily.Monospace,
+                        color = colors.dimText,
+                        fontSize = 12.sp,
+                    )
+                    Text(
+                        text = "Uses sample data for demonstration.",
+                        fontFamily = FontFamily.Monospace,
+                        color = colors.dimText,
+                        fontSize = 12.sp,
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Live data activates after tour.",
+                        fontFamily = FontFamily.Monospace,
+                        color = colors.amber,
+                        fontSize = 12.sp,
+                    )
+                }
+
                 Spacer(Modifier.height(24.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -63,7 +84,7 @@ fun TutorialStartDialog(onStart: () -> Unit, onSkip: () -> Unit) {
                         modifier = Modifier.height(44.dp)
                     ) {
                         Text(
-                            text = stringResource(R.string.tutorial_start_no),
+                            text = "[SKIP]",
                             color = colors.dimText,
                             fontSize = 11.sp,
                             fontFamily = FontFamily.Monospace
@@ -72,16 +93,16 @@ fun TutorialStartDialog(onStart: () -> Unit, onSkip: () -> Unit) {
                     Spacer(Modifier.width(12.dp))
                     Button(
                         onClick = onStart,
-                        modifier = Modifier.size(44.dp),
+                        modifier = Modifier.height(44.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = colors.primary,
                             contentColor = colors.background
                         ),
                         shape = RectangleShape,
-                        contentPadding = PaddingValues(0.dp)
+                        contentPadding = PaddingValues(horizontal = 16.dp)
                     ) {
                         Text(
-                            text = stringResource(R.string.tutorial_start_yes),
+                            text = "[START_TRAINING]",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.Monospace,

@@ -21,6 +21,8 @@ class CryptoRepositoryImpl @Inject constructor(
     private val networkHealthDao: com.cryptodept.data.db.NetworkHealthDao,
     private val binanceWS: BinanceWebSocketService,
     private val krakenWS: KrakenWebSocketService,
+    private val preferencesService: com.cryptodept.data.datastore.PreferencesService,
+    private val demoMode: com.cryptodept.util.DemoModeProvider,
 ) : CryptoRepository {
     private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var lastFetchTime = 0L
@@ -37,7 +39,7 @@ class CryptoRepositoryImpl @Inject constructor(
     }
 
     private val STABLECOIN_IDS = setOf(
-        "tether", "usd-coin", "binance-usd", "dai", "true-usd", "paxos-standard", "frax", "usdd", "fdusd", "pyusd", "first-digital-usd", "paypal-usd", "ethena-usde"
+        "tether", "usd-coin", "binance-usd", "dai", "true-usd", "paxos-standard", "frax", "usdd", "fdusd", "pyusd", "first-digital-usd", "paypal-usd", "ethena-usde", "usds", "tibbir", "figr_heloc"
     )
 
     internal fun startPriceSubscriptions() {
@@ -82,29 +84,42 @@ class CryptoRepositoryImpl @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun getTrackedCoinPrices(): Flow<List<CoinPrice>> = 
-        coinDao.getTrackedCoins().flatMapLatest { tracked ->
-            if (tracked.isEmpty()) {
-                coinDao.getTopCoins(15).map { top -> top.map { it.toDomainPrice() } }
+        demoMode.demoActiveState.flatMapLatest { active ->
+            if (active) {
+                flowOf(demoMode.getDemoMarketsList().take(15).map { it.toDomain() })
             } else {
-                flowOf(tracked.map { it.toDomainPrice() })
+                coinDao.getTrackedCoins().flatMapLatest { tracked ->
+                    if (tracked.isEmpty()) {
+                        coinDao.getTopCoins(15).map { top -> top.map { it.toDomainPrice() } }
+                    } else {
+                        flowOf(tracked.map { it.toDomainPrice() })
+                    }
+                }
             }
         }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun getAllCoinPrices(): Flow<List<CoinPrice>> = 
-        coinDao.getAllCoins().map { it.map { e -> e.toDomainPrice() } }
+        demoMode.demoActiveState.flatMapLatest { active ->
+            if (active) {
+                flowOf(demoMode.getDemoMarketsList().map { it.toDomain() })
+            } else {
+                coinDao.getAllCoins().map { it.map { e -> e.toDomainPrice() } }
+            }
+        }
 
     override suspend fun refreshPrices(): CryptoResult<Unit> = coroutineScope {
         try {
             if (System.currentTimeMillis() - lastFetchTime < RATE_LIMIT_MS) return@coroutineScope CryptoResult.Success(Unit)
             
             val response = runCatching { 
-                withTimeout(10000) { api.getCoinMarkets(perPage = 15) }
+                withTimeout(10000) { api.getCoinMarkets(perPage = 250) }
             }
             val marketResponse = response.getOrNull()
             
             if (marketResponse == null || marketResponse.isEmpty()) {
                 // Fallback: update only base coins from aggregator
-                val baseIds = listOf("bitcoin", "ethereum", "ripple", "solana", "cardano", "dogecoin")
+                val baseIds = listOf("bitcoin", "ethereum", "ripple", "solana", "binancecoin", "dogecoin")
                 baseIds.forEach { coinId ->
                     try {
                         val agg = aggregator.fetchAggregatedPrice(coinId, null)
@@ -218,14 +233,56 @@ class CryptoRepositoryImpl @Inject constructor(
 
     override suspend fun toggleTracking(coinId: String): CryptoResult<Unit> = try {
         val coin = coinDao.getCoinById(coinId) ?: throw Exception("NOT_FOUND")
+        val currentTrackedCount = coinDao.getTrackedCoinsCount()
+        val isPro = preferencesService.isPro.value
+        
+        if (!coin.isTracked) {
+            val limit = if (isPro) 30 else 3
+            if (currentTrackedCount >= limit) {
+                throw Exception("LIMIT_REACHED: MAX_${limit}_COINS")
+            }
+        }
+
         coinDao.updateCoin(coin.copy(isTracked = !coin.isTracked))
         CryptoResult.Success(Unit)
     } catch (e: Exception) {
         CryptoResult.Error(e)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun getNetworkHealth(): Flow<NetworkHealth?> = 
-        networkHealthDao.getNetworkHealth().map { it?.toDomain() }
+        demoMode.demoActiveState.flatMapLatest { active ->
+            if (active) {
+                val d = demoMode.getDemoNetworkHealth()
+                val s = demoMode.getDemoSentiment()
+                flowOf(NetworkHealth(
+                    btcHashrate = "${d.btcGasFeeSat} sat",
+                    btcMempool = "${d.mempoolBacklog} txs",
+                    ethGas = "${d.ethGasFeeGwei} gwei",
+                    fearGreedIndex = s.fearGreedIndex,
+                    fearGreedLabel = s.fearGreedLabel,
+                    socialPulse = s.redditPositive,
+                    socialPulseLabel = if (s.redditPositive > 60) "Bullish" else "Neutral"
+                ))
+            } else {
+                networkHealthDao.getNetworkHealth().map { it?.toDomain() }
+            }
+        }
+
+    private fun com.cryptodept.util.DemoMarketCoin.toDomain() = CoinPrice(
+        id = symbol.lowercase(),
+        symbol = symbol,
+        name = name,
+        currentPrice = price,
+        priceChange24h = (change24h / 100) * price,
+        priceChangePercentage24h = change24h,
+        marketCap = marketCap.toDouble(),
+        totalVolume = 100_000_000.0,
+        high24h = price * 1.05,
+        low24h = price * 0.95,
+        lastUpdated = System.currentTimeMillis(),
+        isTracked = true
+    )
 
     override suspend fun saveNetworkHealth(health: NetworkHealth) {
         networkHealthDao.insertNetworkHealth(com.cryptodept.data.db.NetworkHealthEntity.fromDomain(health))

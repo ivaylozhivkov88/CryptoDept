@@ -133,7 +133,7 @@ fun CandleChart(
                 setGridBackgroundColor(AndroidColor.TRANSPARENT)
 
                 // Step 54: Crosshair
-                setDrawMarkerViews(true)
+                setDrawMarkers(true)
                 setTouchEnabled(true)
                 setDragEnabled(true)
                 setScaleEnabled(true)

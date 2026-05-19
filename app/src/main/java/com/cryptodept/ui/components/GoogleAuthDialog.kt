@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.cryptodept.ui.components
 
 import androidx.activity.compose.rememberLauncherForActivityResult

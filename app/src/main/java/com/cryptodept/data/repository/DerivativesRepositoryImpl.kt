@@ -24,8 +24,8 @@ class DerivativesRepositoryImpl
                 "BITCOIN" -> "BTC"
                 "ETHEREUM" -> "ETH"
                 "LITECOIN" -> "LTC"
-                "RIPPLE" -> "XRP"
-                "BINANCECOIN" -> "BNB"
+                "XRP" -> "XRP"
+                "BNB" -> "BNB"
                 "SOLANA" -> "SOL"
                 "CARDANO" -> "ADA"
                 "DOGECOIN" -> "DOGE"
@@ -39,13 +39,46 @@ class DerivativesRepositoryImpl
             return if (base.endsWith("USDT")) base else "${base}USDT"
         }
 
+        private fun resolveCoinglassSymbol(symbol: String): String {
+            return when (symbol.uppercase()) {
+                "BITCOIN" -> "BTC"
+                "ETHEREUM" -> "ETH"
+                "BINANCECOIN" -> "BNB"
+                "SOLANA" -> "SOL"
+                "XRP" -> "XRP"
+                "DOGECOIN" -> "DOGE"
+                "CARDANO" -> "ADA"
+                "LITECOIN" -> "LTC"
+                "POLYGON" -> "MATIC"
+                "CHAINLINK" -> "LINK"
+                "POLKADOT" -> "DOT"
+                "TRON" -> "TRX"
+                "AVALANCHE" -> "AVAX"
+                else -> symbol.uppercase()
+            }
+        }
+
+        override suspend fun getDerivativesSnapshot(symbol: String): DerivativesSnapshot = coroutineScope {
+            val funding = async { getFundingRate(symbol).getOrNull() }
+            val openInterest = async { getOpenInterest(symbol).getOrNull() }
+            val liquidations = async { getLiquidationData(symbol).getOrNull() }
+            
+            DerivativesSnapshot(
+                coinId = symbol,
+                funding = funding.await(),
+                openInterest = openInterest.await(),
+                liquidations = liquidations.await()
+            )
+        }
+
         override suspend fun getFundingRate(symbol: String): Result<FundingRateData> =
             try {
                 val binanceSymbol = resolveBinanceSymbol(symbol)
+                val cgSymbol = resolveCoinglassSymbol(symbol)
                 val binanceResponse = binanceApi.getFundingRate(binanceSymbol)
                 val coinglassResponse =
                     try {
-                        coinglassApi.getAggregatedFunding(symbol)
+                        coinglassApi.getAggregatedFunding(cgSymbol)
                     } catch (e: Exception) {
                         null
                     }
@@ -99,10 +132,11 @@ class DerivativesRepositoryImpl
 
         override suspend fun getLiquidationData(symbol: String): Result<LiquidationData> =
             try {
-                val heatmap = coinglassApi.getLiquidationHeatmap(symbol)
+                val cgSymbol = resolveCoinglassSymbol(symbol)
+                val heatmap = coinglassApi.getLiquidationHeatmap(cgSymbol)
                 val summary =
                     try {
-                        coinglassApi.getGlobalLiquidations(symbol)
+                        coinglassApi.getGlobalLiquidations(cgSymbol)
                     } catch (e: Exception) {
                         null
                     }

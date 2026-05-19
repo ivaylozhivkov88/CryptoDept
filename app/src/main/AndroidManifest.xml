@@ -51,6 +51,16 @@
             </intent-filter>
         </service>
 
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/wall_street_green" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="price_alerts" />
+
         <receiver
             android:name=".widget.CryptoDeptWidgetReceiver"
             android:enabled="true"
@@ -85,6 +95,20 @@
             <meta-data
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
+
+            <intent-filter android:label="cryptodept_deep_link">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="cryptodept" android:host="paywall" />
+            </intent-filter>
+
+            <intent-filter android:label="cryptodept_analysis_link">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="cryptodept" android:host="analysis" />
+            </intent-filter>
         </activity>
     </application>
 

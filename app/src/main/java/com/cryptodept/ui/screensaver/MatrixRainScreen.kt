@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -156,33 +157,39 @@ fun MatrixRainScreen(
         Column(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(24.dp)
-                .background(Color.Black.copy(alpha = 0.7f))
-                .border(1.dp, Color(0xFF00FF41).copy(alpha = 0.4f))
-                .padding(12.dp),
-            horizontalAlignment = Alignment.End
+                .padding(bottom = 64.dp, end = 24.dp) // Lifted up (Task fix)
+                .background(Color.Black) // FULL OPAQUE (Task fix)
+                .border(1.dp, Color(0xFF00FF41).copy(alpha = 0.6f))
+                .padding(16.dp),
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.spacedBy(8.dp) // Added spacing (Task fix)
         ) {
             Text(
                 text = java.text.SimpleDateFormat("HH:mm:ss", Locale.US).format(currentTime),
                 color = Color(0xFF00FF41),
                 fontFamily = FontFamily.Monospace,
-                fontSize = 44.sp,
+                fontSize = 42.sp, // Slightly smaller to avoid wrap
                 fontWeight = FontWeight.ExtraBold,
                 style = TextStyle(shadow = Shadow(Color(0xFF00FF41), blurRadius = 8f)),
                 softWrap = false
             )
+            
+            HorizontalDivider(color = Color(0xFF00FF41).copy(alpha = 0.2f), thickness = 0.5.dp)
+
             Text(
                 text = "BTC PRICE: $btcPrice",
                 color = Color(0xFFFFA500),
                 fontFamily = FontFamily.Monospace,
-                fontSize = 14.sp,
+                fontSize = 13.sp,
                 fontWeight = FontWeight.Bold
             )
+            
             Text(
                 text = "RISK_LEVEL: $riskScore/100",
                 color = if (riskScore > 75) Color.Red else Color(0xFF00FF41),
                 fontFamily = FontFamily.Monospace,
-                fontSize = 12.sp
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium
             )
         }
     }

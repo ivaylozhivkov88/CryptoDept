@@ -21,15 +21,12 @@ class OnboardingScreenTest {
             }
         }
 
-        // Slide 1: Boot Sequence
-        composeTestRule.onNodeWithText("[ PROCEED_TO_NAVIGATION ]").performClick()
+        // Slide 1: Boot Sequence (Click anywhere to skip typing animation)
+        composeTestRule.onRoot().performClick()
 
-        // Slide 2: Navigation
-        composeTestRule.onNodeWithText("[ PROCEED_TO_RISK_CHECK ]").performClick()
-
-        // Slide 3: Risk Disclaimer
+        // Slide 2: Risk Disclaimer
         composeTestRule.onNodeWithText("I UNDERSTAND THE RISKS").performClick()
-        composeTestRule.onNodeWithText("[ INITIALIZE_CORE ]").performClick()
+        composeTestRule.onNodeWithText("[ENTER THE TERMINAL →]").performClick()
 
         assert(completed)
     }

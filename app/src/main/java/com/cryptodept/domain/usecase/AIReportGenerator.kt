@@ -22,7 +22,8 @@ import javax.inject.Singleton
 class AIReportGenerator
     @Inject
     constructor(
-        private val remoteConfig: com.cryptodept.data.remoteconfig.RemoteConfigService
+        private val remoteConfig: com.cryptodept.data.remoteconfig.RemoteConfigService,
+        private val demoMode: com.cryptodept.util.DemoModeProvider,
     ) {
         private val GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/"
         
@@ -102,16 +103,49 @@ class AIReportGenerator
         }
 
         fun generateShortSummaryStream(data: MarketDataSnapshot): Flow<String> {
+            if (demoMode.isActive()) {
+                return flow {
+                    emit(demoMode.getDemoAiNarrative())
+                }
+            }
             val prompt = buildShortSummaryPrompt(data)
             return callGeminiStream(prompt)
         }
 
         private fun buildShortSummaryPrompt(data: MarketDataSnapshot): String =
             """
-            Analyze this crypto market data and give me EXACTLY ONE SENTENCE (max 20 words) summary for a terminal dashboard.
-            Be cynical, professional, and data-driven.
-            DATA: BTC ${data.priceChange24h}%, Dom ${data.btcDominance}%, Fear&Greed ${data.fearGreedIndex}, Risk ${data.riskScore}.
-            Example: "BTC holding critical support at 100k; market sentiment neutral as dominance remains high."
+            Act as the CryptoDept ELITE AI Reasoning Orchestrator. 
+            Synthesize a high-density intelligence report for the global crypto market. 
+            Analyze the following sub-agent inputs and provide a professional, data-driven narrative.
+            
+            [DATA_STREAM]
+            BTC Price Change: ${data.priceChange24h}%
+            BTC Dominance: ${data.btcDominance}%
+            Sentiment Index (Fear & Greed): ${data.fearGreedIndex}/100
+            Systemic Risk Score: ${data.riskScore}/100
+            Macro Context: S&P ${data.sp500Change}%, DXY ${data.dxyChange}%
+            
+            [AGENT_LOGS]
+            TECHNICAL_SENTINEL: Identifying momentum structures based on BTC ${data.priceChange24h}% performance. RSI currently at ${data.rsi.toInt()}.
+            GHOST_WHALE: Monitoring funding rates and institutional capital flow. Risk at ${data.riskScore}/100.
+            SENTIMENT_PULSE: Tracking social dominance and euphoria/panic levels. F&G at ${data.fearGreedIndex}.
+
+            Structure your report as a professional terminal briefing EXACTLY as follows:
+            >>> MARKET_INTELLIGENCE_SUMMARY
+            VERDICT: [1-3 word high-level verdict, e.g., ACCUMULATION, DISTRIBUTION, CONSOLIDATION]
+            
+            ANALYSIS: 
+            [Provide a deep-dive analysis (2-3 detailed paragraphs). Discuss the confluence between technical momentum, whale flow, and sentiment. Mention BTC specifically.]
+            
+            AGENT_REPORTS:
+            - SENTINEL: [Detailed technical flag]
+            - SCOUT: [Whale flow / Liquidity flag]
+            - PULSE: [Psychological state / Macro flag]
+            
+            BIAS: [AGGRESSIVE / NEUTRAL / DEFENSIVE] based on confluence.
+            
+            Tone: Professional, clinical, cynical, data-driven. NO emojis.
+            Target length: 150-250 words.
             """.trimIndent()
 
         private suspend fun callGemini(prompt: String): Result<String> {

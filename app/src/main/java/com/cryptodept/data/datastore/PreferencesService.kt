@@ -59,6 +59,8 @@ class PreferencesService
             val LAST_REVIEW_PROMPT_TIME = longPreferencesKey("last_review_prompt_time")
             val LAUNCH_COUNT = intPreferencesKey("launch_count")
             val PRO_EXPIRY_TIMESTAMP = longPreferencesKey("pro_expiry_timestamp")
+            val AI_REPORTS_COUNT = intPreferencesKey("ai_reports_count")
+            val LAST_AI_REPORT_DATE = stringPreferencesKey("last_ai_report_date")
 
             const val KEY_MIGRATED_TO_SECURE = "migrated_to_secure_v5"
         }
@@ -134,6 +136,11 @@ class PreferencesService
                 .catch { exception -> if (exception is IOException) emit(emptyPreferences()) else throw exception }
                 .map { it[LAUNCH_COUNT] ?: 0 }
 
+        val forceShowAllFeatures: Flow<Boolean> =
+            dataStore.data
+                .catch { exception -> if (exception is IOException) emit(emptyPreferences()) else throw exception }
+                .map { it[booleanPreferencesKey("force_show_all_features")] ?: false }
+
         private suspend fun migrateIfNeeded() {
             val prefs = dataStore.data.first()
             val isMigrated = prefs[booleanPreferencesKey(KEY_MIGRATED_TO_SECURE)] ?: false
@@ -156,6 +163,10 @@ class PreferencesService
         private fun oldPro(prefs: Preferences): Boolean = prefs[IS_PRO] ?: false
 
         private fun oldAdmin(prefs: Preferences): Boolean = prefs[IS_ADMIN] ?: false
+
+        suspend fun setForceShowAllFeatures(enabled: Boolean) {
+            dataStore.edit { it[booleanPreferencesKey("force_show_all_features")] = enabled }
+        }
 
         suspend fun setOnboardingComplete(complete: Boolean) {
             dataStore.edit { it[ONBOARDING_COMPLETE] = complete }
@@ -200,8 +211,15 @@ class PreferencesService
             // Admins are automatically PRO users
             if (isAdmin) {
                 setProStatus(true)
+            } else {
+                // Task: When revoking Admin, also revoke Pro for testing purposes
+                setProStatus(false)
             }
         }
+
+        fun isAdmin(): Boolean = _isAdmin.value
+
+        fun getAdminStatusFlow(): Flow<Boolean> = _isAdmin.asStateFlow()
 
         fun setProExpiry(durationDays: Int) {
             val currentExpiry = securePrefs.getLong("pro_expiry_timestamp", 0L)
@@ -264,5 +282,64 @@ class PreferencesService
         suspend fun getLaunchCount(): Int {
             val prefs = dataStore.data.catch { emit(emptyPreferences()) }.first()
             return prefs[LAUNCH_COUNT] ?: 0
+        }
+
+        suspend fun getAiReportsCountToday(): Int {
+            val prefs = dataStore.data.catch { emit(emptyPreferences()) }.first()
+            val lastDate = prefs[LAST_AI_REPORT_DATE] ?: ""
+            val today = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.US).format(java.util.Date())
+            
+            return if (lastDate == today) {
+                prefs[AI_REPORTS_COUNT] ?: 0
+            } else {
+                0
+            }
+        }
+
+        suspend fun incrementAiReportsCount() {
+            val today = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.US).format(java.util.Date())
+            val currentCount = getAiReportsCountToday()
+            
+            dataStore.edit {
+                it[AI_REPORTS_COUNT] = currentCount + 1
+                it[LAST_AI_REPORT_DATE] = today
+            }
+        }
+
+        // Generic accessors for engagement tracking
+        suspend fun getInt(key: String, default: Int): Int {
+            val prefs = dataStore.data.catch { emit(emptyPreferences()) }.first()
+            return prefs[intPreferencesKey(key)] ?: default
+        }
+
+        suspend fun putInt(key: String, value: Int) {
+            dataStore.edit { it[intPreferencesKey(key)] = value }
+        }
+
+        suspend fun getBoolean(key: String, default: Boolean): Boolean {
+            val prefs = dataStore.data.catch { emit(emptyPreferences()) }.first()
+            return prefs[booleanPreferencesKey(key)] ?: default
+        }
+
+        suspend fun putBoolean(key: String, value: Boolean) {
+            dataStore.edit { it[booleanPreferencesKey(key)] = value }
+        }
+
+        suspend fun getLong(key: String, default: Long): Long {
+            val prefs = dataStore.data.catch { emit(emptyPreferences()) }.first()
+            return prefs[longPreferencesKey(key)] ?: default
+        }
+
+        suspend fun putLong(key: String, value: Long) {
+            dataStore.edit { it[longPreferencesKey(key)] = value }
+        }
+
+        suspend fun getString(key: String, default: String?): String? {
+            val prefs = dataStore.data.catch { emit(emptyPreferences()) }.first()
+            return prefs[stringPreferencesKey(key)] ?: default
+        }
+
+        suspend fun putString(key: String, value: String) {
+            dataStore.edit { it[stringPreferencesKey(key)] = value }
         }
     }

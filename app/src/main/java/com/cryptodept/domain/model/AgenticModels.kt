@@ -100,27 +100,38 @@ class MarketingStrategist : CryptoAgent {
     }
 
     override suspend fun generateMarketingPackage(prediction: PricePrediction): AgentReport {
-        val coin = prediction.coinId.uppercase()
+        val resolver = com.cryptodept.util.SymbolResolver()
+        val coin = resolver.toDisplayName(prediction.coinId)
         val price = String.format(java.util.Locale.US, "$%,.2f", prediction.currentPrice)
         val target = String.format(java.util.Locale.US, "$%,.2f", prediction.prediction24h.mid)
         val floor = String.format(java.util.Locale.US, "$%,.2f", prediction.prediction24h.low)
         val dateStr = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.US).format(java.util.Date())
-        
-        // Logo description for AI image generator
-        val logoDesc = when(coin) {
-            "BTC", "BITCOIN" -> "Large orange Bitcoin 'B' circular logo"
-            "ETH", "ETHEREUM" -> "Large blue Ethereum crystal diamond logo"
-            "XRP", "RIPPLE" -> "Large white Ripple 'X' logo"
-            "SOL", "SOLANA" -> "Large Solana S-shaped gradient logo"
-            "TRX", "TRON" -> "Large red TRON geometric logo"
-            else -> "Large professional crypto currency logo for $coin"
-        }
         
         // Extract specific reasoning for human-like touch
         val wyckoffReason = prediction.ensembleConsensus.modelVotes.values.find { it.model == PredictionModel.WYCKOFF_PHASE }?.reasoning ?: "consolidating"
         val cycleReason = prediction.ensembleConsensus.modelVotes.values.find { it.model == PredictionModel.FOURIER_CYCLES }?.reasoning ?: "stable"
         val liquidityReason = prediction.ensembleConsensus.modelVotes.values.find { it.model == PredictionModel.LIQUIDITY_ENGINE }?.reasoning ?: ""
         
+        // Logo description for AI image generator (Top 15 focus)
+        val logoDesc = when(coin) {
+            "BTC" -> "the classic orange Bitcoin 'B' circular logo with two vertical bars"
+            "ETH" -> "the crystal-style blue and gray Ethereum diamond octahedron logo"
+            "USDT" -> "the green Tether 'T' symbol inside a green circular border"
+            "BNB" -> "the yellow and black geometric Binance diamond logo"
+            "XRP" -> "the modern white and black minimalist 'X' logo for XRP"
+            "USDS" -> "the professional USDS logo featuring a stylized white 'S' on a blue or orange circular background"
+            "SOL" -> "the Solana parallel gradient S-shaped bars logo with purple and cyan colors"
+            "TRX" -> "the red circular TRON logo with a white geometric triangle design inside"
+            "DOGE" -> "the golden circular Dogecoin logo featuring the Shiba Inu dog face"
+            "WBTC" -> "the dark Bitcoin 'B' logo on a grey circular background for Wrapped Bitcoin"
+            "ADA" -> "the blue Cardano circular constellation logo with white dots"
+            "HYPC" -> "the green HyperCycle infinity-style geometric logo"
+            "LEO" -> "the red and black stylized LEO token lion head logo"
+            "GLM", "GOLEM" -> "the blue and white geometric Golem GLM logo"
+            "LINK" -> "the blue hexagonal Chainlink logo with white interior"
+            else -> "a high-tech, professional holographic cryptocurrency logo for $coin"
+        }
+
         val fbPost = """
             ⚡️ CRYPTODEPT ELITE INTELLIGENCE REPORT: $coin ⚡️
             📅 DATE: $dateStr
@@ -144,24 +155,29 @@ class MarketingStrategist : CryptoAgent {
         """.trimIndent()
 
         val metaAiVideoPrompt = """
-            STRICT_COMMAND: Create a 5-second STILL digital terminal VIDEO file. 
-            SCENE: Professional high-contrast terminal screen on a solid pitch-black background.
+            STRICT_ANIMATION_COMMAND: Create a 5-second STATIC digital terminal display.
             
-            VISUAL_TOP_ELEMENT: $logoDesc centered at the top.
+            SCENE_COMPOSITION: 
+            - BACKGROUND: Solid, non-reflective pitch-black (#000000).
+            - FOREGROUND: Stationary text and a single central logo.
+            - LOGO_TO_RENDER: Place $logoDesc at the top-center.
             
-            TEXT_DATA_TO_RENDER (STATIONARY):
-            DATE: $dateStr
-            ASSET: $coin
-            PRICE: $price
-            TARGET: $target
-            STATUS: SYSTEM_OPTIMIZED
+            STRICT_VISUAL_RULES (CRITICAL):
+            1. NO_MOVEMENT: All text, numbers, and symbols must remain at fixed pixel coordinates for the entire duration (0-5s).
+            2. NO_TRANSITIONS: Do not use fades, zooms, or pans.
+            3. NO_RANDOM_DATA: Do not generate random scrolling code or flickering digits.
+            4. ZERO_NOISE: No film grain, no digital glitches, no phosphor scanlines.
             
-            TECHNICAL_CONSTRAINTS (FOR VIDEO STABILITY): 
-            1. ZERO_MOVEMENT: Do not animate text, background, or camera.
-            2. ZERO_FLICKER: No digital glitches, no noise, no pulsing effects.
-            3. STATIONARY_PIXELS: All letters and numbers must remain at fixed coordinates from second 0 to second 5.
+            DATA_TO_RENDER (CENTERED):
+            - ASSET: $coin
+            - PRICE: $price
+            - TARGET: $target
+            - STATUS: OPERATIONAL
             
-            VISUAL_STYLE: Flat 2D vector-style electric green typography (#00FF41). Razor-sharp 8K focus. No 3D depth, no cinematic lens flare.
+            VISUAL_STYLE: 
+            - RAZOR_SHARP_FOCUS: High-contrast 8K vector-style typography.
+            - COLOR_SCHEME: Electric CRT Green (#00FF41) on black.
+            - FONT: Monospaced terminal font.
         """.trimIndent()
 
         return AgentReport(
@@ -187,34 +203,37 @@ class NarrativeOrchestrator : CryptoAgent {
             anomalies.add("EXTREME_VOLATILITY_AT_PEAK_RISK")
         }
 
-        // Anomaly Logic 2: Whale/Sentiment Mismatch
+        // Anomaly Logic 2: Sentiment Trap
         if (data.newsSentiment == "BULLISH" && data.riskScore > 85) {
             anomalyScore += 30
-            anomalies.add("SENTIMENT_TRAP_OVERLEVERAGED")
+            anomalies.add("SENTIMENT_TRAP_DETECTED")
         }
 
-        // Anomaly Logic 3: Technical Breakdown
+        // Anomaly Logic 3: Systemic Panic
         if (data.rsi < 25 && data.fearGreedIndex < 20) {
             anomalyScore += 50
             anomalies.add("SYSTEMIC_PANIC_BOTTOM_DETECTED")
         }
         
         val verdict = when {
-            data.riskScore < 30 -> "ACCUMULATION_PHASE_ACTIVE"
-            data.riskScore > 70 -> "DISTRIBUTION_RISK_HIGH"
-            else -> "SIDEWAYS_CONSOLIDATION"
+            data.riskScore < 30 -> "ACCUMULATION_PHASE"
+            data.riskScore > 70 -> "HIGH_DISTRIBUTION_RISK"
+            else -> "STABLE_CONSOLIDATION"
         }
 
-        val reasoning = when(verdict) {
-            "ACCUMULATION_PHASE_ACTIVE" -> "Math-Sentinel confirms oversold RSI levels below 35, while WhaleScout detects significant smart money inflows on BTC/ETH. Pulse identifies extreme fear sentiment, often indicative of a cycle bottom. Synthesized bias: HIGHLY_BULLISH."
-            "DISTRIBUTION_RISK_HIGH" -> "Sentinel warns of RSI bearish divergence on 4H/Daily. Scout identifies heavy whale selling into strength. Sentiment Pulse indicates dangerous retail euphoria and over-leveraged long positions. Synthesized bias: HIGH_RISK_LIQUIDATION."
-            else -> "Market participants are currently in equilibrium. Sentiment is neutral with low whale conviction. No significant technical breakout identified in the current timeframe. Recommended strategy: WAIT for volume confirmation."
-        }
+        val bias = if (data.priceChange24h > 5) "AGGRESSIVE" else if (data.priceChange24h < -5) "DEFENSIVE" else "NEUTRAL"
+        
+        val explanation = """
+            Market structures currently indicating $verdict. BTC price delta is ${data.priceChange24h}%. 
+            Technical Sentinel notes RSI at ${data.rsi.toInt()} while Sentiment Pulse measures Fear & Greed at ${data.fearGreedIndex}/100.
+            The risk engine has computed a systemic score of ${data.riskScore}/100, which suggests ${if (data.riskScore < 50) "low threat level for spot positions" else "elevated risk of sudden liquidations"}.
+            Whale flow remains ${if (data.riskScore < 40) "supportive" else "cautious"}.
+        """.trimIndent()
 
         val finalAnalysis = if (anomalyScore > 70) {
-            ">>> CRITICAL_ANOMALY_DETECTED [SCORE: $anomalyScore]\nLOG: ${anomalies.joinToString(", ")}\n$reasoning"
+            ">>> CRITICAL_SYSTEM_ALERT [SCORE: $anomalyScore]\nLOG: ${anomalies.joinToString(", ")}\nVERDICT: $verdict\n$explanation\nBIAS: $bias"
         } else {
-            ">>> EXECUTIVE_INTELLIGENCE_SUMMARY\nVERDICT: $verdict\nREASONING: $reasoning"
+            ">>> MARKET_INTELLIGENCE_SUMMARY\nVERDICT: $verdict\nANALYSIS: $explanation\nBIAS: $bias"
         }
 
         return AgentReport(

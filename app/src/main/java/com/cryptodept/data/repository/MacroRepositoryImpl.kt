@@ -14,6 +14,10 @@ class MacroRepositoryImpl
     @Inject
     constructor(
         private val alphaVantageApi: AlphaVantageApi,
+        private val coinGeckoApi: com.cryptodept.data.api.CoinGeckoApi,
+        private val coinglassApi: com.cryptodept.data.api.CoinglassApi,
+        private val etherscanApi: com.cryptodept.data.api.EtherscanApi,
+        private val gson: com.google.gson.Gson,
     ) : MacroRepository {
         override suspend fun getMacroData(): Result<MacroData> =
             coroutineScope {
@@ -43,6 +47,69 @@ class MacroRepositoryImpl
                     Result.failure(e)
                 }
             }
+
+        override suspend fun getMacroIntelligence(): Result<MacroIntelligence> = coroutineScope {
+            try {
+                // Task: Added individual try-catches for robustness against API 500s (Task fix)
+                val globalData = try { coinGeckoApi.getGlobalData().data } catch (e: Exception) { null }
+                val liq1h = try { coinglassApi.getGlobalLiquidations("BTC", "h1").data } catch (e: Exception) { null }
+                val liq24h = try { coinglassApi.getGlobalLiquidations("BTC", "h24").data } catch (e: Exception) { null }
+                val gasRes = try { etherscanApi.getGasOracle(apiKey = com.cryptodept.BuildConfig.ETHERSCAN_API_KEY) } catch (e: Exception) { null }
+                val topCoins = try { 
+                    coinGeckoApi.getCoinMarkets(
+                        vsCurrency = "usd",
+                        perPage = 50,
+                        priceChangePercentage = "30d" 
+                    )
+                } catch (e: Exception) { emptyList() }
+
+                if (globalData == null) return@coroutineScope Result.failure(Exception("CRITICAL_API_FAILURE: CoinGecko Global Unreachable"))
+
+                // Parse Gas
+                val gasPrice = try {
+                    gasRes?.let {
+                        val gasData = gson.fromJson(it.result, com.cryptodept.data.api.GasOracleResult::class.java)
+                        gasData.ProposeGasPrice.toIntOrNull() ?: 0
+                    } ?: 0
+                } catch (e: Exception) { 0 }
+
+                // Calculate Altcoin Season Index
+                val btc = topCoins.find { it.symbol.lowercase() == "btc" }
+                val btcPerf = btc?.priceChangePercentage30d ?: btc?.price_change_percentage_24h ?: 0.0
+                
+                val betterThanBtc = topCoins.filter { 
+                    val coinPerf = it.priceChangePercentage30d ?: it.price_change_percentage_24h
+                    it.symbol.lowercase() != "btc" && coinPerf > btcPerf 
+                }.size
+                
+                val altIndex = if (topCoins.size > 1) {
+                    (betterThanBtc.toDouble() / (topCoins.size - 1) * 100).toInt()
+                } else 50
+
+                val data = MacroIntelligence(
+                    btcDominance = globalData.marketCapPercentage["btc"] ?: 0.0,
+                    btcDominanceDelta24h = 0.0,
+                    ethGasGwei = gasPrice,
+                    globalMarketCapUsd = globalData.totalMarketCap["usd"] ?: 0.0,
+                    altcoinSeasonIndex = altIndex,
+                    totalLiquidations1h = LiquidationSnapshot(
+                        totalUsd = (liq1h?.longVolUsd ?: 0.0) + (liq1h?.shortVolUsd ?: 0.0),
+                        longsUsd = liq1h?.longVolUsd ?: 0.0,
+                        shortsUsd = liq1h?.shortVolUsd ?: 0.0,
+                        timestamp = System.currentTimeMillis()
+                    ),
+                    totalLiquidations24h = LiquidationSnapshot(
+                        totalUsd = (liq24h?.longVolUsd ?: 0.0) + (liq24h?.shortVolUsd ?: 0.0),
+                        longsUsd = liq24h?.longVolUsd ?: 0.0,
+                        shortsUsd = liq24h?.shortVolUsd ?: 0.0,
+                        timestamp = System.currentTimeMillis()
+                    )
+                )
+                Result.success(data)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
 
         override suspend fun getCalendarEvents(): Result<List<CalendarEvent>> = Result.success(emptyList())
 

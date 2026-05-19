@@ -72,36 +72,44 @@ class BacktesterEngine
                 equityCurve.add(timestamps.first() to currentCapital)
 
                 // We need at least 14 candles before we can start calculating RSI
-                for (i in 14 until ohlcData.size) {
+                for (i in 14 until prices.size) {
                     val currentPrice = prices[i]
                     val currentTime = timestamps[i]
 
-                    // 1. Calculate RSI for the window up to current index
-                    val window = prices.subList(maxOf(0, i - 100), i + 1)
-                    val rsi = taEngine.calculateRSI(window)
+                    // 1. Calculate RSI for a smaller window to ensure we get data
+                    val window = prices.subList(maxOf(0, i - 14), i + 1)
+                    val rsi = if (window.size >= 14) taEngine.calculateRSI(window) else 50.0
 
                     if (!inPosition) {
-                        // ENTRY LOGIC: RSI Oversold
-                        if (rsi < config.rsiEntryThreshold) {
+                        // ENTRY LOGIC: RSI Oversold (Inclusive boundary)
+                        if (rsi <= config.rsiEntryThreshold) {
                             inPosition = true
                             entryPrice = currentPrice
                             entryTime = currentTime
-                            // Risk management: only risk X% of current capital
+                            
                             val amountToRisk = currentCapital * (config.riskPerTradePercent / 100.0)
-                            // If SL is 5%, then position size is amountToRisk / 0.05
-                            positionSizeUsd = amountToRisk / (config.stopLossPercent / 100.0)
-                            // Cap position size to current capital (no leverage for now or as per rules)
-                            positionSizeUsd = minOf(positionSizeUsd, currentCapital)
+                            positionSizeUsd = if (config.stopLossPercent > 0) {
+                                amountToRisk / (config.stopLossPercent / 100.0)
+                            } else {
+                                currentCapital * 0.5
+                            }
+                            positionSizeUsd = positionSizeUsd.coerceIn(currentCapital * 0.05, currentCapital)
                         }
                     } else {
-                        // EXIT LOGIC: RSI Overbought OR Stop Loss OR Take Profit
+                        // EXIT LOGIC
                         val pnlPct = (currentPrice - entryPrice) / entryPrice * 100.0
                         val isStopLoss = pnlPct <= -config.stopLossPercent
                         val isTakeProfit = pnlPct >= config.takeProfitPercent
-                        val isRsiExit = rsi > config.rsiExitThreshold
+                        val isRsiExit = rsi >= config.rsiExitThreshold
 
                         if (isStopLoss || isTakeProfit || isRsiExit) {
-                            val pnlUsd = positionSizeUsd * (pnlPct / 100.0)
+                            // Close trade
+                            val actualPnlPct = when {
+                                isStopLoss -> -config.stopLossPercent
+                                isTakeProfit -> config.takeProfitPercent
+                                else -> pnlPct
+                            }
+                            val pnlUsd = positionSizeUsd * (actualPnlPct / 100.0)
                             currentCapital += pnlUsd
 
                             trades.add(
@@ -110,7 +118,7 @@ class BacktesterEngine
                                     entryPrice = entryPrice,
                                     exitTimestamp = currentTime,
                                     exitPrice = currentPrice,
-                                    pnlPercent = pnlPct,
+                                    pnlPercent = actualPnlPct,
                                     pnlUsd = pnlUsd,
                                     durationMs = currentTime - entryTime,
                                 ),

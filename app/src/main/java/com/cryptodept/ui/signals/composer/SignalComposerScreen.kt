@@ -5,6 +5,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -146,7 +148,15 @@ fun AddRuleDialog(
 ) {
     val colors = LocalTerminalColors.current
     var name by remember { mutableStateOf("") }
+    var indicator by remember { mutableStateOf(IndicatorType.RSI) }
+    var operator by remember { mutableStateOf(ComparisonOperator.LESS_THAN) }
+    var threshold by remember { mutableStateOf("30") }
     var action by remember { mutableStateOf(SignalAction.BUY) }
+    
+    // Task 2.12: Add notification toggles
+    var soundEnabled by remember { mutableStateOf(true) }
+    var vibeEnabled by remember { mutableStateOf(true) }
+    var pushEnabled by remember { mutableStateOf(true) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -154,25 +164,99 @@ fun AddRuleDialog(
         modifier = Modifier.border(1.dp, colors.primary, RectangleShape),
         title = { Text("BUILD SIGNAL RULE", color = colors.primary, fontFamily = FontFamily.Monospace) },
         text = {
-            Column {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 TextField(
                     value = name,
                     onValueChange = { name = it },
                     label = { Text("RULE NAME", color = colors.dimText) },
                     colors = TextFieldDefaults.colors(focusedContainerColor = colors.surface, unfocusedContainerColor = colors.surface),
+                    modifier = Modifier.fillMaxWidth()
                 )
+                
                 Spacer(modifier = Modifier.height(16.dp))
-                Text("CONDITION: RSI < 30 (STUB)", color = colors.dimText, fontSize = 10.sp)
-                // In a real app, here we would have a more complex condition builder
+                
+                Text("CONDITION:", color = colors.amber, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                
+                var showIndicatorDropdown by remember { mutableStateOf(false) }
+                var showOperatorDropdown by remember { mutableStateOf(false) }
+
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    // Indicator Selection
+                    Box(modifier = Modifier.weight(1f)) {
+                        OutlinedButton(onClick = { showIndicatorDropdown = true }, modifier = Modifier.fillMaxWidth()) {
+                            Text(indicator.name, fontSize = 10.sp)
+                        }
+                        DropdownMenu(expanded = showIndicatorDropdown, onDismissRequest = { showIndicatorDropdown = false }) {
+                            IndicatorType.entries.forEach { type ->
+                                DropdownMenuItem(
+                                    text = { Text(type.name) },
+                                    onClick = { indicator = type; showIndicatorDropdown = false }
+                                )
+                            }
+                        }
+                    }
+                    
+                    // Operator Selection
+                    Box(modifier = Modifier.weight(1f)) {
+                        OutlinedButton(onClick = { showOperatorDropdown = true }, modifier = Modifier.fillMaxWidth()) {
+                            Text(operator.name.replace("_", " "), fontSize = 10.sp)
+                        }
+                        DropdownMenu(expanded = showOperatorDropdown, onDismissRequest = { showOperatorDropdown = false }) {
+                            ComparisonOperator.entries.forEach { op ->
+                                DropdownMenuItem(
+                                    text = { Text(op.name.replace("_", " ")) },
+                                    onClick = { operator = op; showOperatorDropdown = false }
+                                )
+                            }
+                        }
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                TextField(
+                    value = threshold,
+                    onValueChange = { threshold = it },
+                    label = { Text("THRESHOLD VALUE", color = colors.dimText) },
+                    colors = TextFieldDefaults.colors(focusedContainerColor = colors.surface),
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Text("ALERT_PROTOCOL:", color = colors.amber, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                
+                NotificationToggle("PUSH NOTIFICATIONS", pushEnabled) { pushEnabled = it }
+                NotificationToggle("SOUND ALARM", soundEnabled) { soundEnabled = it }
+                NotificationToggle("HAPTIC VIBRATION", vibeEnabled) { vibeEnabled = it }
             }
         },
         confirmButton = {
             TextButton(onClick = {
-                val conditions = listOf(CustomSignalCondition(IndicatorType.RSI, ComparisonOperator.LESS_THAN, 30.0))
+                val value = threshold.toDoubleOrNull() ?: 30.0
+                val conditions = listOf(CustomSignalCondition(indicator, operator, value))
                 onSave(name, conditions, LogicalOperator.AND, action)
             }) {
-                Text("SAVE", color = colors.primary)
+                Text("SAVE_AND_ACTIVATE", color = colors.primary, fontWeight = FontWeight.Bold)
             }
         },
     )
+}
+
+@Composable
+fun NotificationToggle(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    val colors = LocalTerminalColors.current
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(label, color = colors.textPrimary, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors(checkedThumbColor = colors.primary)
+        )
+    }
 }

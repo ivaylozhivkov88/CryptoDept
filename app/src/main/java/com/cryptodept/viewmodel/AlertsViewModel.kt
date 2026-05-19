@@ -8,6 +8,8 @@ package com.cryptodept.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cryptodept.domain.model.Alert
+import com.cryptodept.domain.tier.AccessTier
+import com.cryptodept.domain.tier.TierAccessManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
@@ -19,7 +21,12 @@ class AlertsViewModel
     @Inject
     constructor(
         private val repository: com.cryptodept.domain.repository.AlertsRepository,
+        private val tierAccessManager: TierAccessManager,
     ) : ViewModel() {
+        companion object {
+            const val FREE_TIER_ALERT_LIMIT = 3
+        }
+
         private val _alerts = MutableStateFlow<List<Alert>>(emptyList())
         val alerts: StateFlow<List<Alert>> = _alerts.asStateFlow()
 
@@ -79,4 +86,35 @@ class AlertsViewModel
                 repository.deleteAlert(id)
             }
         }
+
+        fun getCurrentTier(): AccessTier = tierAccessManager.getCurrentTier()
+
+        suspend fun canCreateNewAlert(): AlertCreationResult {
+            val tier = tierAccessManager.getCurrentTier()
+            
+            if (tier.canAccess(AccessTier.PRO)) {
+                return AlertCreationResult.Allowed
+            }
+            
+            val currentCount = _alerts.value.size
+            
+            return if (currentCount < FREE_TIER_ALERT_LIMIT) {
+                AlertCreationResult.Allowed
+            } else {
+                AlertCreationResult.LimitReached(
+                    currentCount = currentCount,
+                    limit = FREE_TIER_ALERT_LIMIT,
+                    tierRequired = AccessTier.PRO,
+                )
+            }
+        }
     }
+
+sealed class AlertCreationResult {
+    object Allowed : AlertCreationResult()
+    data class LimitReached(
+        val currentCount: Int,
+        val limit: Int,
+        val tierRequired: AccessTier,
+    ) : AlertCreationResult()
+}

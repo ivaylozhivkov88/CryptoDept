@@ -53,10 +53,10 @@ class BacktesterViewModel
                             riskPerTradePercent = riskPerTrade.value.toDouble(),
                         )
 
-                    // PRICHINA 3: Execution on background dispatcher
+                    // Increase historical data range (Task 2.5)
                     val history =
                         withContext(Dispatchers.IO) {
-                            repository.getOHLCData(config.coinId, days = 30)
+                            repository.getOHLCData(config.coinId, days = 90)
                         }
 
                     if (history.isEmpty()) {

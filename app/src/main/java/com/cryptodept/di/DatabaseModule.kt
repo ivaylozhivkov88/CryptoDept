@@ -21,16 +21,27 @@ object DatabaseModule {
         @ApplicationContext context: Context,
         securePrefs: SecurePrefsService,
     ): CryptoDatabase {
+        val dbName = CryptoDatabase.DATABASE_NAME
         val passphrase = securePrefs.getDatabasePassword()
         val factory = net.sqlcipher.database.SupportFactory(passphrase)
 
+        return try {
+            buildDatabase(context, factory)
+        } catch (e: Exception) {
+            android.util.Log.e("DatabaseModule", "Database decryption failed. Wiping and recreating...", e)
+            context.deleteDatabase(dbName)
+            buildDatabase(context, factory)
+        }
+    }
+
+    private fun buildDatabase(context: Context, factory: net.sqlcipher.database.SupportFactory): CryptoDatabase {
         return Room
             .databaseBuilder(
                 context,
                 CryptoDatabase::class.java,
                 CryptoDatabase.DATABASE_NAME,
             ).openHelperFactory(factory)
-            .fallbackToDestructiveMigration(true) // Safe for first production release
+            .fallbackToDestructiveMigration(true)
             .build()
     }
 

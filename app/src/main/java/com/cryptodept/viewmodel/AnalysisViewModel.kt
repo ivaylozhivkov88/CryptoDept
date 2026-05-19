@@ -3,11 +3,13 @@ package com.cryptodept.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cryptodept.data.datastore.PreferencesService
+import com.cryptodept.data.remoteconfig.RemoteConfigService
 import com.cryptodept.domain.model.*
 import com.cryptodept.domain.usecase.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import java.util.Locale
 import javax.inject.Inject
 
 sealed class AnalysisUiState {
@@ -23,37 +25,103 @@ class AnalysisViewModel @Inject constructor(
     private val generateReport: GenerateAnalysisReportUseCase,
     private val observeAnalysisHistory: ObserveAnalysisHistoryUseCase,
     private val preferencesService: PreferencesService,
+    private val remoteConfig: RemoteConfigService,
+    private val demoMode: com.cryptodept.util.DemoModeProvider,
 ) : ViewModel() {
 
     val isAdmin = preferencesService.isAdmin.stateIn(
         viewModelScope, 
         SharingStarted.WhileSubscribed(5000), 
+        false,
+    )
+    
+    val isPro = preferencesService.isPro.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
         false
     )
 
     private val _selectedCoin = MutableStateFlow("bitcoin")
     private val _selectedDays = MutableStateFlow(30)
 
-    val analysisState: StateFlow<AnalysisUiState> = combine(
-        _selectedCoin, 
-        _selectedDays
-    ) { coin, days -> coin to days }
-        .flatMapLatest { (coin, days) ->
-            flow {
-                emit(AnalysisUiState.Loading)
-                try {
-                    withTimeout(20000) {
-                        runDeepAnalysis.execute(coin, days)
-                            .onSuccess { emit(AnalysisUiState.Success(it)) }
-                            .onFailure { emit(AnalysisUiState.Error(it.message ?: "UNKNOWN ERROR")) }
-                    }
-                } catch (e: TimeoutCancellationException) {
-                    emit(AnalysisUiState.Error("ANALYSIS_TIMEOUT: NETWORK_CONGESTION_DETECTED"))
-                } catch (e: Exception) {
-                    emit(AnalysisUiState.Error(e.message ?: "SYSTEM_ERROR"))
+    init {
+        observeDemoMode()
+    }
+
+    private fun observeDemoMode() {
+        viewModelScope.launch {
+            demoMode.demoActiveState.collectLatest { active ->
+                if (active) {
+                    // Trigger a re-analysis when demo starts to load demo data
+                    val current = _selectedCoin.value
+                    _selectedCoin.value = ""
+                    delay(10)
+                    _selectedCoin.value = current
                 }
             }
-        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AnalysisUiState.Loading)
+        }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val analysisState: StateFlow<AnalysisUiState> = demoMode.demoActiveState.flatMapLatest { active ->
+        if (active) {
+            val d = demoMode.getDemoAnalysis()
+            flowOf(
+                AnalysisUiState.Success(
+                    DeepAnalysisResult(
+                        coinId = d.coinSymbol,
+                        compositeSignal = CompositeSignal(
+                            strength = SignalStrength.BUY,
+                            bullishCount = 4,
+                            bearishCount = 1,
+                            neutralCount = 1,
+                            indicators = listOf(
+                                IndicatorStatus("RSI", String.format(Locale.US, "%.1f", d.rsi), Sentiment.NEUTRAL),
+                                IndicatorStatus("MACD", d.macdLabel, Sentiment.BULLISH),
+                                IndicatorStatus("EMA50", "SUPPORT", Sentiment.BULLISH),
+                            ),
+                            confidence = d.confidence,
+                        ),
+                        currentPrice = d.currentPrice,
+                        ohlcData = demoMode.getDemoOhlc(),
+                        patterns = demoMode.getDemoPatterns(),
+                        fibonacci = mapOf("0.618" to (d.currentPrice * 0.98), "0.5" to (d.currentPrice * 0.95)),
+                        rsiValue = d.rsi,
+                        sentiment = SentimentResult(
+                            symbol = d.coinSymbol,
+                            verdict = SentimentVerdict.BULLISH,
+                            bullishPercent = 65,
+                            bearishPercent = 15,
+                            neutralPercent = 20,
+                            totalAnalyzed = 142,
+                        ),
+                        traces = demoMode.getDemoTraces(),
+                    )
+                )
+            )
+        } else {
+            combine(
+                _selectedCoin, 
+                _selectedDays,
+            ) { coin, days -> coin to days }
+                .flatMapLatest { (coin, days) ->
+                    flow<AnalysisUiState> {
+                        emit(AnalysisUiState.Loading)
+                        try {
+                            withTimeout(20000) {
+                                runDeepAnalysis.execute(coin, days)
+                                    .onSuccess { emit(AnalysisUiState.Success(it)) }
+                                    .onFailure { emit(AnalysisUiState.Error(it.message ?: "UNKNOWN ERROR")) }
+                            }
+                        } catch (_: TimeoutCancellationException) {
+                            emit(AnalysisUiState.Error("ANALYSIS_TIMEOUT: NETWORK_CONGESTION_DETECTED"))
+                        } catch (e: Exception) {
+                            emit(AnalysisUiState.Error(e.message ?: "SYSTEM_ERROR"))
+                        }
+                    }
+                }
+        }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, AnalysisUiState.Loading)
 
     fun loadAnalysis(coinId: String) {
         viewModelScope.launch {
@@ -64,12 +132,15 @@ class AnalysisViewModel @Inject constructor(
         }
     }
 
-    val trackedCoins: StateFlow<List<String>> = observeAnalysisHistory()
-        .map { list -> 
-            if (list.isEmpty()) listOf("BTC", "ETH", "SOL", "BNB", "XRP", "DOGE", "ADA", "TRX", "DOT", "LINK", "AVAX", "SHIB", "TON", "XLM", "SUI")
-            else list 
+    val trackedCoins: StateFlow<List<String>> = demoMode.demoActiveState.flatMapLatest { active ->
+        if (active) {
+            flowOf(demoMode.getDemoTrackedCoins())
+        } else {
+            observeAnalysisHistory().map { list -> 
+                list.ifEmpty { listOf("BTC", "ETH", "SOL", "BNB", "XRP", "DOGE", "ADA", "TRX", "DOT", "LINK", "AVAX", "SHIB", "TON", "XLM", "SUI") }
+            }
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), listOf("BTC", "ETH", "SOL"))
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), listOf("BTC", "ETH", "SOL"))
 
     private val _aiReport = MutableStateFlow<String?>(null)
     val aiReport: StateFlow<String?> = _aiReport.asStateFlow()
@@ -79,8 +150,22 @@ class AnalysisViewModel @Inject constructor(
 
     fun generateAIReport(result: DeepAnalysisResult) {
         viewModelScope.launch {
+            if (!isPro.value) {
+                val count = preferencesService.getAiReportsCountToday()
+                val limit = remoteConfig.getFreeAiLimitDaily()
+                if (count >= limit) {
+                    _aiReport.value = ">>> LIMIT_REACHED: FREE OPERATORS ARE LIMITED TO $limit REPORTS DAILY.\n\nUPGRADE TO PRO TO UNLOCK UNLIMITED AI INTELLIGENCE."
+                    return@launch
+                }
+            }
+
             _aiReport.value = ""
             _isAiStreaming.value = true
+            
+            if (!isPro.value) {
+                preferencesService.incrementAiReportsCount()
+            }
+
             generateReport.execute(result)
                 .onCompletion { _isAiStreaming.value = false }
                 .collect { chunk ->

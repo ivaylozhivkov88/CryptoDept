@@ -39,6 +39,7 @@ class IndicatorsViewModel
     constructor(
         private val repository: CryptoRepository,
         private val taEngine: TechnicalAnalysisEngine,
+        private val symbolResolver: com.cryptodept.util.SymbolResolver,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow<IndicatorsUiState>(IndicatorsUiState.Loading)
         val uiState = _uiState.asStateFlow()
@@ -49,6 +50,7 @@ class IndicatorsViewModel
                 "ethereum",
                 "ripple",
                 "solana",
+                "binancecoin",
                 "cardano",
                 "polkadot",
                 "dogecoin",
@@ -91,7 +93,7 @@ class IndicatorsViewModel
 
                                     IndicatorScanResult(
                                         coinId = coinId,
-                                        symbol = coinId.take(3).uppercase(),
+                                        symbol = symbolResolver.toDisplayName(coinId),
                                         rsi = rsi,
                                         macdValue = macdHist,
                                         signal = signal,

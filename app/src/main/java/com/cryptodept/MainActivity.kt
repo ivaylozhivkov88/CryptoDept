@@ -28,6 +28,8 @@ import com.cryptodept.domain.usecase.RiskScoreEngine
 import com.cryptodept.service.NewsSyncWorker
 import com.cryptodept.ui.components.GlobalMarketBar
 import com.cryptodept.ui.components.TerminalBottomBar
+import com.cryptodept.ui.components.LocalHapticManager
+import com.cryptodept.ui.components.LocalAnalyticsManager
 import com.cryptodept.ui.components.crt.CRTOverlay
 import com.cryptodept.ui.navigation.NavGraph
 import com.cryptodept.ui.tutorial.*
@@ -46,12 +48,29 @@ import com.cryptodept.util.HapticService
 import com.cryptodept.util.TerminalAudioManager
 import com.cryptodept.util.toCurrency
 import com.cryptodept.util.toPercentage
+import com.cryptodept.data.remoteconfig.RemoteConfigService
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.model.InstallStatus
+import com.google.android.play.core.install.model.UpdateAvailability
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import android.net.Uri
+import android.content.Intent
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Text
+import androidx.compose.ui.graphics.Color
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)
@@ -83,13 +102,10 @@ class MainActivity : ComponentActivity() {
     lateinit var reviewService: com.cryptodept.util.ReviewService
 
     @Inject
-    lateinit var screensaverCycleService: ScreensaverCycleService
-
-    @Inject
-    lateinit var heatmapDataRepository: com.cryptodept.domain.repository.HeatmapDataRepository
-
-    @Inject
     lateinit var connectivityObserver: ConnectivityObserver
+
+    @Inject
+    lateinit var remoteConfig: RemoteConfigService
 
     private val requestPermissionLauncher =
         registerForActivityResult(
@@ -121,9 +137,34 @@ class MainActivity : ComponentActivity() {
         com.cryptodept.service.AccuracyVerificationWorker
             .schedule(this)
 
+        // --- FETCH AND LOG FCM TOKEN ---
+        com.google.firebase.messaging.FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                android.util.Log.d("FCM_TOKEN", ">>> CURRENT_TOKEN: ${task.result}")
+            }
+        }
+
         setContent {
             val context = LocalContext.current
             val phosphorModeStr by preferencesService.phosphorMode.collectAsState(initial = "GREEN")
+            
+            // --- FORCE UPDATE LOGIC ---
+            var isUpdateRequired by remember { mutableStateOf(false) }
+            LaunchedEffect(Unit) {
+                val currentVersion = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    packageManager.getPackageInfo(packageName, 0).longVersionCode.toInt()
+                } else {
+                    packageManager.getPackageInfo(packageName, 0).versionCode
+                }
+                
+                remoteConfig.fetchAndActivate {
+                    val minVersion = remoteConfig.getMinVersionCode()
+                    if (currentVersion < minVersion) {
+                        isUpdateRequired = true
+                    }
+                }
+            }
+
             val mode =
                 when (phosphorModeStr) {
                     "AMBER" -> PhosphorMode.AMBER
@@ -138,6 +179,7 @@ class MainActivity : ComponentActivity() {
                 remember {
                     WindowCompat.getInsetsController(window, window.decorView)
                 }
+            val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
 
             val screensaverTimeout by preferencesService.screensaverTimeout.collectAsState(initial = 1)
             val btcPriceFlow = remember { cryptoRepository.getCoinPrice("bitcoin") }
@@ -150,8 +192,6 @@ class MainActivity : ComponentActivity() {
             }.collectAsState(initial = emptyList())
 
             val riskScoreState by riskEngine.observeRiskScore().collectAsState(initial = 50)
-            val currentScreensaver by screensaverCycleService.currentScreensaver.collectAsState()
-            val heatmapData by heatmapDataRepository.getHeatmapData().collectAsState(initial = emptyList())
             val isOnboardingComplete by preferencesService.isOnboardingComplete.collectAsState(initial = true)
             val connectivityStatus by connectivityObserver.observe().collectAsState(initial = ConnectivityObserver.Status.Available)
             
@@ -167,30 +207,31 @@ class MainActivity : ComponentActivity() {
                 if (screensaverTimeout > 0) {
                     delay(screensaverTimeout * 60 * 1000L)
                     isIdle = true
-                    screensaverCycleService.startCycling()
                 }
             }
 
             LaunchedEffect(isIdle) {
                 if (isIdle) {
+                    keyboardController?.hide()
                     windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
                     windowInsetsController.systemBarsBehavior =
                         WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
                     window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                 } else {
                     windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
-                    screensaverCycleService.stopCycling()
                     window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                 }
             }
 
             CompositionLocalProvider(
                 LocalTerminalAudioManager provides soundService,
-                com.cryptodept.ui.components.LocalHapticManager provides hapticService,
-                com.cryptodept.ui.components.LocalAnalyticsManager provides analyticsService,
+                LocalHapticManager provides hapticService,
+                LocalAnalyticsManager provides analyticsService,
             ) {
                 CryptoDeptTheme(mode = mode) {
-                    if (!isOnboardingComplete) {
+                    if (isUpdateRequired) {
+                        ForceUpdateScreen()
+                    } else if (!isOnboardingComplete) {
                         OnboardingScreen(
                             onOnboardingComplete = {
                                 lifecycleScope.launch {
@@ -264,52 +305,6 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
 
-                                if (isIdle) {
-                                    val btcDisplay =
-                                        btcPriceState?.let {
-                                            "${it.currentPrice.toCurrency(
-                                                0,
-                                            )} ${if (it.priceChangePercentage24h >= 0) "▲" else "▼"}${it.priceChangePercentage24h.toPercentage(
-                                                decimals = 1,
-                                            )}"
-                                        } ?: "FETCHING..."
-
-                                    androidx.compose.animation.Crossfade(
-                                        targetState = currentScreensaver,
-                                        animationSpec =
-                                            androidx.compose.animation.core
-                                                .tween(300),
-                                        label = "screensaver_fade",
-                                    ) { type ->
-                                        when (type) {
-                                            ScreensaverType.BLOOMBERG_WALL -> {
-                                                BloombergWallScreen(
-                                                    modifier = Modifier.fillMaxSize(),
-                                                    onDismiss = {
-                                                        isIdle = false
-                                                        lastInteractionTime = System.currentTimeMillis()
-                                                    },
-                                                )
-                                            }
-                                            ScreensaverType.MATRIX_RAIN -> {
-                                                MatrixRainScreen(
-                                                    modifier = Modifier.fillMaxSize(),
-                                                    btcPrice = btcDisplay,
-                                                    allPrices = allPricesState,
-                                                    riskScore = riskScoreState,
-                                                    onDismiss = {
-                                                        isIdle = false
-                                                        lastInteractionTime = System.currentTimeMillis()
-                                                    },
-                                                )
-                                            }
-                                            ScreensaverType.HEATMAP -> {
-                                                HeatmapScreensaverScreen(items = heatmapData)
-                                            }
-                                        }
-                                    }
-                                }
-
                                 // OVERLAY ABOVE EVERYTHING
                                 TutorialOverlay(
                                     controller = tutorialController,
@@ -341,6 +336,28 @@ class MainActivity : ComponentActivity() {
                                         onDismiss = { tutorialController.dismissCompletionDialog() }
                                     )
                                 }
+
+                                if (isIdle) {
+                                    val btcDisplay =
+                                        btcPriceState?.let {
+                                            "${it.currentPrice.toCurrency(
+                                                0,
+                                            )} ${if (it.priceChangePercentage24h >= 0) "▲" else "▼"}${it.priceChangePercentage24h.toPercentage(
+                                                decimals = 1,
+                                            )}"
+                                        } ?: "FETCHING..."
+
+                                    MatrixRainScreen(
+                                        modifier = Modifier.fillMaxSize(),
+                                        btcPrice = btcDisplay,
+                                        allPrices = allPricesState,
+                                        riskScore = riskScoreState,
+                                        onDismiss = {
+                                            isIdle = false
+                                            lastInteractionTime = System.currentTimeMillis()
+                                        },
+                                    )
+                                }
                             }
                         }
 
@@ -361,6 +378,19 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         volumeControlStream = android.media.AudioManager.STREAM_MUSIC
         reviewService.requestReviewIfAppropriate(this)
+        
+        // Check if update was downloaded while app was in background
+        val appUpdateManager = AppUpdateManagerFactory.create(this)
+        appUpdateManager.appUpdateInfo.addOnSuccessListener { info ->
+            if (info.installStatus() == InstallStatus.DOWNLOADED) {
+                // The AppUpdateBanner state machine will handle showing the UI
+                android.util.Log.d("Update", "Update downloaded, ready to install")
+            }
+            if (info.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS) {
+                // Resume immediate update flow if it was interrupted
+                android.util.Log.d("Update", "Update in progress, resuming UI")
+            }
+        }
     }
 
     override fun onDestroy() {
@@ -375,6 +405,61 @@ class MainActivity : ComponentActivity() {
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
+
+    @Composable
+    private fun ForceUpdateScreen() {
+        val colors = LocalTerminalColors.current
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black)
+                .padding(24.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .border(1.dp, colors.danger, RectangleShape)
+                    .padding(24.dp)
+            ) {
+                Text(
+                    text = "[!!] UPDATE_REQUIRED [!!]",
+                    color = colors.danger,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "A critical system update is required to maintain terminal integrity. Your current version is no longer supported by the Global Market Feed.",
+                    color = colors.textPrimary,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 12.sp,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(32.dp))
+                Button(
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW).apply {
+                            data = Uri.parse("market://details?id=$packageName")
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        startActivity(intent)
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.danger),
+                    shape = RectangleShape,
+                    modifier = Modifier.fillMaxWidth().height(56.dp)
+                ) {
+                    Text(
+                        text = "UPDATE VIA GOOGLE PLAY",
+                        color = Color.Black,
+                        fontWeight = FontWeight.Black,
+                        fontFamily = FontFamily.Monospace
+                    )
+                }
             }
         }
     }

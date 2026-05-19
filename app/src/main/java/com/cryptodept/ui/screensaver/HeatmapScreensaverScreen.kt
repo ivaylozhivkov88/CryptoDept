@@ -2,6 +2,7 @@ package com.cryptodept.ui.screensaver
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -9,6 +10,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontFamily
@@ -22,7 +24,10 @@ import com.cryptodept.ui.theme.LocalTerminalColors
 import java.util.*
 
 @Composable
-fun HeatmapScreensaverScreen(items: List<TreemapItem>) {
+fun HeatmapScreensaverScreen(
+    items: List<TreemapItem>,
+    onDismiss: () -> Unit = {}
+) {
     val colors = LocalTerminalColors.current
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
@@ -36,7 +41,15 @@ fun HeatmapScreensaverScreen(items: List<TreemapItem>) {
 
     val textMeasurer = rememberTextMeasurer()
 
-    Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+    Box(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(Color.Black)
+                .pointerInput(Unit) {
+                    detectTapGestures { onDismiss() }
+                },
+    ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             rects.forEach { rect ->
                 val color = HeatmapColorMapper.getColorForChange(rect.item.change24h)

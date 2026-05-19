@@ -26,8 +26,17 @@ import com.cryptodept.domain.model.NewsItem
 import com.cryptodept.domain.model.NewsSentiment
 import com.cryptodept.ui.components.EmptyState
 import com.cryptodept.ui.components.ErrorState
+import com.cryptodept.ui.components.skeletons.NewsCardSkeleton
 import com.cryptodept.ui.theme.*
+import com.cryptodept.util.TerminalConfig
 import java.util.*
+
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.ui.draw.clip
+import coil.compose.AsyncImage
+import com.cryptodept.ui.components.TerminalCard
 
 @Composable
 fun NewsScreen(viewModel: NewsViewModel) {
@@ -46,202 +55,200 @@ fun NewsScreen(viewModel: NewsViewModel) {
             Modifier
                 .fillMaxSize()
                 .background(colors.background)
-                .padding(16.dp),
     ) {
-        Text(
-            text = ">>> CRYPTO NEWS FEED",
-            color = colors.primary,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Monospace,
-        )
+        // TOP HEADER
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(TerminalConfig.UI.DEFAULT_PADDING),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = ">>> INTELLIGENCE_WIRE",
+                color = colors.primary,
+                fontSize = TerminalConfig.UI.FONT_SIZE_HEADER,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Monospace,
+            )
+            IconButton(onClick = { viewModel.refresh() }) {
+                Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = colors.primary)
+            }
+        }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
+        // HORIZONTAL FILTERS (REVOLUT STYLE)
         LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(horizontal = TerminalConfig.UI.DEFAULT_PADDING),
+            horizontalArrangement = Arrangement.spacedBy(TerminalConfig.UI.SPACER_MEDIUM),
+            modifier = Modifier.fillMaxWidth().padding(bottom = TerminalConfig.UI.SPACER_LARGE),
         ) {
             items(filters) { filter ->
                 val isSelected = currentFilter == filter
                 Box(
                     modifier =
                         Modifier
-                            .border(1.dp, if (isSelected) colors.primary else colors.grid, RectangleShape)
-                            .background(if (isSelected) colors.primary.copy(alpha = 0.2f) else Color.Transparent)
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(if (isSelected) colors.primary.copy(alpha = 0.15f) else colors.surface)
+                            .border(TerminalConfig.UI.BORDER_WIDTH, if (isSelected) colors.primary else colors.grid, RoundedCornerShape(20.dp))
                             .clickable { viewModel.setFilter(filter) }
-                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                            .padding(horizontal = TerminalConfig.UI.DEFAULT_PADDING, vertical = TerminalConfig.UI.SMALL_PADDING),
                 ) {
                     Text(
                         text = filter,
                         color = if (isSelected) colors.primary else colors.dimText,
-                        fontSize = 11.sp,
+                        fontSize = TerminalConfig.UI.FONT_SIZE_SMALL,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                         fontFamily = FontFamily.Monospace,
                     )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
         when {
-            isLoading -> {
-                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                    Text("FETCHING WIRE DATA...", color = colors.primary, fontFamily = FontFamily.Monospace)
+            isLoading && pagingNews.itemCount == 0 -> {
+                LazyColumn(modifier = Modifier.fillMaxSize().padding(TerminalConfig.UI.DEFAULT_PADDING)) {
+                    items(5) { NewsCardSkeleton() }
                 }
             }
             error != null -> {
-                ErrorState(
-                    message = error!!,
-                    onRetry = { viewModel.refresh() },
-                    modifier = Modifier.weight(1f)
-                )
-            }
-            currentFilter == "ALL" && pagingNews.itemCount == 0 -> {
-                EmptyState(
-                    title = "NO_NEWS_TRANSMISSIONS",
-                    description = "The wire is silent. Check your connection or refresh the feed.",
-                    actionLabel = "REFRESH_FEED",
-                    onAction = { viewModel.refresh() },
-                    modifier = Modifier.weight(1f)
-                )
-            }
-            currentFilter != "ALL" && news.isEmpty() -> {
-                EmptyState(
-                    title = "NO_MATCHING_DATA",
-                    description = "No news found for filter: $currentFilter",
-                    actionLabel = "CLEAR_FILTER",
-                    onAction = { viewModel.setFilter("ALL") },
-                    modifier = Modifier.weight(1f)
-                )
+                ErrorState(message = error!!, onRetry = { viewModel.refresh() }, modifier = Modifier.fillMaxSize())
             }
             else -> {
                 LazyColumn(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(TerminalConfig.UI.DEFAULT_PADDING),
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
+                    // TOP STORIES SECTION
+                    if (currentFilter == "ALL" && pagingNews.itemCount > 0) {
+                        item {
+                            Text("TOP_STORIES", color = colors.dimText, fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 12.dp))
+                            LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                items(5) { index ->
+                                    pagingNews[index]?.let { item ->
+                                        NewsHeadlineCard(item) {
+                                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(item.url)))
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    item {
+                        Text("PREVIOUS_TRANSMISSIONS", color = colors.dimText, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    }
+
                     if (currentFilter == "ALL") {
-                        items(
-                            count = pagingNews.itemCount,
-                            key = pagingNews.itemKey { it.url },
-                        ) { index ->
+                        items(pagingNews.itemCount) { index ->
                             pagingNews[index]?.let { item ->
-                                NewsCard(item) {
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(item.url))
-                                    context.startActivity(intent)
+                                NewsListItem(item) {
+                                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(item.url)))
                                 }
                             }
                         }
                     } else {
-                        items(news, key = { it.url }) { item ->
-                            NewsCard(item) {
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(item.url))
-                                context.startActivity(intent)
+                        items(news) { item ->
+                            NewsListItem(item) {
+                                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(item.url)))
                             }
                         }
                     }
                 }
             }
         }
+    }
+}
 
-        Spacer(modifier = Modifier.height(8.dp))
-        Button(
-            onClick = { viewModel.refresh() },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RectangleShape,
-            colors = ButtonDefaults.buttonColors(containerColor = colors.primary, contentColor = colors.background),
-        ) {
-            Text("[REFRESH FEED]", fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+@Composable
+fun NewsHeadlineCard(item: NewsItem, onClick: () -> Unit) {
+    val colors = LocalTerminalColors.current
+    Card(
+        modifier = Modifier.width(220.dp).height(280.dp).clickable { onClick() },
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = colors.surface)
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            AsyncImage(
+                model = item.imageUrl ?: "https://cryptodept.com/placeholder.png",
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize().background(Color.Black),
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop
+            )
+            // Gradient Overlay
+            Box(
+                modifier = Modifier.fillMaxSize().background(
+                    androidx.compose.ui.graphics.Brush.verticalGradient(
+                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f))
+                    )
+                )
+            )
+            Column(
+                modifier = Modifier.align(Alignment.BottomStart).padding(12.dp)
+            ) {
+                Text(
+                    text = item.currencies.firstOrNull()?.uppercase() ?: "MARKET",
+                    color = colors.primary,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Black
+                )
+                Text(
+                    text = item.title,
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = item.source, color = colors.dimText, fontSize = 10.sp)
+            }
         }
     }
 }
 
 @Composable
-fun NewsCard(
-    item: NewsItem,
-    onOpen: () -> Unit,
-) {
+fun NewsListItem(item: NewsItem, onClick: () -> Unit) {
     val colors = LocalTerminalColors.current
-    val sentimentColor =
-        when (item.sentiment) {
-            NewsSentiment.BULLISH -> colors.primary
-            NewsSentiment.BEARISH -> colors.danger
-            NewsSentiment.NEUTRAL -> colors.amber
-        }
-
-    val timeStr =
-        remember(item.publishedAt) {
-            val diff = System.currentTimeMillis() - item.publishedAt
-            val mins = diff / (60 * 1000)
-            if (mins < 60) "${mins}m" else "${mins / 60}h"
-        }
-
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .border(1.dp, colors.grid, RectangleShape)
-                .padding(12.dp),
+    Row(
+        modifier = Modifier.fillMaxWidth().clickable { onClick() }.padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
+        Column(modifier = Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "[${item.sentiment.name.take(4)}]",
-                    color = sentimentColor,
+                    item.currencies.firstOrNull()?.uppercase() ?: "SYS",
+                    color = colors.primary,
                     fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = item.currencies.take(3).joinToString(", "),
-                    color = colors.textPrimary,
-                    fontSize = 10.sp,
-                    fontFamily = FontFamily.Monospace,
+                    text = remember(item.publishedAt) {
+                        val diff = System.currentTimeMillis() - item.publishedAt
+                        val hours = diff / (60 * 60 * 1000)
+                        if (hours < 1) "${diff / (60 * 1000)}m" else "${hours}h"
+                    },
+                    color = colors.dimText,
+                    fontSize = 10.sp
                 )
             }
-            Text(text = timeStr, color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = item.title,
+                color = colors.textPrimary,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(text = item.source, color = colors.dimText, fontSize = 11.sp)
         }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = item.title,
-            color = colors.primary,
-            fontSize = 14.sp,
-            lineHeight = 18.sp,
-            fontFamily = FontFamily.Monospace,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
+        
+        AsyncImage(
+            model = item.imageUrl ?: "https://cryptodept.com/placeholder.png",
+            contentDescription = null,
+            modifier = Modifier.size(70.dp).clip(RoundedCornerShape(8.dp)).background(colors.surface),
+            contentScale = androidx.compose.ui.layout.ContentScale.Crop
         )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = "Source: ${item.source}",
-                color = colors.dimText,
-                fontSize = 10.sp,
-                fontFamily = FontFamily.Monospace,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f)
-            )
-
-            Text(
-                text = "[OPEN ↗]",
-                color = colors.primary,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable { onOpen() },
-            )
-        }
     }
 }

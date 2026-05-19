@@ -100,6 +100,7 @@ fun MTFSummaryTable(mtf: MTFConsensus) {
 fun ExpandableModelRow(
     modelName: String,
     vote: ModelVote,
+    coinId: String,
     modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -112,13 +113,26 @@ fun ExpandableModelRow(
                 .clickable { expanded = !expanded }
                 .padding(vertical = 12.dp),
     ) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(
-                text = if (expanded) "[-] $modelName" else "[+] $modelName",
-                color = if (expanded) colors.primary else colors.textPrimary.copy(alpha = 0.8f),
-                fontFamily = FontFamily.Monospace,
-                fontSize = 13.sp,
-            )
+        Row(
+            modifier = Modifier.fillMaxWidth(), 
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = if (expanded) "[-] $modelName" else "[+] $modelName",
+                    color = if (expanded) colors.primary else colors.textPrimary.copy(alpha = 0.8f),
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 13.sp,
+                )
+                
+                Spacer(modifier = Modifier.height(2.dp))
+                
+                com.cryptodept.ui.components.ModelAccuracyBadge(
+                    modelName = modelName,
+                    coinId = coinId
+                )
+            }
 
             val dirColor =
                 when {
@@ -226,18 +240,28 @@ fun ConsensusHeader(prediction: PricePrediction) {
             Spacer(modifier = Modifier.height(16.dp))
 
             // Accuracy score pill
-            Surface(
-                color = color.copy(alpha = 0.2f),
-                border = androidx.compose.foundation.BorderStroke(1.dp, color),
-                shape = RectangleShape
-            ) {
-                Text(
-                    text = " CONVICTION: ${(prediction.ensembleConsensus.overallConfidence * 100).toInt()}% ",
-                    color = color,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Monospace,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Surface(
+                    color = color.copy(alpha = 0.2f),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, color),
+                    shape = RectangleShape
+                ) {
+                    Text(
+                        text = " CONVICTION: ${(prediction.ensembleConsensus.overallConfidence * 100).toInt()}% ",
+                        color = color,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+                
+                Spacer(modifier = Modifier.width(12.dp))
+                
+                com.cryptodept.ui.components.ModelAccuracyBadge(
+                    modelName = "ENSEMBLE",
+                    coinId = prediction.coinId,
+                    compact = true
                 )
             }
         }

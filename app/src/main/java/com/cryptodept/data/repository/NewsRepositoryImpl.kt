@@ -85,6 +85,7 @@ class NewsRepositoryImpl
                                     publishedAt = res.updatedAt * 1000,
                                     sentiment = sentimentScorer.analyze(res.title),
                                     currencies = detectCurrencies(res.title).toImmutableList(),
+                                    imageUrl = res.thumb
                                 )
                             }
                         }
@@ -103,6 +104,7 @@ class NewsRepositoryImpl
                                     publishedAt = parseRssDate(rss.pubDate),
                                     sentiment = sentimentScorer.analyze(rss.title),
                                     currencies = detectCurrencies(rss.title).toImmutableList(),
+                                    imageUrl = rss.imageUrl
                                 )
                             }
                         }

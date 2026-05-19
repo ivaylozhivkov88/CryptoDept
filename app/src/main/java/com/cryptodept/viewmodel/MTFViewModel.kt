@@ -20,6 +20,7 @@ class MTFViewModel
         private val mtfAnalyzer: MultiTimeframeAnalyzer,
         private val repository: CryptoRepository,
         private val chartRepository: ChartRepository,
+        private val demoMode: com.cryptodept.util.DemoModeProvider,
     ) : ViewModel() {
         val trackedCoins: StateFlow<List<String>> =
             repository
@@ -34,7 +35,16 @@ class MTFViewModel
         val state: StateFlow<MTFUiState> = _state.asStateFlow()
 
         init {
+            observeDemoMode()
             analyze()
+        }
+
+        private fun observeDemoMode() {
+            viewModelScope.launch {
+                demoMode.demoActiveState.collectLatest { active ->
+                    if (active) analyze()
+                }
+            }
         }
 
         fun selectCoin(coinId: String) {

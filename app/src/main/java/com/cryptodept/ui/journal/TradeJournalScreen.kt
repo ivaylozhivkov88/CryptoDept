@@ -122,7 +122,7 @@ fun TradeJournalScreen(viewModel: JournalViewModel = hiltViewModel()) {
 @Composable
 fun HeaderSection() {
     val colors = LocalTerminalColors.current
-    Box(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+    Box(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
         Text(
             text = ">>> TRADE JOURNAL",
             color = colors.primary,
@@ -183,7 +183,7 @@ fun SectionDivider(title: String) {
             Modifier
                 .fillMaxWidth()
                 .background(colors.surface)
-                .padding(vertical = 4.dp, horizontal = 8.dp),
+                .padding(vertical = 6.dp, horizontal = 12.dp),
     ) {
         Text(
             text = "═ $title " + "═".repeat(15),

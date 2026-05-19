@@ -14,8 +14,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cryptodept.domain.model.PositionSizeResult
+import com.cryptodept.ui.components.ComposeErrorBoundary
 import com.cryptodept.ui.components.TerminalCard
 import com.cryptodept.ui.components.TerminalInput
+import com.cryptodept.ui.components.SanityCheckDialog
+import com.cryptodept.ui.components.SanitySeverity
 import com.cryptodept.ui.theme.*
 import com.cryptodept.util.TerminalConfig
 import com.cryptodept.viewmodel.PositionSizeViewModel
@@ -29,6 +32,18 @@ fun PositionSizeScreen(
     onBack: () -> Unit = {},
 ) {
     val colors = LocalTerminalColors.current
+    ComposeErrorBoundary {
+        PositionSizeContent(colors, viewModel, onBack)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PositionSizeContent(
+    colors: TerminalColorSet,
+    viewModel: PositionSizeViewModel,
+    onBack: () -> Unit,
+) {
     val portfolioSize by viewModel.portfolioSize.collectAsState()
     val riskPercent by viewModel.riskPercent.collectAsState()
     val entryPrice by viewModel.entryPrice.collectAsState()
@@ -36,7 +51,25 @@ fun PositionSizeScreen(
     val takeProfit by viewModel.takeProfit.collectAsState()
     val result by viewModel.result.collectAsState()
 
+    var showSanityCheck by remember { mutableStateOf(false) }
+    var sanityCheckSeverity by remember { mutableStateOf(SanitySeverity.WARNING) }
+    var sanityCheckMessage by remember { mutableStateOf("") }
+
     val scrollState = rememberScrollState()
+
+    if (showSanityCheck) {
+        SanityCheckDialog(
+            title = "LARGE_POSITION_DETECTED",
+            message = sanityCheckMessage,
+            severity = sanityCheckSeverity,
+            onConfirm = {
+                showSanityCheck = false
+            },
+            onDismiss = { 
+                showSanityCheck = false 
+            },
+        )
+    }
 
     Column(
         modifier =
@@ -60,12 +93,12 @@ fun PositionSizeScreen(
         TerminalCard(title = "PORTFOLIO & RISK") {
             TerminalInput(
                 label = "PORTFOLIO SIZE (USD)",
-                value = portfolioSize.toString(),
+                value = portfolioSize,
                 onValueChange = { viewModel.setPortfolioSize(it) },
             )
             TerminalInput(
                 label = "RISK PER TRADE (%)",
-                value = riskPercent.toString(),
+                value = riskPercent,
                 onValueChange = { viewModel.setRiskPercent(it) },
             )
             result?.let {
@@ -84,7 +117,7 @@ fun PositionSizeScreen(
         TerminalCard(title = "TRADE PARAMETERS") {
             TerminalInput(
                 label = "ENTRY PRICE",
-                value = entryPrice.toString(),
+                value = entryPrice,
                 onValueChange = { viewModel.setEntryPrice(it) },
                 trailingIcon = {
                     TextButton(onClick = { viewModel.useCurrentPrice() }) {
@@ -98,17 +131,62 @@ fun PositionSizeScreen(
             )
             TerminalInput(
                 label = "STOP LOSS",
-                value = stopLoss.toString(),
+                value = stopLoss,
                 onValueChange = { viewModel.setStopLoss(it) },
             )
             TerminalInput(
                 label = "TAKE PROFIT",
-                value = takeProfit.toString(),
+                value = takeProfit,
                 onValueChange = { viewModel.setTakeProfit(it) },
             )
         }
 
-        Spacer(modifier = Modifier.height(TerminalConfig.UI.SPACER_LARGE + TerminalConfig.UI.SPACER_MEDIUM))
+        Spacer(modifier = Modifier.height(TerminalConfig.UI.SPACER_LARGE))
+
+        // CALCULATION ACTION (NEW)
+        Button(
+            onClick = { 
+                val currentResult = result
+                val portfolio = portfolioSize.toDoubleOrNull() ?: 0.0
+                if (currentResult != null && portfolio > 0) {
+                    val percentOfAccount = (currentResult.positionSizeUsd / portfolio) * 100
+                    
+                    when {
+                        percentOfAccount > 50 -> {
+                            sanityCheckSeverity = SanitySeverity.CRITICAL
+                            sanityCheckMessage = """
+                                This trade would risk ${percentOfAccount.toInt()}% of your portfolio.
+                                
+                                Professional traders rarely risk more than 1-3% per trade.
+                                A single bad trade could destroy your account.
+                                
+                                Are you absolutely sure?
+                            """.trimIndent()
+                            showSanityCheck = true
+                        }
+                        percentOfAccount > 30 -> {
+                            sanityCheckSeverity = SanitySeverity.WARNING
+                            sanityCheckMessage = """
+                                This trade risks ${percentOfAccount.toInt()}% of your portfolio.
+                                
+                                Most experienced traders limit individual trade risk to 1-3%.
+                                Larger positions reduce your ability to survive losing streaks.
+                                
+                                Consider a smaller position size.
+                            """.trimIndent()
+                            showSanityCheck = true
+                        }
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = colors.primary, contentColor = colors.background),
+            shape = RectangleShape
+        ) {
+            Text("RUN SANITY CHECK", fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+        }
+
+        Spacer(modifier = Modifier.height(TerminalConfig.UI.SPACER_LARGE))
 
         // RESULT SECTION
         if (result != null) {

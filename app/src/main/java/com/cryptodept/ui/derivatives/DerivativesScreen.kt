@@ -22,6 +22,7 @@ import com.cryptodept.domain.model.FundingRateData
 import com.cryptodept.domain.model.LiquidationData
 import com.cryptodept.domain.model.OpenInterestData
 import com.cryptodept.ui.theme.LocalTerminalColors
+import com.cryptodept.util.TerminalConfig
 import com.cryptodept.viewmodel.DerivativesUiState
 import com.cryptodept.viewmodel.DerivativesViewModel
 import java.util.*
@@ -36,7 +37,7 @@ fun DerivativesScreen(viewModel: DerivativesViewModel = hiltViewModel()) {
             Modifier
                 .fillMaxSize()
                 .background(colors.background)
-                .padding(16.dp),
+                .padding(TerminalConfig.UI.DEFAULT_PADDING),
     ) {
         when (val uiState = state) {
             is DerivativesUiState.Loading -> {
@@ -81,14 +82,14 @@ fun DerivativesContent(
         modifier =
             Modifier
                 .fillMaxSize()
-                .border(1.dp, colors.grid, RectangleShape),
+                .border(TerminalConfig.UI.BORDER_WIDTH, colors.grid, RectangleShape),
     ) {
         item {
             Row(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .padding(8.dp),
+                        .padding(TerminalConfig.UI.SMALL_PADDING),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -97,17 +98,17 @@ fun DerivativesContent(
                     color = colors.primary,
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
+                    fontSize = TerminalConfig.UI.FONT_SIZE_LARGE,
                     modifier = Modifier.weight(1f)
                 )
                 Row(
                     modifier = Modifier.wrapContentWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(TerminalConfig.UI.TINY_PADDING)
                 ) {
                     listOf("BTC", "ETH", "XRP").forEach { symbol ->
                         Box(
                             modifier = Modifier
-                                .border(1.dp, if (funding.symbol == symbol) colors.primary else colors.grid)
+                                .border(TerminalConfig.UI.BORDER_WIDTH, if (funding.symbol == symbol) colors.primary else colors.grid)
                                 .clickable { onCoinSelect(symbol) }
                                 .padding(horizontal = 6.dp, vertical = 2.dp)
                         ) {
@@ -115,25 +116,25 @@ fun DerivativesContent(
                                 text = symbol,
                                 color = if (funding.symbol == symbol) colors.primary else colors.dimText,
                                 fontFamily = FontFamily.Monospace,
-                                fontSize = 11.sp
+                                fontSize = TerminalConfig.UI.FONT_SIZE_SMALL
                             )
                         }
                     }
                 }
             }
-            HorizontalDivider(color = colors.grid, thickness = 1.dp)
+            HorizontalDivider(color = colors.grid, thickness = TerminalConfig.UI.BORDER_WIDTH)
         }
 
         // --- FUNDING RATE ---
         item {
             SectionHeader("FUNDING RATE")
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(modifier = Modifier.padding(TerminalConfig.UI.DEFAULT_PADDING)) {
                 Text(
                     "EXPLANATION: Periodic payments between longs and shorts. Positive = Longs pay Shorts (Bullish sentiment). Negative = Shorts pay Longs (Bearish sentiment).",
                     color = colors.dimText,
-                    fontSize = 10.sp,
+                    fontSize = TerminalConfig.UI.FONT_SIZE_MICRO,
                     fontFamily = FontFamily.Monospace,
-                    modifier = Modifier.padding(bottom = 8.dp),
+                    modifier = Modifier.padding(bottom = TerminalConfig.UI.SMALL_PADDING),
                 )
                 Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
                     Text("BINANCE:", color = colors.dimText, fontFamily = FontFamily.Monospace)

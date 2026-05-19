@@ -14,19 +14,38 @@ class MultiTimeframeAnalyzer
     constructor(
         private val taEngine: TechnicalAnalysisEngine,
         private val chartRepository: ChartRepository,
+        private val demoMode: com.cryptodept.util.DemoModeProvider,
     ) {
         // Mapping: timeframe label → CoinGecko days param
         private val TIMEFRAME_CONFIG =
             listOf(
-                Triple("15m", 1, 96), // 1 ден данни, последните 96 свещи
-                Triple("1H", 1, 24), // 1 ден данни, последните 24 свещи
-                Triple("4H", 7, 42), // 7 дни данни, последните 42 свещи
-                Triple("1D", 30, 30), // 30 дни данни
-                Triple("1W", 90, 13), // 90 дни данни (приблизително 13 седмични свещи)
+                Triple("15m", 1, 96),
+                Triple("1H", 1, 24),
+                Triple("4H", 7, 42),
+                Triple("1D", 30, 30),
+                Triple("1W", 90, 13),
             )
 
         suspend fun analyze(coinId: String): MTFConsensus =
             withContext(Dispatchers.Default) {
+                if (demoMode.isActive()) {
+                    return@withContext MTFConsensus(
+                        timeframes = listOf(
+                            TimeframeSignal("15m", TrendDirection.UP, 62.0, MTFMacdSignal.BULLISH, EmaSignal.ABOVE_50, OverallSignal.BUY, 96),
+                            TimeframeSignal("1H", TrendDirection.UP, 58.0, MTFMacdSignal.BULLISH, EmaSignal.ABOVE_50, OverallSignal.BUY, 24),
+                            TimeframeSignal("4H", TrendDirection.SIDEWAYS, 54.0, MTFMacdSignal.NEUTRAL, EmaSignal.MIXED, OverallSignal.NEUTRAL, 42),
+                            TimeframeSignal("1D", TrendDirection.DOWN, 42.0, MTFMacdSignal.BEARISH, EmaSignal.BELOW_50, OverallSignal.SELL, 30),
+                            TimeframeSignal("1W", TrendDirection.DOWN, 38.0, MTFMacdSignal.BEARISH, EmaSignal.BELOW_ALL, OverallSignal.STRONG_SELL, 13)
+                        ),
+                        bullishCount = 2,
+                        bearishCount = 2,
+                        neutralCount = 1,
+                        consensus = OverallSignal.NEUTRAL,
+                        interpretation = "DEMO DATA: SHOWING MIXED BIAS ACROSS TIMEFRAMES.",
+                        tradingBias = "NEUTRAL"
+                    )
+                }
+
                 val timeframeSignals = mutableListOf<TimeframeSignal>()
 
                 TIMEFRAME_CONFIG.forEach { (tfLabel, days, take) ->
@@ -38,122 +57,48 @@ class MultiTimeframeAnalyzer
                         val prices = candles.map { it.close }
                         val rsi = taEngine.calculateRSI(prices)
                         val macd = taEngine.calculateMACD(prices)
-                        val ema20 = taEngine.calculateEMA(prices, 20).last()
-                        val ema50 = taEngine.calculateEMA(prices, minOf(50, prices.size)).last()
+
+                        val macdHist = macd.histogram.lastOrNull() ?: 0.0
+                        val macdSignal = when {
+                            macdHist > 0 -> MTFMacdSignal.BULLISH
+                            macdHist < 0 -> MTFMacdSignal.BEARISH
+                            else -> MTFMacdSignal.NEUTRAL
+                        }
+
+                        val ema50 = taEngine.calculateEMA(prices, 50).lastOrNull() ?: 0.0
+                        val ema200 = taEngine.calculateEMA(prices, 200).lastOrNull() ?: 0.0
                         val currentPrice = prices.last()
 
-                        val trend = determineTrend(prices, ema20, ema50)
-                        val macdSignal = determineMacdSignal(macd)
-                        val emaSignal = determineEmaSignal(currentPrice, ema20, ema50)
-                        val overall = calculateOverall(trend, rsi, macdSignal, emaSignal)
+                        val emaSignal = when {
+                            currentPrice > ema50 && currentPrice > ema200 -> EmaSignal.ABOVE_ALL
+                            currentPrice > ema50 -> EmaSignal.ABOVE_50
+                            currentPrice < ema50 && currentPrice < ema200 -> EmaSignal.BELOW_ALL
+                            else -> EmaSignal.MIXED
+                        }
+
+                        val trend = when {
+                            currentPrice > ema200 && prices[prices.size-1] > prices[prices.size-2] -> TrendDirection.UP
+                            currentPrice < ema200 && prices[prices.size-1] < prices[prices.size-2] -> TrendDirection.DOWN
+                            else -> TrendDirection.SIDEWAYS
+                        }
+
+                        val overall = calculateOverall(rsi, macdHist, currentPrice, ema50, trend)
 
                         timeframeSignals.add(
-                            TimeframeSignal(
-                                tfLabel,
-                                trend,
-                                rsi,
-                                macdSignal,
-                                emaSignal,
-                                overall,
-                                candles.size,
-                            ),
+                            TimeframeSignal(tfLabel, trend, rsi, macdSignal, emaSignal, overall, candles.size)
                         )
                     } catch (e: Exception) {
-                        android.util.Log.e("CryptoDept_MTF", "Error for $tfLabel: ${e.message}")
+                        // Skip failed timeframe
                     }
                 }
 
-                buildConsensus(timeframeSignals)
-            }
+                if (timeframeSignals.isEmpty()) throw Exception("NO_TIMEFRAME_DATA")
 
-        private fun determineTrend(
-            prices: List<Double>,
-            ema20: Double,
-            ema50: Double,
-        ): TrendDirection {
-            val current = prices.last()
-            val recentChange = if (prices.size >= 5) (current - prices[prices.size - 5]) / prices[prices.size - 5] * 100 else 0.0
-            return when {
-                current > ema20 && current > ema50 && recentChange > 2 -> TrendDirection.STRONG_UP
-                current > ema20 && current > ema50 -> TrendDirection.UP
-                current < ema20 && current < ema50 && recentChange < -2 -> TrendDirection.STRONG_DOWN
-                current < ema20 && current < ema50 -> TrendDirection.DOWN
-                else -> TrendDirection.SIDEWAYS
-            }
-        }
+                val bullish = timeframeSignals.count { it.overallSignal == OverallSignal.BUY || it.overallSignal == OverallSignal.STRONG_BUY }
+                val bearish = timeframeSignals.count { it.overallSignal == OverallSignal.SELL || it.overallSignal == OverallSignal.STRONG_SELL }
+                val neutral = timeframeSignals.size - bullish - bearish
 
-        private fun determineMacdSignal(macd: MACDResult): MTFMacdSignal {
-            val hist = macd.histogram
-            if (hist.size < 2) return MTFMacdSignal.NEUTRAL
-            val current = hist.last()
-            val previous = hist[hist.size - 2]
-            return when {
-                previous < 0 && current > 0 -> MTFMacdSignal.BULLISH_CROSS
-                previous > 0 && current < 0 -> MTFMacdSignal.BEARISH_CROSS
-                current > 0 && current > previous -> MTFMacdSignal.BULLISH
-                current < 0 && current < previous -> MTFMacdSignal.BEARISH
-                else -> MTFMacdSignal.NEUTRAL
-            }
-        }
-
-        private fun determineEmaSignal(
-            price: Double,
-            ema20: Double,
-            ema50: Double,
-        ): EmaSignal =
-            when {
-                price > ema20 && price > ema50 && ema20 > ema50 -> EmaSignal.ABOVE_ALL
-                price > ema50 -> EmaSignal.ABOVE_50
-                price < ema20 && price < ema50 && ema20 < ema50 -> EmaSignal.BELOW_ALL
-                price < ema50 -> EmaSignal.BELOW_50
-                else -> EmaSignal.MIXED
-            }
-
-        private fun calculateOverall(
-            trend: TrendDirection,
-            rsi: Double,
-            macd: MTFMacdSignal,
-            ema: EmaSignal,
-        ): OverallSignal {
-            var score = 0
-            score +=
-                when (trend) {
-                    TrendDirection.STRONG_UP -> 2
-                    TrendDirection.UP -> 1
-                    TrendDirection.STRONG_DOWN -> -2
-                    TrendDirection.DOWN -> -1
-                    else -> 0
-                }
-            if (rsi < 35) score += 1
-            if (rsi > 65) score -= 1
-            score +=
-                when (macd) {
-                    MTFMacdSignal.BULLISH_CROSS, MTFMacdSignal.BULLISH -> 1
-                    MTFMacdSignal.BEARISH_CROSS, MTFMacdSignal.BEARISH -> -1
-                    else -> 0
-                }
-            score +=
-                when (ema) {
-                    EmaSignal.ABOVE_ALL -> 1
-                    EmaSignal.BELOW_ALL -> -1
-                    else -> 0
-                }
-            return when {
-                score >= 4 -> OverallSignal.STRONG_BUY
-                score >= 2 -> OverallSignal.BUY
-                score <= -4 -> OverallSignal.STRONG_SELL
-                score <= -2 -> OverallSignal.SELL
-                else -> OverallSignal.NEUTRAL
-            }
-        }
-
-        private fun buildConsensus(signals: List<TimeframeSignal>): MTFConsensus {
-            val bullish = signals.count { it.overallSignal in listOf(OverallSignal.BUY, OverallSignal.STRONG_BUY) }
-            val bearish = signals.count { it.overallSignal in listOf(OverallSignal.SELL, OverallSignal.STRONG_SELL) }
-            val neutral = signals.size - bullish - bearish
-
-            val consensus =
-                when {
+                val consensus = when {
                     bullish >= 4 -> OverallSignal.STRONG_BUY
                     bullish >= 3 -> OverallSignal.BUY
                     bearish >= 4 -> OverallSignal.STRONG_SELL
@@ -161,22 +106,35 @@ class MultiTimeframeAnalyzer
                     else -> OverallSignal.NEUTRAL
                 }
 
-            val interpretation =
-                when {
-                    bullish >= 4 -> "Strong alignment across all timeframes. Trend likely to continue."
-                    bullish == 3 && bearish == 0 -> "Higher timeframes bullish. Short-term weakness = dip opportunity."
-                    bearish >= 4 -> "Strong bearish alignment. Avoid longs."
-                    bullish > 0 && bearish > 0 -> "Mixed signals. Higher timeframes take priority. Wait for clarity."
-                    else -> "No clear direction. Market in consolidation."
-                }
+                MTFConsensus(
+                    timeframes = timeframeSignals,
+                    bullishCount = bullish,
+                    bearishCount = bearish,
+                    neutralCount = neutral,
+                    consensus = consensus,
+                    interpretation = generateInterpretation(consensus, bullish, bearish),
+                    tradingBias = if (bullish > bearish) "BULLISH" else if (bearish > bullish) "BEARISH" else "NEUTRAL"
+                )
+            }
 
-            val bias =
-                when (consensus) {
-                    OverallSignal.STRONG_BUY, OverallSignal.BUY -> "LONG"
-                    OverallSignal.STRONG_SELL, OverallSignal.SELL -> "SHORT"
-                    else -> "WAIT"
-                }
+        private fun calculateOverall(rsi: Double, macdHist: Double, price: Double, ema50: Double, trend: TrendDirection): OverallSignal {
+            var score = 0
+            if (rsi < 35) score += 2
+            if (rsi > 65) score -= 2
+            if (macdHist > 0) score += 1 else score -= 1
+            if (price > ema50) score += 1 else score -= 1
+            if (trend == TrendDirection.UP) score += 1 else if (trend == TrendDirection.DOWN) score -= 1
 
-            return MTFConsensus(signals, bullish, bearish, neutral, consensus, interpretation, bias)
+            return when {
+                score >= 3 -> OverallSignal.STRONG_BUY
+                score >= 1 -> OverallSignal.BUY
+                score <= -3 -> OverallSignal.STRONG_SELL
+                score <= -1 -> OverallSignal.SELL
+                else -> OverallSignal.NEUTRAL
+            }
+        }
+
+        private fun generateInterpretation(consensus: OverallSignal, bullish: Int, bearish: Int): String {
+            return "CONSENSUS IS ${consensus.name}. $bullish OF 5 TIMEFRAMES SHOW BULLISH BIAS, WHILE $bearish SHOW BEARISH PRESSURE."
         }
     }

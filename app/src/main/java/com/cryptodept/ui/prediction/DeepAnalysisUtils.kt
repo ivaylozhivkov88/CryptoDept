@@ -5,12 +5,14 @@ import com.cryptodept.domain.model.PricePrediction
 import java.util.Locale
 
 fun generateShareText(prediction: PricePrediction): String {
+    val resolver = com.cryptodept.util.SymbolResolver()
+    val assetName = resolver.toDisplayName(prediction.coinId)
     val direction = prediction.ensembleConsensus.direction.name
     val confidence = (prediction.ensembleConsensus.overallConfidence * 100).toInt()
 
     return """
         --- CRYPTODEPT AI REPORT ---
-        ASSET: ${prediction.coinId.uppercase()}
+        ASSET: $assetName
         SENTIMENT: $direction ($confidence%)
         
         PRICE DISTRIBUTION:
@@ -25,19 +27,20 @@ fun generateShareText(prediction: PricePrediction): String {
 }
 
 fun generateAiPrompt(prediction: PricePrediction): String {
-    val asset = prediction.coinId.uppercase()
+    val resolver = com.cryptodept.util.SymbolResolver()
+    val asset = resolver.toDisplayName(prediction.coinId)
     val sentiment = prediction.ensembleConsensus.direction
 
     val symbolDesc =
         when (asset) {
-            "BTC", "BITCOIN" -> "the classic orange Bitcoin 'B' logo"
-            "ETH", "ETHEREUM" -> "the blue Ethereum crystal diamond symbol"
-            "XRP", "RIPPLE" -> "the modern white Ripple 'X' logo"
-            "SOL", "SOLANA" -> "the Solana S-shaped logo with gradient colors"
-            "ADA", "CARDANO" -> "the Cardano circular dot constellation logo"
-            "DOGE", "DOGECOIN" -> "the Dogecoin golden 'D' logo"
-            "DOT", "POLKADOT" -> "the Polkadot pink dot circle logo"
-            "MATIC", "POLYGON" -> "the Polygon purple geometric logo"
+            "BTC" -> "the classic orange Bitcoin 'B' logo"
+            "ETH" -> "the blue Ethereum crystal diamond symbol"
+            "XRP" -> "the modern white XRP 'X' logo"
+            "SOL" -> "the Solana S-shaped logo with gradient colors"
+            "ADA" -> "the Cardano circular dot constellation logo"
+            "DOGE" -> "the Dogecoin golden 'D' logo"
+            "DOT" -> "the Polkadot pink dot circle logo"
+            "MATIC" -> "the Polygon purple geometric logo"
             else -> "the futuristic digital logo for $asset"
         }
 

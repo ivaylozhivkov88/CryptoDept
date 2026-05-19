@@ -1,16 +1,15 @@
 package com.cryptodept.ui.markets
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -26,7 +25,11 @@ import com.cryptodept.ui.components.TerminalLoadingSkeleton
 import com.cryptodept.ui.tutorial.tutorialTarget
 import com.cryptodept.domain.tutorial.TutorialTargetId
 import com.cryptodept.ui.navigation.Screen
-import com.cryptodept.ui.theme.LocalTerminalColors // REPLACED
+import com.cryptodept.ui.navigation.navigateToPaywall
+import com.cryptodept.ui.components.UpgradeBanner
+import com.cryptodept.ui.components.FeatureHelpIcon
+import com.cryptodept.ui.theme.LocalTerminalColors
+import com.cryptodept.util.TerminalConfig
 import com.cryptodept.viewmodel.MarketsUiState
 import com.cryptodept.viewmodel.MarketsViewModel
 import java.util.Locale
@@ -38,25 +41,120 @@ fun MarketsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val sentimentMap by viewModel.sentimentMap.collectAsStateWithLifecycle()
-    val colors = LocalTerminalColors.current // OBTAIN CURRENT THEME COLORS
+    val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
+    val errorEvent by viewModel.errorEvents.collectAsState(initial = null)
+    val colors = LocalTerminalColors.current
+    
+    var showAddDialog by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
+    var showWatchlistLimitDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(errorEvent) {
+        if (errorEvent?.contains("Watchlist limit") == true) {
+            showWatchlistLimitDialog = true
+        }
+    }
+
+    if (showWatchlistLimitDialog) {
+        AlertDialog(
+            onDismissRequest = { showWatchlistLimitDialog = false },
+            title = { Text("Watchlist Limit Reached", fontFamily = FontFamily.Monospace, color = colors.primary) },
+            text = { 
+                Text(
+                    "Free tier allows up to 10 tracked coins.\n\nUpgrade to Pro for unlimited watchlist capacity.",
+                    fontFamily = FontFamily.Monospace,
+                    color = colors.textPrimary
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showWatchlistLimitDialog = false
+                    navController.navigateToPaywall("watchlist")
+                }) {
+                    Text("[ UPGRADE_TO_PRO ]", fontFamily = FontFamily.Monospace, color = colors.amber)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showWatchlistLimitDialog = false }) {
+                    Text("[ CLOSE ]", fontFamily = FontFamily.Monospace, color = colors.dimText)
+                }
+            },
+            containerColor = colors.background,
+            shape = RectangleShape
+        )
+    }
+
+    if (showAddDialog) {
+        AlertDialog(
+            onDismissRequest = { showAddDialog = false; searchQuery = "" },
+            containerColor = colors.background,
+            modifier = Modifier.border(1.dp, colors.primary, RectangleShape),
+            title = { Text("ADD_NEW_ASSET", color = colors.primary, fontFamily = FontFamily.Monospace) },
+            text = {
+                Column {
+                    com.cryptodept.ui.components.TerminalInput(
+                        label = "SEARCH_SYMBOL_OR_NAME",
+                        value = searchQuery,
+                        onValueChange = { 
+                            searchQuery = it
+                            viewModel.search(it)
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    LazyColumn(modifier = Modifier.heightIn(max = 300.dp)) {
+                        items(searchResults) { coin ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { 
+                                        viewModel.toggleTracking(coin.id)
+                                        showAddDialog = false
+                                        searchQuery = ""
+                                    }
+                                    .padding(vertical = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(coin.symbol.uppercase(), color = colors.primary, fontFamily = FontFamily.Monospace)
+                                Text(coin.name, color = colors.dimText, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+                                Text("+", color = colors.primary, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showAddDialog = false; searchQuery = "" }) {
+                    Text("CLOSE", color = colors.dimText, fontFamily = FontFamily.Monospace)
+                }
+            }
+        )
+    }
 
     Column(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(colors.background) // Use theme color
-                .padding(8.dp),
+                .background(colors.background)
+                .padding(TerminalConfig.UI.DEFAULT_PADDING),
     ) {
-        Text(
-            text = "--- GLOBAL_MARKET_TERMINAL_v2.0 ---",
-            color = colors.primary,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Monospace,
-            modifier = Modifier
-                .padding(bottom = 8.dp)
-                .tutorialTarget(TutorialTargetId.MARKETS_GLOBAL_STATS),
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "--- GLOBAL_MARKET_TERMINAL ---",
+                color = colors.primary,
+                fontSize = TerminalConfig.UI.FONT_SIZE_LARGE,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Monospace,
+                modifier = Modifier
+                    .tutorialTarget(TutorialTargetId.MARKETS_GLOBAL_STATS),
+            )
+            val successState = uiState as? MarketsUiState.Success
+            FeatureHelpIcon(
+                feature = if (successState?.isProUpgradeNeeded == false) com.cryptodept.domain.tier.FeatureKey.MARKETS_TOP_200 else com.cryptodept.domain.tier.FeatureKey.MARKETS_TOP_50,
+                iconSize = 14.dp
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(TerminalConfig.UI.SMALL_PADDING))
 
         when (val state = uiState) {
             is MarketsUiState.Loading -> {
@@ -77,6 +175,7 @@ fun MarketsScreen(
                 } else {
                     MarketsList(
                         coins = state.coins,
+                        isProUpgradeNeeded = state.isProUpgradeNeeded,
                         sentimentMap = sentimentMap,
                         onCoinClick = { coinId ->
                             navController.navigate(Screen.CoinDetail.createRoute(coinId))
@@ -84,6 +183,7 @@ fun MarketsScreen(
                         onToggleTracking = { coinId ->
                             viewModel.toggleTracking(coinId)
                         },
+                        onUpgradeClick = { navController.navigateToPaywall("markets") }
                     )
                 }
             }
@@ -95,23 +195,36 @@ fun MarketsScreen(
             }
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(TerminalConfig.UI.SPACER_LARGE))
+
+        // ADD COIN BUTTON (PRO ONLY)
+        val billingViewModel: com.cryptodept.viewmodel.BillingViewModel = hiltViewModel()
+        val isPro by billingViewModel.billingManager.isPro.collectAsState()
         
-        com.cryptodept.ui.components.TerminalCommandBar(
-            onCommandEntered = { cmd ->
-                com.cryptodept.ui.analysis.handleGlobalCommand(cmd, navController)
-            },
-            modifier = Modifier.padding(bottom = 8.dp).imePadding()
-        )
+        if (isPro) {
+            Button(
+                onClick = { showAddDialog = true },
+                modifier = Modifier.fillMaxWidth().height(TerminalConfig.Interaction.TOUCH_TARGET_SIZE.dp),
+                shape = RectangleShape,
+                colors = ButtonDefaults.buttonColors(containerColor = colors.surface, contentColor = colors.primary),
+                border = BorderStroke(TerminalConfig.UI.BORDER_WIDTH, colors.primary)
+            ) {
+                Text("ADD COIN +", fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+            }
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
     }
 }
 
 @Composable
 fun MarketsList(
     coins: List<CoinPrice>,
+    isProUpgradeNeeded: Boolean,
     sentimentMap: Map<String, com.cryptodept.domain.usecase.SentimentVerdict>,
     onCoinClick: (String) -> Unit,
     onToggleTracking: (String) -> Unit,
+    onUpgradeClick: () -> Unit,
 ) {
     val colors = LocalTerminalColors.current
     LazyColumn(modifier = Modifier.tutorialTarget(TutorialTargetId.MARKETS_LIST)) {
@@ -139,6 +252,17 @@ fun MarketsList(
                 onToggleTracking = onToggleTracking,
                 sentiment = sentimentMap[coin.id],
             )
+        }
+        
+        if (isProUpgradeNeeded) {
+            item {
+                UpgradeBanner(
+                    featureName = "Top 200 Markets",
+                    description = "Pro tier unlocks 150 more coins plus advanced filters.",
+                    requiredTier = "Pro",
+                    onUpgradeClick = onUpgradeClick,
+                )
+            }
         }
     }
 }

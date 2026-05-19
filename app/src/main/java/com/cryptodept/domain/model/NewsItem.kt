@@ -12,6 +12,7 @@ data class NewsItem(
     val publishedAt: Long,
     val sentiment: NewsSentiment,
     val currencies: ImmutableList<String>,
+    val imageUrl: String? = null,
 )
 
 enum class NewsSentiment { BULLISH, BEARISH, NEUTRAL }

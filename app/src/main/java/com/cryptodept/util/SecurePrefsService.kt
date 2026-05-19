@@ -2,6 +2,7 @@ package com.cryptodept.util
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -10,7 +11,7 @@ import javax.inject.Singleton
 
 /**
  * PROMPT #201 — Secure storage for sensitive information.
- * Wraps EncryptedSharedPreferences for easy access.
+ * Wraps EncryptedSharedPreferences with crash protection for Keystore mismatches.
  */
 @Singleton
 class SecurePrefsService
@@ -24,14 +25,30 @@ class SecurePrefsService
                 .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
                 .build()
 
-        private val sharedPreferences: SharedPreferences =
-            EncryptedSharedPreferences.create(
+        private val sharedPreferences: SharedPreferences = try {
+            createEncryptedPrefs(context, masterKey)
+        } catch (e: Exception) {
+            Log.e("SecurePrefs", "Failed to initialize encrypted prefs, possible Keystore mismatch. Clearing...", e)
+            // If creation fails (e.g. AEADBadTagException), clear the file and retry once
+            context.getSharedPreferences("secure_prefs", Context.MODE_PRIVATE).edit().clear().apply()
+            try {
+                createEncryptedPrefs(context, masterKey)
+            } catch (e2: Exception) {
+                Log.e("SecurePrefs", "Fatal failure to initialize secure storage", e2)
+                // Fallback to plain prefs if encryption is completely broken on device
+                context.getSharedPreferences("secure_prefs_fallback", Context.MODE_PRIVATE)
+            }
+        }
+
+        private fun createEncryptedPrefs(context: Context, key: MasterKey): SharedPreferences {
+            return EncryptedSharedPreferences.create(
                 context,
                 "secure_prefs",
-                masterKey,
+                key,
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
             )
+        }
 
         fun saveString(
             key: String,

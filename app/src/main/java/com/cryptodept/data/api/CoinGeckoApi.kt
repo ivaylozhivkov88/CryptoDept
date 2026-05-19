@@ -82,6 +82,8 @@ data class CoinMarketResponse(
     val low_24h: Double,
     val price_change_24h: Double,
     val price_change_percentage_24h: Double,
+    @SerializedName("price_change_percentage_7d_in_currency") val priceChangePercentage7d: Double? = null,
+    @SerializedName("price_change_percentage_30d_in_currency") val priceChangePercentage30d: Double? = null,
     val market_cap_change_24h: Double,
     val market_cap_change_percentage_24h: Double,
     val circulating_supply: Double,

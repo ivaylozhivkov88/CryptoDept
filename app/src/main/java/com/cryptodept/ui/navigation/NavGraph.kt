@@ -1,10 +1,7 @@
 package com.cryptodept.ui.navigation
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -83,6 +80,9 @@ fun NavGraph(
                         defaultValue = "bitcoin"
                     },
                 ),
+            deepLinks = listOf(
+                androidx.navigation.navDeepLink { uriPattern = "cryptodept://analysis/{coinId}" }
+            )
         ) { backStackEntry ->
             val coinId = backStackEntry.arguments?.getString("coinId") ?: "bitcoin"
             ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
@@ -182,9 +182,7 @@ fun NavGraph(
         }
 
         composable(Screen.PositionSizer.route) {
-            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
-                PositionSizeScreen(onBack = { navController.popBackStack() })
-            }
+            PositionSizeScreen(onBack = { navController.popBackStack() })
         }
 
         composable(Screen.WhaleTracker.route) {
@@ -194,16 +192,23 @@ fun NavGraph(
         }
 
         composable(Screen.Prediction.route) {
-            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
+            val settingsViewModel: com.cryptodept.viewmodel.SettingsViewModel = hiltViewModel()
+            val tier by settingsViewModel.tierAccessManager.currentTier.collectAsState()
+            
+            if (tier == com.cryptodept.domain.tier.AccessTier.ADMIN) {
                 com.cryptodept.ui.prediction.PredictionHubScreen(onBack = { navController.popBackStack() })
+            } else {
+                LaunchedEffect(Unit) {
+                    navController.popBackStack()
+                }
             }
         }
 
         composable(Screen.ContentStudio.route) {
             val settingsViewModel: com.cryptodept.viewmodel.SettingsViewModel = hiltViewModel()
-            val isAdmin by settingsViewModel.isAdmin.collectAsState()
+            val tier by settingsViewModel.tierAccessManager.currentTier.collectAsState()
             
-            if (isAdmin) {
+            if (tier == com.cryptodept.domain.tier.AccessTier.ADMIN) {
                 com.cryptodept.ui.ai.ContentStudioScreen(
                     onBack = { navController.popBackStack() },
                     onNavigateToAiCoach = { prompt ->
@@ -212,8 +217,8 @@ fun NavGraph(
                     }
                 )
             } else {
-                Box(modifier = androidx.compose.ui.Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
-                    androidx.compose.material3.Text("ADMIN ACCESS REQUIRED", color = androidx.compose.ui.graphics.Color.Red)
+                LaunchedEffect(Unit) {
+                    navController.popBackStack()
                 }
             }
         }
@@ -261,9 +266,10 @@ fun NavGraph(
         }
         
         composable(Screen.Alerts.route) {
-            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
-                AlertsScreen(onNavigateToBuilder = { navController.navigate("alert_builder") })
-            }
+            AlertsScreen(
+                onNavigateToBuilder = { navController.navigate("alert_builder") },
+                onNavigateToPaywall = { navController.navigateToPaywall("alerts") }
+            )
         }
         
         composable("alert_builder") {
@@ -312,7 +318,7 @@ fun NavGraph(
             NewsScreen(viewModel = viewModel)
         }
         
-        composable(Screen.Settings.route) { SettingsScreen(onBack = { navController.popBackStack() }) }
+        composable(Screen.Settings.route) { SettingsScreen(onBack = { navController.popBackStack() }, navController = navController) }
         
         composable(Screen.Journal.route) { 
             ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
@@ -373,10 +379,28 @@ fun NavGraph(
             }
         }
 
-        composable(Screen.AgentHub.route) {
-            ProGate(onLocked = { com.cryptodept.ui.paywall.PaywallScreen(onDismiss = { navController.popBackStack() }) }) {
-                com.cryptodept.ui.agents.AgentHubScreen(navController = navController)
-            }
+        composable(Screen.Glossary.route) {
+            com.cryptodept.ui.education.GlossaryScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable(
+            route = Screen.Paywall.route,
+            arguments = listOf(
+                navArgument("reason") {
+                    type = NavType.StringType
+                    defaultValue = "general"
+                    nullable = true
+                }
+            ),
+            deepLinks = listOf(
+                androidx.navigation.navDeepLink { uriPattern = "cryptodept://paywall?reason={reason}" }
+            )
+        ) { backStackEntry ->
+            val reason = backStackEntry.arguments?.getString("reason") ?: "general"
+            com.cryptodept.ui.paywall.PaywallScreen(
+                reason = reason,
+                onDismiss = { navController.popBackStack() }
+            )
         }
     }
 }

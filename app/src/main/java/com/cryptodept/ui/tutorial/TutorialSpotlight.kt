@@ -53,7 +53,7 @@ fun TutorialSpotlight(
     Canvas(modifier = Modifier.fillMaxSize()) {
         if (targetBounds == null) {
             // Fully dim screen when no target
-            drawRect(Color.Black.copy(alpha = 0.85f))
+            drawRect(Color.Black.copy(alpha = 0.95f))
             return@Canvas
         }
 
@@ -66,7 +66,7 @@ fun TutorialSpotlight(
         )
 
         // Step 1: Draw dim everywhere
-        drawRect(Color.Black.copy(alpha = 0.82f))
+        drawRect(Color.Black.copy(alpha = 0.95f))
 
         // Step 2: Cut out spotlight (BlendMode.Clear)
         drawRoundRect(

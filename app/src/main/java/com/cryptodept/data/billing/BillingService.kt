@@ -113,8 +113,8 @@ class BillingService
 
             if (!billingClient.isReady) return emptyList()
 
-            val inAppProducts = listOf("pro-1d", "pro-3d", "pro-7d")
-            val subProducts = listOf("pro-30d", "pro-90d", "pro-1y")
+            val inAppProducts = listOf("pro_1d", "pro_3d", "pro_7d")
+            val subProducts = listOf("pro_30d", "pro_90d", "pro_1y")
 
             val inAppList = inAppProducts.map { id ->
                 QueryProductDetailsParams.Product.newBuilder()
@@ -195,9 +195,9 @@ class BillingService
                 // Handle One-Time Passes
                 purchase.products.forEach { productId ->
                     when (productId) {
-                        "pro-1d" -> preferencesService.setProExpiry(1)
-                        "pro-3d" -> preferencesService.setProExpiry(3)
-                        "pro-7d" -> preferencesService.setProExpiry(7)
+                        "pro_1d" -> preferencesService.setProExpiry(1)
+                        "pro_3d" -> preferencesService.setProExpiry(3)
+                        "pro_7d" -> preferencesService.setProExpiry(7)
                     }
                 }
 

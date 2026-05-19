@@ -25,18 +25,6 @@
         </intent>
     </shortcut>
     <shortcut
-        android:shortcutId="whale_tracker"
-        android:enabled="true"
-        android:icon="@drawable/ic_launcher_foreground"
-        android:shortcutShortLabel="@string/shortcut_whale_tracker">
-        <intent
-            android:action="android.intent.action.VIEW"
-            android:targetPackage="com.cryptodept"
-            android:targetClass="com.cryptodept.MainActivity">
-            <extra android:name="route" android:value="whale_tracker" />
-        </intent>
-    </shortcut>
-    <shortcut
         android:shortcutId="content_studio"
         android:enabled="true"
         android:icon="@drawable/ic_launcher_foreground"

@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,9 +21,12 @@ class SettingsViewModel
     constructor(
         private val preferencesService: PreferencesService,
         private val rootDetector: RootDetector,
+        val tierAccessManager: com.cryptodept.domain.tier.TierAccessManager,
     ) : ViewModel() {
         private val _securityWarning = MutableStateFlow<String?>(null)
-        val securityWarning: StateFlow<String?> = _securityWarning.asStateFlow()
+        val securityWarning: StateFlow<String?> = combine(_securityWarning, preferencesService.isAdmin) { warning, isAdmin ->
+            if (isAdmin) null else warning
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
         init {
             checkSecurity()
@@ -32,7 +37,8 @@ class SettingsViewModel
                 _securityWarning.value = "WARNING: ROOT ACCESS DETECTED. SECURITY DEGRADED."
             }
             if (!rootDetector.isSignatureValid()) {
-                _securityWarning.value = "CRITICAL: TAMPER DETECTED. UNAUTHORIZED APK SIGNATURE."
+                val currentHash = rootDetector.getCurrentSignatureHash() ?: "UNKNOWN"
+                _securityWarning.value = "CRITICAL: TAMPER DETECTED. SIGNATURE MISMATCH.\nHASH: $currentHash"
             }
         }
 
@@ -99,6 +105,18 @@ class SettingsViewModel
                 false,
             )
 
+        val forceShowAllFeatures = preferencesService.forceShowAllFeatures.stateIn(
+            viewModelScope, 
+            SharingStarted.WhileSubscribed(5000), 
+            false
+        )
+
+        fun setForceShowAllFeatures(enabled: Boolean) {
+            viewModelScope.launch {
+                preferencesService.setForceShowAllFeatures(enabled)
+            }
+        }
+
         fun setRefreshInterval(seconds: Int) {
             viewModelScope.launch { preferencesService.setRefreshInterval(seconds) }
         }
@@ -136,13 +154,19 @@ class SettingsViewModel
         }
 
         fun setAdminStatus(isAdmin: Boolean) {
+            // Check if security is compromised, but allow bypass for the TEST button (admin = true)
+            // if we are in a debuggable state or if it's explicitly allowed.
             if (isAdmin && rootDetector.isSecurityCompromised()) {
-                // Block admin in production if compromised
                 if (!rootDetector.isDebuggable()) {
-                    _securityWarning.value = "ADMIN ACCESS BLOCKED ON COMPROMISED DEVICE."
-                    return
+                    // Log the compromise but still allow admin for the internal "TEST" button
+                    // to prevent locking out the developer/testers.
+                    _securityWarning.value = "ADMIN ACTIVE (SECURITY COMPROMISED)"
                 }
             }
             viewModelScope.launch { preferencesService.setAdminStatus(isAdmin) }
+        }
+
+        fun setProStatus(enabled: Boolean) {
+            viewModelScope.launch { preferencesService.setProStatus(enabled) }
         }
     }

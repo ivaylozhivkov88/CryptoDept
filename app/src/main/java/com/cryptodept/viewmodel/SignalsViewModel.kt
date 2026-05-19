@@ -32,10 +32,19 @@ class SignalsViewModel
         private val getOHLCUseCase: GetOHLCUseCase,
         private val taEngine: TechnicalAnalysisEngine,
         private val alphaEngine: AlphaSignalEngine,
-        private val preferencesService: com.cryptodept.data.datastore.PreferencesService
+        private val preferencesService: com.cryptodept.data.datastore.PreferencesService,
+        private val demoMode: com.cryptodept.util.DemoModeProvider,
     ) : ViewModel() {
         private val _signals = MutableStateFlow<List<CoinSignal>>(emptyList())
-        val signals: StateFlow<List<CoinSignal>> = _signals.asStateFlow()
+        val signals: StateFlow<List<CoinSignal>> = combine(_signals, demoMode.demoActiveState) { real, active ->
+            if (active) {
+                listOf(
+                    CoinSignal("bitcoin", "BTC", 103245.5, CompositeSignal(SignalStrength.BUY, 4, 1, 1, emptyList(), 0.8f)),
+                    CoinSignal("ethereum", "ETH", 3425.8, CompositeSignal(SignalStrength.BUY, 3, 2, 1, emptyList(), 0.7f)),
+                    CoinSignal("solana", "SOL", 212.45, CompositeSignal(SignalStrength.NEUTRAL, 2, 2, 2, emptyList(), 0.5f))
+                )
+            } else real
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
         val alphaSignals: StateFlow<List<AlphaSignal>> = alphaEngine.signals.stateIn(
             viewModelScope,

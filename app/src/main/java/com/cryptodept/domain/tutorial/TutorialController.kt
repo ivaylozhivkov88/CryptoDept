@@ -3,6 +3,7 @@ package com.cryptodept.domain.tutorial
 import com.cryptodept.data.datastore.PreferencesService
 import com.cryptodept.domain.manager.AchievementEngine
 import com.cryptodept.domain.model.AchievementCondition
+import com.cryptodept.util.DemoModeProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,6 +19,7 @@ import javax.inject.Singleton
 class TutorialController @Inject constructor(
     private val preferencesService: PreferencesService,
     private val achievementEngine: AchievementEngine,
+    private val demoMode: DemoModeProvider,
 ) {
 
     private val _state = MutableStateFlow(TutorialUiState())
@@ -41,6 +43,7 @@ class TutorialController @Inject constructor(
     }
 
     fun startTutorial() {
+        demoMode.activate()
         _state.value = TutorialUiState(
             isActive = true,
             currentStepIndex = 0,
@@ -78,6 +81,7 @@ class TutorialController @Inject constructor(
     }
 
     fun confirmSkip() {
+        demoMode.deactivate()
         completeTutorial()
         _state.value = _state.value.copy(showSkipConfirmation = false)
     }
@@ -87,6 +91,7 @@ class TutorialController @Inject constructor(
     }
 
     fun completeTutorial() {
+        demoMode.deactivate()
         // Set completed flag in preferences
         kotlinx.coroutines.MainScope().launch {
             preferencesService.setTutorialCompleted(true)

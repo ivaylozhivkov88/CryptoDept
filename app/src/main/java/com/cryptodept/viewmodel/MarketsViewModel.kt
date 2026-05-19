@@ -4,16 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cryptodept.domain.model.CoinPrice
 import com.cryptodept.domain.repository.CryptoRepository
+import com.cryptodept.domain.tier.AccessTier
+import com.cryptodept.domain.tier.TierAccessManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -22,6 +20,7 @@ sealed class MarketsUiState {
 
     data class Success(
         val coins: List<CoinPrice>,
+        val isProUpgradeNeeded: Boolean = false
     ) : MarketsUiState()
 
     data class Error(
@@ -36,44 +35,110 @@ class MarketsViewModel
         private val cryptoRepository: CryptoRepository,
         private val sentimentAnalyzer: com.cryptodept.domain.usecase.SentimentAnalyzer,
         private val errorMapper: com.cryptodept.util.ErrorMessageMapper,
+        private val demoMode: com.cryptodept.util.DemoModeProvider,
+        private val tierAccessManager: TierAccessManager,
     ) : ViewModel() {
-        private val _uiState = MutableStateFlow<MarketsUiState>(MarketsUiState.Loading)
-        val uiState: StateFlow<MarketsUiState> = _uiState.asStateFlow()
+        
+        @OptIn(ExperimentalCoroutinesApi::class)
+        val uiState: StateFlow<MarketsUiState> = combine(
+            demoMode.demoActiveState,
+            tierAccessManager.currentTier
+        ) { active: Boolean, tier: AccessTier ->
+            active to tier
+        }.flatMapLatest { (active, tier) ->
+            if (active) {
+                flowOf(MarketsUiState.Success(
+                    coins = demoMode.getDemoMarketsList().map { it.toDomain() },
+                    isProUpgradeNeeded = false
+                ))
+            } else {
+                cryptoRepository.getAllCoinPrices().map { coins ->
+                    if (coins.isNotEmpty()) {
+                        val limit = if (tier.canAccess(AccessTier.PRO)) 200 else 50
+                        val sortedCoins = coins.sortedByDescending { it.marketCap }.take(limit)
+                        
+                        // Task 1.2: Enforce strict 3-star limit for FREE tier in UI state
+                        val processedCoins = if (tier == AccessTier.FREE) {
+                            var trackedCount = 0
+                            sortedCoins.map { coin ->
+                                if (coin.isTracked) {
+                                    if (trackedCount < 3) {
+                                        trackedCount++
+                                        coin
+                                    } else {
+                                        coin.copy(isTracked = false)
+                                    }
+                                } else coin
+                            }
+                        } else sortedCoins
+
+                        MarketsUiState.Success(
+                            coins = processedCoins,
+                            isProUpgradeNeeded = !tier.canAccess(AccessTier.PRO)
+                        )
+                    } else MarketsUiState.Loading
+                }
+            }
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MarketsUiState.Loading)
+
+        private val _searchResults = MutableStateFlow<List<CoinPrice>>(emptyList())
+        val searchResults: StateFlow<List<CoinPrice>> = _searchResults.asStateFlow()
 
         private val _sentimentMap = MutableStateFlow<Map<String, com.cryptodept.domain.usecase.SentimentVerdict>>(emptyMap())
-        val sentimentMap: StateFlow<Map<String, com.cryptodept.domain.usecase.SentimentVerdict>> = _sentimentMap.asStateFlow()
+        val sentimentMap: StateFlow<Map<String, com.cryptodept.domain.usecase.SentimentVerdict>> = combine(_sentimentMap, demoMode.demoActiveState) { map, active ->
+            if (active) {
+                demoMode.getDemoMarketsList().associate { it.symbol.lowercase() to com.cryptodept.domain.usecase.SentimentVerdict.BULLISH }
+            } else map
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
         private val _errorChannel = Channel<String>()
         val errorEvents = _errorChannel.receiveAsFlow()
 
         init {
-            observePrices()
             refreshData()
         }
 
-        private fun observePrices() {
+        private fun com.cryptodept.util.DemoMarketCoin.toDomain() = CoinPrice(
+            id = symbol.lowercase(),
+            symbol = symbol,
+            name = name,
+            currentPrice = price,
+            priceChange24h = (change24h / 100) * price,
+            priceChangePercentage24h = change24h,
+            marketCap = marketCap.toDouble(),
+            totalVolume = 100_000_000.0,
+            high24h = price * 1.05,
+            low24h = price * 0.95,
+            lastUpdated = System.currentTimeMillis(),
+            isTracked = true
+        )
+
+        fun search(query: String) {
+            if (query.length < 2) {
+                _searchResults.value = emptyList()
+                return
+            }
             viewModelScope.launch(Dispatchers.IO) {
-                cryptoRepository
-                    .getAllCoinPrices()
-                    .catch { e ->
-                        _uiState.value = MarketsUiState.Error(e.message ?: "DATABASE ERROR")
-                    }.collect { coins ->
-                        if (coins.isNotEmpty()) {
-                            _uiState.value = MarketsUiState.Success(coins)
-                            fetchQuickSentiment(coins.take(10))
-                        } else if (_uiState.value is MarketsUiState.Loading) {
-                            // If DB is empty and we are still loading, wait a bit then check again or error
-                            delay(10000)
-                            if (_uiState.value is MarketsUiState.Loading) {
-                                _uiState.value = MarketsUiState.Error("NO DATA AVAILABLE. CHECK CONNECTION.")
-                            }
-                        }
-                    }
+                cryptoRepository.getAllCoinPrices()
+                    .first()
+                    .filter { it.symbol.contains(query, true) || it.name.contains(query, true) }
+                    .let { _searchResults.value = it }
             }
         }
 
         fun toggleTracking(coinId: String) {
             viewModelScope.launch(Dispatchers.IO) {
+                val tier = tierAccessManager.getCurrentTier()
+                if (!tier.canAccess(AccessTier.PRO)) {
+                    val currentTracked = cryptoRepository.getTrackedCoinPrices().first()
+                    val isCurrentlyTracked = currentTracked.any { it.id == coinId }
+                    
+                    if (!isCurrentlyTracked && currentTracked.size >= 10) {
+                        _errorChannel.trySend("Watchlist limit reached (10 coins). Upgrade to PRO for unlimited.")
+                        return@launch
+                    }
+                }
+
                 cryptoRepository
                     .toggleTracking(coinId)
                     .onFailure { error ->
@@ -82,44 +147,13 @@ class MarketsViewModel
             }
         }
 
-        private fun fetchQuickSentiment(coins: List<CoinPrice>) {
-            viewModelScope.launch(Dispatchers.IO) {
-                val map = mutableMapOf<String, com.cryptodept.domain.usecase.SentimentVerdict>()
-                coins.forEach { coin ->
-                    try {
-                        val result = sentimentAnalyzer.analyzeCoin(coin.symbol.uppercase())
-                        map[coin.id] = result.verdict
-                    } catch (e: Exception) {
-                    }
-                }
-                _sentimentMap.value = map
-            }
-        }
-
         fun refreshData() {
             viewModelScope.launch(Dispatchers.IO) {
-                cryptoRepository
-                    .refreshPrices()
-                    .onFailure { error ->
-                        if (_uiState.value is MarketsUiState.Loading) {
-                            launch {
-                                val cached = cryptoRepository.getTrackedCoinPrices().first()
-                                if (cached.isNotEmpty()) {
-                                    _uiState.value = MarketsUiState.Success(cached)
-                                } else {
-                                    _uiState.value =
-                                        MarketsUiState.Error(
-                                            errorMapper.map(error),
-                                        )
-                                }
-                            }
-                        }
-                    }
+                cryptoRepository.refreshPrices()
             }
         }
 
         fun loadMarkets() {
-            _uiState.value = MarketsUiState.Loading
             refreshData()
         }
     }

@@ -31,20 +31,16 @@ class AuthService @Inject constructor(
     }
 
     private fun updateAdminStatus(user: FirebaseUser?) {
-        if (user != null) {
-            // Authorized admin emails for CryptoDept Terminal
-            val adminEmails = listOf(
-                "kaiko.dept@gmail.com",
-                "ivaylozhivkov14@gmail.com",
-                "condignia@gmail.com",
-                "test-reviewer@cryptodept.com"
-            )
-            val isAdminEmail = adminEmails.contains(user.email)
-            if (isAdminEmail) {
-                // This will also trigger setProStatus(true) internally
-                preferencesService.setAdminStatus(true)
-            }
-        }
+        val email = user?.email?.lowercase()?.trim()
+        
+        val adminEmails = setOf(
+            "ivaylozhivkov14@gmail.com",
+            "condignia@gmail.com",
+            "test-reviewer@cryptodept.com",
+        )
+        
+        val isAdminEmail = email != null && email in adminEmails
+        preferencesService.setAdminStatus(isAdminEmail)
     }
 
     suspend fun signInWithGoogle(idToken: String): Result<FirebaseUser> {
@@ -62,5 +58,6 @@ class AuthService @Inject constructor(
     fun signOut() {
         auth.signOut()
         preferencesService.setAdminStatus(false)
+        preferencesService.setProStatus(false)
     }
 }

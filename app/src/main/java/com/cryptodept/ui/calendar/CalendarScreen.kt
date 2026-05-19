@@ -71,7 +71,7 @@ fun HeaderSection(onHotToggle: () -> Unit) {
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
+                .padding(12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {

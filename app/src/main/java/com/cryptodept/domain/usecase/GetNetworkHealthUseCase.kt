@@ -22,9 +22,23 @@ class GetNetworkHealthUseCase
         private val fearGreedApi: FearGreedApi,
         private val sentimentAnalyzer: SentimentAnalyzer,
         private val gson: Gson,
+        private val demoMode: com.cryptodept.util.DemoModeProvider,
     ) {
         suspend operator fun invoke(): Result<NetworkHealth> =
             coroutineScope {
+                if (demoMode.isActive()) {
+                    val d = demoMode.getDemoNetworkHealth()
+                    val s = demoMode.getDemoSentiment()
+                    return@coroutineScope Result.success(NetworkHealth(
+                        btcHashrate = "${d.btcGasFeeSat} sat",
+                        btcMempool = "${d.mempoolBacklog} txs",
+                        ethGas = "${d.ethGasFeeGwei} gwei",
+                        fearGreedIndex = s.fearGreedIndex,
+                        fearGreedLabel = s.fearGreedLabel,
+                        socialPulse = s.redditPositive,
+                        socialPulseLabel = if (s.redditPositive > 60) "Bullish" else "Neutral"
+                    ))
+                }
                 try {
                     val btcStats = async { 
                         runCatching { withTimeoutOrNull(10000) { blockchainApi.getStats() } }.getOrNull() 
@@ -43,7 +57,7 @@ class GetNetworkHealthUseCase
                     val fg = fearGreed.await()
 
                     var safeGasPrice = "N/A"
-                    if (eth != null && eth.status == "1" && eth.result != null) {
+                    if (eth != null && eth.status == "1") {
                         val gasData = gson.fromJson(eth.result, GasOracleResult::class.java)
                         safeGasPrice = "${gasData.SafeGasPrice} Gwei"
                     }

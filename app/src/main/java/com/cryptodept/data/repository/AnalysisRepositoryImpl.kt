@@ -3,8 +3,7 @@ package com.cryptodept.data.repository
 import com.cryptodept.domain.model.*
 import com.cryptodept.domain.repository.AnalysisRepository
 import com.cryptodept.domain.repository.PriceHistoryRepository
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.pow
@@ -15,25 +14,38 @@ class AnalysisRepositoryImpl
     @Inject
     constructor(
         private val priceHistoryRepository: PriceHistoryRepository,
+        private val demoMode: com.cryptodept.util.DemoModeProvider,
     ) : AnalysisRepository {
+        
+        @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
         override fun getTechnicalIndicators(coinId: String): Flow<TechnicalIndicators> {
-            return priceHistoryRepository.getPriceHistory(coinId).map { history ->
-                // Обръщаме историята, за да работим в хронологичен ред (от минало към настояще)
-                val prices = history.map { it.price }.reversed()
-
-                if (prices.isEmpty()) {
-                    return@map TechnicalIndicators.default()
+            return demoMode.demoActiveState.flatMapLatest { active ->
+                if (active) {
+                    val d = demoMode.getDemoAnalysis()
+                    flowOf(TechnicalIndicators(
+                        rsi = d.rsi.toFloat(),
+                        macd = MACDData(d.macdValue.toFloat(), 0f, d.macdValue.toFloat()),
+                        bollingerBands = BollingerBandsData(d.currentPrice * 1.05, d.currentPrice, d.currentPrice * 0.95),
+                        emas = mapOf(50 to d.ema50, 200 to d.ema200),
+                        trend = TrendSignal.BULLISH,
+                        supportLevels = listOf(d.currentPrice * 0.9),
+                        resistanceLevels = listOf(d.currentPrice * 1.1)
+                    ))
+                } else {
+                    priceHistoryRepository.getPriceHistory(coinId).map { history ->
+                        val prices = history.map { it.price }.reversed()
+                        if (prices.isEmpty()) return@map TechnicalIndicators.default()
+                        TechnicalIndicators(
+                            rsi = calculateRSI(prices),
+                            macd = calculateMACD(prices),
+                            bollingerBands = calculateBollingerBands(prices),
+                            emas = calculateEMAs(prices, listOf(9, 21, 50, 200)),
+                            trend = determineTrend(prices),
+                            supportLevels = findSupportLevels(prices),
+                            resistanceLevels = findResistanceLevels(prices),
+                        )
+                    }
                 }
-
-                TechnicalIndicators(
-                    rsi = calculateRSI(prices),
-                    macd = calculateMACD(prices),
-                    bollingerBands = calculateBollingerBands(prices),
-                    emas = calculateEMAs(prices, listOf(9, 21, 50, 200)),
-                    trend = determineTrend(prices),
-                    supportLevels = findSupportLevels(prices),
-                    resistanceLevels = findResistanceLevels(prices),
-                )
             }
         }
 

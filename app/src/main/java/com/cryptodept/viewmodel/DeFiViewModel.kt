@@ -8,23 +8,37 @@ import com.cryptodept.domain.model.LpSimulationResult
 import com.cryptodept.domain.repository.DeFiRepository
 import com.cryptodept.domain.usecase.SimulateLpUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 @HiltViewModel
 class DeFiViewModel @Inject constructor(
     private val repository: DeFiRepository,
-    private val simulateLpUseCase: SimulateLpUseCase
+    private val simulateLpUseCase: SimulateLpUseCase,
+    private val demoMode: com.cryptodept.util.DemoModeProvider,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow<DeFiUiState>(DeFiUiState.Loading)
-    val uiState: StateFlow<DeFiUiState> = _uiState.asStateFlow()
+    
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val uiState: StateFlow<DeFiUiState> = demoMode.demoActiveState.flatMapLatest { active ->
+        if (active) {
+            flowOf(DeFiUiState.Success(
+                protocols = listOf(
+                    DeFiProtocol("lido", "Lido", "LDO", "https://lido.fi", "Liquid Staking", "", 28_000_000_000.0, 0.5, 1.2, 5.4, "Ethereum", "Liquid Staking"),
+                    DeFiProtocol("aave", "Aave", "AAVE", "https://aave.com", "Lending", "", 12_000_000_000.0, -0.2, 0.8, 3.1, "Multi", "Lending")
+                ),
+                yields = listOf(
+                    DeFiYieldOpportunity("Lido", "stETH", 28_000_000_000.0, 3.8, "Ethereum"),
+                    DeFiYieldOpportunity("Aave", "USDC", 1_500_000_000.0, 5.2, "Polygon")
+                )
+            ))
+        } else {
+            _realUiState
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), DeFiUiState.Loading)
 
+    private val _realUiState = MutableStateFlow<DeFiUiState>(DeFiUiState.Loading)
+    
     private val _simulationResult = MutableStateFlow<LpSimulationResult?>(null)
     val simulationResult: StateFlow<LpSimulationResult?> = _simulationResult.asStateFlow()
 
@@ -34,8 +48,8 @@ class DeFiViewModel @Inject constructor(
 
     fun loadData() {
         viewModelScope.launch {
-            _uiState.value = DeFiUiState.Loading
-            kotlinx.coroutines.delay(500)
+            _realUiState.value = DeFiUiState.Loading
+            delay(500)
             try {
                 withContext(Dispatchers.IO) {
                     val protocols = async { repository.getTopProtocols() }
@@ -44,17 +58,20 @@ class DeFiViewModel @Inject constructor(
                     val protocolsRes = protocols.await()
                     val yieldsRes = yields.await()
 
-                    if (protocolsRes.isSuccess && yieldsRes.isSuccess) {
-                        _uiState.value = DeFiUiState.Success(
-                            protocols = protocolsRes.getOrThrow(),
-                            yields = yieldsRes.getOrThrow()
+                    if (protocolsRes.isSuccess || yieldsRes.isSuccess) {
+                        val p = protocolsRes.getOrDefault(emptyList())
+                        val y = yieldsRes.getOrDefault(emptyList())
+                        _realUiState.value = DeFiUiState.Success(
+                            protocols = p,
+                            yields = y
                         )
                     } else {
-                        _uiState.value = DeFiUiState.Error("FAILED TO FETCH DEFI DATA")
+                        val error = protocolsRes.exceptionOrNull()?.message ?: yieldsRes.exceptionOrNull()?.message ?: "FAILED TO FETCH DEFI DATA"
+                        _realUiState.value = DeFiUiState.Error(error)
                     }
                 }
             } catch (e: Exception) {
-                _uiState.value = DeFiUiState.Error(e.message ?: "UNKNOWN ERROR")
+                _realUiState.value = DeFiUiState.Error(e.message ?: "UNKNOWN ERROR")
             }
         }
     }

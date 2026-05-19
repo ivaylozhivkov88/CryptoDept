@@ -87,13 +87,7 @@ class EntryAnalyzerViewModel
                 }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), EntryAnalysisUiState.Loading)
 
         init {
-            // Auto-refresh every 60 seconds
-            viewModelScope.launch {
-                while (true) {
-                    delay(60000)
-                    refreshTrigger.value = System.currentTimeMillis()
-                }
-            }
+            // Remove auto-refresh loop (Task 2.8)
         }
 
         fun selectCoin(coinId: String) {

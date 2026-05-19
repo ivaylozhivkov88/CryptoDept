@@ -9,16 +9,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import com.cryptodept.ui.theme.LocalTerminalAudioManager
 import com.cryptodept.ui.theme.LocalTerminalColors
 import com.cryptodept.util.TerminalAudioService
+import com.scottyab.rootbeer.RootBeer
 import kotlinx.coroutines.delay
 
 @Composable
 fun BootSequenceScreen(onBootComplete: () -> Unit) {
     val colors = LocalTerminalColors.current
+    val context = LocalContext.current
     val soundService = LocalTerminalAudioManager.current
     val displayedLines = remember { mutableStateListOf<String>() }
+    var isRooted by remember { mutableStateOf(false) }
 
     val fullLogs =
         listOf(
@@ -28,6 +32,7 @@ fun BootSequenceScreen(onBootComplete: () -> Unit) {
             "",
             "SYSTEM BOOT SEQUENCE INITIATED...",
             "",
+            "[..] INTEGRITY CHECK...........",
             "[OK] MEMORY CHECK.............. 2048MB",
             "[OK] STORAGE DRIVER............ ROOM DB v11",
             "[OK] NETWORK INTERFACE......... MULTI-API",
@@ -42,8 +47,22 @@ fun BootSequenceScreen(onBootComplete: () -> Unit) {
         )
 
     LaunchedEffect(Unit) {
+        val rootBeer = RootBeer(context)
+        isRooted = rootBeer.isRooted
+
         fullLogs.forEach { line ->
-            if (line.isEmpty()) {
+            if (line == "[..] INTEGRITY CHECK...........") {
+                delay(300)
+                if (isRooted) {
+                    displayedLines.add("[!!] ROOT DETECTED. SYSTEM HALTED.")
+                    displayedLines.add("[!!] UNAUTHORIZED ENVIRONMENT.")
+                    return@LaunchedEffect
+                } else {
+                    displayedLines.add("[OK] SYSTEM INTEGRITY VERIFIED")
+                    soundService?.playSound(TerminalAudioService.SOUND_CLICK)
+                    delay(200)
+                }
+            } else if (line.isEmpty()) {
                 displayedLines.add("")
                 delay(20)
             } else {
@@ -79,7 +98,7 @@ fun BootSequenceScreen(onBootComplete: () -> Unit) {
                         text = line,
                         color = colors.primary,
                         fontFamily = FontFamily.Monospace,
-                        fontSize = 14.sp,
+                        fontSize = 11.sp, // REDUCED (Task fix: avoid line wrap)
                         modifier = Modifier.padding(vertical = 1.dp),
                     )
                     if (index == displayedLines.size - 1) {
@@ -109,7 +128,7 @@ fun BlinkingCursor() {
     Box(
         modifier =
             Modifier
-                .size(10.dp, 16.dp)
+                .size(7.dp, 12.dp) // Adjusted to match 11.sp font
                 .background(colors.primary.copy(alpha = alpha)),
     )
 }

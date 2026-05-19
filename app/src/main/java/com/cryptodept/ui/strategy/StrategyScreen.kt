@@ -75,7 +75,7 @@ fun StrategyScreen(
                 onClick = { viewModel.clearRules() },
                 modifier = Modifier.weight(1f),
                 shape = RectangleShape,
-                border = ButtonDefaults.outlinedButtonBorder.copy(brush = androidx.compose.ui.graphics.SolidColor(colors.danger))
+                border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(brush = androidx.compose.ui.graphics.SolidColor(colors.danger))
             ) {
                 Text("CLEAR", color = colors.danger, fontFamily = FontFamily.Monospace)
             }

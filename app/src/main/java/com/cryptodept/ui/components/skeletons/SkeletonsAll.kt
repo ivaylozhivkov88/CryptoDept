@@ -117,6 +117,111 @@ fun DashboardSkeleton(modifier: Modifier = Modifier) {
 }
 
 @Composable
+fun NewsCardSkeleton(modifier: Modifier = Modifier) {
+    val colors = LocalTerminalColors.current
+    val infiniteTransition = rememberInfiniteTransition(label = "news_skeleton")
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 0.2f,
+        targetValue = 0.5f,
+        animationSpec =
+            infiniteRepeatable(
+                animation = tween(1000, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+        label = "news_shimmer",
+    )
+    val shimmerColor = colors.grid.copy(alpha = alpha)
+
+    Column(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .border(1.dp, colors.grid)
+                .padding(12.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Box(
+                modifier =
+                    Modifier
+                        .width(60.dp)
+                        .height(12.dp)
+                        .background(shimmerColor),
+            )
+            Box(
+                modifier =
+                    Modifier
+                        .width(30.dp)
+                        .height(12.dp)
+                        .background(shimmerColor),
+            )
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth(0.9f)
+                    .height(16.dp)
+                    .background(shimmerColor),
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth(0.6f)
+                    .height(16.dp)
+                    .background(shimmerColor),
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Box(
+            modifier =
+                Modifier
+                    .width(80.dp)
+                    .height(10.dp)
+                    .background(shimmerColor),
+        )
+    }
+}
+
+@Composable
+fun WhaleTxSkeleton(modifier: Modifier = Modifier) {
+    val colors = LocalTerminalColors.current
+    val infiniteTransition = rememberInfiniteTransition(label = "whale_skeleton")
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 0.2f,
+        targetValue = 0.4f,
+        animationSpec =
+            infiniteRepeatable(
+                animation = tween(1000, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+        label = "whale_shimmer",
+    )
+    val shimmerColor = colors.grid.copy(alpha = alpha)
+
+    Box(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .border(1.dp, colors.grid)
+                .padding(12.dp),
+    ) {
+        Column {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Box(modifier = Modifier.width(100.dp).height(20.dp).background(shimmerColor))
+                Box(modifier = Modifier.width(60.dp).height(16.dp).background(shimmerColor))
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Box(modifier = Modifier.width(200.dp).height(12.dp).background(shimmerColor))
+            Spacer(modifier = Modifier.height(8.dp))
+            Box(modifier = Modifier.width(180.dp).height(12.dp).background(shimmerColor))
+        }
+    }
+}
+
+@Composable
 fun ChartsSkeleton(modifier: Modifier = Modifier) {
     val colors = LocalTerminalColors.current
     val infiniteTransition = rememberInfiniteTransition(label = "chart_skeleton")

@@ -8,6 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -28,30 +29,26 @@ class CorrelationViewModel
     @Inject
     constructor(
         private val getCorrelationMatrixUseCase: GetCorrelationMatrixUseCase,
+        private val repository: com.cryptodept.domain.repository.CryptoRepository,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow<CorrelationUiState>(CorrelationUiState.Loading)
         val uiState: StateFlow<CorrelationUiState> = _uiState.asStateFlow()
 
-        private val defaultSymbols =
-            listOf(
-                "BTC",
-                "ETH",
-                "SOL",
-                "XRP",
-                "ADA",
-                "DOT",
-                "LINK",
-                "AVAX",
-                "MATIC",
-                "DOGE",
-            )
-
         init {
-            loadCorrelationMatrix()
+            viewModelScope.launch {
+                repository.getTrackedCoinPrices().collectLatest { prices ->
+                    val symbols = if (prices.isNotEmpty()) {
+                        prices.map { it.symbol.uppercase() }
+                    } else {
+                        listOf("BTC", "ETH", "SOL", "XRP", "ADA", "DOT", "LINK", "AVAX", "MATIC", "DOGE")
+                    }
+                    loadCorrelationMatrix(symbols)
+                }
+            }
         }
 
         fun loadCorrelationMatrix(
-            symbols: List<String> = defaultSymbols,
+            symbols: List<String>,
             days: Int = 30,
         ) {
             viewModelScope.launch {
