@@ -3,6 +3,8 @@ package com.cryptodept.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cryptodept.data.datastore.SubscriptionAccessManager
+import com.cryptodept.data.datastore.SystemSettingsManager
 import com.cryptodept.data.remoteconfig.RemoteConfigService
 import com.cryptodept.domain.model.*
 import com.cryptodept.domain.usecase.*
@@ -30,7 +32,8 @@ class DashboardViewModel @Inject constructor(
     private val riskEngine: RiskScoreEngine,
     private val logService: DashboardLogService,
     private val analytics: AnalyticsService,
-    private val preferencesService: com.cryptodept.data.datastore.PreferencesService,
+    private val settings: SystemSettingsManager,
+    private val subscription: SubscriptionAccessManager,
     private val agentCoordinator: MultiAgentCoordinator,
     private val demoMode: com.cryptodept.util.DemoModeProvider,
     private val remoteConfig: RemoteConfigService,
@@ -61,7 +64,7 @@ class DashboardViewModel @Inject constructor(
         tierAccessManager.hasAccessFlow(FeatureKey.DASHBOARD_SENTIMENT_MATRIX)
 
 
-    val focusModeEnabled: StateFlow<Boolean> = preferencesService.focusModeEnabled.stateIn(
+    val focusModeEnabled: StateFlow<Boolean> = settings.focusModeEnabled.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
         false,
@@ -231,7 +234,7 @@ class DashboardViewModel @Inject constructor(
         isTracked = true
     )
 
-    val isAdmin: StateFlow<Boolean> = preferencesService.isAdmin.stateIn(
+    val isAdmin: StateFlow<Boolean> = subscription.isAdmin.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
         false
@@ -250,7 +253,7 @@ class DashboardViewModel @Inject constructor(
 
     fun setAdminStatus(enabled: Boolean) {
         viewModelScope.launch {
-            preferencesService.setAdminStatus(enabled)
+            subscription.setAdminStatus(enabled)
         }
     }
 

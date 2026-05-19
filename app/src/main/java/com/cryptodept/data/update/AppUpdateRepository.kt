@@ -4,7 +4,7 @@ import android.app.Activity
 import android.content.Context
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
-import com.cryptodept.data.datastore.PreferencesService
+import com.cryptodept.data.datastore.UserSessionManager
 import com.cryptodept.domain.update.AppUpdateState
 import com.cryptodept.domain.update.UpdatePriority
 import com.google.android.play.core.appupdate.AppUpdateInfo
@@ -35,7 +35,7 @@ import javax.inject.Singleton
 @Singleton
 class AppUpdateRepository @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val preferences: PreferencesService,
+    private val session: UserSessionManager,
 ) {
     private val appUpdateManager: AppUpdateManager by lazy {
         AppUpdateManagerFactory.create(context)
@@ -148,7 +148,7 @@ class AppUpdateRepository @Inject constructor(
      * User dismissed update prompt — set cooldown.
      */
     suspend fun dismissUpdate() {
-        preferences.putLong(KEY_DISMISS_TIME, System.currentTimeMillis())
+        session.putLong(KEY_DISMISS_TIME, System.currentTimeMillis())
         _updateState.value = AppUpdateState.UpToDate
     }
     
@@ -156,7 +156,7 @@ class AppUpdateRepository @Inject constructor(
      * Check if we're within 24h cooldown period.
      */
     private suspend fun isWithinDismissCooldown(): Boolean {
-        val dismissTime = preferences.getLong(KEY_DISMISS_TIME, 0L)
+        val dismissTime = session.getLong(KEY_DISMISS_TIME, 0L)
         if (dismissTime == 0L) return false
         
         val now = System.currentTimeMillis()

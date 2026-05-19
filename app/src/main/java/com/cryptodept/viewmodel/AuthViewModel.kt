@@ -3,7 +3,7 @@ package com.cryptodept.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cryptodept.data.auth.AuthService
-import com.cryptodept.data.datastore.PreferencesService
+import com.cryptodept.data.datastore.SubscriptionAccessManager
 import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
@@ -13,7 +13,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authService: AuthService,
-    private val preferencesService: PreferencesService
+    private val subscription: SubscriptionAccessManager
 ) : ViewModel() {
     
     val currentUser: StateFlow<FirebaseUser?> = authService.currentUser
@@ -31,6 +31,6 @@ class AuthViewModel @Inject constructor(
     }
 
     fun setAdminStatus(isAdmin: Boolean) {
-        preferencesService.setAdminStatus(isAdmin)
+        subscription.setAdminStatus(isAdmin)
     }
 }

@@ -10,9 +10,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -30,7 +27,7 @@ class PreferencesService
     constructor(
         @dagger.hilt.android.qualifiers.ApplicationContext context: Context,
         private val securePrefs: SecurePrefsService,
-    ) {
+    ) : SystemSettingsManager, UserSessionManager, SubscriptionAccessManager {
         // Използваме applicationContext, за да избегнем memory leaks
         private val dataStore = context.applicationContext.dataStore
         private val scope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO + kotlinx.coroutines.SupervisorJob())
@@ -67,76 +64,76 @@ class PreferencesService
 
         // Flows за четене с вградена защита от грешки
         private val _isPro = MutableStateFlow(securePrefs.getBoolean("is_pro", false) || (securePrefs.getLong("pro_expiry_timestamp", 0L) > System.currentTimeMillis()))
-        val isPro: StateFlow<Boolean> = _isPro.asStateFlow()
+        override val isPro: StateFlow<Boolean> = _isPro.asStateFlow()
 
         private val _isAdmin = MutableStateFlow(securePrefs.getBoolean("is_admin", false))
-        val isAdmin: StateFlow<Boolean> = _isAdmin.asStateFlow()
+        override val isAdmin: StateFlow<Boolean> = _isAdmin.asStateFlow()
 
         private val _isTutorialCompleted = MutableStateFlow(securePrefs.getBoolean("tutorial_completed_v1", false))
-        val isTutorialCompleted: StateFlow<Boolean> = _isTutorialCompleted.asStateFlow()
+        override val isTutorialCompleted: StateFlow<Boolean> = _isTutorialCompleted.asStateFlow()
 
-        val refreshInterval: Flow<Int> =
+        override val refreshInterval: Flow<Int> =
             dataStore.data
                 .catch { exception -> if (exception is IOException) emit(emptyPreferences()) else throw exception }
                 .map { it[REFRESH_INTERVAL] ?: 30 }
 
-        val phosphorMode: Flow<String> =
+        override val phosphorMode: Flow<String> =
             dataStore.data
                 .catch { exception -> if (exception is IOException) emit(emptyPreferences()) else throw exception }
                 .map { it[PHOSPHOR_MODE] ?: "GREEN" }
 
-        val soundsEnabled: Flow<Boolean> =
+        override val soundsEnabled: Flow<Boolean> =
             dataStore.data
                 .catch { exception -> if (exception is IOException) emit(emptyPreferences()) else throw exception }
                 .map { it[SOUNDS_ENABLED] ?: false }
 
-        val soundsVolume: Flow<Float> =
+        override val soundsVolume: Flow<Float> =
             dataStore.data
                 .catch { exception -> if (exception is IOException) emit(emptyPreferences()) else throw exception }
                 .map { it[SOUNDS_VOLUME] ?: 0.5f }
 
-        val notificationsEnabled: Flow<Boolean> =
+        override val notificationsEnabled: Flow<Boolean> =
             dataStore.data
                 .catch { exception -> if (exception is IOException) emit(emptyPreferences()) else throw exception }
                 .map { it[NOTIFICATIONS_ENABLED] ?: true }
 
-        val isOnboardingComplete: Flow<Boolean> =
+        override val isOnboardingComplete: Flow<Boolean> =
             dataStore.data
                 .catch { exception -> if (exception is IOException) emit(emptyPreferences()) else throw exception }
                 .map { it[ONBOARDING_COMPLETE] ?: false }
 
-        val hapticEnabled: Flow<Boolean> =
+        override val hapticEnabled: Flow<Boolean> =
             dataStore.data
                 .catch { exception -> if (exception is IOException) emit(emptyPreferences()) else throw exception }
                 .map { it[HAPTIC_ENABLED] ?: true }
 
-        val screensaverTimeout: Flow<Int> =
+        override val screensaverTimeout: Flow<Int> =
             dataStore.data
                 .catch { exception -> if (exception is IOException) emit(emptyPreferences()) else throw exception }
                 .map { it[SCREENSAVER_TIMEOUT] ?: 1 }
 
-        val powerUserMode: Flow<Boolean> =
+        override val powerUserMode: Flow<Boolean> =
             dataStore.data
                 .catch { exception -> if (exception is IOException) emit(emptyPreferences()) else throw exception }
                 .map { it[POWER_USER_MODE] ?: false }
 
-        val focusModeEnabled: Flow<Boolean> =
+        override val focusModeEnabled: Flow<Boolean> =
             dataStore.data
                 .catch { exception -> if (exception is IOException) emit(emptyPreferences()) else throw exception }
                 .map { it[FOCUS_MODE_ENABLED] ?: false }
 
-        val crashlyticsConsent: Flow<Boolean> = dataStore.data.map { it[CRASHLYTICS_CONSENT] ?: true }
+        override val crashlyticsConsent: Flow<Boolean> = dataStore.data.map { it[CRASHLYTICS_CONSENT] ?: true }
 
         suspend fun performMigration() {
             migrateIfNeeded()
         }
 
-        val launchCount: Flow<Int> =
+        override val launchCount: Flow<Int> =
             dataStore.data
                 .catch { exception -> if (exception is IOException) emit(emptyPreferences()) else throw exception }
                 .map { it[LAUNCH_COUNT] ?: 0 }
 
-        val forceShowAllFeatures: Flow<Boolean> =
+        override val forceShowAllFeatures: Flow<Boolean> =
             dataStore.data
                 .catch { exception -> if (exception is IOException) emit(emptyPreferences()) else throw exception }
                 .map { it[booleanPreferencesKey("force_show_all_features")] ?: false }
@@ -164,48 +161,48 @@ class PreferencesService
 
         private fun oldAdmin(prefs: Preferences): Boolean = prefs[IS_ADMIN] ?: false
 
-        suspend fun setForceShowAllFeatures(enabled: Boolean) {
+        override suspend fun setForceShowAllFeatures(enabled: Boolean) {
             dataStore.edit { it[booleanPreferencesKey("force_show_all_features")] = enabled }
         }
 
-        suspend fun setOnboardingComplete(complete: Boolean) {
+        override suspend fun setOnboardingComplete(complete: Boolean) {
             dataStore.edit { it[ONBOARDING_COMPLETE] = complete }
         }
 
-        suspend fun setHapticEnabled(enabled: Boolean) {
+        override suspend fun setHapticEnabled(enabled: Boolean) {
             dataStore.edit { it[HAPTIC_ENABLED] = enabled }
         }
 
-        suspend fun setScreensaverTimeout(minutes: Int) {
+        override suspend fun setScreensaverTimeout(minutes: Int) {
             dataStore.edit { it[SCREENSAVER_TIMEOUT] = minutes }
         }
 
-        suspend fun setRefreshInterval(seconds: Int) {
+        override suspend fun setRefreshInterval(seconds: Int) {
             dataStore.edit { it[REFRESH_INTERVAL] = seconds }
         }
 
-        suspend fun setPhosphorMode(mode: String) {
+        override suspend fun setPhosphorMode(mode: String) {
             dataStore.edit { it[PHOSPHOR_MODE] = mode }
         }
 
-        suspend fun setSoundsEnabled(enabled: Boolean) {
+        override suspend fun setSoundsEnabled(enabled: Boolean) {
             dataStore.edit { it[SOUNDS_ENABLED] = enabled }
         }
 
-        suspend fun setSoundsVolume(volume: Float) {
+        override suspend fun setSoundsVolume(volume: Float) {
             dataStore.edit { it[SOUNDS_VOLUME] = volume }
         }
 
-        suspend fun setNotificationsEnabled(enabled: Boolean) {
+        override suspend fun setNotificationsEnabled(enabled: Boolean) {
             dataStore.edit { it[NOTIFICATIONS_ENABLED] = enabled }
         }
 
-        fun setProStatus(isPro: Boolean) {
+        override fun setProStatus(isPro: Boolean) {
             securePrefs.saveBoolean("is_pro", isPro)
             _isPro.value = isPro
         }
 
-        fun setAdminStatus(isAdmin: Boolean) {
+        override fun setAdminStatus(isAdmin: Boolean) {
             securePrefs.saveBoolean("is_admin", isAdmin)
             _isAdmin.value = isAdmin
             // Admins are automatically PRO users
@@ -217,11 +214,11 @@ class PreferencesService
             }
         }
 
-        fun isAdmin(): Boolean = _isAdmin.value
+        override fun isAdmin(): Boolean = _isAdmin.value
 
-        fun getAdminStatusFlow(): Flow<Boolean> = _isAdmin.asStateFlow()
+        override fun getAdminStatusFlow(): Flow<Boolean> = _isAdmin.asStateFlow()
 
-        fun setProExpiry(durationDays: Int) {
+        override fun setProExpiry(durationDays: Int) {
             val currentExpiry = securePrefs.getLong("pro_expiry_timestamp", 0L)
             val startTime = if (currentExpiry > System.currentTimeMillis()) currentExpiry else System.currentTimeMillis()
             val newExpiry = startTime + (durationDays * 24 * 60 * 60 * 1000L)
@@ -234,7 +231,7 @@ class PreferencesService
             }
         }
 
-        fun checkProStatus() {
+        override fun checkProStatus() {
             val expiry = securePrefs.getLong("pro_expiry_timestamp", 0L)
             val isProByBilling = securePrefs.getBoolean("is_pro", false)
             val isExpired = expiry <= System.currentTimeMillis()
@@ -246,45 +243,45 @@ class PreferencesService
             }
         }
 
-        suspend fun setPowerUserMode(enabled: Boolean) {
+        override suspend fun setPowerUserMode(enabled: Boolean) {
             dataStore.edit { it[POWER_USER_MODE] = enabled }
         }
 
-        suspend fun setFocusModeEnabled(enabled: Boolean) {
+        override suspend fun setFocusModeEnabled(enabled: Boolean) {
             dataStore.edit { it[FOCUS_MODE_ENABLED] = enabled }
         }
 
-        suspend fun setCrashlyticsConsent(enabled: Boolean) {
+        override suspend fun setCrashlyticsConsent(enabled: Boolean) {
             dataStore.edit { it[CRASHLYTICS_CONSENT] = enabled }
         }
 
-        suspend fun setTutorialCompleted(completed: Boolean) {
+        override suspend fun setTutorialCompleted(completed: Boolean) {
             securePrefs.saveBoolean("tutorial_completed_v1", completed)
             _isTutorialCompleted.value = completed
             dataStore.edit { it[TUTORIAL_COMPLETED] = completed }
         }
 
-        suspend fun saveLastReviewPromptTime(timestamp: Long) {
+        override suspend fun saveLastReviewPromptTime(timestamp: Long) {
             dataStore.edit { it[LAST_REVIEW_PROMPT_TIME] = timestamp }
         }
 
-        suspend fun getLastReviewPromptTime(): Long {
+        override suspend fun getLastReviewPromptTime(): Long {
             val prefs = dataStore.data.catch { emit(emptyPreferences()) }.first()
             return prefs[LAST_REVIEW_PROMPT_TIME] ?: 0L
         }
 
-        suspend fun incrementLaunchCount() {
+        override suspend fun incrementLaunchCount() {
             val prefs = dataStore.data.catch { emit(emptyPreferences()) }.first()
             val currentCount = prefs[LAUNCH_COUNT] ?: 0
             dataStore.edit { it[LAUNCH_COUNT] = currentCount + 1 }
         }
 
-        suspend fun getLaunchCount(): Int {
+        override suspend fun getLaunchCount(): Int {
             val prefs = dataStore.data.catch { emit(emptyPreferences()) }.first()
             return prefs[LAUNCH_COUNT] ?: 0
         }
 
-        suspend fun getAiReportsCountToday(): Int {
+        override suspend fun getAiReportsCountToday(): Int {
             val prefs = dataStore.data.catch { emit(emptyPreferences()) }.first()
             val lastDate = prefs[LAST_AI_REPORT_DATE] ?: ""
             val today = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.US).format(java.util.Date())
@@ -296,7 +293,7 @@ class PreferencesService
             }
         }
 
-        suspend fun incrementAiReportsCount() {
+        override suspend fun incrementAiReportsCount() {
             val today = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.US).format(java.util.Date())
             val currentCount = getAiReportsCountToday()
             
@@ -307,39 +304,39 @@ class PreferencesService
         }
 
         // Generic accessors for engagement tracking
-        suspend fun getInt(key: String, default: Int): Int {
+        override suspend fun getInt(key: String, default: Int): Int {
             val prefs = dataStore.data.catch { emit(emptyPreferences()) }.first()
             return prefs[intPreferencesKey(key)] ?: default
         }
 
-        suspend fun putInt(key: String, value: Int) {
+        override suspend fun putInt(key: String, value: Int) {
             dataStore.edit { it[intPreferencesKey(key)] = value }
         }
 
-        suspend fun getBoolean(key: String, default: Boolean): Boolean {
+        override suspend fun getBoolean(key: String, default: Boolean): Boolean {
             val prefs = dataStore.data.catch { emit(emptyPreferences()) }.first()
             return prefs[booleanPreferencesKey(key)] ?: default
         }
 
-        suspend fun putBoolean(key: String, value: Boolean) {
+        override suspend fun putBoolean(key: String, value: Boolean) {
             dataStore.edit { it[booleanPreferencesKey(key)] = value }
         }
 
-        suspend fun getLong(key: String, default: Long): Long {
+        override suspend fun getLong(key: String, default: Long): Long {
             val prefs = dataStore.data.catch { emit(emptyPreferences()) }.first()
             return prefs[longPreferencesKey(key)] ?: default
         }
 
-        suspend fun putLong(key: String, value: Long) {
+        override suspend fun putLong(key: String, value: Long) {
             dataStore.edit { it[longPreferencesKey(key)] = value }
         }
 
-        suspend fun getString(key: String, default: String?): String? {
+        override suspend fun getString(key: String, default: String?): String? {
             val prefs = dataStore.data.catch { emit(emptyPreferences()) }.first()
             return prefs[stringPreferencesKey(key)] ?: default
         }
 
-        suspend fun putString(key: String, value: String) {
+        override suspend fun putString(key: String, value: String) {
             dataStore.edit { it[stringPreferencesKey(key)] = value }
         }
     }

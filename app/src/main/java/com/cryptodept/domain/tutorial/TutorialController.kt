@@ -1,6 +1,6 @@
 package com.cryptodept.domain.tutorial
 
-import com.cryptodept.data.datastore.PreferencesService
+import com.cryptodept.data.datastore.UserSessionManager
 import com.cryptodept.domain.manager.AchievementEngine
 import com.cryptodept.domain.model.AchievementCondition
 import com.cryptodept.util.DemoModeProvider
@@ -17,7 +17,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class TutorialController @Inject constructor(
-    private val preferencesService: PreferencesService,
+    private val session: UserSessionManager,
     private val achievementEngine: AchievementEngine,
     private val demoMode: DemoModeProvider,
 ) {
@@ -31,7 +31,7 @@ class TutorialController @Inject constructor(
         // Show start dialog only if:
         // - Tutorial is not completed
         // - It is not currently active
-        return !preferencesService.isTutorialCompleted.value && !_state.value.isActive
+        return !session.isTutorialCompleted.value && !_state.value.isActive
     }
 
     fun promptToStartTutorial() {
@@ -94,7 +94,7 @@ class TutorialController @Inject constructor(
         demoMode.deactivate()
         // Set completed flag in preferences
         kotlinx.coroutines.MainScope().launch {
-            preferencesService.setTutorialCompleted(true)
+            session.setTutorialCompleted(true)
         }
         achievementEngine.triggerCondition(AchievementCondition.FIRST_BOOT)
         _state.value = TutorialUiState(

@@ -1,7 +1,7 @@
 package com.cryptodept.data.auth
 
 import android.content.Context
-import com.cryptodept.data.datastore.PreferencesService
+import com.cryptodept.data.datastore.SubscriptionAccessManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
@@ -16,7 +16,7 @@ import javax.inject.Singleton
 @Singleton
 class AuthService @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val preferencesService: PreferencesService
+    private val subscription: SubscriptionAccessManager
 ) {
     private val auth = FirebaseAuth.getInstance()
     
@@ -40,7 +40,7 @@ class AuthService @Inject constructor(
         )
         
         val isAdminEmail = email != null && email in adminEmails
-        preferencesService.setAdminStatus(isAdminEmail)
+        subscription.setAdminStatus(isAdminEmail)
     }
 
     suspend fun signInWithGoogle(idToken: String): Result<FirebaseUser> {
@@ -57,7 +57,7 @@ class AuthService @Inject constructor(
 
     fun signOut() {
         auth.signOut()
-        preferencesService.setAdminStatus(false)
-        preferencesService.setProStatus(false)
+        subscription.setAdminStatus(false)
+        subscription.setProStatus(false)
     }
 }

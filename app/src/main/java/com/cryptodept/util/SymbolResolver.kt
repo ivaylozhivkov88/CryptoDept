@@ -99,4 +99,71 @@ class SymbolResolver @Inject constructor() {
             else -> input.uppercase()
         }
     }
+
+    fun toKrakenSymbol(coinGeckoId: String): String? =
+        when (coinGeckoId) {
+            "bitcoin" -> "XBTUSD"
+            "ethereum" -> "ETHUSD"
+            "ripple" -> "XRPUSD"
+            "solana" -> "SOLUSD"
+            "cardano" -> "ADAUSD"
+            "polkadot" -> "DOTUSD"
+            "dogecoin" -> "DOGEUSD"
+            "chainlink" -> "LINKUSD"
+            "shiba-inu" -> "SHIBUSD"
+            "litecoin" -> "LTCUSD"
+            "avalanche-2" -> "AVAXUSD"
+            "tron" -> "TRXUSD"
+            "matic-network" -> "MATICUSD"
+            "stellar" -> "XLMUSD"
+            "cosmos" -> "ATOMUSD"
+            else -> "${coinGeckoId.uppercase()}USD"
+        }
+
+    fun toCoinbaseSymbol(coinGeckoId: String): String? =
+        when (coinGeckoId) {
+            "bitcoin" -> "BTC-USD"
+            "ethereum" -> "ETH-USD"
+            "ripple" -> "XRP-USD"
+            "solana" -> "SOL-USD"
+            "cardano" -> "ADA-USD"
+            "polkadot" -> "DOT-USD"
+            "dogecoin" -> "DOGE-USD"
+            "chainlink" -> "LINK-USD"
+            "shiba-inu" -> "SHIB-USD"
+            "litecoin" -> "LTC-USD"
+            "avalanche-2" -> "AVAX-USD"
+            "tron" -> "TRX-USD"
+            "matic-network" -> "MATIC-USD"
+            "stellar" -> "XLM-USD"
+            "cosmos" -> "ATOM-USD"
+            else -> "${coinGeckoId.uppercase()}-USD"
+        }
+
+    fun toCoinCapId(coinGeckoId: String): String =
+        when (coinGeckoId) {
+            "avalanche-2" -> "avalanche"
+            "matic-network" -> "polygon"
+            else -> coinGeckoId.lowercase()
+        }
+
+    fun toCoinPaprikaId(coinGeckoId: String): String? =
+        when (coinGeckoId) {
+            "bitcoin" -> "btc-bitcoin"
+            "ethereum" -> "eth-ethereum"
+            "ripple" -> "xrp-ripple"
+            "solana" -> "sol-solana"
+            "cardano" -> "ada-cardano"
+            "polkadot" -> "dot-polkadot"
+            "dogecoin" -> "doge-dogecoin"
+            "chainlink" -> "link-chainlink"
+            "shiba-inu" -> "shib-shiba-inu"
+            "litecoin" -> "ltc-litecoin"
+            "avalanche-2" -> "avax-avalanche"
+            "tron" -> "trx-tron"
+            "matic-network" -> "matic-polygon"
+            "stellar" -> "xlm-stellar"
+            "cosmos" -> "atom-cosmos"
+            else -> null // Unknown coin — return null to signal skip
+        }
 }

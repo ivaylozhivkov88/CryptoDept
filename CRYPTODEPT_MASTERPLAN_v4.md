@@ -18,8 +18,10 @@ Continuously evolving. v1.1.2 introduces Macro Intelligence (Liquidations, Altco
 | **M** | MACRO INTELLIGENCE REFACTOR | 100% | ✅ DONE |
 | **A1-A4** | PART A: AUTH + TIER SYSTEM + FREE LIMITS | 100% | ✅ DONE |
 | **B5-B12** | PART B: GLOSSARY + ACCURACY + PROTECTION | 100% | ✅ DONE |
+| **G** | GOD OBJECT REFACTOR | 100% | ✅ DONE |
+| **C** | CLOUD INTELLIGENCE ORCHESTRATION | 0% | 🏗️ IN PROGRESS |
 
-**Overall Progress:** 349/349 Atomic Tasks (100%)
+**Overall Progress:** 360/385 Atomic Tasks (93%)
 **Target Build:** Version 1.1.2 (Build 18)
 
 ---
@@ -59,6 +61,60 @@ Continuously evolving. v1.1.2 introduces Macro Intelligence (Liquidations, Altco
 | **PHASE M (MACRO)** | | | | |
 | M-001 | Macro Data & Logic | 3500 | AUDITOR | <font color="#00FF41">✅ DONE</font> |
 | M-002 | UI Refactor & Tickers | 4500 | CORE | <font color="#00FF41">✅ DONE</font> |
+| **PHASE G (REFACTOR)** | | | | |
+| G-001 | Preferences Decoupling | 3500 | AUDITOR | <font color="#00FF41">✅ DONE</font> |
+| G-002 | Price Strategy Core | 4000 | INTEGRITY | <font color="#00FF41">✅ DONE</font> |
+| G-003 | Aggregator & Migration | 5000 | CORE | <font color="#00FF41">✅ DONE</font> |
+| **PHASE C (CLOUD)** | | | | |
+| C-001 | Infrastructure & RTDB | 3000 | AUDITOR | 🏗️ IN PROGRESS |
+| C-002 | Cloud Harvester Base | 4500 | SENTINEL | ⏳ PENDING |
+| C-003 | Logic Centralization | 5000 | QUANT | ⏳ PENDING |
+| C-004 | UI Sync & Fallback | 4000 | CORE | ⏳ PENDING |
+
+---
+
+# 🏁 PHASE G: GOD OBJECT REFACTOR (ARCHITECTURE PURITY)
+...
+---
+
+# 🏁 PHASE C: CLOUD INTELLIGENCE ORCHESTRATION (THE BACKEND SHIFT)
+
+## [C1] INFRASTRUCTURE & REALTIME SYNC (BRIDGE)
+- [ ] **1.1 Firebase RTDB SDK:** Add Realtime Database dependencies and initialize Firebase in the app.
+- [ ] **1.2 CloudPriceProvider:** Create a specialized provider that listens to Firebase RTDB "prices" node.
+- [ ] **1.3 Realtime Repository Integration:** Refactor CryptoRepository to merge Cloud flows with local Fallback.
+
+## [C2] THE CLOUD HARVESTER (BACKEND SERVICE)
+- [ ] **2.1 Market Aggregator Script:** Create Node.js Cloud Function for Binance, Bitfinex, Kraken, Gemini, Coinbase, OKX, Upbit (Kimchi), and DexScreener (DEX).
+- [ ] **2.2 Macro Harvester Script:** Create Node.js script for Coinglass (Liquidations), Etherscan (Gas), Alternative.me (FearGreed), and CryptoPanic (News).
+- [ ] **2.3 JSON State Orchestrator:** Define and implement the "Terminal State" JSON structure in Firebase.
+
+## [C3] INTELLIGENCE CENTRALIZATION (LOGIC)
+- [ ] **3.1 Math to Cloud Migration:** Move RSI, MACD, and EMA calculations from Android to Cloud Functions.
+- [ ] **3.2 Whale Intelligence Migration:** Move transaction suumaries and Whale signals to the backend.
+- [ ] **3.3 Narrative Engine (AI):** Implement periodic generation of the "Executive Narrative" via Gemini AI on the server.
+
+## [C4] TERMINAL REFACTOR & POLISH
+- [ ] **4.1 Dashboard Sync:** Update UI to react to the unified Cloud State for instant updates.
+- [ ] **4.2 Push Notification Engine:** Implement server-side alerts for price targets and whale movements.
+- [ ] **4.3 Hybrid Fallback & Health:** Logic to automatically switch to direct API fetching if Cloud latency is high.
+
+---
+
+## [G1] PREFERENCES DECOUPLING (INTERFACES)
+- [✅] **1.1 Storage Interfaces:** <font color="#00FF41">Created SystemSettingsManager, UserSessionManager, and SubscriptionAccessManager. [DONE — 19.05.2026]</font>
+- [✅] **1.2 Implementation Bridge:** <font color="#00FF41">Updated PreferencesService to implement new interfaces with proper overrides. [DONE — 19.05.2026]</font>
+- [✅] **1.3 DI Module:** <font color="#00FF41">Created PreferencesModule to provide interface-specific bindings via Hilt. [DONE — 19.05.2026]</font>
+
+## [G2] PRICE PROVIDER STRATEGY (SCALABILITY)
+- [✅] **2.1 Strategy Interface:** <font color="#00FF41">Created PriceProvider interface and migrated exchange mapping logic to SymbolResolver. [DONE — 19.05.2026]</font>
+- [✅] **2.2 Exchange Impls:** <font color="#00FF41">Created Kraken, Coinbase, CoinCap, and CoinPaprika PriceProvider implementations. [DONE — 19.05.2026]</font>
+- [✅] **2.3 Multibindings:** <font color="#00FF41">Configured PriceProvidersModule with Hilt Multibindings to provide a Set<PriceProvider>. [DONE — 19.05.2026]</font>
+
+## [G3] MASS MIGRATION & AGGREGATOR CLEANUP
+- [✅] **3.1 Aggregator Refactor:** <font color="#00FF41">Rewrote MultiSourcePriceAggregator to use Set<PriceProvider> via strategy pattern. [DONE — 19.05.2026]</font>
+- [✅] **3.2 ViewModel Migration:** <font color="#00FF41">Updated 15+ injection sites (HapticService, BillingService, ViewModels) to use narrow interfaces. [DONE — 19.05.2026]</font>
+- [✅] **3.3 Regression & Unit Tests:** <font color="#00FF41">Verified DataStore keys consistency and provider accuracy. [DONE — 19.05.2026]</font>
 
 ---
 

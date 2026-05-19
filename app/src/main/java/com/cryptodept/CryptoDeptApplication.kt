@@ -11,7 +11,6 @@ import com.cryptodept.util.NotificationChannels
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.appcheck.appCheck
-import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
 import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 import dagger.hilt.android.HiltAndroidApp
 import java.util.concurrent.TimeUnit
@@ -36,12 +35,19 @@ class CryptoDeptApplication :
         setupCrashlytics()
         
         // --- FIREBASE APP CHECK CONFIGURATION ---
-        val appCheckFactory = if (BuildConfig.DEBUG) {
-            DebugAppCheckProviderFactory.getInstance()
+        if (BuildConfig.DEBUG) {
+            try {
+                val debugFactoryClass = Class.forName("com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory")
+                val getInstanceMethod = debugFactoryClass.getMethod("getInstance")
+                val factory = getInstanceMethod.invoke(null) as com.google.firebase.appcheck.AppCheckProviderFactory
+                Firebase.appCheck.installAppCheckProviderFactory(factory)
+            } catch (_: Exception) {
+                // Fallback or log if debug factory is somehow missing even in debug
+                Firebase.appCheck.installAppCheckProviderFactory(PlayIntegrityAppCheckProviderFactory.getInstance())
+            }
         } else {
-            PlayIntegrityAppCheckProviderFactory.getInstance()
+            Firebase.appCheck.installAppCheckProviderFactory(PlayIntegrityAppCheckProviderFactory.getInstance())
         }
-        Firebase.appCheck.installAppCheckProviderFactory(appCheckFactory)
 
         remoteConfigService.fetchAndActivate { }
         socketLifecycleService.init()

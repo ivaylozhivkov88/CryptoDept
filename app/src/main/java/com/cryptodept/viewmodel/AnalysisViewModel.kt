@@ -2,7 +2,7 @@ package com.cryptodept.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cryptodept.data.datastore.PreferencesService
+import com.cryptodept.data.datastore.SubscriptionAccessManager
 import com.cryptodept.data.remoteconfig.RemoteConfigService
 import com.cryptodept.domain.model.*
 import com.cryptodept.domain.usecase.*
@@ -24,18 +24,18 @@ class AnalysisViewModel @Inject constructor(
     private val runDeepAnalysis: RunDeepAnalysisUseCase,
     private val generateReport: GenerateAnalysisReportUseCase,
     private val observeAnalysisHistory: ObserveAnalysisHistoryUseCase,
-    private val preferencesService: PreferencesService,
+    private val subscription: SubscriptionAccessManager,
     private val remoteConfig: RemoteConfigService,
     private val demoMode: com.cryptodept.util.DemoModeProvider,
 ) : ViewModel() {
 
-    val isAdmin = preferencesService.isAdmin.stateIn(
+    val isAdmin = subscription.isAdmin.stateIn(
         viewModelScope, 
         SharingStarted.WhileSubscribed(5000), 
         false,
     )
     
-    val isPro = preferencesService.isPro.stateIn(
+    val isPro = subscription.isPro.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
         false
@@ -151,7 +151,7 @@ class AnalysisViewModel @Inject constructor(
     fun generateAIReport(result: DeepAnalysisResult) {
         viewModelScope.launch {
             if (!isPro.value) {
-                val count = preferencesService.getAiReportsCountToday()
+                val count = subscription.getAiReportsCountToday()
                 val limit = remoteConfig.getFreeAiLimitDaily()
                 if (count >= limit) {
                     _aiReport.value = ">>> LIMIT_REACHED: FREE OPERATORS ARE LIMITED TO $limit REPORTS DAILY.\n\nUPGRADE TO PRO TO UNLOCK UNLIMITED AI INTELLIGENCE."
@@ -163,7 +163,7 @@ class AnalysisViewModel @Inject constructor(
             _isAiStreaming.value = true
             
             if (!isPro.value) {
-                preferencesService.incrementAiReportsCount()
+                subscription.incrementAiReportsCount()
             }
 
             generateReport.execute(result)
@@ -179,6 +179,6 @@ class AnalysisViewModel @Inject constructor(
     }
 
     fun setAdminStatus(isAdmin: Boolean) {
-        viewModelScope.launch { preferencesService.setAdminStatus(isAdmin) }
+        viewModelScope.launch { subscription.setAdminStatus(isAdmin) }
     }
 }

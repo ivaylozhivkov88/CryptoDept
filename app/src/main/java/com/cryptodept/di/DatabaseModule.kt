@@ -21,9 +21,12 @@ object DatabaseModule {
         @ApplicationContext context: Context,
         securePrefs: SecurePrefsService,
     ): CryptoDatabase {
+        // КРИТИЧНО: Ръчно зареждаме native библиотеката на SQLCipher
+        System.loadLibrary("sqlcipher")
+
         val dbName = CryptoDatabase.DATABASE_NAME
         val passphrase = securePrefs.getDatabasePassword()
-        val factory = net.sqlcipher.database.SupportFactory(passphrase)
+        val factory = net.zetetic.database.sqlcipher.SupportOpenHelperFactory(passphrase)
 
         return try {
             buildDatabase(context, factory)
@@ -34,7 +37,7 @@ object DatabaseModule {
         }
     }
 
-    private fun buildDatabase(context: Context, factory: net.sqlcipher.database.SupportFactory): CryptoDatabase {
+    private fun buildDatabase(context: Context, factory: net.zetetic.database.sqlcipher.SupportOpenHelperFactory): CryptoDatabase {
         return Room
             .databaseBuilder(
                 context,

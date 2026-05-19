@@ -2,6 +2,7 @@ package com.cryptodept.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cryptodept.data.datastore.SubscriptionAccessManager
 import com.cryptodept.domain.model.CompositeSignal
 import com.cryptodept.domain.model.IndicatorStatus
 import com.cryptodept.domain.model.Sentiment
@@ -32,7 +33,7 @@ class SignalsViewModel
         private val getOHLCUseCase: GetOHLCUseCase,
         private val taEngine: TechnicalAnalysisEngine,
         private val alphaEngine: AlphaSignalEngine,
-        private val preferencesService: com.cryptodept.data.datastore.PreferencesService,
+        private val subscription: SubscriptionAccessManager,
         private val demoMode: com.cryptodept.util.DemoModeProvider,
     ) : ViewModel() {
         private val _signals = MutableStateFlow<List<CoinSignal>>(emptyList())
@@ -52,7 +53,7 @@ class SignalsViewModel
             emptyList()
         )
 
-        val isPro: StateFlow<Boolean> = preferencesService.isPro.stateIn(
+        val isPro: StateFlow<Boolean> = subscription.isPro.stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
             false

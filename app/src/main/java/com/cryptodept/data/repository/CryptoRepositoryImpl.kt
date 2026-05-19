@@ -21,7 +21,7 @@ class CryptoRepositoryImpl @Inject constructor(
     private val networkHealthDao: com.cryptodept.data.db.NetworkHealthDao,
     private val binanceWS: BinanceWebSocketService,
     private val krakenWS: KrakenWebSocketService,
-    private val preferencesService: com.cryptodept.data.datastore.PreferencesService,
+    private val subscription: com.cryptodept.data.datastore.SubscriptionAccessManager,
     private val demoMode: com.cryptodept.util.DemoModeProvider,
 ) : CryptoRepository {
     private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -234,7 +234,7 @@ class CryptoRepositoryImpl @Inject constructor(
     override suspend fun toggleTracking(coinId: String): CryptoResult<Unit> = try {
         val coin = coinDao.getCoinById(coinId) ?: throw Exception("NOT_FOUND")
         val currentTrackedCount = coinDao.getTrackedCoinsCount()
-        val isPro = preferencesService.isPro.value
+        val isPro = subscription.isPro.value
         
         if (!coin.isTracked) {
             val limit = if (isPro) 30 else 3

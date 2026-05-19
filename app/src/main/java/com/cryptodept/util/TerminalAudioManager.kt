@@ -4,7 +4,7 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.media.SoundPool
 import com.cryptodept.R
-import com.cryptodept.data.datastore.PreferencesService
+import com.cryptodept.data.datastore.SystemSettingsManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,7 +18,7 @@ class TerminalAudioManager
     @Inject
     constructor(
         @ApplicationContext private val context: Context,
-        private val preferencesService: PreferencesService,
+        private val settings: SystemSettingsManager,
     ) {
         private val soundPool: SoundPool
         private val sounds = mutableMapOf<String, Int>()
@@ -64,12 +64,12 @@ class TerminalAudioManager
             loadSound(SOUND_POWERUP, R.raw.boot_complete)
 
             scope.launch {
-                preferencesService.soundsEnabled.collect { enabled ->
+                settings.soundsEnabled.collect { enabled ->
                     isEnabled = enabled
                 }
             }
             scope.launch {
-                preferencesService.soundsVolume.collect { volume ->
+                settings.soundsVolume.collect { volume ->
                     currentVolume = volume
                 }
             }

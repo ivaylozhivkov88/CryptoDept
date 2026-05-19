@@ -5,7 +5,7 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
-import com.cryptodept.data.datastore.PreferencesService
+import com.cryptodept.data.datastore.SystemSettingsManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -21,7 +21,7 @@ class HapticService
     @Inject
     constructor(
         @ApplicationContext private val context: Context,
-        private val preferencesService: PreferencesService,
+        private val settings: SystemSettingsManager,
     ) {
         private val scope = CoroutineScope(Dispatchers.Main)
 
@@ -71,7 +71,7 @@ class HapticService
 
         private fun checkAndVibrate(action: () -> Unit) {
             scope.launch {
-                if (preferencesService.hapticEnabled.first()) {
+                if (settings.hapticEnabled.first()) {
                     action()
                 }
             }

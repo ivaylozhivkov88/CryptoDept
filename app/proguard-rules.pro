@@ -272,5 +272,19 @@
 -dontwarn org.apache.http.**
 
 # ============================================================
+# SQLCIPHER: Encrypted Database
+# Native code uses reflection to access Java fields.
+# ============================================================
+-keep class net.zetetic.database.** { *; }
+-keep class net.zetetic.database.sqlcipher.** { *; }
+-keep class net.zetetic.database.sqlcipher.SQLiteConnection { *; }
+-dontwarn net.zetetic.database.**
+
+# Запазване на JNI методи
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
+
+# ============================================================
 # END OF RULES
 # ============================================================

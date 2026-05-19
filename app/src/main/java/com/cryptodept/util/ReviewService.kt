@@ -2,7 +2,7 @@ package com.cryptodept.util
 
 import android.app.Activity
 import android.content.Context
-import com.cryptodept.data.datastore.PreferencesService
+import com.cryptodept.data.datastore.UserSessionManager
 import com.google.android.play.core.review.ReviewManagerFactory
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -17,7 +17,7 @@ class ReviewService
     @Inject
     constructor(
         @ApplicationContext private val context: Context,
-        private val preferencesService: PreferencesService,
+        private val session: UserSessionManager,
         private val journalRepository: com.cryptodept.domain.repository.JournalRepository,
     ) {
         private val reviewManager = ReviewManagerFactory.create(context)
@@ -25,8 +25,8 @@ class ReviewService
 
         fun requestReviewIfAppropriate(activity: Activity) {
             scope.launch {
-                val launches = preferencesService.getLaunchCount()
-                val lastReview = preferencesService.getLastReviewPromptTime()
+                val launches = session.getLaunchCount()
+                val lastReview = session.getLastReviewPromptTime()
                 val daysSinceLastReview = (System.currentTimeMillis() - lastReview) / 86_400_000
 
                 // Profitability check
@@ -40,7 +40,7 @@ class ReviewService
                             val reviewInfo = task.result
                             reviewManager.launchReviewFlow(activity, reviewInfo)
                             scope.launch {
-                                preferencesService.saveLastReviewPromptTime(System.currentTimeMillis())
+                                session.saveLastReviewPromptTime(System.currentTimeMillis())
                             }
                         }
                     }

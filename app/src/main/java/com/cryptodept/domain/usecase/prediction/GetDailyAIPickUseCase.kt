@@ -1,6 +1,6 @@
 package com.cryptodept.domain.usecase.prediction
 
-import com.cryptodept.data.datastore.PreferencesService
+import com.cryptodept.data.datastore.UserSessionManager
 import com.cryptodept.domain.repository.CryptoRepository
 import com.cryptodept.domain.usecase.GetOHLCUseCase
 import com.google.gson.Gson
@@ -12,7 +12,7 @@ class GetDailyAIPickUseCase @Inject constructor(
     private val predictionEngine: PredictionEnsembleEngine,
     private val cryptoRepository: CryptoRepository,
     private val ohlcUseCase: GetOHLCUseCase,
-    private val prefs: PreferencesService,
+    private val session: UserSessionManager,
 ) {
     
     /**
@@ -71,7 +71,7 @@ class GetDailyAIPickUseCase @Inject constructor(
     }
     
     private suspend fun loadFromCache(key: String): DailyAIPick? {
-        val json = prefs.getString("daily_ai_pick_$key", null) ?: return null
+        val json = session.getString("daily_ai_pick_$key", null) ?: return null
         return try {
             Gson().fromJson(json, DailyAIPick::class.java)
         } catch (e: Exception) {
@@ -80,7 +80,7 @@ class GetDailyAIPickUseCase @Inject constructor(
     }
     
     private suspend fun saveToCache(key: String, pick: DailyAIPick) {
-        prefs.putString("daily_ai_pick_$key", Gson().toJson(pick))
+        session.putString("daily_ai_pick_$key", Gson().toJson(pick))
     }
 }
 

@@ -2,15 +2,15 @@ package com.cryptodept.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cryptodept.data.datastore.PreferencesService
+import com.cryptodept.data.datastore.SubscriptionAccessManager
+import com.cryptodept.data.datastore.SystemSettingsManager
+import com.cryptodept.data.datastore.UserSessionManager
 import com.cryptodept.util.RootDetector
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,12 +19,14 @@ import javax.inject.Inject
 class SettingsViewModel
     @Inject
     constructor(
-        private val preferencesService: PreferencesService,
+        private val settings: SystemSettingsManager,
+        private val session: UserSessionManager,
+        private val subscription: SubscriptionAccessManager,
         private val rootDetector: RootDetector,
         val tierAccessManager: com.cryptodept.domain.tier.TierAccessManager,
     ) : ViewModel() {
         private val _securityWarning = MutableStateFlow<String?>(null)
-        val securityWarning: StateFlow<String?> = combine(_securityWarning, preferencesService.isAdmin) { warning, isAdmin ->
+        val securityWarning: StateFlow<String?> = combine(_securityWarning, subscription.isAdmin) { warning, isAdmin ->
             if (isAdmin) null else warning
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
@@ -43,69 +45,69 @@ class SettingsViewModel
         }
 
         val refreshInterval =
-            preferencesService.refreshInterval.stateIn(
+            settings.refreshInterval.stateIn(
                 viewModelScope,
                 SharingStarted.WhileSubscribed(5000),
                 30,
             )
 
         val phosphorMode =
-            preferencesService.phosphorMode.stateIn(
+            settings.phosphorMode.stateIn(
                 viewModelScope,
                 SharingStarted.WhileSubscribed(5000),
                 "GREEN",
             )
 
         val soundsEnabled =
-            preferencesService.soundsEnabled.stateIn(
+            settings.soundsEnabled.stateIn(
                 viewModelScope,
                 SharingStarted.WhileSubscribed(5000),
                 true,
             )
 
         val soundsVolume =
-            preferencesService.soundsVolume.stateIn(
+            settings.soundsVolume.stateIn(
                 viewModelScope,
                 SharingStarted.WhileSubscribed(5000),
                 0.5f,
             )
 
         val notificationsEnabled =
-            preferencesService.notificationsEnabled.stateIn(
+            settings.notificationsEnabled.stateIn(
                 viewModelScope,
                 SharingStarted.WhileSubscribed(5000),
                 true,
             )
 
         val hapticEnabled =
-            preferencesService.hapticEnabled.stateIn(
+            settings.hapticEnabled.stateIn(
                 viewModelScope,
                 SharingStarted.WhileSubscribed(5000),
                 true,
             )
 
         val powerUserMode =
-            preferencesService.powerUserMode.stateIn(
+            settings.powerUserMode.stateIn(
                 viewModelScope,
                 SharingStarted.WhileSubscribed(5000),
                 false,
             )
 
         val screensaverTimeout =
-            preferencesService.screensaverTimeout.stateIn(
+            settings.screensaverTimeout.stateIn(
                 viewModelScope,
                 SharingStarted.WhileSubscribed(5000),
                 5,
             )
 
         val isAdmin =
-            preferencesService.isAdmin.stateIn(
+            subscription.isAdmin.stateIn(
                 viewModelScope,
                 SharingStarted.WhileSubscribed(5000),
                 false,
             )
 
-        val forceShowAllFeatures = preferencesService.forceShowAllFeatures.stateIn(
+        val forceShowAllFeatures = settings.forceShowAllFeatures.stateIn(
             viewModelScope, 
             SharingStarted.WhileSubscribed(5000), 
             false
@@ -113,44 +115,44 @@ class SettingsViewModel
 
         fun setForceShowAllFeatures(enabled: Boolean) {
             viewModelScope.launch {
-                preferencesService.setForceShowAllFeatures(enabled)
+                settings.setForceShowAllFeatures(enabled)
             }
         }
 
         fun setRefreshInterval(seconds: Int) {
-            viewModelScope.launch { preferencesService.setRefreshInterval(seconds) }
+            viewModelScope.launch { settings.setRefreshInterval(seconds) }
         }
 
         fun setPhosphorMode(mode: String) {
-            viewModelScope.launch { preferencesService.setPhosphorMode(mode) }
+            viewModelScope.launch { settings.setPhosphorMode(mode) }
         }
 
         fun setSoundsEnabled(enabled: Boolean) {
-            viewModelScope.launch { preferencesService.setSoundsEnabled(enabled) }
+            viewModelScope.launch { settings.setSoundsEnabled(enabled) }
         }
 
         fun setSoundsVolume(volume: Float) {
-            viewModelScope.launch { preferencesService.setSoundsVolume(volume) }
+            viewModelScope.launch { settings.setSoundsVolume(volume) }
         }
 
         fun setNotificationsEnabled(enabled: Boolean) {
-            viewModelScope.launch { preferencesService.setNotificationsEnabled(enabled) }
+            viewModelScope.launch { settings.setNotificationsEnabled(enabled) }
         }
 
         fun setHapticEnabled(enabled: Boolean) {
-            viewModelScope.launch { preferencesService.setHapticEnabled(enabled) }
+            viewModelScope.launch { settings.setHapticEnabled(enabled) }
         }
 
         fun setPowerUserMode(enabled: Boolean) {
-            viewModelScope.launch { preferencesService.setPowerUserMode(enabled) }
+            viewModelScope.launch { settings.setPowerUserMode(enabled) }
         }
 
         fun setScreensaverTimeout(minutes: Int) {
-            viewModelScope.launch { preferencesService.setScreensaverTimeout(minutes) }
+            viewModelScope.launch { settings.setScreensaverTimeout(minutes) }
         }
 
         fun restartOnboarding() {
-            viewModelScope.launch { preferencesService.setOnboardingComplete(false) }
+            viewModelScope.launch { session.setOnboardingComplete(false) }
         }
 
         fun setAdminStatus(isAdmin: Boolean) {
@@ -163,10 +165,10 @@ class SettingsViewModel
                     _securityWarning.value = "ADMIN ACTIVE (SECURITY COMPROMISED)"
                 }
             }
-            viewModelScope.launch { preferencesService.setAdminStatus(isAdmin) }
+            viewModelScope.launch { subscription.setAdminStatus(isAdmin) }
         }
 
         fun setProStatus(enabled: Boolean) {
-            viewModelScope.launch { preferencesService.setProStatus(enabled) }
+            viewModelScope.launch { subscription.setProStatus(enabled) }
         }
     }

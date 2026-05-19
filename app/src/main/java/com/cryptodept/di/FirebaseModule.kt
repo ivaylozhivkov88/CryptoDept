@@ -1,7 +1,7 @@
 package com.cryptodept.di
 
 import com.cryptodept.R
-import com.cryptodept.data.datastore.PreferencesService
+import com.cryptodept.data.datastore.SystemSettingsManager
 import com.google.firebase.Firebase
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.analytics
@@ -27,10 +27,10 @@ object FirebaseModule {
 
     @Provides
     @Singleton
-    fun provideCrashlytics(preferences: PreferencesService): FirebaseCrashlytics {
+    fun provideCrashlytics(settings: SystemSettingsManager): FirebaseCrashlytics {
         val crashlytics = Firebase.crashlytics
         // GDPR Compliance: Set collection enabled based on user consent
-        val isEnabled = runBlocking { preferences.crashlyticsConsent.first() }
+        val isEnabled = runBlocking { settings.crashlyticsConsent.first() }
         crashlytics.setCrashlyticsCollectionEnabled(isEnabled)
         return crashlytics
     }

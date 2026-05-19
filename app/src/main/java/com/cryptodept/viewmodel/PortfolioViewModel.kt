@@ -2,6 +2,7 @@ package com.cryptodept.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cryptodept.data.datastore.SubscriptionAccessManager
 import com.cryptodept.domain.model.PortfolioEntry
 import com.cryptodept.domain.model.PortfolioSummary
 import com.cryptodept.domain.repository.CryptoRepository
@@ -19,10 +20,10 @@ class PortfolioViewModel
     constructor(
         private val portfolioRepository: PortfolioRepository,
         private val cryptoRepository: CryptoRepository,
-        private val preferencesManager: com.cryptodept.data.datastore.PreferencesManager,
+        private val subscription: SubscriptionAccessManager,
     ) : ViewModel() {
         val isAdmin =
-            preferencesManager.isAdmin.stateIn(
+            subscription.isAdmin.stateIn(
                 viewModelScope,
                 SharingStarted.WhileSubscribed(5000),
                 false,
@@ -68,7 +69,7 @@ class PortfolioViewModel
         }
 
         fun setAdminStatus(isAdmin: Boolean) {
-            viewModelScope.launch { preferencesManager.setAdminStatus(isAdmin) }
+            viewModelScope.launch { subscription.setAdminStatus(isAdmin) }
         }
     }
 

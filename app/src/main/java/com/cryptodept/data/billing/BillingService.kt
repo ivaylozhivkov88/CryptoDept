@@ -3,7 +3,7 @@ package com.cryptodept.data.billing
 import android.app.Activity
 import android.content.Context
 import com.android.billingclient.api.*
-import com.cryptodept.data.datastore.PreferencesService
+import com.cryptodept.data.datastore.SubscriptionAccessManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +26,7 @@ class BillingService
     @Inject
     constructor(
         @ApplicationContext private val context: Context,
-        private val preferencesService: PreferencesService,
+        private val subscription: SubscriptionAccessManager,
         private val analyticsManager: com.cryptodept.util.AnalyticsService,
     ) : PurchasesUpdatedListener {
         private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -36,7 +36,7 @@ class BillingService
         val isPro: StateFlow<Boolean> =
             combine(
                 _isPro,
-                preferencesService.isPro,
+                subscription.isPro,
             ) { billingPro, prefPro ->
                 billingPro || prefPro
             }.stateIn(scope, SharingStarted.Eagerly, false)
@@ -195,9 +195,9 @@ class BillingService
                 // Handle One-Time Passes
                 purchase.products.forEach { productId ->
                     when (productId) {
-                        "pro_1d" -> preferencesService.setProExpiry(1)
-                        "pro_3d" -> preferencesService.setProExpiry(3)
-                        "pro_7d" -> preferencesService.setProExpiry(7)
+                        "pro_1d" -> subscription.setProExpiry(1)
+                        "pro_3d" -> subscription.setProExpiry(3)
+                        "pro_7d" -> subscription.setProExpiry(7)
                     }
                 }
 
@@ -228,6 +228,6 @@ class BillingService
         }
 
         suspend fun setAdminOverride(enabled: Boolean) {
-            preferencesService.setProStatus(enabled)
+            subscription.setProStatus(enabled)
         }
     }

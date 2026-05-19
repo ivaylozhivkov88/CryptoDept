@@ -1,7 +1,7 @@
 package com.cryptodept.domain.tier
 
 import com.cryptodept.data.billing.BillingService
-import com.cryptodept.data.datastore.PreferencesService
+import com.cryptodept.data.datastore.SubscriptionAccessManager
 import com.cryptodept.util.TestModeFlag
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,7 +35,7 @@ import javax.inject.Singleton
 @Singleton
 class TierAccessManager @Inject constructor(
     private val billingService: BillingService,
-    private val preferencesService: PreferencesService,
+    private val subscription: SubscriptionAccessManager,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     
@@ -44,12 +44,12 @@ class TierAccessManager @Inject constructor(
      * 
      * Combines:
      *   - billingService.isPro flow (Google Play subscription)
-     *   - preferencesService.getAdminStatusFlow() (email-based)
+     *   - subscription.getAdminStatusFlow() (email-based)
      *   - TestModeFlag.BYPASS_PAYWALL_IN_DEBUG (dev convenience)
      */
     val currentTier: StateFlow<AccessTier> = combine(
         billingService.isPro,
-        preferencesService.getAdminStatusFlow(),
+        subscription.getAdminStatusFlow(),
     ) { isPro, isAdmin ->
         resolveTier(isPro = isPro, isAdmin = isAdmin)
     }.stateIn(
@@ -57,7 +57,7 @@ class TierAccessManager @Inject constructor(
         started = SharingStarted.Eagerly,
         initialValue = resolveTier(
             isPro = billingService.isPro.value, 
-            isAdmin = preferencesService.isAdmin()
+            isAdmin = subscription.isAdmin()
         ),
     )
     
@@ -104,7 +104,7 @@ class TierAccessManager @Inject constructor(
         appendLine("=== TierAccessManager State ===")
         appendLine("Current tier: ${currentTier.value}")
         appendLine("Is Pro (raw): ${billingService.isPro.value}")
-        appendLine("Is Admin (raw): ${preferencesService.isAdmin()}")
+        appendLine("Is Admin (raw): ${subscription.isAdmin()}")
         appendLine("Test period: ${TestModeFlag.IS_TEST_PERIOD}")
         appendLine("Bypass paywall (debug): ${TestModeFlag.BYPASS_PAYWALL_IN_DEBUG}")
         appendLine("===")
