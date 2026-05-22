@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.android.billingclient.api.ProductDetails
+import com.cryptodept.domain.tier.FeatureKey
 import com.cryptodept.ui.theme.LocalTerminalColors
 import com.cryptodept.viewmodel.BillingViewModel
 import com.cryptodept.util.TestModeFlag
@@ -32,6 +33,7 @@ import java.util.Locale
 @Composable
 fun PaywallScreen(
     reason: String = "general",
+    featureContext: FeatureKey? = null,
     viewModel: BillingViewModel = hiltViewModel(),
     onDismiss: () -> Unit = {},
 ) {
@@ -84,6 +86,44 @@ fun PaywallScreen(
             }
         }
 
+        // === CONTEXTUAL HIGHLIGHT (CHANGE 3) ===
+        featureContext?.let { key ->
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .border(1.dp, colors.primary, RectangleShape)
+                        .background(colors.primary.copy(alpha = 0.08f))
+                        .padding(14.dp)
+                ) {
+                    Column {
+                        Text(
+                            text = ">>> YOU TRIED TO ACCESS",
+                            color = colors.dimText,
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = 10.sp,
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = key.displayName,
+                            color = colors.primary,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                        )
+                        Spacer(Modifier.height(2.dp))
+                        Text(
+                            text = key.proDescription,
+                            color = colors.textPrimary,
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = 11.sp,
+                        )
+                    }
+                }
+            }
+        }
+
         // === HEADER (personalized by reason) ===
         item {
             val pitchTitle = when (reason) {
@@ -93,7 +133,7 @@ fun PaywallScreen(
                 "derivatives" -> "📈 See Derivatives Data"
                 "defi" -> "🏦 Access DeFi Yields"
                 "alerts" -> "🔔 Unlimited Alerts"
-                "markets" -> "📋 Top 200 Markets"
+                "markets" -> "📋 Top 100 Markets"
                 "ai_narrative" -> "🤖 Full AI Narrative"
                 "watchlist" -> "⭐ Unlimited Watchlist"
                 else -> ">>> UPGRADE_TO_PRO"
@@ -217,12 +257,13 @@ fun PaywallScreen(
                     Spacer(Modifier.height(8.dp))
                     Text(
                         text = "Even without Pro you get:\n" +
-                               "• Live prices (top 50 coins)\n" +
+                               "• Live prices (top 10 dashboard)\n" +
                                "• Position Sizer (risk calculator)\n" +
                                "• Daily AI Pick + market pulse\n" +
                                "• News + sentiment + glossary\n" +
-                               "• 3 alerts + 1 watchlist (10 coins)\n\n" +
-                               "Upgrade ONLY if Pro features actively help you.",
+                               "• 3 alerts + 1 watchlist (3 coins)\n" +
+                               "• Access to top 50 markets\n\n" +
+                               "Upgrade to Pro for 15 watchlist slots.",
                         color = colors.textPrimary,
                         fontFamily = FontFamily.Monospace,
                         fontSize = 11.sp,
@@ -352,6 +393,6 @@ private val proValueProps = listOf(
     ValuePropData("🛠️", "Pro Trader Toolkit", "Backtester, MTF analyzer, entry scorer"),
     ValuePropData("🔔", "Unlimited Alerts", "With composite AND/OR logic"),
     ValuePropData("📚", "DeFi + Macro Analysis", "DefiLlama yields, S&P correlation"),
-    ValuePropData("📋", "Top 200 Markets", "150 more coins + advanced filters"),
+    ValuePropData("📋", "Top 100 Markets", "50 more coins + advanced filters"),
     ValuePropData("📓", "Full Trade Journal", "Unlimited entries with detailed analytics"),
 )

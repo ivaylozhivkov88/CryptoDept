@@ -37,6 +37,16 @@ class HapticService
 
         fun tick() = lightTick()
 
+        fun navTick() = checkAndVibrate { vibrate(15) }
+
+        fun whaleAlert() = checkAndVibrate { vibrate(longArrayOf(0, 60, 80, 60)) }
+
+        fun priceAlert() = checkAndVibrate { vibrate(40) }
+
+        fun tiltLock() = checkAndVibrate { vibrate(400) }
+
+        fun achievement() = checkAndVibrate { vibrate(longArrayOf(0, 50, 60, 50, 60, 50)) }
+
         fun confirm() =
             checkAndVibrate {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

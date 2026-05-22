@@ -56,8 +56,10 @@ class PreferencesService
             val LAST_REVIEW_PROMPT_TIME = longPreferencesKey("last_review_prompt_time")
             val LAUNCH_COUNT = intPreferencesKey("launch_count")
             val PRO_EXPIRY_TIMESTAMP = longPreferencesKey("pro_expiry_timestamp")
+            val LAST_BILLING_CHECK = longPreferencesKey("last_billing_check")
             val AI_REPORTS_COUNT = intPreferencesKey("ai_reports_count")
             val LAST_AI_REPORT_DATE = stringPreferencesKey("last_ai_report_date")
+            val TILT_PROTECTION_ENABLED = booleanPreferencesKey("tilt_protection_enabled")
 
             const val KEY_MIGRATED_TO_SECURE = "migrated_to_secure_v5"
         }
@@ -138,6 +140,11 @@ class PreferencesService
                 .catch { exception -> if (exception is IOException) emit(emptyPreferences()) else throw exception }
                 .map { it[booleanPreferencesKey("force_show_all_features")] ?: false }
 
+        override val tiltProtectionEnabled: Flow<Boolean> =
+            dataStore.data
+                .catch { exception -> if (exception is IOException) emit(emptyPreferences()) else throw exception }
+                .map { it[TILT_PROTECTION_ENABLED] ?: true }
+
         private suspend fun migrateIfNeeded() {
             val prefs = dataStore.data.first()
             val isMigrated = prefs[booleanPreferencesKey(KEY_MIGRATED_TO_SECURE)] ?: false
@@ -160,6 +167,10 @@ class PreferencesService
         private fun oldPro(prefs: Preferences): Boolean = prefs[IS_PRO] ?: false
 
         private fun oldAdmin(prefs: Preferences): Boolean = prefs[IS_ADMIN] ?: false
+
+        override suspend fun setTiltProtectionEnabled(enabled: Boolean) {
+            dataStore.edit { it[TILT_PROTECTION_ENABLED] = enabled }
+        }
 
         override suspend fun setForceShowAllFeatures(enabled: Boolean) {
             dataStore.edit { it[booleanPreferencesKey("force_show_all_features")] = enabled }
@@ -241,6 +252,17 @@ class PreferencesService
             } else if (expiry > System.currentTimeMillis()) {
                 _isPro.value = true
             }
+        }
+
+        override fun setLastBillingCheck(timestamp: Long) {
+            securePrefs.saveLong("last_billing_check", timestamp)
+            scope.launch {
+                dataStore.edit { it[longPreferencesKey("last_billing_check")] = timestamp }
+            }
+        }
+
+        override fun getLastBillingCheck(): Long {
+            return securePrefs.getLong("last_billing_check", 0L)
         }
 
         override suspend fun setPowerUserMode(enabled: Boolean) {

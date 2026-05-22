@@ -9,6 +9,8 @@ data class MacroIntelligence(
     val ethGasGwei: Int,
     val globalMarketCapUsd: Double,
     val altcoinSeasonIndex: Int, // 0-100
+    val globalLiquidityUsd: Double = 0.0,
+    val gasPrediction: String = "NOW", // NEW: M1.2
     val totalLiquidations1h: LiquidationSnapshot,
     val totalLiquidations24h: LiquidationSnapshot
 )

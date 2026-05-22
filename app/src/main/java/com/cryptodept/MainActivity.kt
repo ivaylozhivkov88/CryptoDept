@@ -144,6 +144,15 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        // --- SUBSCRIBE TO GLOBAL ALERTS ---
+        com.google.firebase.messaging.FirebaseMessaging.getInstance()
+            .subscribeToTopic("market_alerts")
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    android.util.Log.d("FCM", ">>> Subscribed to market_alerts")
+                }
+            }
+
         setContent {
             val context = LocalContext.current
             val phosphorModeStr by preferencesService.phosphorMode.collectAsState(initial = "GREEN")

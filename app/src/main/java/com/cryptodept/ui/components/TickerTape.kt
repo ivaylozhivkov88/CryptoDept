@@ -1,5 +1,6 @@
 package com.cryptodept.ui.components
 
+import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.*
@@ -11,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -30,6 +32,7 @@ fun TickerTape(
     prices: List<CoinPrice>,
     networkHealth: com.cryptodept.domain.model.NetworkHealth?,
     modifier: Modifier = Modifier,
+    speed: Float = 1f
 ) {
     val colors = LocalTerminalColors.current // OBTAIN CURRENT THEME COLORS
 
@@ -50,14 +53,14 @@ fun TickerTape(
     val listState = rememberLazyListState()
     val currentItems by rememberUpdatedState(tickerItems)
 
-    LaunchedEffect(tickerItems.size) {
+    LaunchedEffect(tickerItems.size, speed) {
         if (tickerItems.isEmpty()) return@LaunchedEffect
         
         // Start from middle to allow scrolling both ways
         listState.scrollToItem(tickerItems.size / 2)
 
         while (isActive) {
-            listState.scrollBy(TerminalConfig.Animation.TICKER_SPEED)
+            listState.scrollBy(TerminalConfig.Animation.TICKER_SPEED * speed)
             
             // Loop logic: if we reach 90% of the list, jump back to middle
             val firstVisible = listState.firstVisibleItemIndex
@@ -98,19 +101,51 @@ fun TickerTape(
                             val trendColor = if (coin.priceChangePercentage24h >= 0) colors.primary else colors.error
                             val symbol = if (coin.priceChangePercentage24h >= 0) "▲" else "▼"
 
+                            val (flashDirection, flashAlpha) = rememberPriceFlash(coin.currentPrice)
+                            val priceColor = when {
+                                flashDirection == PriceDirection.UP && flashAlpha > 0f -> lerp(Color.White, colors.primary, flashAlpha)
+                                flashDirection == PriceDirection.DOWN && flashAlpha > 0f -> lerp(Color.White, colors.error, flashAlpha)
+                                else -> Color.White
+                            }
+
                             Text(
-                                text = "${coin.symbol.uppercase()} $${String.format(Locale.US, "%.2f", coin.currentPrice)} ",
-                                color = colors.primary,
+                                text = "${coin.symbol.uppercase()} ",
+                                color = colors.dimText,
                                 fontSize = TerminalConfig.UI.FONT_SIZE_SMALL,
-                                fontWeight = FontWeight.Bold,
                                 fontFamily = FontFamily.Monospace,
                             )
-                            Text(
-                                text = "$symbol${String.format(Locale.US, "%.2f", kotlin.math.abs(coin.priceChangePercentage24h))}%",
-                                color = trendColor,
-                                fontSize = TerminalConfig.UI.FONT_SIZE_SMALL,
-                                fontFamily = FontFamily.Monospace,
-                            )
+                            
+                            AnimatedContent(
+                                targetState = coin.currentPrice,
+                                transitionSpec = {
+                                    slideInVertically { height -> height } + fadeIn() togetherWith
+                                            slideOutVertically { height -> -height } + fadeOut()
+                                },
+                                label = "PriceAnim"
+                            ) { price ->
+                                Text(
+                                    text = "$${String.format(Locale.US, "%.2f", price)} ",
+                                    color = priceColor,
+                                    fontSize = TerminalConfig.UI.FONT_SIZE_SMALL,
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = FontFamily.Monospace,
+                                )
+                            }
+
+                            AnimatedContent(
+                                targetState = coin.priceChangePercentage24h,
+                                transitionSpec = {
+                                    fadeIn() togetherWith fadeOut()
+                                },
+                                label = "ChangeAnim"
+                            ) { change ->
+                                Text(
+                                    text = "$symbol${String.format(Locale.US, "%.2f", kotlin.math.abs(change))}%",
+                                    color = trendColor,
+                                    fontSize = TerminalConfig.UI.FONT_SIZE_SMALL,
+                                    fontFamily = FontFamily.Monospace,
+                                )
+                            }
                         }
                         is TickerItem.Stat -> {
                             Text(

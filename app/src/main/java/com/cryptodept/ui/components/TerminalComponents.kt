@@ -6,19 +6,44 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cryptodept.ui.theme.*
 import com.cryptodept.util.AnalyticsManager
 import com.cryptodept.util.HapticManager
+import kotlinx.coroutines.launch
 
 val LocalHapticManager = staticCompositionLocalOf<HapticManager?> { null }
 val LocalAnalyticsManager = staticCompositionLocalOf<AnalyticsManager?> { null }
+
+/**
+ * High-end terminal glow style.
+ */
+@Composable
+fun terminalTextStyle(
+    color: Color = LocalTerminalColors.current.primary,
+    fontSize: androidx.compose.ui.unit.TextUnit = 13.sp,
+    fontWeight: FontWeight? = null,
+    glow: Boolean = false
+): TextStyle {
+    return TextStyle(
+        color = color,
+        fontSize = fontSize,
+        fontFamily = FontFamily.Monospace,
+        fontWeight = fontWeight,
+        shadow = if (glow) Shadow(
+            color = color.copy(alpha = 0.6f),
+            blurRadius = 8f
+        ) else null
+    )
+}
 
 @Composable
 fun TerminalCard(

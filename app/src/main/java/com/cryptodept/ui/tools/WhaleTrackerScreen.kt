@@ -95,10 +95,11 @@ fun WhaleTrackerScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        "(Scanning for $500k+ moves on BTC/ETH/SOL)",
+                        "(Scanning for $1M+ BTC, $2M+ ETH, $500k+ SOL moves)",
                         color = colors.grid,
-                        fontSize = 9.sp,
-                        fontFamily = FontFamily.Monospace
+                        fontSize = 11.sp,
+                        fontFamily = FontFamily.Monospace,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     TextButton(onClick = { viewModel.refresh() }) {
@@ -110,8 +111,13 @@ fun WhaleTrackerScreen(
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(TerminalConfig.UI.SPACER_MEDIUM),
+                contentPadding = PaddingValues(bottom = 16.dp)
             ) {
-                items(transactions, key = { it.hash }) { tx ->
+                items(
+                    items = transactions, 
+                    key = { it.hash },
+                    contentType = { "whale_tx" }
+                ) { tx ->
                     WhaleTxCardV2(tx)
                 }
             }

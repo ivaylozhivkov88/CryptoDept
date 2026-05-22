@@ -24,7 +24,7 @@ fun AccessGate(
     lockedContent: @Composable (onUpgrade: () -> Unit) -> Unit = { onUpgrade ->
         UpgradeBanner(
             featureName = feature.displayName,
-            description = feature.description,
+            description = feature.proDescription,
             requiredTier = feature.requiredTier.displayName,
             onUpgradeClick = onUpgrade,
         )

@@ -23,7 +23,8 @@ data class NetworkHealthEntity(
         fearGreedIndex = fearGreedIndex,
         fearGreedLabel = fearGreedLabel,
         socialPulse = socialPulse,
-        socialPulseLabel = socialPulseLabel
+        socialPulseLabel = socialPulseLabel,
+        lastUpdated = lastUpdated
     )
 
     companion object {
@@ -35,7 +36,7 @@ data class NetworkHealthEntity(
             fearGreedLabel = health.fearGreedLabel,
             socialPulse = health.socialPulse,
             socialPulseLabel = health.socialPulseLabel,
-            lastUpdated = System.currentTimeMillis()
+            lastUpdated = health.lastUpdated
         )
     }
 }

@@ -156,7 +156,7 @@ fun InfoItem(
 ) {
     val colors = LocalTerminalColors.current
     Column {
-        Text(label, color = colors.dimText, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+        Text(label, color = colors.dimText, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
         Text(value, color = colors.primary, fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
     }
 }

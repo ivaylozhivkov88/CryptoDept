@@ -98,6 +98,7 @@ fun SettingsScreen(
     val phosphorMode by viewModel.phosphorMode.collectAsState()
     val securityWarning by viewModel.securityWarning.collectAsState()
     val forceShowAllFeatures by viewModel.forceShowAllFeatures.collectAsState()
+    val tiltProtectionEnabled by viewModel.tiltProtectionEnabled.collectAsState()
 
     var showPaywall by remember { mutableStateOf(false) }
 
@@ -205,10 +206,10 @@ fun SettingsScreen(
                     )
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = if (isPro) "Unlimited Terminal Access (Max 30 Coins)" else "Limited to 10 Tracked Coins",
+                            text = if (isPro) "Unlimited Terminal Access (Max 15 Coins)" else "Limited to 3 Tracked Coins",
                             color = colors.dimText,
                             fontFamily = FontFamily.Monospace,
-                            fontSize = 10.sp,
+                            fontSize = 12.sp,
                         )
                         FeatureHelpIcon(
                             feature = if (isPro) FeatureKey.WATCHLISTS_UNLIMITED else FeatureKey.WATCHLIST_SINGLE,
@@ -258,6 +259,13 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // TILT PROTECTION (Change 9)
+        SettingRow("TILT_PROTECTION", "Auto-locks terminal during emotional volatility", tiltProtectionEnabled) {
+            viewModel.setTiltProtectionEnabled(it)
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         // PROGRESSIVE DISCLOSURE OVERRIDE
         SettingRow("SHOW_ALL_FEATURES", "Override progressive disclosure", forceShowAllFeatures) {
             viewModel.setForceShowAllFeatures(it)
@@ -286,7 +294,7 @@ fun SettingsScreen(
         ) {
             Column {
                 Text("CRYPTO_GLOSSARY", color = colors.primary, fontFamily = FontFamily.Monospace, fontSize = 14.sp)
-                Text("Learn key crypto and trading terms", color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 10.sp)
+                Text("Learn key crypto and trading terms", color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 12.sp)
             }
         }
 
@@ -304,7 +312,7 @@ fun SettingsScreen(
         ) {
             Column {
                 Text("RESTART_TUTORIAL", color = colors.primary, fontFamily = FontFamily.Monospace, fontSize = 14.sp)
-                Text("Reset first-run onboarding sequence", color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 10.sp)
+                Text("Reset first-run onboarding sequence", color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 12.sp)
             }
         }
 
@@ -328,22 +336,77 @@ fun SettingsScreen(
         ) {
             Column {
                 Text("PRIVACY_POLICY", color = colors.primary, fontFamily = FontFamily.Monospace, fontSize = 14.sp)
-                Text("Review how we handle your data", color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 10.sp)
+                Text("Review how we handle your data", color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 12.sp)
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        var showDeleteConfirmation by remember { mutableStateOf(false) }
+        var isDeleting by remember { mutableStateOf(false) }
+
+        if (showDeleteConfirmation) {
+            AlertDialog(
+                onDismissRequest = { if (!isDeleting) showDeleteConfirmation = false },
+                title = { Text(">>> DELETE_DATA_PROTOCOL", color = colors.danger, fontFamily = FontFamily.Monospace, fontSize = 16.sp) },
+                text = {
+                    Text(
+                        "WARNING: This action will permanently erase your account, access tier, and all quantitative history from our cloud nodes. This process cannot be undone.",
+                        color = colors.textPrimary,
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 12.sp
+                    )
+                },
+                containerColor = Color.Black,
+                modifier = Modifier.border(1.dp, colors.danger, RectangleShape),
+                confirmButton = {
+                    TextButton(
+                        enabled = !isDeleting,
+                        onClick = {
+                            coroutineScope.launch {
+                                isDeleting = true
+                                val result = viewModel.deleteAccount(authService)
+                                isDeleting = false
+                                if (result.isSuccess) {
+                                    showDeleteConfirmation = false
+                                    snackbarHostState.showSnackbar("DATA_ERASED: SESSION_TERMINATED")
+                                } else {
+                                    snackbarHostState.showSnackbar("ERROR: ${result.exceptionOrNull()?.message}")
+                                }
+                            }
+                        }
+                    ) {
+                        if (isDeleting) {
+                            CircularProgressIndicator(modifier = Modifier.size(16.dp), color = colors.danger, strokeWidth = 2.dp)
+                        } else {
+                            Text("CONFIRM_ERASE", color = colors.danger, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                        }
+                    }
+                },
+                dismissButton = {
+                    TextButton(enabled = !isDeleting, onClick = { showDeleteConfirmation = false }) {
+                        Text("CANCEL", color = colors.dimText, fontFamily = FontFamily.Monospace)
+                    }
+                }
+            )
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, colors.primary.copy(alpha = 0.2f), RectangleShape)
-                .clickable { uriHandler.openUri("https://gist.githubusercontent.com/ivaylozhivkov88/041f01cf7720f989358dd4e7125ba22f/raw/") }
+                .border(1.dp, colors.danger.copy(alpha = 0.2f), RectangleShape)
+                .clickable(enabled = currentUser != null) { showDeleteConfirmation = true }
                 .padding(12.dp),
         ) {
             Column {
-                Text("DELETE_ACCOUNT", color = colors.danger, fontFamily = FontFamily.Monospace, fontSize = 14.sp)
-                Text("Instructions for account removal", color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 10.sp)
+                val textColor = if (currentUser != null) colors.danger else colors.dimText
+                Text("DELETE_ACCOUNT", color = textColor, fontFamily = FontFamily.Monospace, fontSize = 14.sp)
+                Text(
+                    if (currentUser != null) "Permanently remove all data from terminal" else "Log in to manage account data",
+                    color = colors.dimText,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 12.sp
+                )
             }
         }
 
@@ -368,7 +431,7 @@ fun SettingsScreen(
             ) {
                 Column {
                     Text("PREDICTION_TRACK_RECORD", color = colors.primary, fontFamily = FontFamily.Monospace, fontSize = 14.sp)
-                    Text("Historical AI accuracy metrics & stats", color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 10.sp)
+                    Text("Historical AI accuracy metrics & stats", color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 12.sp)
                 }
             }
             Spacer(modifier = Modifier.height(32.dp))
@@ -389,9 +452,19 @@ fun SettingsScreen(
                     Text(
                         "STATUS: AUTHENTICATED",
                         color = colors.primary,
-                        fontSize = 11.sp,
+                        fontSize = 13.sp,
                         fontFamily = FontFamily.Monospace
                     )
+                    Text(
+                        "RESOLVED_TIER: ${tier.name}",
+                        color = colors.amber,
+                        fontSize = 12.sp,
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    TextButton(onClick = { viewModel.forceSyncIdentity(authService) }) {
+                        Text("[ FORCE_IDENTITY_SYNC ]", color = colors.primary, fontSize = 10.sp)
+                    }
                     Spacer(modifier = Modifier.height(16.dp))
                     OutlinedButton(
                         onClick = { authService.signOut() },
@@ -493,7 +566,7 @@ fun SettingsScreen(
             text = "v${BuildConfig.VERSION_NAME} (build ${BuildConfig.VERSION_CODE})",
             color = colors.dimText,
             fontFamily = FontFamily.Monospace,
-            fontSize = 10.sp,
+            fontSize = 12.sp,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
@@ -535,7 +608,7 @@ fun SettingRow(
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(label, color = colors.primary, fontFamily = FontFamily.Monospace, fontSize = 14.sp)
-            Text(desc, color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 10.sp)
+            Text(desc, color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 12.sp)
         }
         Switch(
             checked = checked,

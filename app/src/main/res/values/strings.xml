@@ -22,127 +22,127 @@
     <string name="tutorial_chapter_dashboard">>>> CHAPTER 1: DASHBOARD</string>
     <string name="tutorial_chapter_markets">>>> CHAPTER 2: MARKETS</string>
     <string name="tutorial_chapter_analysis">>>> CHAPTER 3: ANALYSIS</string>
-    <string name="tutorial_chapter_tools">>>> CHAPTER 4: TRADER TOOLS</string>
-    <string name="tutorial_chapter_signals">>>> CHAPTER 5: AI INSIGHTS</string>
-    <string name="tutorial_chapter_alerts">>>> CHAPTER 6: ALERTS</string>
-    <string name="tutorial_chapter_settings">>>> CHAPTER 7: SETTINGS</string>
+    <string name="tutorial_chapter_tools">>>> CHAPTER 4: TRADING TOOLS</string>
+    <string name="tutorial_chapter_signals">>>> CHAPTER 5: DATA INSIGHTS</string>
+    <string name="tutorial_chapter_alerts">>>> CHAPTER 6: MONITORING</string>
+    <string name="tutorial_chapter_settings">>>> CHAPTER 7: SYSTEM</string>
 
     <!-- Tour controls -->
-    <string name="tutorial_start_question">>>> INITIATE GUIDED SYSTEM TOUR? &lt;&lt;&lt;</string>
-    <string name="tutorial_start_body">A guided interactive walkthrough of all CryptoDept modules.\n\nEstimated duration: 3 minutes.</string>
-    <string name="tutorial_start_yes">GO !</string>
-    <string name="tutorial_start_no">[SKIP - I KNOW WHAT I\'M DOING]</string>
+    <string name="tutorial_start_question">>>> INITIATE SYSTEM WALKTHROUGH? &lt;&lt;&lt;</string>
+    <string name="tutorial_start_body">A guided tour of the terminal interfaces and data feeds.\n\nEstimated duration: 3 minutes.</string>
+    <string name="tutorial_start_yes">START</string>
+    <string name="tutorial_start_no">[SKIP - PROCEED TO TERMINAL]</string>
     <string name="tutorial_skip">[SKIP_TOUR]</string>
     <string name="tutorial_next">[NEXT &gt;&gt;]</string>
     <string name="tutorial_previous">[&lt;&lt; PREV]</string>
     <string name="tutorial_finish">[COMPLETE_TOUR]</string>
     <string name="tutorial_step_counter">[%1$d/%2$d]</string>
-    <string name="tutorial_skip_confirm">Abort tour? You can replay it from Settings.</string>
-    <string name="tutorial_completed_title">>>> TRAINING_COMPLETE</string>
-    <string name="tutorial_completed_message">All systems familiarized. You are now authorized to operate CryptoDept Terminal at full capacity.\n\nAchievement unlocked: [FIRST_BOOT]</string>
+    <string name="tutorial_skip_confirm">Abort walkthrough? You can replay it from System settings.</string>
+    <string name="tutorial_completed_title">>>> READY_TO_ACCESS</string>
+    <string name="tutorial_completed_message">System orientation complete. You now have access to the full suite of terminal analysis tools.\n\nLog: [ORIENTATION_COMPLETE]</string>
 
     <!-- ============= DASHBOARD (7) ============= -->
-    <string name="tutorial_dash_1_title">[01] PRICE_TICKER</string>
-    <string name="tutorial_dash_1_message">Live price feed for your watched assets. Tap any to dive into Analysis.</string>
+    <string name="tutorial_dash_1_title">[01] MARKET_TICKER</string>
+    <string name="tutorial_dash_1_message">Real-time price feed for tracked assets. Select any asset for technical deep-dive.</string>
 
-    <string name="tutorial_dash_2_title">[02] AI_MARKET_NARRATIVE</string>
-    <string name="tutorial_dash_2_message">Synthesized strategic report from AI agents. Refreshes periodically.</string>
+    <string name="tutorial_dash_2_title">[02] SYSTEM_NARRATIVE</string>
+    <string name="tutorial_dash_2_message">Synthesized market report from specialized analysis agents. Updated periodically via cloud sync.</string>
 
-    <string name="tutorial_dash_3_title">[03] TOP_MOVERS</string>
-    <string name="tutorial_dash_3_message">Real-time gainers and losers across tracked coins.</string>
+    <string name="tutorial_dash_3_title">[03] VOLATILITY_SCANNER</string>
+    <string name="tutorial_dash_3_message">Identifies top gainers and losers in the current market cycle.</string>
 
-    <string name="tutorial_dash_5_title">[04] SENTIMENT_PULSE</string>
-    <string name="tutorial_dash_5_message">Aggregated mood from Reddit, CryptoPanic, and news feeds. Fear &amp; Greed at a glance.</string>
+    <string name="tutorial_dash_5_title">[04] SENTIMENT_BAROMETER</string>
+    <string name="tutorial_dash_5_message">Aggregated social and macro sentiment. Fear &amp; Greed indexed in real-time.</string>
 
-    <string name="tutorial_dash_6_title">[05] NETWORK_HEALTH</string>
-    <string name="tutorial_dash_6_message">Gas fees, mempool congestion, validator status. Critical for transaction timing.</string>
+    <string name="tutorial_dash_6_title">[05] NETWORK_MONITOR</string>
+    <string name="tutorial_dash_6_message">On-chain health: Gas fees, mempool status, and validator latency.</string>
 
     <!-- ============= MARKETS (4) ============= -->
-    <string name="tutorial_mkt_1_title">[06] GLOBAL_STATS</string>
-    <string name="tutorial_mkt_1_message">Total market cap, BTC dominance, 24h volume. The big picture in one row.</string>
+    <string name="tutorial_mkt_1_title">[06] GLOBAL_DATA</string>
+    <string name="tutorial_mkt_1_message">Global market capitalization, BTC dominance, and aggregate volume.</string>
 
-    <string name="tutorial_mkt_2_title">[07] COIN_LIST</string>
-    <string name="tutorial_mkt_2_message">Top assets ranked by market cap. Live price + 24h change.</string>
+    <string name="tutorial_mkt_2_title">[07] ASSET_INDEX</string>
+    <string name="tutorial_mkt_2_message">Ranked assets by valuation. Real-time pricing and liquidity tracking.</string>
 
-    <string name="tutorial_mkt_3_title">[08] SORT_AND_FILTER</string>
-    <string name="tutorial_mkt_3_message">Sort by gain, volume, or volatility. Filter by category.</string>
+    <string name="tutorial_mkt_3_title">[08] SORT_CRITERIA</string>
+    <string name="tutorial_mkt_3_message">Optimize list by gain, volume, or volatility factors.</string>
 
-    <string name="tutorial_mkt_4_title">[09] FAVORITES</string>
-    <string name="tutorial_mkt_4_message">Star coins for quick access. Watchlist limited to 3 assets for Free, up to 30 for PRO users.</string>
+    <string name="tutorial_mkt_4_title">[09] TRACKING_LIST</string>
+    <string name="tutorial_mkt_4_message">Flag assets for prioritized monitoring. Capacity scales with access tier.</string>
 
     <!-- ============= ANALYSIS (Merged) ============= -->
-    <string name="tutorial_merged_analysis_title">[10] ADVANCED ANALYSIS SYSTEMS</string>
+    <string name="tutorial_merged_analysis_title">[10] TECHNICAL ANALYSIS SUITE</string>
     <string name="tutorial_merged_analysis_message">
-        • COIN SELECTOR: Switch assets instantly\n
-        • INDICATORS: RSI, MACD, EMA bias\n
-        • AI VERDICT: Strategic conclusion\n
-        • ENSEMBLE: 6 prediction engines\n
-        • DEEP SCAN: Pattern recognition
+        • SELECTOR: Immediate asset switching\n
+        • INDICATORS: RSI, MACD, EMA trend bias\n
+        • VERDICT: Clinical strategic summary\n
+        • ENSEMBLE: 7 independent quantitative models\n
+        • PATTERNS: Automated structure recognition
     </string>
 
     <!-- ============= TOOLS & SIGNALS (Merged) ============= -->
-    <string name="tutorial_merged_tools_title">[11] TRADER TOOLS &amp; SIGNALS</string>
+    <string name="tutorial_merged_tools_title">[11] QUANTITATIVE TOOLS</string>
     <string name="tutorial_merged_tools_message">
-        • CALCULATORS: Position sizing &amp; planning\n
-        • STRATEGY: Backtesting &amp; MTF analysis\n
-        • PSYCHOLOGY: Tilt &amp; FOMO protection\n
-        • SIGNALS: AI insights &amp; signal composer\n
-        • PERFORMANCE: Signal accuracy audit
+        • ARCHITECT: Position sizing &amp; risk planning\n
+        • STRATEGY: Backtesting &amp; MTF confluence\n
+        • PSYCHOLOGY: Disciplined execution monitor\n
+        • SIGNALS: Logic-based scanner alerts\n
+        • TRACK_RECORD: Historical accuracy audit
     </string>
 
     <!-- ============= ALERTS (Merged) ============= -->
-    <string name="tutorial_merged_alerts_title">[12] SMART ALERT DAEMONS</string>
+    <string name="tutorial_merged_alerts_title">[12] MONITORING DAEMONS</string>
     <string name="tutorial_merged_alerts_message">
-        • ACTIVE ALERTS: Push notification system\n
-        • COMPOSITE BUILDER: Multi-logic alerts\n
-        • PRIORITY: Set urgency (bypass DND)
+        • ALERTS: Server-side push notification grid\n
+        • LOGIC: Composite AND/OR alert builder\n
+        • PRIORITY: Critical threshold notification
     </string>
 
     <!-- ============= SETTINGS (2) ============= -->
-    <string name="tutorial_set_1_title">[13] APPEARANCE_AND_LOCALE</string>
-    <string name="tutorial_set_1_message">Theme variants (amber, green phosphor), language, sound effects.</string>
+    <string name="tutorial_set_1_title">[13] TERMINAL_PREFERENCES</string>
+    <string name="tutorial_set_1_message">Theme calibration, interface sounds, and locale settings.</string>
 
-    <string name="tutorial_set_glossary_title">[14] CRYPTO_GLOSSARY</string>
-    <string name="tutorial_set_glossary_message">Unfamiliar with a term? Access our 45+ terms database to learn the language of the market.</string>
+    <string name="tutorial_set_glossary_title">[14] TERMINOLOGY_DATABASE</string>
+    <string name="tutorial_set_glossary_message">Market dictionary with 45+ technical and institutional terms.</string>
 
-    <string name="tutorial_set_tier_title">[15] ACCESS_TIER_SYSTEM</string>
-    <string name="tutorial_set_tier_message">Manage your subscription and access level here. Admins get full command rights.</string>
+    <string name="tutorial_set_tier_title">[15] ACCESS_MANAGEMENT</string>
+    <string name="tutorial_set_tier_message">Manage subscription tier. Administrative accounts have full system privileges.</string>
 
-    <string name="tutorial_set_2_title">[16] REPLAY_THIS_TOUR</string>
-    <string name="tutorial_set_2_message">Want to see this again? Tap here anytime to restart the guided tour.</string>
+    <string name="tutorial_set_2_title">[16] SYSTEM_ORIENTATION</string>
+    <string name="tutorial_set_2_message">Restart the guided tour of terminal interfaces at any time.</string>
 
     <!-- ============= DASHBOARD UI ============= -->
-    <string name="dash_header">>>> MARKET TERMINAL v3.0</string>
-    <string name="dash_sources">SOURCES: MULTI-API</string>
-    <string name="dash_ai_narrative_header">[LIVE_FEED]</string>
-    <string name="dash_ai_narrative_prefix">AI_NARRATIVE: %1$s</string>
-    <string name="dash_event_log_header">--- SYSTEM_EVENT_LOG ---</string>
+    <string name="dash_header">>>> MARKET TERMINAL</string>
+    <string name="dash_sources">SOURCE: CLOUD_HARVESTER</string>
+    <string name="dash_ai_narrative_header">[INTELLIGENCE_FEED]</string>
+    <string name="dash_ai_narrative_prefix">NARRATIVE: %1$s</string>
+    <string name="dash_event_log_header">--- SYSTEM_STATUS ---</string>
     <string name="dash_dominance_format">DOMINANCE: BTC %1$.0f%% | ETH %2$.0f%%</string>
 
     <!-- ============= ONBOARDING ============= -->
-    <string name="onboarding_init">INITIALIZING CRYPTODEPT v4.0...</string>
-    <string name="onboarding_feed">CONNECTING TO GLOBAL MARKET FEED...</string>
-    <string name="onboarding_decrypt">DECRYPTING CORE LOGIC...</string>
-    <string name="onboarding_loading">LOADING TERMINAL INTERFACE...</string>
-    <string name="onboarding_notice">>>> IMPORTANT NOTICE</string>
-    <string name="onboarding_disclaimer_1">THIS APP PROVIDES MARKET DATA AND ANALYSIS TOOLS ONLY.</string>
-    <string name="onboarding_disclaimer_2">IT IS NOT FINANCIAL ADVICE.</string>
-    <string name="onboarding_disclaimer_3">TRADING INVOLVES SIGNIFICANT RISK OF LOSS.</string>
-    <string name="onboarding_disclaimer_4">NEVER RISK MORE THAN YOU CAN AFFORD TO LOSE.</string>
-    <string name="onboarding_understand">I UNDERSTAND THE RISKS</string>
-    <string name="onboarding_privacy">By entering, you agree to our [PRIVACY_POLICY]</string>
-    <string name="onboarding_enter">[ENTER THE TERMINAL →]</string>
+    <string name="onboarding_init">INITIALIZING TERMINAL CORE...</string>
+    <string name="onboarding_feed">SYNCHRONIZING WITH MARKET NODES...</string>
+    <string name="onboarding_decrypt">DECODING LOGIC STACK...</string>
+    <string name="onboarding_loading">LOADING INTERFACE...</string>
+    <string name="onboarding_notice">>>> DISCLOSURE</string>
+    <string name="onboarding_disclaimer_1">THIS TERMINAL PROVIDES QUANTITATIVE DATA ONLY.</string>
+    <string name="onboarding_disclaimer_2">ALL ANALYSES ARE STATISTICAL, NOT FINANCIAL ADVICE.</string>
+    <string name="onboarding_disclaimer_3">CAPITAL RISK IS INHERENT TO SPECULATIVE TRADING.</string>
+    <string name="onboarding_disclaimer_4">OPERATE WITHIN ESTABLISHED RISK TOLERANCE LEVELS.</string>
+    <string name="onboarding_understand">ACKNOWLEDGE DISCLOSURE</string>
+    <string name="onboarding_privacy">Access implies agreement with [PRIVACY_POLICY]</string>
+    <string name="onboarding_enter">[ACCESS TERMINAL →]</string>
 
     <!-- ============= ANALYSIS UI ============= -->
-    <string name="analysis_header">>>> TERMINAL_DEPT_V3</string>
-    <string name="analysis_analyzing">>>> ANALYZING_SYSTEM_DATA...</string>
-    <string name="analysis_verdict">SCANNER_VERDICT:</string>
+    <string name="analysis_header">>>> ASSET_ANALYSIS_NODE</string>
+    <string name="analysis_analyzing">>>> COMPUTING_TECHNICAL_METRICS...</string>
+    <string name="analysis_verdict">SUMMARY_VERDICT:</string>
     <string name="analysis_confidence">CONFIDENCE:</string>
-    <string name="analysis_matrix">>>> INDICATOR_MATRIX</string>
-    <string name="analysis_sentiment_title">>>> MARKET_SENTIMENT (REDDIT/CRYPTO_PANIC)</string>
-    <string name="analysis_data_points">DATA_POINTS_ANALYZED: %1$d</string>
-    <string name="analysis_fibonacci">>>> FIBONACCI_RETRACEMENT</string>
-    <string name="analysis_predict_btn">PREDICT_FUTURE</string>
-    <string name="analysis_deep_scan_btn">DEEP_SCAN</string>
+    <string name="analysis_matrix">>>> INDICATOR_CONFLUENCE</string>
+    <string name="analysis_sentiment_title">>>> SOCIAL_SENTIMENT_ANALYSIS</string>
+    <string name="analysis_data_points">DATA_POINTS: %1$d</string>
+    <string name="analysis_fibonacci">>>> FIBONACCI_STRUCTURE</string>
+    <string name="analysis_predict_btn">RUN_QUANT_PROJECTION</string>
+    <string name="analysis_deep_scan_btn">STRUCTURAL_SCAN</string>
 
 </resources>

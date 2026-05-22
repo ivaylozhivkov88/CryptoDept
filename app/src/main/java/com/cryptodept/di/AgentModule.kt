@@ -55,6 +55,7 @@ object AgentModule {
     @Singleton
     fun provideDataIntegrityAgent(
         api: com.cryptodept.data.api.CoinGeckoApi,
-        repository: com.cryptodept.domain.repository.CryptoRepository
-    ): com.cryptodept.domain.agent.DataIntegrityAgent = com.cryptodept.domain.agent.DataIntegrityAgent(api, repository)
+        repository: com.cryptodept.domain.repository.CryptoRepository,
+        integrityService: com.cryptodept.domain.manager.SystemIntegrityService
+    ): com.cryptodept.domain.agent.DataIntegrityAgent = com.cryptodept.domain.agent.DataIntegrityAgent(api, repository, integrityService)
 }

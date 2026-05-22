@@ -14,6 +14,7 @@ import javax.inject.Inject
 class WhaleViewModel @Inject constructor(
     private val aggregator: AggregateWhaleActivityUseCase,
     private val demoMode: DemoModeProvider,
+    private val haptic: com.cryptodept.util.HapticService,
 ) : ViewModel() {
 
     private val _isRefreshing = MutableStateFlow(false)
@@ -35,8 +36,8 @@ class WhaleViewModel @Inject constructor(
             _isRefreshing.value = true
             try {
                 val results = aggregator.execute(minUsd = 500_000.0)
-                if (results.isEmpty()) {
-                    android.util.Log.w("WhaleViewModel", "No transactions found above threshold")
+                if (results.isNotEmpty() && results.size > _transactions.value.size) {
+                    haptic.whaleAlert()
                 }
                 _transactions.value = results
             } catch (e: Exception) {

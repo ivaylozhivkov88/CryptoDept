@@ -21,6 +21,7 @@ class CryptoRepositoryImpl @Inject constructor(
     private val networkHealthDao: com.cryptodept.data.db.NetworkHealthDao,
     private val binanceWS: BinanceWebSocketService,
     private val krakenWS: KrakenWebSocketService,
+    private val firebaseDataSource: com.cryptodept.data.remote.source.FirebaseRemoteDataSource,
     private val subscription: com.cryptodept.data.datastore.SubscriptionAccessManager,
     private val demoMode: com.cryptodept.util.DemoModeProvider,
 ) : CryptoRepository {
@@ -28,6 +29,7 @@ class CryptoRepositoryImpl @Inject constructor(
     private var lastFetchTime = 0L
     private val RATE_LIMIT_MS = 10_000L
     private var subscriptionJob: Job? = null
+    private var cloudSyncJob: Job? = null
 
     @Inject
     lateinit var alertsRepository: AlertsRepository
@@ -36,6 +38,96 @@ class CryptoRepositoryImpl @Inject constructor(
         repositoryScope.launch {
             coinDao.deleteStablecoins()
         }
+        startCloudSync()
+    }
+
+    private fun startCloudSync() {
+        cloudSyncJob?.cancel()
+        cloudSyncJob = repositoryScope.launch {
+            // 1. Listen to Global State (Macro, Reports, Whale Alerts)
+            firebaseDataSource.getTerminalState().collect { cloudState ->
+                if (cloudState == null) return@collect
+
+                // Sync Network Health / Macro Briefing
+                cloudState.macroBriefing?.let { briefing ->
+                    val health = NetworkHealth(
+                        btcHashrate = "N/A",
+                        btcMempool = "N/A",
+                        ethGas = "${briefing.ethGasGwei} gwei",
+                        fearGreedIndex = briefing.fearGreedIndex,
+                        fearGreedLabel = when {
+                            briefing.fearGreedIndex > 75 -> "Extreme Greed"
+                            briefing.fearGreedIndex > 55 -> "Greed"
+                            briefing.fearGreedIndex > 45 -> "Neutral"
+                            briefing.fearGreedIndex > 25 -> "Fear"
+                            else -> "Extreme Fear"
+                        },
+                        socialPulse = 50,
+                        socialPulseLabel = "Neutral"
+                    )
+                    saveNetworkHealth(health)
+                }
+                
+                // 2. Identify and Sync Top 5 Global Coins (Free for all)
+                // We take top 5 from the cloud market data sorted by market cap
+                val top5Ids = cloudState.marketData.values
+                    .sortedByDescending { it.marketCap }
+                    .take(5)
+                    .map { it.id }
+                    .toSet()
+                
+                syncSpecificCoins(top5Ids)
+            }
+        }
+        
+        // 3. Granular listeners for User Watchlist (3 for Free / 15 for Pro)
+        repositoryScope.launch {
+            coinDao.getTrackedCoins().collect { trackedEntities ->
+                val limit = if (subscription.isPro.value) 15 else 3
+                val trackedIds = trackedEntities.take(limit).map { it.id }.toSet()
+                syncSpecificCoins(trackedIds)
+            }
+        }
+    }
+
+    private val activeSyncJobs = java.util.concurrent.ConcurrentHashMap<String, Job>()
+
+    private fun syncSpecificCoins(coinIds: Set<String>) {
+        coinIds.forEach { id ->
+            if (!activeSyncJobs.containsKey(id)) {
+                val job = repositoryScope.launch {
+                    firebaseDataSource.getCoinData(id).collect { cloudCoin ->
+                        if (cloudCoin != null) {
+                            updateLocalCoinFromCloud(cloudCoin)
+                        }
+                    }
+                }
+                activeSyncJobs[id] = job
+            }
+        }
+        
+        // Optional: Clean up jobs for coins no longer in top5 or watchlist
+        // But since we want to keep them cached, we can leave them or add a timeout
+    }
+
+    private suspend fun updateLocalCoinFromCloud(cloudCoin: com.cryptodept.data.remote.model.CloudMarketData) {
+        val localCoin = coinDao.getCoinById(cloudCoin.id)
+        val entity = CoinEntity(
+            id = cloudCoin.id,
+            symbol = cloudCoin.symbol,
+            name = localCoin?.name ?: cloudCoin.symbol.uppercase(),
+            isTracked = localCoin?.isTracked ?: false,
+            currentPrice = cloudCoin.currentPrice,
+            priceChange24h = cloudCoin.priceChange24h,
+            priceChangePercentage24h = (cloudCoin.priceChange24h / cloudCoin.currentPrice) * 100,
+            marketCap = cloudCoin.marketCap,
+            totalVolume = cloudCoin.volume24h,
+            high24h = localCoin?.high24h ?: cloudCoin.currentPrice,
+            low24h = localCoin?.low24h ?: cloudCoin.currentPrice,
+            lastUpdated = System.currentTimeMillis()
+        )
+        coinDao.insertCoins(listOf(entity))
+        alertsRepository.checkAlerts(cloudCoin.id, cloudCoin.currentPrice)
     }
 
     private val STABLECOIN_IDS = setOf(
@@ -110,10 +202,19 @@ class CryptoRepositoryImpl @Inject constructor(
 
     override suspend fun refreshPrices(): CryptoResult<Unit> = coroutineScope {
         try {
-            if (System.currentTimeMillis() - lastFetchTime < RATE_LIMIT_MS) return@coroutineScope CryptoResult.Success(Unit)
+            val now = System.currentTimeMillis()
+            if (now - lastFetchTime < RATE_LIMIT_MS) return@coroutineScope CryptoResult.Success(Unit)
             
+            // PHASE C: Check Cloud Freshness
+            val cloud = firebaseDataSource.getTerminalState().firstOrNull()
+            if (cloud != null && (now - cloud.lastUpdateTimestamp) < 300_000) { // 5 mins
+                // Cloud is fresh, already synced via startCloudSync(), skipping expensive CG call
+                lastFetchTime = now
+                return@coroutineScope CryptoResult.Success(Unit)
+            }
+
             val response = runCatching { 
-                withTimeout(10000) { api.getCoinMarkets(perPage = 250) }
+                withTimeout(10000) { api.getCoinMarkets(perPage = 100) }
             }
             val marketResponse = response.getOrNull()
             
@@ -228,6 +329,20 @@ class CryptoRepositoryImpl @Inject constructor(
         CryptoResult.Error(e)
     }
 
+    override fun getGlobalMarketDataFlow(): Flow<GlobalMarketData?> = 
+        firebaseDataSource.getTerminalState().map { state ->
+            state?.macroBriefing?.let { b ->
+                GlobalMarketData(
+                    activeCoins = 10000, // Placeholder
+                    totalMarketCap = b.globalMarketCapUsd,
+                    totalVolume = 0.0, // Placeholder
+                    marketCapChangePercentage24h = 0.0,
+                    btcDominance = b.btcDominance,
+                    ethDominance = 15.0 // Placeholder
+                )
+            }
+        }
+
     override suspend fun getPriceAtTimestamp(coinId: String, timestamp: Long): Double =
         priceHistoryRepository.getPriceAtTimestamp(coinId, timestamp) ?: getCurrentPrice(coinId)
 
@@ -237,7 +352,7 @@ class CryptoRepositoryImpl @Inject constructor(
         val isPro = subscription.isPro.value
         
         if (!coin.isTracked) {
-            val limit = if (isPro) 30 else 3
+            val limit = if (isPro) 15 else 3 // STRICT LIMIT: 3 for Free, 15 for Pro
             if (currentTrackedCount >= limit) {
                 throw Exception("LIMIT_REACHED: MAX_${limit}_COINS")
             }

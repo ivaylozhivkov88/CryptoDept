@@ -47,7 +47,7 @@ fun AnalysisLoadingScreen(state: PredictUiState.Loading) {
             text = "PREDICT_ENGINE_ACTIVE: ENSEMBLE_V2.1",
             color = Color(0xFF00FF41).copy(alpha = 0.6f),
             fontFamily = FontFamily.Monospace,
-            fontSize = 10.sp,
+            fontSize = 12.sp,
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -71,7 +71,7 @@ fun AnalysisLoadingScreen(state: PredictUiState.Loading) {
                 text = "ANALYSIS_PROGRESS: ${(state.progress * 100).toInt()}%",
                 color = Color(0xFF00FF41),
                 fontFamily = FontFamily.Monospace,
-                fontSize = 12.sp,
+                fontSize = 13.sp,
             )
             Spacer(modifier = Modifier.height(8.dp))
             LinearProgressIndicator(
@@ -105,13 +105,13 @@ fun TerminalLogLine(
             text = if (isCurrent) ">> " else "[ OK ] ",
             color = if (isCurrent) Color.White else Color(0xFF00FF41),
             fontFamily = FontFamily.Monospace,
-            fontSize = 14.sp,
+            fontSize = 11.sp,
         )
         Text(
             text = displayedText,
             color = if (isCurrent) Color.White else Color(0xFF00FF41).copy(alpha = 0.7f),
             fontFamily = FontFamily.Monospace,
-            fontSize = 14.sp,
+            fontSize = 11.sp,
         )
     }
 }

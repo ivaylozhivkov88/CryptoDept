@@ -178,7 +178,7 @@ fun StatCard(
                 .padding(12.dp),
     ) {
         Column {
-            Text(label, color = colors.dimText, fontSize = 9.sp, fontFamily = JetBrainsMono)
+            Text(label, color = colors.dimText, fontSize = 11.sp, fontFamily = JetBrainsMono)
             Text(
                 value,
                 color = if (color == Color.Unspecified) colors.primary else color,

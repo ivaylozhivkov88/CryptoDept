@@ -121,11 +121,63 @@ class PredictionEnsembleEngine
                         modelsAgreement = consensus.agreementScore,
                         dataQuality = predictability,
                         calculatedAt = System.currentTimeMillis(),
+                        factors = buildPredictionFactors(votesWithReasoning, liquidityInsight, predictability),
                     )
 
                 cache.put(coinId, "main", result)
                 return@coroutineScope result
             }
+
+        private fun buildPredictionFactors(
+            votes: List<ModelVote>,
+            liquidity: LiquidityInsight,
+            predictability: Float,
+        ): List<PredictionFactor> {
+            val factors = mutableListOf<PredictionFactor>()
+            
+            // 1. Quant Alpha (MC/Fourier)
+            val mcVote = votes.find { it.model == PredictionModel.MONTE_CARLO }
+            mcVote?.let {
+                factors.add(PredictionFactor(
+                    label = "Monte Carlo Cluster",
+                    weightPercent = 25,
+                    direction = it.direction,
+                    detail = "Clusterized distribution suggests ${it.direction.name} move with ${it.confidence * 100}% confidence."
+                ))
+            }
+
+            // 2. Orderflow (Liquidity)
+            factors.add(PredictionFactor(
+                label = "Binance Orderflow",
+                weightPercent = 28,
+                direction = if (liquidity.longShortRatio < 0.45) Direction.UP else if (liquidity.longShortRatio > 0.55) Direction.DOWN else Direction.SIDEWAYS,
+                detail = "Retail L/S Ratio at ${(liquidity.longShortRatio * 100).toInt()}%. Institutional bias is ${liquidity.sentimentBias}."
+            ))
+
+            // 3. Technical (Hurst/Linear)
+            val linearVote = votes.find { it.model == PredictionModel.LINEAR_REGRESSION }
+            linearVote?.let {
+                factors.add(PredictionFactor(
+                    label = "Mean Regression",
+                    weightPercent = 22,
+                    direction = it.direction,
+                    detail = "Hurst Exponent confirms ${if (predictability > 0.6) "stable trend" else "noisy structure"}."
+                ))
+            }
+
+            // 4. Momentum (Fourier)
+            val fourierVote = votes.find { it.model == PredictionModel.FOURIER_CYCLES }
+            fourierVote?.let {
+                factors.add(PredictionFactor(
+                    label = "Cycle Harmonics",
+                    weightPercent = 25,
+                    direction = it.direction,
+                    detail = "Digital filter identifies dominant price cycle phase at ${it.confidence * 100}% extension."
+                ))
+            }
+
+            return factors
+        }
 
         private fun generateDeepReasoning(
             vote: ModelVote,

@@ -332,8 +332,12 @@ fun ContentStudioScreen(
                         viewModel.sendPromptToAiCoach(generatedPrompt)
                     }
                     
+                    AgentSelectRow("MARKETING_STRATEGIST", "Viral Post Engine | Direct Generate") {
+                        showAgentDialog = false
+                        viewModel.sendToAi()
+                    }
+                    
                     AgentSelectRow("NARRATIVE_ORCHESTRATOR", "Auto-Synthesis | Coming Soon", enabled = false) {}
-                    AgentSelectRow("MARKETING_STRATEGIST", "Viral Post Engine | Coming Soon", enabled = false) {}
                 }
             },
             confirmButton = {

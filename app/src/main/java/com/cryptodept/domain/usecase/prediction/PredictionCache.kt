@@ -15,7 +15,8 @@ class PredictionCache
         )
 
         private val cache = ConcurrentHashMap<String, CacheEntry>()
-        private val TTL_MS = 5 * 60 * 1000L // 5 минути
+        private val TTL_MS = 15 * 60 * 1000L // 15 minutes (Change 3)
+        private val MAX_SIZE = 10 // Max coins cached simultaneously
 
         fun get(
             coinId: String,
@@ -35,6 +36,11 @@ class PredictionCache
             timeframe: String,
             result: PricePrediction,
         ) {
+            if (cache.size >= MAX_SIZE) {
+                // Remove oldest (not strictly LRU with ConcurrentHashMap but good enough)
+                val oldestKey = cache.keys.firstOrNull()
+                oldestKey?.let { cache.remove(it) }
+            }
             cache["$coinId:$timeframe"] = CacheEntry(result)
         }
 

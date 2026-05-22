@@ -29,6 +29,8 @@ import com.cryptodept.domain.tier.FeatureKey
 import com.cryptodept.domain.tier.AccessTier
 import com.cryptodept.ui.components.FeatureHelpIcon
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 @Composable
 fun ToolsHubScreen(
     navController: NavController,
@@ -36,7 +38,7 @@ fun ToolsHubScreen(
     viewModel: ToolsHubViewModel = hiltViewModel()
 ) {
     val colors = LocalTerminalColors.current
-    val currentTier by viewModel.tierAccessManager.currentTier.collectAsState()
+    val currentTier by viewModel.tierAccessManager.currentTier.collectAsStateWithLifecycle()
     
     val essentialTools = listOf(
         ToolItem("POSITION SIZER", "Lot size & risk calc", Icons.Default.Build, Screen.PositionSizer.route, targetId = TutorialTargetId.TOOLS_POSITION_SIZER, feature = FeatureKey.POSITION_SIZER),
@@ -119,7 +121,11 @@ fun ToolGrid(tools: List<ToolItem>, navController: NavController, tier: AccessTi
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 rowTools.forEach { tool ->
-                    val hasAccess = tool.feature?.let { tier.canAccess(it.requiredTier) } ?: true
+                    val hasAccess = tool.feature?.let { 
+                        val allowed = tier.canAccess(it.requiredTier)
+                        android.util.Log.d("ToolsHub", "Checking ${tool.name}: tier=${tier.name}, required=${it.requiredTier.name}, hasAccess=$allowed")
+                        allowed
+                    } ?: true
                     
                     ToolCard(
                         tool = tool, 
@@ -129,7 +135,7 @@ fun ToolGrid(tools: List<ToolItem>, navController: NavController, tier: AccessTi
                         if (hasAccess) {
                             navController.navigate(tool.route) 
                         } else {
-                            navController.navigateToPaywall(tool.feature.name.lowercase())
+                            navController.navigateToPaywall(tool.feature.name.lowercase(), tool.feature)
                         }
                     }
                 }
@@ -190,7 +196,7 @@ fun ToolCard(
             Text(
                 text = tool.description,
                 color = if (isLocked) colors.dimText.copy(alpha = 0.5f) else colors.dimText,
-                fontSize = 9.sp,
+                fontSize = 11.sp,
                 fontFamily = JetBrainsMono,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
             )

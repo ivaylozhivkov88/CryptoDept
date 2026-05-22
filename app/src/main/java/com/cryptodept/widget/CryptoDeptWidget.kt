@@ -54,8 +54,8 @@ class CryptoDeptWidget : GlanceAppWidget() {
     @InstallIn(SingletonComponent::class)
     interface WidgetEntryPoint {
         fun cryptoRepository(): CryptoRepository
-
         fun billingService(): BillingService
+        fun firebaseDataSource(): com.cryptodept.data.remote.source.FirebaseRemoteDataSource
     }
 
     override suspend fun provideGlance(
@@ -65,6 +65,7 @@ class CryptoDeptWidget : GlanceAppWidget() {
         val entryPoint = EntryPointAccessors.fromApplication(context, WidgetEntryPoint::class.java)
         val repository = entryPoint.cryptoRepository()
         val isPro = entryPoint.billingService().isPro.value
+        val firebaseDataSource = entryPoint.firebaseDataSource()
 
         val prices =
             try {
@@ -72,10 +73,17 @@ class CryptoDeptWidget : GlanceAppWidget() {
             } catch (e: Exception) {
                 emptyList()
             }
+            
+        val verdict = try {
+            val state = firebaseDataSource.getTerminalState().first()
+            state?.aiNarrative ?: "MARKET SCANNING..."
+        } catch (e: Exception) {
+            "OFFLINE"
+        }
 
         provideContent {
             val size = LocalSize.current
-            CryptoDeptWidgetContent(prices, isPro, size)
+            CryptoDeptWidgetContent(prices, isPro, size, verdict)
         }
     }
 
@@ -84,6 +92,7 @@ class CryptoDeptWidget : GlanceAppWidget() {
         prices: List<CoinPrice>,
         isPro: Boolean,
         size: DpSize,
+        verdict: String
     ) {
         val colors = WidgetColors()
 
@@ -122,6 +131,12 @@ class CryptoDeptWidget : GlanceAppWidget() {
 
             Spacer(modifier = GlanceModifier.padding(0.dp))
             Box(modifier = GlanceModifier.fillMaxWidth().height(1.dp).background(colors.darkGreen)) {}
+            
+            Text(
+                text = "VERDICT: ${verdict.take(40)}...",
+                style = TextStyle(color = ColorProvider(Color.White), fontSize = 9.sp, fontWeight = FontWeight.Bold),
+                maxLines = 1
+            )
 
             Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -132,7 +147,7 @@ class CryptoDeptWidget : GlanceAppWidget() {
                 Text(
                     text = "[REFRESH]",
                     style = TextStyle(color = ColorProvider(colors.amber), fontSize = 8.sp, fontWeight = FontWeight.Bold),
-                    modifier = GlanceModifier.clickable(actionStartActivity<MainActivity>()), // In real app, this would trigger a worker
+                    modifier = GlanceModifier.clickable(actionStartActivity<MainActivity>()),
                 )
             }
         }

@@ -2,6 +2,7 @@ package com.cryptodept.ui.alerts
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -38,7 +39,7 @@ import java.util.*
 @Composable
 fun AlertsScreen(
     onNavigateToBuilder: () -> Unit,
-    onNavigateToPaywall: () -> Unit = {},
+    onNavigateToPaywall: (com.cryptodept.domain.tier.FeatureKey?) -> Unit = {},
     viewModel: AlertsViewModel = hiltViewModel(),
 ) {
     val alerts by viewModel.alerts.collectAsState()
@@ -46,6 +47,8 @@ fun AlertsScreen(
     val colors = LocalTerminalColors.current
     val scope = rememberCoroutineScope()
     var showLimitDialog by remember { mutableStateOf(false) }
+    
+    val alertCreationResult = viewModel.canCreateNewAlert()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -53,11 +56,9 @@ fun AlertsScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    scope.launch {
-                        when (viewModel.canCreateNewAlert()) {
-                            AlertCreationResult.Allowed -> onNavigateToBuilder()
-                            is AlertCreationResult.LimitReached -> showLimitDialog = true
-                        }
+                    when (viewModel.canCreateNewAlert()) {
+                        is AlertCreationResult.LimitReached -> showLimitDialog = true
+                        else -> onNavigateToBuilder()
                     }
                 },
                 containerColor = colors.primary,
@@ -93,7 +94,7 @@ fun AlertsScreen(
                     confirmButton = {
                         TextButton(onClick = {
                             showLimitDialog = false
-                            onNavigateToPaywall()
+                            onNavigateToPaywall(com.cryptodept.domain.tier.FeatureKey.ALERTS_UNLIMITED)
                         }) {
                             Text("[ UPGRADE_TO_PRO ]", fontFamily = FontFamily.Monospace, color = colors.amber)
                         }
@@ -123,6 +124,37 @@ fun AlertsScreen(
             }
 
             Spacer(modifier = Modifier.height(TerminalConfig.UI.SPACER_LARGE))
+
+            if (alertCreationResult is AlertCreationResult.ApproachingLimit) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = TerminalConfig.UI.SPACER_MEDIUM)
+                        .background(colors.amber.copy(alpha = 0.08f))
+                        .border(1.dp, colors.amber, RectangleShape)
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        text = "[!] LAST FREE SLOT — ${alertCreationResult.currentCount}/${alertCreationResult.limit} alerts used.",
+                        color = colors.amber,
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 11.sp,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Text(
+                        text = "UPGRADE ›",
+                        color = colors.amber,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 11.sp,
+                        modifier = Modifier
+                            .clickable { onNavigateToPaywall(com.cryptodept.domain.tier.FeatureKey.ALERTS_UNLIMITED) }
+                            .padding(start = 8.dp),
+                    )
+                }
+            }
 
             if (alerts.isEmpty() && compositeAlerts.isEmpty()) {
                 Box(

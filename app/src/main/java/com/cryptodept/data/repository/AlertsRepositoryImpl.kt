@@ -87,7 +87,7 @@ class AlertsRepositoryImpl
                     if (triggered) {
                         Log.i("AlertsRepository", "Triggered: ${alert.coinSymbol} at $currentPrice")
                         alertDao.markAsTriggered(alert.id)
-                        hapticService.alert()
+                        hapticService.priceAlert()
                         alertNotificationService.showPriceAlert(alert, currentPrice)
                     }
                 } else {

@@ -25,6 +25,11 @@ class BinanceWebSocketService
         @Named("PublicClient") private val okHttpClient: OkHttpClient,
         private val gson: Gson,
     ) {
+        // Firebase pushes real-time price updates to all users centrally.
+        // Per-device WebSocket connections are redundant and waste battery/CPU.
+        // Re-enable by setting isDisabledByFirebase = false if Firebase is removed.
+        val isDisabledByFirebase = true
+
         private val _priceUpdates =
             MutableSharedFlow<BinanceTickerResponse>(
                 replay = 1,
@@ -50,6 +55,10 @@ class BinanceWebSocketService
             "wss://stream.binance.com:9443/stream?streams=btcusdt@ticker/ethusdt@ticker/xrpusdt@ticker/btcusdt@aggTrade/ethusdt@aggTrade/xrpusdt@aggTrade"
 
         fun connect() {
+            if (isDisabledByFirebase) {
+                Log.d("WebSocket", "${javaClass.simpleName} disabled — Firebase handles real-time data")
+                return
+            }
             if (webSocket != null) return
             startConnection()
         }

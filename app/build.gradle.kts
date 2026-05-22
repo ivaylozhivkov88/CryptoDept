@@ -22,8 +22,8 @@ android {
         applicationId = "com.cryptodept"
         minSdk = 26
         targetSdk = 35
-        versionCode = 18
-        versionName = "1.1.2"
+        versionCode = 28
+        versionName = "1.1.15"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -80,7 +80,7 @@ android {
                 debugSymbolLevel = "full"
             }
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
+                getDefaultProguardFile("proguard-android.txt"),
                 "proguard-rules.pro",
             )
             signingConfig = signingConfigs.getByName("release")
@@ -191,6 +191,7 @@ dependencies {
     // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
+    implementation(libs.firebase.database) // Ползваме името от libs.versions.toml
     implementation(libs.firebase.inapp.messaging)
     implementation(libs.firebase.messaging)
     implementation(libs.firebase.appcheck)

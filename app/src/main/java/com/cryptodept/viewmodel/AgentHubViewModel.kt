@@ -3,6 +3,8 @@ package com.cryptodept.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cryptodept.data.db.IntelligenceBriefingEntity
+import com.cryptodept.data.remote.source.FirebaseRemoteDataSource
+import com.cryptodept.domain.model.AgentStatus
 import com.cryptodept.domain.model.MarketDataSnapshot
 import com.cryptodept.domain.repository.BriefingRepository
 import com.cryptodept.domain.usecase.GetNetworkHealthUseCase
@@ -18,14 +20,33 @@ class AgentHubViewModel @Inject constructor(
     private val briefingRepository: BriefingRepository,
     private val agentCoordinator: MultiAgentCoordinator,
     private val getNetworkHealth: GetNetworkHealthUseCase,
-    private val riskEngine: RiskScoreEngine
+    private val riskEngine: RiskScoreEngine,
+    private val firebaseDataSource: FirebaseRemoteDataSource
 ) : ViewModel() {
-
-    val briefings: StateFlow<List<IntelligenceBriefingEntity>> = briefingRepository.getAllBriefings()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
+    val briefings: StateFlow<List<IntelligenceBriefingEntity>> = combine(
+        briefingRepository.getAllBriefings(),
+        firebaseDataSource.getTerminalState()
+    ) { local, cloud ->
+        if (local.isNotEmpty()) {
+            local.distinctBy { it.summary }
+        } else {
+            // Fallback: Map cloud specialized reports to briefing cards if local DB is empty
+            cloud?.agentReports?.values?.distinct()?.map { report ->
+                IntelligenceBriefingEntity(
+                    timestamp = cloud.lastUpdateTimestamp,
+                    summary = report,
+                    anomalyScore = if (report.contains("SIGNAL_LOST")) 100 else 0,
+                    sentiment = "CLOUD_SYNC",
+                    riskScore = cloud.macroBriefing?.riskScore ?: 0,
+                    evidence = "SOURCE: CLOUD_HARVESTER"
+                )
+            } ?: emptyList()
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun refresh() {
         viewModelScope.launch {

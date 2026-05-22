@@ -3,13 +3,12 @@ package com.cryptodept.data.repository
 import com.cryptodept.data.api.EtherscanWhaleClient
 import com.cryptodept.data.api.HeliusWhaleClient
 import com.cryptodept.data.api.MempoolWhaleClient
+import com.cryptodept.domain.model.Blockchain
 import com.cryptodept.domain.model.WhaleTransaction
 import com.cryptodept.domain.repository.WhaleRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -20,10 +19,33 @@ class WhaleRepositoryImpl
         private val etherscanClient: EtherscanWhaleClient,
         private val heliusClient: HeliusWhaleClient,
         private val btcClient: MempoolWhaleClient,
+        private val firebaseDataSource: com.cryptodept.data.remote.source.FirebaseRemoteDataSource,
     ) : WhaleRepository {
         private val _transactions = MutableStateFlow<List<WhaleTransaction>>(emptyList())
 
-        override fun getWhaleTransactions(): Flow<List<WhaleTransaction>> = _transactions.asStateFlow()
+        override fun getWhaleTransactions(): Flow<List<WhaleTransaction>> = 
+            merge(
+                _transactions.asStateFlow(),
+                firebaseDataSource.getTerminalState().map { state ->
+                    state?.whaleAlerts?.map { alert ->
+                        WhaleTransaction(
+                            id = alert.timestamp.toString(),
+                            blockchain = when {
+                                alert.explorerUrl.contains("etherscan") -> Blockchain.ETHEREUM
+                                alert.explorerUrl.contains("solscan") || alert.explorerUrl.contains("helius") -> Blockchain.SOLANA
+                                else -> Blockchain.BITCOIN
+                            },
+                            amount = 0.0, // We usually care about USD more
+                            amountUsd = alert.amountUsd,
+                            symbol = alert.asset,
+                            fromAddress = "Unknown",
+                            toAddress = "Unknown",
+                            timestamp = alert.timestamp,
+                            transactionHash = alert.explorerUrl.split("/").last()
+                        )
+                    } ?: emptyList()
+                }
+            ).map { it.sortedByDescending { tx -> tx.timestamp }.distinctBy { tx -> tx.transactionHash } }
 
         override suspend fun refreshWhaleTransactions(): Result<Unit> =
             coroutineScope {

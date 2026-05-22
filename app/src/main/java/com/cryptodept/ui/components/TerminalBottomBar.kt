@@ -32,6 +32,7 @@ fun TerminalBottomBar(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val colors = LocalTerminalColors.current
+    val haptic = LocalHapticManager.current
 
     // Don't show on boot screen
     if (currentRoute == Screen.Boot.route) return
@@ -72,6 +73,7 @@ fun TerminalBottomBar(navController: NavHostController) {
                                 .clickable(
                                     onClickLabel = "Navigate to ${screen.label}",
                                     onClick = {
+                                        haptic?.navTick()
                                         if (currentRoute != screen.route) {
                                             val targetRoute =
                                                 if (screen == Screen.Analysis) {

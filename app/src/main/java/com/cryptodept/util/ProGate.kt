@@ -4,20 +4,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.cryptodept.data.billing.BillingService
-import com.cryptodept.viewmodel.BillingViewModel
+import com.cryptodept.domain.tier.FeatureKey
+import com.cryptodept.viewmodel.SettingsViewModel
 
 @Composable
 fun ProGate(
-    billingService: BillingService = hiltViewModel<BillingViewModel>().billingService,
-    onLocked: @Composable () -> Unit = { /* Paywall handled in NavGraph or here */ },
+    feature: FeatureKey? = null,
+    settingsViewModel: SettingsViewModel = hiltViewModel(),
+    onLocked: @Composable (FeatureKey?) -> Unit = { /* Paywall handled in NavGraph or here */ },
     content: @Composable () -> Unit,
 ) {
-    val isPro by billingService.isPro.collectAsState()
+    val tier by settingsViewModel.tierAccessManager.currentTier.collectAsState()
+    val hasAccess = feature?.let { tier.canAccess(it.requiredTier) } ?: tier.isPaid
 
-    if (isPro) {
+    if (hasAccess) {
         content()
     } else {
-        onLocked()
+        onLocked(feature)
     }
 }

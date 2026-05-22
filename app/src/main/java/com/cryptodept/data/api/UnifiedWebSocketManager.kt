@@ -17,8 +17,12 @@ class UnifiedWebSocketManager @Inject constructor(
     )
 
     fun connectAll() {
-        binanceWS.connect()
-        krakenWS.connect()
+        if (!binanceWS.isDisabledByFirebase) {
+            binanceWS.connect()
+        }
+        if (!krakenWS.isDisabledByFirebase) {
+            krakenWS.connect()
+        }
     }
 
     fun disconnectAll() {

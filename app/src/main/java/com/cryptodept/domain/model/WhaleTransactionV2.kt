@@ -51,7 +51,7 @@ enum class WhaleSignificance(val minUsd: Double, val label: String, val emoji: S
         fun fromAmount(usd: Double): WhaleSignificance = when {
             usd >= MEGA.minUsd -> MEGA
             usd >= LARGE.minUsd -> LARGE
-            usd >= SIGNIFICANT.minUsd -> SIGNIFICANT
+            usd >= 1_000_000.0 -> SIGNIFICANT
             else -> NOTABLE
         }
     }

@@ -46,15 +46,4 @@ class BillingViewModel
             billingService.launchBillingFlow(activity, productDetails)
         }
 
-        fun unlockAdmin(code: String): Boolean {
-            val sanitized = code.trim().uppercase()
-            return if (sanitized == "BIGBOSSBAIKO" || sanitized == "BIGBOSSKAIKO") {
-                viewModelScope.launch {
-                    billingService.setAdminOverride(true)
-                }
-                true
-            } else {
-                false
-            }
-        }
     }

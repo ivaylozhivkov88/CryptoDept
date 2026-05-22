@@ -69,8 +69,21 @@ fun AccuracyDashboardScreen(
 
             items(state.modelStats) { stat ->
                 Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(stat.name, color = colors.textPrimary, fontFamily = FontFamily.Monospace)
-                    Text("${stat.accuracy}%", color = if (stat.accuracy > 50) colors.primary else colors.danger, fontFamily = FontFamily.Monospace)
+                    Text(stat.name, color = colors.textPrimary, fontFamily = FontFamily.Monospace, fontSize = 13.sp)
+                    Text("${stat.accuracy}%", color = if (stat.accuracy > 50) colors.primary else colors.danger, fontFamily = FontFamily.Monospace, fontSize = 13.sp)
+                }
+            }
+
+            item {
+                Spacer(Modifier.height(24.dp))
+                Text("MARKET_REGIME_PERFORMANCE", color = colors.amber, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+                Spacer(Modifier.height(8.dp))
+            }
+
+            items(state.regimeStats) { stat ->
+                Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text(stat.name, color = colors.textPrimary, fontFamily = FontFamily.Monospace, fontSize = 13.sp)
+                    Text("${stat.accuracy}%", color = if (stat.accuracy > 50) colors.primary else colors.danger, fontFamily = FontFamily.Monospace, fontSize = 13.sp)
                 }
             }
         }

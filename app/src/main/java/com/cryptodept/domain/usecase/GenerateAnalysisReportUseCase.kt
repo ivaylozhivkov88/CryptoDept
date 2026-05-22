@@ -42,8 +42,8 @@ class GenerateAnalysisReportUseCase
             val conviction = (consensus.overallConfidence * 100).toInt()
 
             val prompt = buildString {
-                append("Act as a Lead Quantitative Strategist for the 'CryptoDept Elite' financial terminal.\n")
-                append("Generate a high-impact, professional narrative report for $coin.\n\n")
+                append("IDENTITY: Lead Quantitative Strategist for CryptoDept Elite Terminal.\n")
+                append("TASK: Generate a high-impact, professional narrative report for $coin.\n\n")
 
                 append(">>> CORE_MARKET_DATA\n")
                 append("PRICE: $$price (24H_CHANGE: $change%)\n")
@@ -93,13 +93,13 @@ class GenerateAnalysisReportUseCase
                     append("\n")
                 }
 
-                append("INSTRUCTIONS:\n")
-                append("1. Be professional, data-driven, and slightly cynical. Use terminal-style language.\n")
-                append("2. Synthesize the conflicting or agreeing model votes into a coherent strategic outlook.\n")
-                append("3. Mention specific liquidity levels if available.\n")
-                append("4. End with a one-sentence 'EXECUTIVE VERDICT'.\n")
-                append("5. DO NOT include these instructions or [PROXY] headers in the response. Return ONLY the report content.\n")
-                append("6. DO NOT use emojis. DO NOT provide financial advice.\n")
+                append("REPORT_CONSTRAINTS:\n")
+                append("1. Tone: Professional, clinical, data-driven. Terminal-style language.\n")
+                append("2. Output Structure: Use headers [MARKET_SITUATIONAL_AWARENESS], [QUANTITATIVE_DATA_SNAPSHOT], [MODEL_CONSENSUS_ANALYSIS], [EXECUTIVE_VERDICT].\n")
+                append("3. Reference specific targets ($${prediction.priceDistribution.percentile10} to $${prediction.priceDistribution.percentile90}) and model agreement (${(prediction.modelsAgreement * 100).toInt()}%).\n")
+                append("4. Synthesize the 'Chain of Evidence' into the narrative.\n")
+                append("5. CRITICAL: Return ONLY the report text. DO NOT include instructions or echo the identity.\n")
+                append("6. Language: English. No emojis. No financial advice.\n")
             }
 
             return aiProvider.sendMessage(prompt)

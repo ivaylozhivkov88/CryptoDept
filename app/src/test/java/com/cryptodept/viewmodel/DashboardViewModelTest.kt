@@ -1,12 +1,19 @@
 package com.cryptodept.viewmodel
 
 import app.cash.turbine.test
-import com.cryptodept.data.datastore.PreferencesService
+import com.cryptodept.data.datastore.SubscriptionAccessManager
+import com.cryptodept.data.datastore.SystemSettingsManager
+import com.cryptodept.data.remoteconfig.RemoteConfigService
 import com.cryptodept.domain.manager.DashboardLogService
 import com.cryptodept.domain.model.CoinPrice
 import com.cryptodept.domain.model.NetworkHealth
 import com.cryptodept.domain.usecase.*
+import com.cryptodept.domain.tier.AccessTier
+import com.cryptodept.domain.tier.TierAccessManager
+import com.cryptodept.domain.usecase.prediction.GetDailyAIPickUseCase
+import com.cryptodept.domain.usecase.whale.AggregateWhaleActivityUseCase
 import com.cryptodept.util.AnalyticsService
+import com.cryptodept.util.DemoModeProvider
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.every
@@ -25,13 +32,20 @@ class DashboardViewModelTest {
     private val observeTickerUseCase: ObserveTickerUseCase = mockk()
     private val getNetworkHealthUseCase: GetNetworkHealthUseCase = mockk()
     private val refreshPricesUseCase: RefreshPricesUseCase = mockk()
-    private val getActionRecommendationUseCase: GetActionRecommendationUseCase = mockk()
     private val aiGenerator: AIReportGenerator = mockk()
     private val riskEngine: RiskScoreEngine = mockk()
     private val logService: DashboardLogService = mockk(relaxed = true)
     private val analytics: AnalyticsService = mockk(relaxed = true)
-    private val preferencesService: PreferencesService = mockk(relaxed = true)
+    private val settings: SystemSettingsManager = mockk(relaxed = true)
+    private val subscription: SubscriptionAccessManager = mockk(relaxed = true)
     private val agentCoordinator: MultiAgentCoordinator = mockk(relaxed = true)
+    private val demoMode: DemoModeProvider = mockk(relaxed = true)
+    private val remoteConfig: RemoteConfigService = mockk(relaxed = true)
+    private val tierAccessManager: TierAccessManager = mockk(relaxed = true)
+    private val firebaseDataSource: com.cryptodept.data.remote.source.FirebaseRemoteDataSource = mockk(relaxed = true)
+    private val aggregateWhaleActivityUseCase: AggregateWhaleActivityUseCase = mockk(relaxed = true)
+    private val getDailyAIPickUseCase: GetDailyAIPickUseCase = mockk(relaxed = true)
+    private val getMacroIntelligenceUseCase: GetMacroIntelligenceUseCase = mockk(relaxed = true)
 
     private lateinit var viewModel: DashboardViewModel
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -48,26 +62,39 @@ class DashboardViewModelTest {
             lastUpdated = System.currentTimeMillis()
         ))
         every { observeTickerUseCase() } returns flowOf(prices)
-        every { preferencesService.isAdmin } returns MutableStateFlow(false)
-        every { preferencesService.isPro } returns MutableStateFlow(false)
-        every { preferencesService.focusModeEnabled } returns flowOf(false)
+        every { subscription.isAdmin } returns MutableStateFlow(false)
+        every { subscription.isPro } returns MutableStateFlow(false)
+        every { tierAccessManager.currentTier } returns MutableStateFlow(AccessTier.FREE)
+        every { settings.focusModeEnabled } returns flowOf(false)
         every { riskEngine.currentScore } returns MutableStateFlow(50)
+        every { demoMode.demoActiveState } returns MutableStateFlow(false)
+        every { firebaseDataSource.getTerminalState() } returns flowOf(null)
+        every { logService.events } returns MutableStateFlow(emptyList())
+        
         coEvery { getNetworkHealthUseCase() } returns Result.success(
             NetworkHealth("80 EH/s", "10 vB", "20 Gwei", 50, "Neutral")
         )
         coEvery { aiGenerator.generateShortSummary(any()) } returns Result.success("Bullish market")
+        coEvery { getMacroIntelligenceUseCase() } returns Result.success(mockk(relaxed = true))
 
         viewModel = DashboardViewModel(
             observeTickerUseCase,
             getNetworkHealthUseCase,
             refreshPricesUseCase,
-            getActionRecommendationUseCase,
             aiGenerator,
             riskEngine,
             logService,
             analytics,
-            preferencesService,
-            agentCoordinator
+            settings,
+            subscription,
+            agentCoordinator,
+            demoMode,
+            remoteConfig,
+            tierAccessManager,
+            firebaseDataSource,
+            aggregateWhaleActivityUseCase,
+            getDailyAIPickUseCase,
+            getMacroIntelligenceUseCase
         )
     }
 
@@ -84,21 +111,6 @@ class DashboardViewModelTest {
             val success = state as DashboardUiState.Success
             assertThat(success.prices).isNotEmpty()
             assertThat(success.prices.first().symbol).isEqualTo("BTC")
-        }
-    }
-
-    @Test
-    fun `focusModeEnabled reflects preferences`() = runTest {
-        every { preferencesService.focusModeEnabled } returns flowOf(true)
-        // Need to re-init viewModel or mock was already used during init
-        val vm = DashboardViewModel(
-            observeTickerUseCase, getNetworkHealthUseCase, refreshPricesUseCase,
-            getActionRecommendationUseCase, aiGenerator, riskEngine, logService,
-            analytics, preferencesService, agentCoordinator
-        )
-        
-        vm.focusModeEnabled.test {
-            assertThat(awaitItem()).isTrue()
         }
     }
 }

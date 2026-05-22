@@ -43,11 +43,18 @@ fun MarketsScreen(
     val sentimentMap by viewModel.sentimentMap.collectAsStateWithLifecycle()
     val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
     val errorEvent by viewModel.errorEvents.collectAsState(initial = null)
+    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val colors = LocalTerminalColors.current
     
     var showAddDialog by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     var showWatchlistLimitDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(showAddDialog) {
+        if (showAddDialog) {
+            viewModel.search("")
+        }
+    }
 
     LaunchedEffect(errorEvent) {
         if (errorEvent?.contains("Watchlist limit") == true) {
@@ -69,7 +76,7 @@ fun MarketsScreen(
             confirmButton = {
                 TextButton(onClick = {
                     showWatchlistLimitDialog = false
-                    navController.navigateToPaywall("watchlist")
+                    navController.navigateToPaywall("watchlist", com.cryptodept.domain.tier.FeatureKey.WATCHLISTS_UNLIMITED)
                 }) {
                     Text("[ UPGRADE_TO_PRO ]", fontFamily = FontFamily.Monospace, color = colors.amber)
                 }
@@ -101,7 +108,50 @@ fun MarketsScreen(
                         }
                     )
                     Spacer(modifier = Modifier.height(12.dp))
-                    LazyColumn(modifier = Modifier.heightIn(max = 300.dp)) {
+
+                    if (searchQuery.isEmpty()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            listOf("BTC", "ETH", "SOL", "BNB", "XRP", "DOGE", "ADA", "LINK").forEach { sym ->
+                                Surface(
+                                    onClick = {
+                                        searchQuery = sym
+                                        viewModel.search(sym)
+                                    },
+                                    color = colors.surface,
+                                    shape = RectangleShape,
+                                    border = BorderStroke(1.dp, colors.primary.copy(alpha = 0.3f))
+                                ) {
+                                    Text(
+                                        text = sym,
+                                        color = colors.primary,
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                        fontSize = 12.sp,
+                                        fontFamily = FontFamily.Monospace
+                                    )
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+                    
+                    LazyColumn(modifier = Modifier.heightIn(max = 400.dp)) {
+                        if (searchQuery.isEmpty() && searchResults.isNotEmpty()) {
+                            item {
+                                Text(
+                                    "--- SUGGESTED_ASSETS ---", 
+                                    color = colors.dimText, 
+                                    fontSize = 11.sp, 
+                                    fontFamily = FontFamily.Monospace,
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                )
+                            }
+                        }
+
                         items(searchResults) { coin ->
                             Row(
                                 modifier = Modifier
@@ -115,7 +165,7 @@ fun MarketsScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(coin.symbol.uppercase(), color = colors.primary, fontFamily = FontFamily.Monospace)
-                                Text(coin.name, color = colors.dimText, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+                                Text(coin.name, color = colors.dimText, fontSize = 13.sp, fontFamily = FontFamily.Monospace)
                                 Text("+", color = colors.primary, fontWeight = FontWeight.Bold)
                             }
                         }
@@ -130,90 +180,97 @@ fun MarketsScreen(
         )
     }
 
-    Column(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .background(colors.background)
-                .padding(TerminalConfig.UI.DEFAULT_PADDING),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = "--- GLOBAL_MARKET_TERMINAL ---",
-                color = colors.primary,
-                fontSize = TerminalConfig.UI.FONT_SIZE_LARGE,
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Monospace,
-                modifier = Modifier
-                    .tutorialTarget(TutorialTargetId.MARKETS_GLOBAL_STATS),
-            )
-            val successState = uiState as? MarketsUiState.Success
-            FeatureHelpIcon(
-                feature = if (successState?.isProUpgradeNeeded == false) com.cryptodept.domain.tier.FeatureKey.MARKETS_TOP_200 else com.cryptodept.domain.tier.FeatureKey.MARKETS_TOP_50,
-                iconSize = 14.dp
-            )
-        }
-        
-        Spacer(modifier = Modifier.height(TerminalConfig.UI.SMALL_PADDING))
-
-        when (val state = uiState) {
-            is MarketsUiState.Loading -> {
-                LazyColumn {
-                    items(10) {
-                        TerminalLoadingSkeleton(modifier = Modifier.padding(vertical = 4.dp))
-                    }
-                }
-            }
-            is MarketsUiState.Success -> {
-                if (state.coins.isEmpty()) {
-                    EmptyState(
-                        title = "NO_MARKETS_DATA",
-                        description = "Market feed is currently empty. Pull to refresh or check your trackers.",
-                        actionLabel = "REFRESH_FEED",
-                        onAction = { viewModel.refreshData() }
-                    )
-                } else {
-                    MarketsList(
-                        coins = state.coins,
-                        isProUpgradeNeeded = state.isProUpgradeNeeded,
-                        sentimentMap = sentimentMap,
-                        onCoinClick = { coinId ->
-                            navController.navigate(Screen.CoinDetail.createRoute(coinId))
-                        },
-                        onToggleTracking = { coinId ->
-                            viewModel.toggleTracking(coinId)
-                        },
-                        onUpgradeClick = { navController.navigateToPaywall("markets") }
-                    )
-                }
-            }
-            is MarketsUiState.Error -> {
-                ErrorState(
-                    message = state.message,
-                    onRetry = { viewModel.loadMarkets() }
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(colors.background)
+                    .padding(TerminalConfig.UI.DEFAULT_PADDING),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "--- GLOBAL_MARKET_TERMINAL ---",
+                    color = colors.primary,
+                    fontSize = TerminalConfig.UI.FONT_SIZE_LARGE,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Monospace,
+                    modifier = Modifier
+                        .tutorialTarget(TutorialTargetId.MARKETS_GLOBAL_STATS),
+                )
+                val successState = uiState as? MarketsUiState.Success
+                FeatureHelpIcon(
+                    feature = if (successState?.isProUpgradeNeeded == false) com.cryptodept.domain.tier.FeatureKey.MARKETS_TOP_200 else com.cryptodept.domain.tier.FeatureKey.MARKETS_TOP_50,
+                    iconSize = 14.dp
                 )
             }
-        }
+            
+            Spacer(modifier = Modifier.height(TerminalConfig.UI.SMALL_PADDING))
 
-        Spacer(modifier = Modifier.height(TerminalConfig.UI.SPACER_LARGE))
-
-        // ADD COIN BUTTON (PRO ONLY)
-        val billingViewModel: com.cryptodept.viewmodel.BillingViewModel = hiltViewModel()
-        val isPro by billingViewModel.billingManager.isPro.collectAsState()
-        
-        if (isPro) {
-            Button(
-                onClick = { showAddDialog = true },
-                modifier = Modifier.fillMaxWidth().height(TerminalConfig.Interaction.TOUCH_TARGET_SIZE.dp),
-                shape = RectangleShape,
-                colors = ButtonDefaults.buttonColors(containerColor = colors.surface, contentColor = colors.primary),
-                border = BorderStroke(TerminalConfig.UI.BORDER_WIDTH, colors.primary)
-            ) {
-                Text("ADD COIN +", fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+            when (val state = uiState) {
+                is MarketsUiState.Loading -> {
+                    LazyColumn {
+                        items(10) {
+                            TerminalLoadingSkeleton(modifier = Modifier.padding(vertical = 4.dp))
+                        }
+                    }
+                }
+                is MarketsUiState.Success -> {
+                    if (state.coins.isEmpty()) {
+                        EmptyState(
+                            title = "NO_MARKETS_DATA",
+                            description = "Market feed is currently empty. Pull to refresh or check your trackers.",
+                            actionLabel = "REFRESH_FEED",
+                            onAction = { viewModel.refreshData() }
+                        )
+                    } else {
+                        MarketsList(
+                            coins = state.coins,
+                            isProUpgradeNeeded = state.isProUpgradeNeeded,
+                            sentimentMap = sentimentMap,
+                            onCoinClick = { coinId ->
+                                navController.navigate(Screen.CoinDetail.createRoute(coinId))
+                            },
+                            onToggleTracking = { coinId ->
+                                viewModel.toggleTracking(coinId)
+                            },
+                            onUpgradeClick = { navController.navigateToPaywall("markets", com.cryptodept.domain.tier.FeatureKey.MARKETS_TOP_200) }
+                        )
+                    }
+                }
+                is MarketsUiState.Error -> {
+                    ErrorState(
+                        message = state.message,
+                        onRetry = { viewModel.loadMarkets() }
+                    )
+                }
             }
+
+            Spacer(modifier = Modifier.height(TerminalConfig.UI.SPACER_LARGE))
+
+            // ADD COIN BUTTON (PRO ONLY)
+            val billingViewModel: com.cryptodept.viewmodel.BillingViewModel = hiltViewModel()
+            val isPro by billingViewModel.billingManager.isPro.collectAsState()
+            
+            if (isPro) {
+                Button(
+                    onClick = { showAddDialog = true },
+                    modifier = Modifier.fillMaxWidth().height(TerminalConfig.Interaction.TOUCH_TARGET_SIZE.dp),
+                    shape = RectangleShape,
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.surface, contentColor = colors.primary),
+                    border = BorderStroke(TerminalConfig.UI.BORDER_WIDTH, colors.primary)
+                ) {
+                    Text("ADD COIN +", fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                }
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        com.cryptodept.ui.components.ScanLineOverlay(
+            modifier = Modifier.fillMaxSize(),
+            isScanning = isRefreshing
+        )
     }
 }
 
@@ -239,10 +296,10 @@ fun MarketsList(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Spacer(modifier = Modifier.width(32.dp)) // Space for star icon
-                Text(" ASSET", modifier = Modifier.weight(1f), color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-                Text("PRICE ", modifier = Modifier.weight(1f), color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-                Text("24H_CHG ", modifier = Modifier.weight(0.8f), color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-                Text("SENT ", modifier = Modifier.weight(0.5f), color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                Text(" ASSET", modifier = Modifier.weight(1f), color = colors.dimText, fontSize = 13.sp, fontFamily = FontFamily.Monospace)
+                Text("PRICE ", modifier = Modifier.weight(1f), color = colors.dimText, fontSize = 13.sp, fontFamily = FontFamily.Monospace)
+                Text("24H_CHG ", modifier = Modifier.weight(0.8f), color = colors.dimText, fontSize = 13.sp, fontFamily = FontFamily.Monospace)
+                Text("SENT ", modifier = Modifier.weight(0.5f), color = colors.dimText, fontSize = 13.sp, fontFamily = FontFamily.Monospace)
             }
         }
         items(coins) { coin ->
@@ -275,10 +332,26 @@ fun MarketRow(
     sentiment: com.cryptodept.domain.usecase.SentimentVerdict? = null,
 ) {
     val colors = LocalTerminalColors.current
+    val (flashDirection, flashAlpha) = com.cryptodept.ui.components.rememberPriceFlash(coin.currentPrice)
+    val isBigMove = kotlin.math.abs(coin.priceChangePercentage24h) >= 2.0
+    
+    val rowBackground = when {
+        isBigMove && flashDirection == com.cryptodept.ui.components.PriceDirection.UP -> colors.primary.copy(alpha = 0.08f * flashAlpha)
+        isBigMove && flashDirection == com.cryptodept.ui.components.PriceDirection.DOWN -> colors.error.copy(alpha = 0.08f * flashAlpha)
+        else -> Color.Transparent
+    }
+
+    val priceTextColor = when {
+        flashDirection == com.cryptodept.ui.components.PriceDirection.UP && flashAlpha > 0f -> androidx.compose.ui.graphics.lerp(colors.primary, colors.primary, flashAlpha) // Primary is already green
+        flashDirection == com.cryptodept.ui.components.PriceDirection.DOWN && flashAlpha > 0f -> androidx.compose.ui.graphics.lerp(colors.primary, colors.error, flashAlpha)
+        else -> colors.primary
+    }
+
     Row(
         modifier =
             Modifier
                 .fillMaxWidth()
+                .background(rowBackground)
                 .padding(vertical = 6.dp)
                 .border(1.dp, colors.primary.copy(alpha = 0.2f))
                 .clickable { onClick(coin.id) }
@@ -308,7 +381,7 @@ fun MarketRow(
             Text(
                 coin.name.uppercase(), 
                 color = colors.dimText, 
-                fontSize = 10.sp, 
+                fontSize = 13.sp, 
                 fontFamily = FontFamily.Monospace,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -318,7 +391,7 @@ fun MarketRow(
         Text(
             text = "$${String.format(Locale.US, "%.2f", coin.currentPrice)}",
             modifier = Modifier.weight(1f),
-            color = colors.primary,
+            color = priceTextColor,
             fontFamily = FontFamily.Monospace
         )
 
@@ -349,7 +422,7 @@ fun MarketRow(
                 text = sentiment.name.take(4),
                 modifier = Modifier.weight(0.5f),
                 color = sentimentColor,
-                fontSize = 10.sp,
+                fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Monospace
             )

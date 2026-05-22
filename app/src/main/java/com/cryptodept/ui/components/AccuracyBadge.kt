@@ -27,6 +27,8 @@ fun AccuracyBadge(
     sampleSize: Int?,
     modifier: Modifier = Modifier,
     compact: Boolean = false,
+    coinId: String = "BTC",
+    timeframe: String = "24h"
 ) {
     val colors = LocalTerminalColors.current
     
@@ -38,17 +40,22 @@ fun AccuracyBadge(
             shape = RectangleShape,
             modifier = modifier,
         ) {
-            Text(
-                text = if (compact) {
-                    "⚠ NEW"
-                } else {
-                    "⚠ INSUFFICIENT DATA — Track record builds with 10+ verified predictions"
-                },
-                color = colors.dimText,
-                fontFamily = FontFamily.Monospace,
-                fontSize = if (compact) 9.sp else 10.sp,
-                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-            )
+            Column(modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)) {
+                Text(
+                    text = if (compact) "⚠ NEW" else "⚠ INSUFFICIENT DATA",
+                    color = colors.dimText,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = if (compact) 11.sp else 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Accuracy tracking in progress",
+                    color = colors.dimText,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(top = 2.dp),
+                )
+            }
         }
         return
     }
@@ -60,72 +67,27 @@ fun AccuracyBadge(
         else -> colors.danger
     }
     
-    val betterThanCoinFlip = accuracyPercent > 50
-    
     Surface(
         color = accuracyColor.copy(alpha = 0.15f),
         border = BorderStroke(1.dp, accuracyColor),
         shape = RectangleShape,
         modifier = modifier,
     ) {
-        if (compact) {
+        Column(modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)) {
             Text(
-                text = "$accuracyPercent% (n=$sampleSize)",
+                text = if (compact) "$accuracyPercent% (n=$sampleSize)" else "$accuracyPercent% accuracy",
                 color = accuracyColor,
                 fontFamily = FontFamily.Monospace,
-                fontSize = 9.sp,
+                fontSize = if (compact) 11.sp else 13.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
             )
-        } else {
-            Column(modifier = Modifier.padding(10.dp)) {
-                Text(
-                    text = ">>> TRACK_RECORD",
-                    color = colors.amber,
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-                
-                Spacer(modifier = Modifier.height(4.dp))
-                
-                Text(
-                    text = "$accuracyPercent% accuracy",
-                    color = accuracyColor,
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-                
-                Text(
-                    text = "Based on $sampleSize verified predictions",
-                    color = colors.textPrimary,
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = 10.sp,
-                )
-                
-                Spacer(modifier = Modifier.height(4.dp))
-                
-                Text(
-                    text = if (betterThanCoinFlip) {
-                        "✓ Better than coin flip (>50%)"
-                    } else {
-                        "⚠ Below coin flip rate — use with extreme caution"
-                    },
-                    color = if (betterThanCoinFlip) colors.primary else colors.danger,
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = 10.sp,
-                )
-                
-                Spacer(modifier = Modifier.height(4.dp))
-                
-                Text(
-                    text = "Past performance ≠ future results.",
-                    color = colors.dimText,
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = 9.sp,
-                )
-            }
+            Text(
+                text = "Historically correct on ${coinId.uppercase()} $timeframe calls",
+                color = colors.dimText,
+                fontFamily = FontFamily.Monospace,
+                fontSize = 11.sp,
+                modifier = Modifier.padding(top = 2.dp),
+            )
         }
     }
 }

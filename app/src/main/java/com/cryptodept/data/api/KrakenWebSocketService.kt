@@ -25,6 +25,11 @@ class KrakenWebSocketService
         @Named("PublicClient") private val client: OkHttpClient,
         private val gson: Gson,
     ) {
+        // Firebase pushes real-time price updates to all users centrally.
+        // Per-device WebSocket connections are redundant and waste battery/CPU.
+        // Re-enable by setting isDisabledByFirebase = false if Firebase is removed.
+        val isDisabledByFirebase = true
+
         private val _priceUpdates =
             MutableSharedFlow<Pair<String, Double>>(
                 replay = 1,
@@ -49,6 +54,10 @@ class KrakenWebSocketService
         private val KRAKEN_WS_URL = "wss://ws.kraken.com/v2"
 
         fun connect() {
+            if (isDisabledByFirebase) {
+                Log.d("WebSocket", "${javaClass.simpleName} disabled — Firebase handles real-time data")
+                return
+            }
             if (webSocket != null) return
             startConnection()
         }

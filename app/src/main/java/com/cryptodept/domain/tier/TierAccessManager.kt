@@ -6,14 +6,10 @@ import com.cryptodept.util.TestModeFlag
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * Single source of truth for user's effective access tier.
@@ -36,45 +32,66 @@ import javax.inject.Singleton
 class TierAccessManager @Inject constructor(
     private val billingService: BillingService,
     private val subscription: SubscriptionAccessManager,
+    private val firebaseDataSource: com.cryptodept.data.remote.source.FirebaseRemoteDataSource,
+    private val authService: com.cryptodept.data.auth.AuthService,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+    /**
+     * Listen to server-side authority if user is logged in.
+     */
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    private val serverTierFlow: Flow<AccessTier?> = authService.currentUser.flatMapLatest { user ->
+        if (user == null) kotlinx.coroutines.flow.flowOf(null)
+        else firebaseDataSource.getUserTier(user.uid).map { tierStr ->
+            when (tierStr) {
+                "PRO" -> AccessTier.PRO
+                "ADMIN" -> AccessTier.ADMIN
+                else -> null
+            }
+        }
+    }
     
     /**
      * Current effective tier — reactive StateFlow.
      * 
-     * Combines:
-     *   - billingService.isPro flow (Google Play subscription)
-     *   - subscription.getAdminStatusFlow() (email-based)
-     *   - TestModeFlag.BYPASS_PAYWALL_IN_DEBUG (dev convenience)
+     * Priority: Hardcoded Email > ADMIN > Server PRO > Local PRO > FREE
      */
     val currentTier: StateFlow<AccessTier> = combine(
         billingService.isPro,
         subscription.getAdminStatusFlow(),
-    ) { isPro, isAdmin ->
-        resolveTier(isPro = isPro, isAdmin = isAdmin)
+        serverTierFlow,
+        authService.currentUser
+    ) { localPro, isAdmin, serverTier, user ->
+        resolveTier(localPro = localPro, isAdmin = isAdmin, serverTier = serverTier, user = user)
     }.stateIn(
         scope = scope,
         started = SharingStarted.Eagerly,
         initialValue = resolveTier(
-            isPro = billingService.isPro.value, 
-            isAdmin = subscription.isAdmin()
+            localPro = billingService.isPro.value, 
+            isAdmin = subscription.isAdmin(),
+            serverTier = null,
+            user = authService.currentUser.value
         ),
     )
     
     /**
-     * Resolve tier from raw flags.
+     * Resolve tier from multiple authorities.
      */
-    private fun resolveTier(isPro: Boolean, isAdmin: Boolean): AccessTier {
-        // Admin always wins, regardless of subscription state
-        if (isAdmin) return AccessTier.ADMIN
+    private fun resolveTier(localPro: Boolean, isAdmin: Boolean, serverTier: AccessTier?, user: com.google.firebase.auth.FirebaseUser?): AccessTier {
+        // IMMEDIATE ADMIN BYPASS: If email is in hardcoded list, ignore everything else
+        val email = user?.email?.lowercase()?.trim()
+        if (email == "ivaylozhivkov14@gmail.com" || email == "condignia@gmail.com") {
+            return AccessTier.ADMIN
+        }
+
+        if (isAdmin || serverTier == AccessTier.ADMIN) return AccessTier.ADMIN
         
-        // Debug bypass during test period (dev convenience)
         if (TestModeFlag.BYPASS_PAYWALL_IN_DEBUG) return AccessTier.PRO
         
-        // Real Pro subscription
-        if (isPro) return AccessTier.PRO
+        // Either server says PRO or local billing says PRO
+        if (serverTier == AccessTier.PRO || localPro) return AccessTier.PRO
         
-        // Default
         return AccessTier.FREE
     }
     

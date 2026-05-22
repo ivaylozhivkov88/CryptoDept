@@ -102,50 +102,77 @@ class AIReportGenerator
             return callGeminiStream(prompt)
         }
 
-        fun generateShortSummaryStream(data: MarketDataSnapshot): Flow<String> {
+        fun generateShortSummaryStream(agentId: String, data: MarketDataSnapshot): Flow<String> {
             if (demoMode.isActive()) {
-                return flow {
-                    emit(demoMode.getDemoAiNarrative())
-                }
+                return flow { emit(demoMode.getDemoAiNarrative()) }
             }
-            val prompt = buildShortSummaryPrompt(data)
+            val prompt = when(agentId) {
+                "SENTINEL" -> buildSentinelPrompt(data)
+                "PULSE" -> buildPulsePrompt(data)
+                "QUANT" -> buildQuantPrompt(data)
+                else -> buildShortSummaryPrompt(data)
+            }
             return callGeminiStream(prompt)
         }
 
+        private fun buildSentinelPrompt(data: MarketDataSnapshot): String = """
+            Act as SENTINEL, the Technical Analysis Agent.
+            DATA: BTC ${data.priceChange24h}%, RSI: ${data.rsi.toInt()}, Trend: ${data.ema50Signal}.
+            TASK: 50-word technical SITREP. Focus on structural breakouts and momentum. 
+            NOTE: Quantify uncertainty. Use probabilistic ranges instead of absolute claims.
+            Tone: Professional, clinical, data-only. No emojis.
+        """.trimIndent()
+
+        private fun buildPulsePrompt(data: MarketDataSnapshot): String = """
+            Act as PULSE, the Market Sentiment Agent.
+            DATA: Fear & Greed Index: ${data.fearGreedIndex}/100, Risk Score: ${data.riskScore}/100.
+            TASK: 50-word psychological SITREP. Focus on crowd behavior and social bias.
+            NOTE: Quantify uncertainty. Express levels of confidence in sentiment shifts.
+            Tone: Psychological, slightly cynical, objective. No emojis.
+        """.trimIndent()
+
+        private fun buildQuantPrompt(data: MarketDataSnapshot): String = """
+            Act as QUANT, the Oracle Prediction Agent.
+            DATA: BTC Price: $${data.price}, Volatility: ${data.priceChange24h}%, Liquidity Risk: ${data.riskScore}/100.
+            TASK: 50-word strategic SITREP. Focus on price targets and probability distribution.
+            NOTE: Quantify uncertainty. Always provide probabilistic intervals for targets.
+            Tone: Strategic, forward-looking, quantitative. No emojis.
+        """.trimIndent()
+
         private fun buildShortSummaryPrompt(data: MarketDataSnapshot): String =
             """
-            Act as the CryptoDept ELITE AI Reasoning Orchestrator. 
-            Synthesize a high-density intelligence report for the global crypto market. 
-            Analyze the following sub-agent inputs and provide a professional, data-driven narrative.
+            Act as a Quantitative Market Analyst. 
+            Synthesize a concise intelligence report for the global cryptocurrency market. 
+            Analyze the following data points and provide a professional, data-driven summary.
             
-            [DATA_STREAM]
-            BTC Price Change: ${data.priceChange24h}%
+            [MARKET_DATA]
+            BTC 24h Change: ${data.priceChange24h}%
             BTC Dominance: ${data.btcDominance}%
-            Sentiment Index (Fear & Greed): ${data.fearGreedIndex}/100
-            Systemic Risk Score: ${data.riskScore}/100
-            Macro Context: S&P ${data.sp500Change}%, DXY ${data.dxyChange}%
+            Sentiment (Fear & Greed): ${data.fearGreedIndex}/100
+            Systemic Risk: ${data.riskScore}/100
+            Macro: S&P ${data.sp500Change}%, DXY ${data.dxyChange}%
             
-            [AGENT_LOGS]
-            TECHNICAL_SENTINEL: Identifying momentum structures based on BTC ${data.priceChange24h}% performance. RSI currently at ${data.rsi.toInt()}.
-            GHOST_WHALE: Monitoring funding rates and institutional capital flow. Risk at ${data.riskScore}/100.
-            SENTIMENT_PULSE: Tracking social dominance and euphoria/panic levels. F&G at ${data.fearGreedIndex}.
+            [TECHNICAL_STATUS]
+            - RSI: ${data.rsi.toInt()}
+            - Trend Bias: ${data.ema50Signal}
+            - Risk Score: ${data.riskScore}/100
 
-            Structure your report as a professional terminal briefing EXACTLY as follows:
-            >>> MARKET_INTELLIGENCE_SUMMARY
+            Structure your report EXACTLY as follows:
+            >>> MARKET_STATUS_SUMMARY
             VERDICT: [1-3 word high-level verdict, e.g., ACCUMULATION, DISTRIBUTION, CONSOLIDATION]
             
             ANALYSIS: 
-            [Provide a deep-dive analysis (2-3 detailed paragraphs). Discuss the confluence between technical momentum, whale flow, and sentiment. Mention BTC specifically.]
+            [Provide a data-driven analysis in 2 concise paragraphs. Discuss the relationship between technical momentum, liquidity, and sentiment.]
             
-            AGENT_REPORTS:
-            - SENTINEL: [Detailed technical flag]
-            - SCOUT: [Whale flow / Liquidity flag]
-            - PULSE: [Psychological state / Macro flag]
+            METRICS:
+            - MOMENTUM: [Technical flag]
+            - LIQUIDITY: [Whale flow / Order-flow flag]
+            - SENTIMENT: [Psychological state flag]
             
-            BIAS: [AGGRESSIVE / NEUTRAL / DEFENSIVE] based on confluence.
+            STRATEGIC_BIAS: [NEUTRAL / BULLISH / BEARISH]
             
-            Tone: Professional, clinical, cynical, data-driven. NO emojis.
-            Target length: 150-250 words.
+            Tone: Professional, clinical, objective. NO emojis.
+            Target length: 100-150 words.
             """.trimIndent()
 
         private suspend fun callGemini(prompt: String): Result<String> {
@@ -268,66 +295,66 @@ class AIReportGenerator
             d: MarketDataSnapshot,
         ): String =
             """
-            Act as a cynical hedge fund manager who hates hype and looks only at hard data.
-            Analyze $coinName ($symbol).
+            Act as a Quantitative Analyst.
+            Analyze $coinName ($symbol) based on provided data points.
             DATA: Price $${d.price}, RSI ${d.rsi}, MACD ${d.macdSignal}, EMA50 ${d.ema50Signal}, EMA200 ${d.ema200Signal}, BB ${d.bollingerPosition}.
             DERIVATIVES: Funding ${d.fundingRate} (${d.fundingLevel}), Liqs: L $${d.longLiquidations24h} / S $${d.shortLiquidations24h}.
             SENTIMENT: Fear&Greed ${d.fearGreedIndex}, News ${d.newsSentiment}.
-            SMART MONEY: Wyckoff ${d.wyckoffPhase}, Elliott ${d.elliottWave}.
-            RISK: Score ${d.riskScore}/100.
+            STRUCTURE: Wyckoff ${d.wyckoffPhase}, Elliott ${d.elliottWave}.
+            RISK: ${d.riskScore}/100.
 
             Structure your response EXACTLY like this:
             **TLDR**
             [Summary]
-            **Verdict:** [Strong Bullish/Bullish/Neutral/Bearish/Strong Bearish]
-            **1. [Technical Title]**
+            **Verdict:** [Bullish/Neutral/Bearish]
+            **1. [Technical Analysis]**
             Overview: [Text]
-            What it means: [Text]
-            Watch for: [Text]
+            Implication: [Text]
+            Key Levels: [Text]
             **2. [Market Dynamics]**
             Overview: [Text]
-            What it means: [Text]
-            Watch for: [Text]
-            **3. Near-term Market Outlook**
+            Implication: [Text]
+            Key Levels: [Text]
+            **3. Strategic Outlook**
             Overview: [Text]
-            What it means: [Text]
-            Watch for: [Text]
+            Implication: [Text]
+            Key Levels: [Text]
             **Conclusion**
-            Market Outlook: **[Label]** [Final text]
-            Key watch: [Single trigger]
+            Outlook: **[Label]** [Final text]
+            Primary Trigger: [Single trigger]
             """.trimIndent()
 
         private fun buildMarketPrompt(d: MarketDataSnapshot): String =
             """
-            Act as a cynical hedge fund manager who hates hype and looks only at hard data.
-            Analyze OVERALL CRYPTO MARKET.
+            Act as a Quantitative Strategist.
+            Analyze aggregate CRYPTO MARKET data.
             BTC Change: ${d.priceChange24h}%, Dominance: ${d.btcDominance}%, Fear&Greed: ${d.fearGreedIndex}.
-            Funding: ${d.fundingRate}, Wyckoff: ${d.wyckoffPhase}, Risk: ${d.riskScore}.
+            Funding: ${d.fundingRate}, Risk: ${d.riskScore}.
             Macro: S&P ${d.sp500Change}%, DXY ${d.dxyChange}%.
 
             Structure your response EXACTLY like this:
             **TLDR**
             [Summary]
-            **Verdict:** [Strong Bullish/Bullish/Neutral/Bearish/Strong Bearish]
-            **1. [Bitcoin's Role]**
+            **Verdict:** [Bullish/Neutral/Bearish]
+            **1. [Bitcoin Dominance & Trend]**
             Overview: [Text]
-            What it means: [Text]
-            Watch for: [Text]
-            **2. [Derivatives Landscape]**
+            Implication: [Text]
+            Watch For: [Text]
+            **2. [Liquidity & Derivatives]**
             Overview: [Text]
-            What it means: [Text]
-            Watch for: [Text]
-            **3. [Macro Forces]**
+            Implication: [Text]
+            Watch For: [Text]
+            **3. [Macro Correlation]**
             Overview: [Text]
-            What it means: [Text]
-            Watch for: [Text]
-            **4. Near-term Market Outlook**
+            Implication: [Text]
+            Watch For: [Text]
+            **4. Market Outlook**
             Overview: [Text]
-            What it means: [Text]
-            Watch for: [Text]
+            Implication: [Text]
+            Watch For: [Text]
             **Conclusion**
-            Market Outlook: **[Label]** [Final text]
-            Key watch: [Single trigger]
+            Outlook: **[Label]** [Final text]
+            Key Indicator: [Single trigger]
             """.trimIndent()
 
         private fun parseReport(

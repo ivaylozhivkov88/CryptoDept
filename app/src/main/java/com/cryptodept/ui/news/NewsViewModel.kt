@@ -54,13 +54,6 @@ class NewsViewModel
 
         init {
             refresh()
-            // Auto-refresh every 5 minutes
-            viewModelScope.launch {
-                while (true) {
-                    delay(5 * 60 * 1000L)
-                    refresh()
-                }
-            }
         }
 
         fun setFilter(filter: String) {

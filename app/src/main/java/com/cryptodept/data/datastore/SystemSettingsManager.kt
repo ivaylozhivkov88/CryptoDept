@@ -18,6 +18,7 @@ interface SystemSettingsManager {
     val focusModeEnabled: Flow<Boolean>
     val crashlyticsConsent: Flow<Boolean>
     val forceShowAllFeatures: Flow<Boolean>
+    val tiltProtectionEnabled: Flow<Boolean>
 
     suspend fun setRefreshInterval(seconds: Int)
     suspend fun setPhosphorMode(mode: String)
@@ -30,4 +31,5 @@ interface SystemSettingsManager {
     suspend fun setFocusModeEnabled(enabled: Boolean)
     suspend fun setCrashlyticsConsent(enabled: Boolean)
     suspend fun setForceShowAllFeatures(enabled: Boolean)
+    suspend fun setTiltProtectionEnabled(enabled: Boolean)
 }

@@ -99,7 +99,10 @@ sealed class Screen(
 
     object Glossary : Screen("glossary")
 
-    object Paywall : Screen("paywall?reason={reason}") {
-        fun createRoute(reason: String = "general") = "paywall?reason=$reason"
+    object Search : Screen("search")
+
+    object Paywall : Screen("paywall?reason={reason}&featureKey={featureKey}") {
+        fun createRoute(reason: String = "general", featureKey: String? = null) = 
+            "paywall?reason=$reason" + (if (featureKey != null) "&featureKey=$featureKey" else "")
     }
 }

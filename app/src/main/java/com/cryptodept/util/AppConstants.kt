@@ -67,11 +67,6 @@ object AppConstants {
         const val BEARISH_TARGET_MULTIPLIER = 0.95
     }
 
-    // Auth & Security
-    object Auth {
-        const val ADMIN_CODE = "BIGBOSSBAIKO"
-    }
-
     // Risk Engine Constants
     object Risk {
         const val RSI_EXTREME_RISK = 80.0

@@ -25,9 +25,12 @@ class AuthService @Inject constructor(
 
     init {
         auth.addAuthStateListener { firebaseAuth ->
-            _currentUser.value = firebaseAuth.currentUser
-            updateAdminStatus(firebaseAuth.currentUser)
+            val user = firebaseAuth.currentUser
+            _currentUser.value = user
+            updateAdminStatus(user)
         }
+        // Force immediate check
+        updateAdminStatus(auth.currentUser)
     }
 
     private fun updateAdminStatus(user: FirebaseUser?) {
@@ -59,5 +62,24 @@ class AuthService @Inject constructor(
         auth.signOut()
         subscription.setAdminStatus(false)
         subscription.setProStatus(false)
+    }
+
+    suspend fun deleteAccount(): Result<Unit> {
+        val user = auth.currentUser ?: return Result.failure(Exception("NO_ACTIVE_SESSION"))
+        return try {
+            user.delete().await()
+            subscription.setAdminStatus(false)
+            subscription.setProStatus(false)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Force re-check of admin privileges based on current logged in email.
+     */
+    fun checkIdentity() {
+        updateAdminStatus(auth.currentUser)
     }
 }

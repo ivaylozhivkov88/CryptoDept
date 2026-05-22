@@ -12,14 +12,14 @@ object TerminalConfig {
         val TINY_PADDING = 4.dp
         val SCANLINE_HEIGHT = 2.dp
         
-        val FONT_SIZE_TINY = 9.sp
-        val FONT_SIZE_MICRO = 10.sp
-        val FONT_SIZE_SMALL = 11.sp
-        val FONT_SIZE_NORMAL = 13.sp
-        val FONT_SIZE_MEDIUM = 14.sp
-        val FONT_SIZE_LARGE = 16.sp
-        val FONT_SIZE_HEADER = 18.sp
-        val FONT_SIZE_GIANT = 48.sp
+        val FONT_SIZE_TINY = 11.sp
+        val FONT_SIZE_MICRO = 12.sp
+        val FONT_SIZE_SMALL = 13.sp
+        val FONT_SIZE_NORMAL = 14.sp
+        val FONT_SIZE_MEDIUM = 15.sp
+        val FONT_SIZE_LARGE = 18.sp
+        val FONT_SIZE_HEADER = 20.sp
+        val FONT_SIZE_GIANT = 54.sp
 
         val SPACER_LARGE = 16.dp
         val SPACER_MEDIUM = 8.dp

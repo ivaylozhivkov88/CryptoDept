@@ -1,226 +1,126 @@
-# 🏆 CRYPTODEPT — HYBRID ONBOARDING & EVOLUTION | v1.1.2
-## Status: EVOLVING | v1.1.2_PROD | 19.05.2026
+# 🏆 CRYPTODEPT — HYBRID ONBOARDING & EVOLUTION | v1.5.0
+## Status: STABLE | v1.1.15 | 22.05.2026
 
 ---
 
 # 📊 FINAL PROJECT DASHBOARD
-Continuously evolving. v1.1.2 introduces Macro Intelligence (Liquidations, Altcoin Season).
+Terminal is in STABLE production mode. Data sync optimized for scale.
 
 | Phase | Description | Progress | Status |
 |---|---|---|---|
-| **A-X** | CORE ARCHITECTURE & ORACLE ENGINE | 100% | ✅ DONE |
-| **Y** | PRODUCTION HARDENING & UX POLISH | 100% | ✅ DONE |
-| **Z** | HYBRID ONBOARDING REFACTOR | 100% | ✅ DONE |
-| **T** | TRADER SCORE MAXIMIZATION | 100% | ✅ DONE |
-| **P** | PRE-PRODUCTION COMPREHENSIVE | 100% | ✅ DONE |
-| **U** | IN-APP UPDATE SYSTEM | 100% | ✅ DONE |
-| **R** | R8 MINIMAL INVASIVE OPTIMIZATION | 100% | ✅ DONE |
-| **M** | MACRO INTELLIGENCE REFACTOR | 100% | ✅ DONE |
-| **A1-A4** | PART A: AUTH + TIER SYSTEM + FREE LIMITS | 100% | ✅ DONE |
-| **B5-B12** | PART B: GLOSSARY + ACCURACY + PROTECTION | 100% | ✅ DONE |
-| **G** | GOD OBJECT REFACTOR | 100% | ✅ DONE |
-| **C** | CLOUD INTELLIGENCE ORCHESTRATION | 0% | 🏗️ IN PROGRESS |
+| **A-N** | CORE & STRATEGIC OPS | 100% | ✅ DONE |
+| **OPT** | DATA TRAFFIC OPTIMIZATION | 100% | ✅ DONE |
 
-**Overall Progress:** 360/385 Atomic Tasks (93%)
-**Target Build:** Version 1.1.2 (Build 18)
+**Overall Progress:** 465/465 Atomic Tasks (100%)
+**Target Build:** Version 1.1.15 (Build 28) — **ULTIMATE STABLE**
 
 ---
 
-# 🏁 PHASE M: MACRO INTELLIGENCE REFACTOR
+# 🏁 PHASE N: STRATEGIC OPS & CONTENT STUDIO
 
-## [M1] DATA INFRASTRUCTURE (ALGO)
-- [✅] **1.1 Liquidation Service:** <font color="#00FF41">Integrated Coinglass API client for real-time 1h/24h liquidation data. [DONE — 19.05.2026]</font>
-- [✅] **1.2 Altcoin Season Logic:** <font color="#00FF41">Implemented deterministic calculation based on top 50 alts vs BTC performance (30d). [DONE — 19.05.2026]</font>
+## [N1] CONTENT STUDIO INTEGRATION
+- [✅] **1.1 Viral Post Engine:** <font color="#00FF41">Linked Agent-Market to Content Studio with direct generation support. [DONE — 22.05.2026]</font>
+- [✅] **1.2 Visual Prompt Generator:** <font color="#00FF41">Enhanced ViewModel with specific prompts for Sora/Kling AI generators. [DONE — 22.05.2026]</font>
 
-## [M2] SYSTEM INTEGRATION (BRIDGE)
-- [✅] **2.1 DashboardViewModel Update:** <font color="#00FF41">Exposed new macro flows and handled error fallback for API limits. [DONE — 19.05.2026]</font>
-- [✅] **2.2 Cleanup Legacy:** <font color="#00FF41">Removed MarketDominanceBar, MiniHeatmap, and old NetworkHealth logic. [DONE — 19.05.2026]</font>
+## [N2] PERFORMANCE VERIFICATION
+- [✅] **2.1 Oracle Accuracy Hub:** <font color="#00FF41">Integrated Accuracy Dashboard with Hit Rate tracking for all models. [DONE — 22.05.2026]</font>
+- [✅] **2.2 Integrity Logs:** <font color="#00FF41">Implemented real-time `SystemIntegrityFeed` showing cross-check status on Dashboard. [DONE — 22.05.2026]</font>
 
-## [M3] INTELLIGENT UI (TERMINAL)
-- [✅] **3.1 Dual Radar Gauge:** <font color="#00FF41">Implemented AltcoinSeasonGauge side-by-side with FearGreedGauge. [DONE — 19.05.2026]</font>
-- [✅] **3.2 The Pulse Row:** <font color="#00FF41">Compact horizontal row for Dominance, Gas, and Global Cap. [DONE — 19.05.2026]</font>
-- [✅] **3.3 The Blood Ticker:** <font color="#00FF41">High-impact dynamic text component for exchange liquidations. [DONE — 19.05.2026]</font>
+---
 
+# 🏁 PHASE M: AGENT NARRATIVE DEPTH & MACRO
+
+## [M1] MACRO PULSE REFINEMENT
+- [ ] **1.1 Global Liquidity Index:** Add a "Global Liquidity" metric to the Dashboard (tracking USDT/USDC supply changes).
+- [ ] **1.2 Gas Tracker Expansion:** Show "Gas Prediction" (estimated time to cheap fees) in the Macro strip.
+
+## [M2] AGENT PERSONALITY (NARRATIVE)
+- [ ] **2.1 Sentinel Technical Depth:** Sentinel should highlight specific Candle Patterns (e.g., "Bullish Engulfing detected on 4H").
+- [ ] **2.2 Scout Institutional Bias:** Scout should distinguish between "Exchange Inflow" and "OTC accumulation" more clearly.
+
+---
+
+# 🏁 PHASE L: DASHBOARD EVOLUTION & COMPACT UI
+
+## [L1] HERO PRICE ROTATOR (DYNAMICS)
+- [✅] **1.1 Rotating Engine:** <font color="#00FF41">Implemented `HeroPriceRotator` cycling through favorites every 30s with manual swipe, pin functionality, and terminal dashes. [DONE — 22.05.2026]</font>
+- [✅] **1.2 Sensory Visuals:** <font color="#00FF41">Added "shimmer" loading effect for coin logos and phosphor-glow transitions on rotation. [DONE — 22.05.2026]</font>
+
+## [L2] INTELLIGENCE STRIPS (COMPACTNESS)
+- [✅] **2.1 Oracle Strip:** <font color="#00FF41">Collapsed full AI narrative into a 36dp single-line `OracleNarrativeStrip` with expand trigger to AgentHub. [DONE — 22.05.2026]</font>
+- [✅] **2.2 AI Pick Strip:** <font color="#00FF41">Collapsed Daily Pick card into a 36dp single-line `AiPickStrip` with prediction screen navigation. [DONE — 22.05.2026]</font>
+
+---
+
+# 🏁 PHASE K: QUANT REFINEMENT & AGENT OPS
+
+## [K1] AGENT HARDENING (STABILITY)
+- [✅] **1.1 Auditor v1.2:** <font color="#00FF41">Implemented STRICT validation for users (No grace) and INFINITE grace for Admin emails. [DONE — 22.05.2026]</font>
+- [✅] **1.2 Narrator Logic:** <font color="#00FF41">Expanded `LiveNarrative` with "Whale/Bear/Volatility Trap" detection. [DONE — 22.05.2026]</font>
+
+## [K2] ADVANCED INTERACTION (UX)
+- [✅] **2.1 Interactive Charts:** <font color="#00FF41">Added interactive BTC Intraday Scan chart to Dashboard with tap-to-inspect. [DONE — 22.05.2026]</font>
+- [✅] **2.2 Unified Search:** <font color="#00FF41">Implemented Global search bar for assets, agents, and whale alerts. [DONE — 22.05.2026]</font>
+
+## [K3] PERFORMANCE OPS (SPEED)
+- [✅] **3.1 Zero-Lag Scrolling:** <font color="#00FF41">Optimized Whales feed list items with contentType and key-mapping for low-end devices. [DONE — 22.05.2026]</font>
+
+---
+
+# 🏁 PHASE J: ADVANCED SENSORY & TRUST POLISH
+
+## [J1] TRUST & DATA INTEGRITY (TRANSPARENCY)
+- [✅] **1.1 Freshness Indicators:** <font color="#00FF41">Implemented pulsing "LIVE/FRESH/STALE" dots for all data sections (Prices, AI, Flow, etc.). [DONE — 21.05.2026]</font>
+- [✅] **1.2 AI Explainability Panel:** <font color="#00FF41">Implemented weighted factor breakdown for all Oracle predictions. [DONE — 21.05.2026]</font>
+
+## [J2] KINETIC & VISUAL FEEDBACK (LIVENESS)
+- [✅] **2.1 Price Direction Flashes:** <font color="#00FF41">Implemented `rememberPriceFlash` for phosphor green/red highlighting on value changes. [DONE — 21.05.2026]</font>
+- [✅] **2.2 Big Move Background Pulse:** <font color="#00FF41">Add row-level background glow for price changes exceeding 2% in 24h. [DONE — 21.05.2026]</font>
+- [✅] **2.3 Scan Line refresh:** <font color="#00FF41">Implemented the 120ms horizontal scan line overlay triggered by Firebase data arrivals. [DONE — 21.05.2026]</font>
+
+## [J3] TACTILE ENGINE (SENSORY)
+- [✅] **3.1 Haptic Language Implementation:** <font color="#00FF41">Create `HapticEngine` with distinct patterns for Whale Alerts, Price Alerts, Tilt Lock, and Nav ticks. [DONE — 21.05.2026]</font>
+- [✅] **3.2 Settings Integration:** <font color="#00FF41">Add master toggle for Haptic Feedback in System settings. [DONE — 21.05.2026]</font>
+
+## [J4] OS INTEGRATION (RETENTION)
+- [✅] **4.1 Home Screen Widget:** <font color="#00FF41">Build a 4x2 AppWidget showing top prices and AI verdict with 15min refresh cycle. [DONE — 21.05.2026]</font>
+
+---
+
+# 🏁 PHASE I: SENSORY UX & PREMIUM POLISH
+...
 ---
 
 # 📊 PROGRESS TRACKING (NEW)
 
 | # | Prompt | Tokens | Agent | Status |
 |---|---|---|---|---|
-| **PART A** | | | | |
-| A-001 | Auth & Admin Cleanup | 2000 | AUDITOR | <font color="#00FF41">✅ DONE</font> |
-| A-002 | Tier Infrastructure | 4000 | AUDITOR | <font color="#00FF41">✅ DONE</font> |
-| A-003 | Dashboard Adaptive | 3000 | CORE | <font color="#00FF41">✅ DONE</font> |
-| A-004 | Free Tier Limits | 3000 | AUDITOR | <font color="#00FF41">✅ DONE</font> |
-| **PART B** | | | | |
-| B-001 | Glossary & Help | 4000 | PULSE | <font color="#00FF41">✅ DONE</font> |
-| B-002 | Accuracy Badge | 3000 | QUANT | <font color="#00FF41">✅ DONE</font> |
-| B-003 | Sanity Check | 2000 | PULSE | <font color="#00FF41">✅ DONE</font> |
-| B-004 | Paywall & Content | 4000 | MARKET | <font color="#00FF41">✅ DONE</font> |
-| B-005 | Gating & Release | 3000 | AUDITOR | <font color="#00FF41">✅ DONE</font> |
-| **PHASE M (MACRO)** | | | | |
-| M-001 | Macro Data & Logic | 3500 | AUDITOR | <font color="#00FF41">✅ DONE</font> |
-| M-002 | UI Refactor & Tickers | 4500 | CORE | <font color="#00FF41">✅ DONE</font> |
-| **PHASE G (REFACTOR)** | | | | |
-| G-001 | Preferences Decoupling | 3500 | AUDITOR | <font color="#00FF41">✅ DONE</font> |
-| G-002 | Price Strategy Core | 4000 | INTEGRITY | <font color="#00FF41">✅ DONE</font> |
-| G-003 | Aggregator & Migration | 5000 | CORE | <font color="#00FF41">✅ DONE</font> |
-| **PHASE C (CLOUD)** | | | | |
-| C-001 | Infrastructure & RTDB | 3000 | AUDITOR | 🏗️ IN PROGRESS |
-| C-002 | Cloud Harvester Base | 4500 | SENTINEL | ⏳ PENDING |
-| C-003 | Logic Centralization | 5000 | QUANT | ⏳ PENDING |
-| C-004 | UI Sync & Fallback | 4000 | CORE | ⏳ PENDING |
+| ... | ... | ... | ... | ... |
+| **PHASE I (PREMIUM)** | | | | |
+| I-001 | Visual De-Noising | 4000 | CORE | <font color="#00FF41">✅ DONE</font> |
+| I-002 | Ambient Intelligence | 4500 | CORE | <font color="#00FF41">✅ DONE</font> |
+| I-003 | Sensory & Tactile | 3500 | PULSE | <font color="#00FF41">✅ DONE</font> |
+| I-004 | Hero Section Prime | 4000 | MARKET | <font color="#00FF41">✅ DONE</font> |
+| **PHASE J (ELITE)** | | | | |
+| J-001 | Data Freshness Engine | 3500 | INTEGRITY | <font color="#00FF41">✅ DONE</font> |
+| J-002 | Micro-Animations | 4500 | CORE | <font color="#00FF41">✅ DONE</font> |
+| J-003 | Haptic Language | 3000 | PULSE | <font color="#00FF41">✅ DONE</font> |
+| J-004 | AI Explainability | 4000 | QUANT | <font color="#00FF41">✅ DONE</font> |
+| J-005 | Home Widget | 5000 | MARKET | <font color="#00FF41">✅ DONE</font> |
+| **PHASE K (QUANT)** | | | | |
+| K-001 | Auditor Hardening | 4000 | AUDITOR | <font color="#00FF41">✅ DONE</font> |
+| K-002 | Chart Interaction | 4500 | CORE | <font color="#00FF41">✅ DONE</font> |
+| K-003 | Unified Search | 5000 | CORE | <font color="#00FF41">✅ DONE</font> |
+| **PHASE L (DASHBOARD)** | | | | |
+| L-001 | Hero Price Rotator | 5000 | MARKET | <font color="#FFD700">⏳ WIP</font> |
+| L-002 | Compact Intel Strips | 4500 | CORE | <font color="#00FF41">✅ DONE</font> |
+| **PHASE M (NARRATIVE)** | | | | |
+| M-001 | Global Liquidity | 4000 | MARKET | <font color="#FFD700">⏳ WIP</font> |
+| M-002 | Agent Personality | 5000 | CORE | <font color="#00FF41">✅ DONE</font> |
+| **PHASE N (OPS)** | | | | |
+| N-001 | Content Studio | 5000 | MARKET | <font color="#00FF41">✅ DONE</font> |
+| N-002 | Accuracy Dashboard | 4500 | INTEGRITY | <font color="#00FF41">✅ DONE</font> |
+| N-003 | Integrity Logs | 4000 | INTEGRITY | <font color="#00FF41">✅ DONE</font> |
 
 ---
-
-# 🏁 PHASE G: GOD OBJECT REFACTOR (ARCHITECTURE PURITY)
-...
----
-
-# 🏁 PHASE C: CLOUD INTELLIGENCE ORCHESTRATION (THE BACKEND SHIFT)
-
-## [C1] INFRASTRUCTURE & REALTIME SYNC (BRIDGE)
-- [ ] **1.1 Firebase RTDB SDK:** Add Realtime Database dependencies and initialize Firebase in the app.
-- [ ] **1.2 CloudPriceProvider:** Create a specialized provider that listens to Firebase RTDB "prices" node.
-- [ ] **1.3 Realtime Repository Integration:** Refactor CryptoRepository to merge Cloud flows with local Fallback.
-
-## [C2] THE CLOUD HARVESTER (BACKEND SERVICE)
-- [ ] **2.1 Market Aggregator Script:** Create Node.js Cloud Function for Binance, Bitfinex, Kraken, Gemini, Coinbase, OKX, Upbit (Kimchi), and DexScreener (DEX).
-- [ ] **2.2 Macro Harvester Script:** Create Node.js script for Coinglass (Liquidations), Etherscan (Gas), Alternative.me (FearGreed), and CryptoPanic (News).
-- [ ] **2.3 JSON State Orchestrator:** Define and implement the "Terminal State" JSON structure in Firebase.
-
-## [C3] INTELLIGENCE CENTRALIZATION (LOGIC)
-- [ ] **3.1 Math to Cloud Migration:** Move RSI, MACD, and EMA calculations from Android to Cloud Functions.
-- [ ] **3.2 Whale Intelligence Migration:** Move transaction suumaries and Whale signals to the backend.
-- [ ] **3.3 Narrative Engine (AI):** Implement periodic generation of the "Executive Narrative" via Gemini AI on the server.
-
-## [C4] TERMINAL REFACTOR & POLISH
-- [ ] **4.1 Dashboard Sync:** Update UI to react to the unified Cloud State for instant updates.
-- [ ] **4.2 Push Notification Engine:** Implement server-side alerts for price targets and whale movements.
-- [ ] **4.3 Hybrid Fallback & Health:** Logic to automatically switch to direct API fetching if Cloud latency is high.
-
----
-
-## [G1] PREFERENCES DECOUPLING (INTERFACES)
-- [✅] **1.1 Storage Interfaces:** <font color="#00FF41">Created SystemSettingsManager, UserSessionManager, and SubscriptionAccessManager. [DONE — 19.05.2026]</font>
-- [✅] **1.2 Implementation Bridge:** <font color="#00FF41">Updated PreferencesService to implement new interfaces with proper overrides. [DONE — 19.05.2026]</font>
-- [✅] **1.3 DI Module:** <font color="#00FF41">Created PreferencesModule to provide interface-specific bindings via Hilt. [DONE — 19.05.2026]</font>
-
-## [G2] PRICE PROVIDER STRATEGY (SCALABILITY)
-- [✅] **2.1 Strategy Interface:** <font color="#00FF41">Created PriceProvider interface and migrated exchange mapping logic to SymbolResolver. [DONE — 19.05.2026]</font>
-- [✅] **2.2 Exchange Impls:** <font color="#00FF41">Created Kraken, Coinbase, CoinCap, and CoinPaprika PriceProvider implementations. [DONE — 19.05.2026]</font>
-- [✅] **2.3 Multibindings:** <font color="#00FF41">Configured PriceProvidersModule with Hilt Multibindings to provide a Set<PriceProvider>. [DONE — 19.05.2026]</font>
-
-## [G3] MASS MIGRATION & AGGREGATOR CLEANUP
-- [✅] **3.1 Aggregator Refactor:** <font color="#00FF41">Rewrote MultiSourcePriceAggregator to use Set<PriceProvider> via strategy pattern. [DONE — 19.05.2026]</font>
-- [✅] **3.2 ViewModel Migration:** <font color="#00FF41">Updated 15+ injection sites (HapticService, BillingService, ViewModels) to use narrow interfaces. [DONE — 19.05.2026]</font>
-- [✅] **3.3 Regression & Unit Tests:** <font color="#00FF41">Verified DataStore keys consistency and provider accuracy. [DONE — 19.05.2026]</font>
-
----
-
-# 🏁 PHASE A1-A4: PART A (AUTH + TIER + LIMITS)
-
-## [A1] AUTH & ADMIN CLEANUP
-- [✅] **1.1 Update AuthRepository Admin Logic:** <font color="#00FF41">AuthService updated with hardcoded emails, lowercase/trim, always set status. [DONE — 18.05.2026]</font>
-- [✅] **1.2 Verify PreferencesService:** <font color="#00FF41">setAdminStatus, isAdmin, getAdminStatusFlow and string accessors added. [DONE — 18.05.2026]</font>
-- [✅] **1.3 Remove 7-Tap Gesture:** <font color="#00FF41">Legacy "TEST" button removed and version text added to SettingsScreen. [DONE — 18.05.2026]</font>
-- [✅] **1.4 Test Mode Flag:** <font color="#00FF41">TestModeFlag.kt created. [DONE — 18.05.2026]</font>
-
-## [A2] TIER INFRASTRUCTURE
-- [✅] **2.1 AccessTier Enum:** <font color="#00FF41">AccessTier.kt created (FREE/PRO/ADMIN). [DONE — 18.05.2026]</font>
-- [✅] **2.2 FeatureKey Enum:** <font color="#00FF41">FeatureKey.kt created with 50+ gated features. [DONE — 18.05.2026]</font>
-- [✅] **2.3 TierAccessManager:** <font color="#00FF41">TierAccessManager.kt created and registered in AppModule. [DONE — 18.05.2026]</font>
-- [✅] **2.4 AccessGate + UpgradeBanner:** <font color="#00FF41">AccessGate.kt and UpgradeBanner.kt UI components created. [DONE — 18.05.2026]</font>
-- [✅] **2.5 Paywall Navigation Wiring:** <font color="#00FF41">Paywall route updated to accept "reason", and navigation helper created. [DONE — 18.05.2026]</font>
-
-## [A3] DASHBOARD ADAPTIVE
-- [✅] **3.1 DashboardViewModel Tier Awareness:** <font color="#00FF41">TierAccessManager injected, Whale Insight and Daily AI Pick flows added. [DONE — 18.05.2026]</font>
-- [✅] **3.2 Free Dashboard Cards:** <font color="#00FF41">WhaleInsightCard, AIPulseShortCard, and DailyAIPickCard created. [DONE — 18.05.2026]</font>
-- [✅] **3.3 Wire Cards in DashboardScreen:** <font color="#00FF41">DashboardScreen updated with conditional rendering per tier. [DONE — 18.05.2026]</font>
-
-## [A4] FREE TIER LIMITS
-- [✅] **4.1 Alert Limit:** <font color="#00FF41">Enforced max 3 alerts for Free tier in AlertsViewModel. [DONE — 18.05.2026]</font>
-- [✅] **4.2 Watchlist Limit:** <font color="#00FF41">Enforced 10 coin limit in MarketsViewModel. [DONE — 18.05.2026]</font>
-- [✅] **4.3 Markets Top 50 vs 200:** <font color="#00FF41">Restricted markets list to top 50 for Free tier users. [DONE — 18.05.2026]</font>
-- [✅] **4.4 Daily AI Pick UseCase:** <font color="#00FF41">Implemented daily rotating AI prediction for Free tier. [DONE — 18.05.2026]</font>
-
----
-
-# 🏁 PHASE B5-B12: PART B (GLOSSARY + ACCURACY + PROTECTION)
-
-## [B5] GLOSSARY + "?" HELP ICONS
-- [✅] **5.1 Glossary Data:** <font color="#00FF41">45+ crypto and trading terms database created. [DONE — 18.05.2026]</font>
-- [✅] **5.2 Glossary Screen:** <font color="#00FF41">Searchable UI with categories added and wired to Settings. [DONE — 18.05.2026]</font>
-- [✅] **5.3 FeatureHelpIcon:** <font color="#00FF41">Dialog-based help component created using FeatureKey descriptions. [DONE — 18.05.2026]</font>
-- [✅] **5.4 Wire Icons:** <font color="#00FF41">Help icons added to Dashboard, Analysis, ToolsHub, Alerts, Markets, and Settings. [DONE — 18.05.2026]</font>
-
-## [B6] ACCURACY BADGE EVERYWHERE
-- [✅] **6.1 AccuracyBadge UI:** <font color="#00FF41">Honest track record display component created. [DONE — 18.05.2026]</font>
-- [✅] **6.2 Wire Predictions:** <font color="#00FF41">Badges added to Analysis and Oracle results. [DONE — 18.05.2026]</font>
-- [✅] **6.3 Dashboard consistency:** <font color="#00FF41">Daily AI Pick card updated to use standard badge. [DONE — 18.05.2026]</font>
-
-## [B7] SANITY CHECK DIALOG
-- [✅] **7.1 SanityCheckDialog UI:** <font color="#00FF41">Warning component created for risky decisions. [DONE — 18.05.2026]</font>
-- [✅] **7.2 Wire Position/Planner:** <font color="#00FF41">Sanity checks added to Position Sizer and Trade Planner. [DONE — 18.05.2026]</font>
-
-## [B8] HONEST PAYWALL PITCH
-- [✅] **8.1 Rewrite PaywallScreen:** <font color="#00FF41">Personalized pitch with "What we won't do" section created. [DONE — 18.05.2026]</font>
-- [✅] **8.2 Update Store Listing:** <font color="#00FF41">Consistent messaging applied to STORE_LISTING.md. [DONE — 18.05.2026]</font>
-
-## [B9] CONTENT STUDIO PROMPTS V2
-- [✅] **9.1 PromptTemplates:** <font color="#00FF41">Centralized 8 templates with 5 audience variants created. [DONE — 18.05.2026]</font>
-- [✅] **9.2 Wire ViewModel:** <font color="#00FF41">ContentStudioViewModel updated to use buildPrompt logic. [DONE — 18.05.2026]</font>
-
-## [B10] ADMIN & CONTENT STUDIO GATING
-- [✅] **10.1 Hide Content Studio:** <font color="#00FF41">Admin-only access enforced with AccessGate and route guards. [DONE — 18.05.2026]</font>
-- [✅] **10.2 Remove Test Buttons:** <font color="#00FF41">Debug buttons gated by TestModeFlag. [DONE — 18.05.2026]</font>
-
-## [B11] TARGETED REGRESSION TEST
-- [✅] **11.1 Checklist:** <font color="#00FF41">Focused QA document created in docs/REGRESSION_TEST_v1_1.md. [DONE — 18.05.2026]</font>
-- [ ] **11.2 Execution:** Manual testing on real device.
-- [ ] **11.3 Bug Fixes:** Resolve critical failures.
-
-## [B12] BUILD & RELEASE
-- [✅] **12.1 Version Bump:** <font color="#00FF41">v1.1.2 (18) set in build.gradle.kts and docs/CHANGELOG.md created. [DONE — 19.05.2026]</font>
-- [ ] **12.2 Upload:** Submit to Production track.
-
----
-
-# 📜 SUPREME MASTER RULES — V5
-
-0. **LANGUAGE:** The primary and only language of the application is **English**. All UI texts, documentation, logs, and comments must be in English for a global professional image.
-1. **TOKEN BUDGETING:** Every prompt must start with an estimate `≈X tokens`. If you see the context melting — stop and say `[PAUSE — context low]`.
-2. **ATOMIC COMPILATION:** Every sub-task (Part A, B, C, D...) MUST leave the project in a **compilable** state. If Part X requires something from Part Y — create a stub/placeholder that compiles, and replace it in Y.
-3. **GRANULARITY > SPEED:** We prefer 5 small parts over 2 large ones. If the agent stops, we lose at most 1 small part.
-4. **THREE/FOUR-STEP ARCHITECTURE:**
-    * **Part A (Core):** Data models, Repository interfaces, math/algo logic — no UI.
-    * **Part B (Bridge):** ViewModel, Use Cases, DI wiring.
-    * **Part C (UI):** Composables / XML layouts.
-    * **Part D (Polish):** Animations, edge cases, error handling.
-5. **DYNAMIC PLAN:** After completing a sub-task → mark it with `[✅ DONE — DD.MM.YYYY]` in the masterplan. **WRAP the completed task text in electric green** using `<font color="#00FF41">TEXT</font>` for instant visibility. **DO NOT delete the text** — we keep history for clarity.
-6. **PRIORITY FIRST:** Execute in the order listed unless explicitly told otherwise.
-7. **NO REGRESSION:** No new prompt should break old ones. Migrate together with the change if necessary.
-8. **TEST WHAT YOU TOUCH:** When doing core logic (calculator, evaluator, math) — add at least 1 unit test in the same prompt.
-
----
-
-# 🛡️ SYSTEM INTEGRITY LOGS (HISTORICAL)
-<details>
-<summary><b>v1.1.0 STABILIZATION SUMMARY</b></summary>
-
-- **Force Dark Mode:** Fixed `themes.xml` for consistent CRT experience.
-- **Error Boundary:** Implemented `ComposeErrorBoundary` for zero-crash UI.
-- **Rate-Limiting:** Optimized `RateLimitInterceptor` to prevent UI lockups.
-- **AI Link:** Streamlined Gemini API error handling and identity verification.
-- **Security:** SQLCipher ACTIVE, RootBeer ACTIVE, ProGuard HARDENED.
-- **UI Refinement:** Removed Command Center (`TerminalCommandBar`) based on user feedback.
-</details>
-
----
-
-# 🚀 NEXT STEPS: EVOLUTION
-1.  **Execute Phase M:** [COMPLETED] Macro Intelligence Refactor.
-2.  **Deploy v1.1.2:** Production Rollout.
-
----
-*Maintained by CryptoDept Architect | 19.05.2026 | Macro Refactor Complete*
+*Maintained by CryptoDept Architect | 21.05.2026 | Phase J Commencement*

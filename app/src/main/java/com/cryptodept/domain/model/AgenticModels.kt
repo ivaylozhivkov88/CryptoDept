@@ -298,15 +298,26 @@ class MarketNarrator : CryptoAgent {
         val trend = if (data.priceChange24h >= 0) "BULLISH_BIAS" else "BEARISH_PRESSURE"
         val sentimentEffect = if (data.fearGreedIndex < 30) "PANIC_LEVEL_HIGH" else if (data.fearGreedIndex > 70) "EUPHORIA_DETECTED" else "STABLE_SENTIMENT"
         
+        // Whale Trap Detection Logic (K1.2)
+        val trapAlert = when {
+            data.fearGreedIndex > 80 && data.rsi > 70 && data.riskScore > 80 -> 
+                "⚠️ WHALE TRAP ALERT: Extreme euphoria meeting critical resistance. Distribution imminent."
+            data.fearGreedIndex < 20 && data.rsi < 30 && data.priceChange24h < -5 -> 
+                "⚠️ BEAR TRAP ALERT: Oversold conditions in extreme panic zone. Liquidity hunt in progress."
+            data.priceChange24h > 10 && data.riskScore > 85 ->
+                "⚠️ VOLATILITY TRAP: Price surge decoupled from structural integrity. Risk of flash crash."
+            else -> ""
+        }
+
         val analysis = """
             >>> MARKET_NARRATIVE_UPDATE
-            CONDITION: $trend confirmed. Current price action shows BTC holding key levels at ${"$"}${String.format("%.2f", data.price)}.
+            ${if (trapAlert.isNotEmpty()) "$trapAlert\n" else ""}CONDITION: $trend confirmed. Current price action shows BTC holding key levels at ${"$"}${String.format("%.2f", data.price)}.
             SENTIMENT: $sentimentEffect with index at ${data.fearGreedIndex}/100. Social channels indicate ${data.newsSentiment.lowercase()}.
             STRATEGY: Technical Sentinel notes RSI at ${data.rsi.toInt()} suggesting ${if (data.rsi < 40) "room for growth" else "potential exhaustion"}. Whale Scout confirms ${if (data.riskScore < 50) "smart money accumulation" else "distribution risk"}.
             VERDICT: Risk score remains at ${data.riskScore}/100. System status: OPTIMIZED.
         """.trimIndent()
 
-        return AgentReport(id, name, summary = analysis, confidence = 1.0, status = AgentStatus.SUCCESS)
+        return AgentReport(id, name, summary = analysis, confidence = 1.0, status = if (trapAlert.isNotEmpty()) AgentStatus.SCANNING else AgentStatus.SUCCESS)
     }
 }
 

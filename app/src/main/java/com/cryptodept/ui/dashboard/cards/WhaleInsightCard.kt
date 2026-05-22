@@ -56,15 +56,15 @@ fun WhaleInsightCard(
                     text = "[FREE]",
                     color = colors.dimText,
                     fontFamily = FontFamily.Monospace,
-                    fontSize = 8.sp,
+                    fontSize = 11.sp,
                 )
             }
             
             Spacer(modifier = Modifier.height(12.dp))
             
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = signal.emoji, fontSize = 24.sp)
-                Spacer(modifier = Modifier.width(12.dp))
+                Text(text = signal.emoji, fontSize = 28.sp) // LARGER
+                Spacer(modifier = Modifier.width(16.dp))
                 Column {
                     Text(
                         text = signal.label,
@@ -74,14 +74,15 @@ fun WhaleInsightCard(
                             WhaleSignal.NEUTRAL -> colors.amber
                         },
                         fontFamily = FontFamily.Monospace,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Black,
+                        fontSize = 18.sp,
                     )
                     Text(
-                        text = signal.description,
+                        text = "Real-time analysis across 3 blockchains (BTC, ETH, SOL). Monitoring institutional capital flow and exchange liquidity.",
                         color = colors.textPrimary,
                         fontFamily = FontFamily.Monospace,
-                        fontSize = 10.sp,
+                        fontSize = 13.sp,
+                        lineHeight = 16.sp
                     )
                 }
             }
@@ -97,7 +98,7 @@ fun WhaleInsightCard(
                         text = "[ How_calculated? ]",
                         color = colors.dimText,
                         fontFamily = FontFamily.Monospace,
-                        fontSize = 10.sp,
+                        fontSize = 12.sp,
                     )
                 }
                 TextButton(onClick = onUpgrade) {
@@ -105,7 +106,7 @@ fun WhaleInsightCard(
                         text = "[ Live_feed_→ ]",
                         color = colors.amber,
                         fontFamily = FontFamily.Monospace,
-                        fontSize = 10.sp,
+                        fontSize = 12.sp,
                     )
                 }
             }

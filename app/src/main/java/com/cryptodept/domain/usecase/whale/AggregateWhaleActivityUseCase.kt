@@ -10,6 +10,7 @@ import com.cryptodept.domain.model.WhaleTransactionV2
 import com.cryptodept.domain.model.WhaleSignificance
 import com.cryptodept.domain.model.TransactionType
 import com.cryptodept.domain.repository.CryptoRepository
+import com.cryptodept.util.WhaleThresholds
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
@@ -36,10 +37,13 @@ class AggregateWhaleActivityUseCase @Inject constructor(
         val btcWhales = async { fetchBtcWhales(btcPrice, maxPerChain) }
         val solWhales = async { fetchSolWhales(solPrice, maxPerChain) }
         
-        val threshold = minUsd ?: remoteConfig.getWhaleUsdThreshold()
+        val ethThreshold = minUsd ?: WhaleThresholds.ETH_USD
+        val btcThreshold = minUsd ?: WhaleThresholds.BTC_USD
+        val solThreshold = minUsd ?: WhaleThresholds.SOL_USD
         
-        (ethWhales.await() + btcWhales.await() + solWhales.await())
-            .filter { it.amountUsd >= threshold }
+        (ethWhales.await().filter { it.amountUsd >= ethThreshold } + 
+         btcWhales.await().filter { it.amountUsd >= btcThreshold } + 
+         solWhales.await().filter { it.amountUsd >= solThreshold })
             .sortedByDescending { it.timestamp }
     }
     

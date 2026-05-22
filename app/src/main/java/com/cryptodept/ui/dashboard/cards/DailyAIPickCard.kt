@@ -59,7 +59,7 @@ fun DailyAIPickCard(
                     text = "[1_PER_DAY]",
                     color = colors.dimText,
                     fontFamily = FontFamily.Monospace,
-                    fontSize = 8.sp,
+                    fontSize = 11.sp,
                 )
             }
             
@@ -84,7 +84,7 @@ fun DailyAIPickCard(
                     color = colors.textPrimary,
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
+                    fontSize = 15.sp,
                 )
             }
             
@@ -95,7 +95,7 @@ fun DailyAIPickCard(
                 text = "Confidence: $confidencePercent%",
                 color = colors.textPrimary,
                 fontFamily = FontFamily.Monospace,
-                fontSize = 11.sp,
+                fontSize = 13.sp,
             )
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -113,7 +113,7 @@ fun DailyAIPickCard(
                 text = "Not financial advice. DYOR.",
                 color = colors.dimText,
                 fontFamily = FontFamily.Monospace,
-                fontSize = 9.sp,
+                fontSize = 11.sp,
             )
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -126,7 +126,7 @@ fun DailyAIPickCard(
                     text = "[ All_predictions_→ ]",
                     color = colors.amber,
                     fontFamily = FontFamily.Monospace,
-                    fontSize = 10.sp,
+                    fontSize = 12.sp,
                 )
             }
         }

@@ -353,7 +353,7 @@ fun AboutTab(detail: CoinDetail) {
         Text(
             text = "STATUS: DATA_INTEGRITY_VERIFIED",
             color = GridGray,
-            fontSize = 9.sp,
+            fontSize = 11.sp,
             fontFamily = FontFamily.Monospace,
             modifier = Modifier.padding(top = 8.dp),
         )

@@ -18,6 +18,9 @@ interface SubscriptionAccessManager {
     fun setAdminStatus(isAdmin: Boolean)
     fun setProExpiry(durationDays: Int)
     fun checkProStatus()
+    
+    fun setLastBillingCheck(timestamp: Long)
+    fun getLastBillingCheck(): Long
 
     suspend fun getAiReportsCountToday(): Int
     suspend fun incrementAiReportsCount()

@@ -71,4 +71,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindBriefingRepository(impl: BriefingRepositoryImpl): BriefingRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindCoinGlassRepository(impl: CoinGlassRepositoryImpl): CoinGlassRepository
 }

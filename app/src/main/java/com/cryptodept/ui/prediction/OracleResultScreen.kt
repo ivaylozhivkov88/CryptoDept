@@ -79,9 +79,10 @@ fun OracleResultScreen(
                             .verticalScroll(rememberScrollState()),
                 ) {
                     val cleanedReport = aiReportState
-                        .replace("[PROXY] Backend relay active.", "")
-                        .replace("Simulated response for:", "")
-                        .replace("INSTRUCTIONS:", "")
+                        .replace("IDENTITY: Lead Quantitative Strategist for CryptoDept Elite Terminal.", "")
+                        .replace("TASK: Generate a high-impact, professional narrative report for", "")
+                        .replace(Regex("(?s)REPORT_CONSTRAINTS:.*"), "")
+                        .replace(Regex("(?s)INSTRUCTIONS:.*"), "")
                         .trim()
 
                     com.cryptodept.ui.components.StreamingText(
@@ -145,6 +146,16 @@ fun OracleResultScreen(
             // CONSENSUS HEADER
             item {
                 ConsensusHeader(prediction)
+            }
+
+            // EXPLAINABILITY PANEL (FEATURE 16)
+            if (prediction.factors.isNotEmpty()) {
+                item {
+                    com.cryptodept.ui.components.PredictionExplainPanel(
+                        factors = prediction.factors,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
 
             // NEW: Confidence breakdown (PHASE Y2)

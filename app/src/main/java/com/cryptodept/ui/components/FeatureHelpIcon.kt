@@ -73,7 +73,7 @@ private fun FeatureHelpDialog(
         text = {
             Column {
                 Text(
-                    text = feature.description,
+                    text = feature.proDescription,
                     fontFamily = FontFamily.Monospace,
                     fontSize = 12.sp,
                     color = colors.textPrimary

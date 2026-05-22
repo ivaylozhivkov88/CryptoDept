@@ -93,6 +93,7 @@ mpandroidchart = { group = "com.github.PhilJay", name = "MPAndroidChart", versio
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
+firebase-database = { group = "com.google.firebase", name = "firebase-database" }
 firebase-inapp-messaging = { group = "com.google.firebase", name = "firebase-inappmessaging-display" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
 firebase-appcheck = { group = "com.google.firebase", name = "firebase-appcheck-playintegrity" }

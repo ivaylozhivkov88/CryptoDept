@@ -1,10 +1,12 @@
 package com.cryptodept.data.repository
 
 import com.cryptodept.data.api.AlphaVantageApi
+import com.cryptodept.data.remote.model.CloudTerminalState
 import com.cryptodept.domain.model.*
 import com.cryptodept.domain.repository.MacroRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.sqrt
@@ -17,6 +19,7 @@ class MacroRepositoryImpl
         private val coinGeckoApi: com.cryptodept.data.api.CoinGeckoApi,
         private val coinglassApi: com.cryptodept.data.api.CoinglassApi,
         private val etherscanApi: com.cryptodept.data.api.EtherscanApi,
+        private val firebaseDataSource: com.cryptodept.data.remote.source.FirebaseRemoteDataSource,
         private val gson: com.google.gson.Gson,
     ) : MacroRepository {
         override suspend fun getMacroData(): Result<MacroData> =
@@ -50,7 +53,40 @@ class MacroRepositoryImpl
 
         override suspend fun getMacroIntelligence(): Result<MacroIntelligence> = coroutineScope {
             try {
-                // Task: Added individual try-catches for robustness against API 500s (Task fix)
+                // PHASE C: Check Cloud first (with 10-min fresh threshold)
+                val cloudState = try {
+                    firebaseDataSource.getTerminalState().firstOrNull()
+                } catch (e: Exception) {
+                    null
+                }
+
+                val now = System.currentTimeMillis()
+                val isCloudFresh = cloudState != null && (now - cloudState.lastUpdateTimestamp) < 600_000
+
+                val cloudMacro = cloudState?.macroBriefing
+                if (isCloudFresh && cloudMacro != null && cloudMacro.globalMarketCapUsd > 0) {
+                    return@coroutineScope Result.success(MacroIntelligence(
+                        btcDominance = cloudMacro.btcDominance,
+                        btcDominanceDelta24h = 0.0,
+                        ethGasGwei = cloudMacro.ethGasGwei,
+                        globalMarketCapUsd = cloudMacro.globalMarketCapUsd,
+                        altcoinSeasonIndex = cloudMacro.altcoinSeasonIndex,
+                        totalLiquidations1h = LiquidationSnapshot(
+                            totalUsd = cloudMacro.liquidations1h.totalUsd,
+                            longsUsd = cloudMacro.liquidations1h.longsUsd,
+                            shortsUsd = cloudMacro.liquidations1h.shortsUsd,
+                            timestamp = cloudState.lastUpdateTimestamp
+                        ),
+                        totalLiquidations24h = LiquidationSnapshot(
+                            totalUsd = cloudMacro.liquidations24h.totalUsd,
+                            longsUsd = cloudMacro.liquidations24h.longsUsd,
+                            shortsUsd = cloudMacro.liquidations24h.shortsUsd,
+                            timestamp = cloudState.lastUpdateTimestamp
+                        )
+                    ))
+                }
+
+                // Fallback to local fetching if cloud is empty or fails
                 val globalData = try { coinGeckoApi.getGlobalData().data } catch (e: Exception) { null }
                 val liq1h = try { coinglassApi.getGlobalLiquidations("BTC", "h1").data } catch (e: Exception) { null }
                 val liq24h = try { coinglassApi.getGlobalLiquidations("BTC", "h24").data } catch (e: Exception) { null }

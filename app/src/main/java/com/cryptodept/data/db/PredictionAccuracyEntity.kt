@@ -1,9 +1,17 @@
 package com.cryptodept.data.db
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "prediction_accuracy")
+@Entity(
+    tableName = "prediction_accuracy",
+    indices = [
+        Index(value = ["coinId", "model"]),
+        Index(value = ["verifiedAt"]),
+        Index(value = ["coinId"])
+    ]
+)
 data class PredictionAccuracyEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val coinId: String,

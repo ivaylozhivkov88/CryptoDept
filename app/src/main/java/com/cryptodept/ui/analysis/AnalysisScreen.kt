@@ -25,8 +25,10 @@ import com.cryptodept.domain.model.*
 import com.cryptodept.ui.tutorial.tutorialTarget
 import com.cryptodept.domain.tutorial.TutorialTargetId
 import com.cryptodept.ui.components.*
+import com.cryptodept.domain.tier.AccessTier
 import com.cryptodept.domain.tier.FeatureKey
 import com.cryptodept.ui.navigation.Screen
+import com.cryptodept.ui.navigation.navigateToPaywall
 import com.cryptodept.ui.prediction.PredictionViewModel
 import com.cryptodept.ui.theme.*
 import com.cryptodept.viewmodel.AnalysisUiState
@@ -153,11 +155,11 @@ fun AnalysisScreen(
 
                             if (isAdmin) {
                                 IconButton(onClick = { viewModel.generateAIReport(state as AnalysisUiState.Success) }) {
-                                    Text("POST", color = colors.primary, fontWeight = FontWeight.Bold, fontSize = 10.sp)
+                                    Text("POST", color = colors.primary, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                                 }
 
                                 IconButton(onClick = { viewModel.generateVideoTeaser(state as AnalysisUiState.Success) }) {
-                                    Text("VIDEO", color = colors.primary, fontWeight = FontWeight.Bold, fontSize = 10.sp)
+                                    Text("VIDEO", color = colors.primary, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                                 }
                             }
                         }
@@ -210,6 +212,7 @@ fun AnalysisScreen(
 
                         AnalysisContentV2(
                             state = uiState,
+                            navController = navController,
                             onShowBreakdown = { showBreakdown = true },
                             onPredictClick = { navController.navigate(Screen.Prediction.route) },
                             onDeepScanClick = {
@@ -269,11 +272,15 @@ fun AssetSelector(
 @Composable
 fun AnalysisContentV2(
     state: AnalysisUiState.Success,
+    navController: androidx.navigation.NavController,
     onShowBreakdown: () -> Unit,
     onPredictClick: () -> Unit,
     onDeepScanClick: () -> Unit,
 ) {
     val colors = LocalTerminalColors.current
+    val settingsViewModel: com.cryptodept.viewmodel.SettingsViewModel = hiltViewModel()
+    val tier by settingsViewModel.tierAccessManager.currentTier.collectAsStateWithLifecycle()
+
     val result = state.result
     val signal = result.compositeSignal
     val signalColor =
@@ -299,7 +306,7 @@ fun AnalysisContentV2(
         ) {
             Column {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = stringResource(R.string.analysis_verdict), color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                    Text(text = stringResource(R.string.analysis_verdict), color = colors.dimText, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
                     FeatureHelpIcon(feature = FeatureKey.DAILY_AI_PICK, iconSize = 10.dp)
                 }
                 Text(
@@ -311,7 +318,7 @@ fun AnalysisContentV2(
                 )
             }
             Column(horizontalAlignment = Alignment.End) {
-                Text(text = stringResource(R.string.analysis_confidence), color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                Text(text = stringResource(R.string.analysis_confidence), color = colors.dimText, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
                 Text(
                     text = "${String.format(Locale.US, "%.0f", signal.confidence * 100)}%",
                     color = signalColor,
@@ -334,13 +341,13 @@ fun AnalysisContentV2(
             Text(
                 text = "RSI: ${String.format(Locale.US, "%.2f", result.rsiValue)}",
                 color = colors.textPrimary,
-                fontSize = 11.sp,
+                fontSize = 13.sp,
                 fontFamily = FontFamily.Monospace
             )
             Text(
                 text = "[ VIEW_TRACE_LOGS ]",
                 color = colors.primary,
-                fontSize = 11.sp,
+                fontSize = 13.sp,
                 fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.clickable { onShowBreakdown() },
@@ -350,7 +357,7 @@ fun AnalysisContentV2(
 
     Spacer(modifier = Modifier.height(24.dp))
 
-    Text(text = stringResource(R.string.analysis_matrix), color = colors.dimText, fontSize = 12.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.tutorialTarget(TutorialTargetId.ANALYSIS_INDICATORS))
+    Text(text = stringResource(R.string.analysis_matrix), color = colors.dimText, fontSize = 13.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.tutorialTarget(TutorialTargetId.ANALYSIS_INDICATORS))
     result.compositeSignal.indicators.forEach { ind ->
         val indColor =
             when (ind.sentiment) {
@@ -372,24 +379,24 @@ fun AnalysisContentV2(
     Spacer(modifier = Modifier.height(16.dp))
 
     if (result.patterns.isNotEmpty()) {
-        Text(">>> PATTERN_DETECTED", color = colors.dimText, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+        Text(">>> PATTERN_DETECTED", color = colors.dimText, fontSize = 13.sp, fontFamily = FontFamily.Monospace)
         result.patterns.forEach { pattern ->
             Text(
                 text = "[!] ${pattern.pattern.name}: ${pattern.description}",
                 color = if (pattern.isBullish) colors.primary else colors.danger,
                 fontFamily = FontFamily.Monospace,
-                fontSize = 12.sp,
+                fontSize = 13.sp,
                 modifier = Modifier.padding(top = 4.dp),
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
     }
 
-    Text(text = stringResource(R.string.analysis_fibonacci), color = colors.dimText, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+    Text(text = stringResource(R.string.analysis_fibonacci), color = colors.dimText, fontSize = 13.sp, fontFamily = FontFamily.Monospace)
     result.fibonacci.forEach { (level, price) ->
         Row(modifier = Modifier.fillMaxWidth().padding(vertical = 1.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(level, color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 12.sp)
-            Text("$${String.format(Locale.US, "%.2f", price)}", color = colors.amber, fontFamily = FontFamily.Monospace, fontSize = 12.sp)
+            Text(level, color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 13.sp)
+            Text("$${String.format(Locale.US, "%.2f", price)}", color = colors.amber, fontFamily = FontFamily.Monospace, fontSize = 13.sp)
         }
     }
 
@@ -401,12 +408,18 @@ fun AnalysisContentV2(
     ) {
         Column(modifier = Modifier.weight(1f)) {
             OutlinedButton(
-                onClick = onPredictClick,
+                onClick = {
+                    if (tier.canAccess(AccessTier.ADMIN)) {
+                        onPredictClick()
+                    } else {
+                        navController.navigateToPaywall("predictions", FeatureKey.PREDICTION_ENGINES_6)
+                    }
+                },
                 modifier = Modifier.fillMaxWidth().tutorialTarget(TutorialTargetId.ANALYSIS_PREDICTION),
                 shape = RectangleShape,
                 border = BorderStroke(1.dp, colors.primary)
             ) {
-                Text(stringResource(R.string.analysis_predict_btn), color = colors.primary, fontSize = 10.sp)
+                Text(stringResource(R.string.analysis_predict_btn), color = colors.primary, fontSize = 12.sp)
             }
             FeatureHelpIcon(feature = FeatureKey.PREDICTION_ENGINES_6, modifier = Modifier.align(Alignment.CenterHorizontally))
         }
@@ -417,7 +430,7 @@ fun AnalysisContentV2(
             shape = RectangleShape,
             colors = ButtonDefaults.buttonColors(containerColor = colors.primary)
         ) {
-            Text(stringResource(R.string.analysis_deep_scan_btn), color = colors.background, fontSize = 10.sp)
+            Text(stringResource(R.string.analysis_deep_scan_btn), color = colors.background, fontSize = 12.sp)
         }
     }
 
@@ -440,15 +453,15 @@ fun SentimentSection(sentiment: com.cryptodept.domain.usecase.SentimentResult?) 
             else -> colors.amber
         }
 
-    Text(text = stringResource(R.string.analysis_sentiment_title), color = colors.dimText, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+    Text(text = stringResource(R.string.analysis_sentiment_title), color = colors.dimText, fontSize = 13.sp, fontFamily = FontFamily.Monospace)
 
     Box(
         modifier = Modifier.fillMaxWidth().border(1.dp, colors.grid).padding(12.dp),
     ) {
         Column {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("VERDICT:", color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-                Text(sentiment.verdict.name, color = verdictColor, fontWeight = FontWeight.Bold, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+                Text("VERDICT:", color = colors.dimText, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+                Text(sentiment.verdict.name, color = verdictColor, fontWeight = FontWeight.Bold, fontSize = 13.sp, fontFamily = FontFamily.Monospace)
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -481,9 +494,9 @@ fun SentimentSection(sentiment: com.cryptodept.domain.usecase.SentimentResult?) 
             }
 
             Row(modifier = Modifier.fillMaxWidth().padding(top = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("BULL: ${sentiment.bullishPercent}%", color = colors.primary, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
-                Text("NEUT: ${sentiment.neutralPercent}%", color = colors.amber, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
-                Text("BEAR: ${sentiment.bearishPercent}%", color = colors.danger, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+                Text("BULL: ${sentiment.bullishPercent}%", color = colors.primary, fontSize = 13.sp, fontFamily = FontFamily.Monospace)
+                Text("NEUT: ${sentiment.neutralPercent}%", color = colors.amber, fontSize = 13.sp, fontFamily = FontFamily.Monospace)
+                Text("BEAR: ${sentiment.bearishPercent}%", color = colors.danger, fontSize = 13.sp, fontFamily = FontFamily.Monospace)
             }
 
             Text(

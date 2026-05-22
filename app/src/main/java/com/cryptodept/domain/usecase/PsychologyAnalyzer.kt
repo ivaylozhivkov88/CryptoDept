@@ -12,9 +12,11 @@ class PsychologyAnalyzer
     @Inject
     constructor(
         private val journalDao: TradeJournalDao,
+        private val settings: com.cryptodept.data.datastore.SystemSettingsManager,
     ) {
         suspend fun analyzeSession(): SessionStats =
             withContext(Dispatchers.Default) {
+                // ... (rest of the code same)
                 val today = System.currentTimeMillis() - 24 * 60 * 60 * 1000
                 val allTrades = journalDao.getAllTradesSince(today)
                 val closedTrades = allTrades.filter { it.status != "OPEN" }

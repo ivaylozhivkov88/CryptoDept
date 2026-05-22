@@ -27,6 +27,8 @@ interface CryptoRepository {
 
     suspend fun getGlobalMarketData(): CryptoResult<GlobalMarketData>
 
+    fun getGlobalMarketDataFlow(): Flow<GlobalMarketData?>
+
     suspend fun getPriceAtTimestamp(
         coinId: String,
         timestamp: Long,

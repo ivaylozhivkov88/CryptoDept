@@ -377,11 +377,11 @@ fun VerdictExplanationDialog(
                 VerdictRow("<4/10", "AVOID", "Poor conditions. Skip this trade.", colors.danger)
 
                 Spacer(modifier = Modifier.height(12.dp))
-                Text("Checked Items:", color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 9.sp)
+                Text("Checked Items:", color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
                 Text(
                     "✓ Passed checks strengthen your setup\n⚠ Warnings need attention\n✗ Critical fails override verdict",
                     color = colors.dimText,
-                    fontSize = 9.sp,
+                    fontSize = 11.sp,
                     fontFamily = FontFamily.Monospace,
                     modifier = Modifier.padding(top = 4.dp),
                 )
@@ -419,6 +419,6 @@ fun VerdictRow(
     ) {
         Text(score, color = color, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
         Text("→ $verdict", color = color, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-        Text(description, color = colors.dimText, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+        Text(description, color = colors.dimText, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
     }
 }

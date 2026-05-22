@@ -24,6 +24,12 @@ interface CoinglassApi {
         @Query("symbol") symbol: String,
         @Query("time_type") timeType: String = "h1",
     ): GlobalLiquidationDto
+
+    @GET("api/futures/liquidation/chart")
+    suspend fun getLiquidationMap(
+        @Query("symbol") symbol: String,       // e.g. "BTC"
+        @Query("range") range: String = "12h" // look-ahead/behind window
+    ): retrofit2.Response<LiquidationMapResponse>
 }
 
 // Base URL: "https://open-api.coinglass.com/"

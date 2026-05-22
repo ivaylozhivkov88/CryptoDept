@@ -66,7 +66,7 @@ fun AgentHubScreen(
                 Text(
                     text = "[REFRESH]",
                     color = colors.primary,
-                    fontSize = 12.sp,
+                    fontSize = 10.sp,
                     fontFamily = FontFamily.Monospace,
                     modifier = Modifier.clickable { viewModel.refresh() }
                 )

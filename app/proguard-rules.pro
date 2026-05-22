@@ -272,15 +272,39 @@
 -dontwarn org.apache.http.**
 
 # ============================================================
-# SQLCIPHER: Encrypted Database
-# Native code uses reflection to access Java fields.
+# TOTAL STABILITY CONFIGURATION (NO CUTTING, NO RENAMING)
 # ============================================================
--keep class net.zetetic.database.** { *; }
--keep class net.zetetic.database.sqlcipher.** { *; }
--keep class net.zetetic.database.sqlcipher.SQLiteConnection { *; }
--dontwarn net.zetetic.database.**
 
-# Запазване на JNI методи
+-dontobfuscate
+-dontoptimize
+-dontshrink
+-ignorewarnings
+
+# Запазване на абсолютно целия проект
+-keep class com.cryptodept.** { *; }
+-keep interface com.cryptodept.** { *; }
+
+# Запазване на всички библиотеки (бизнес логика и DTO-та)
+-keep class retrofit2.** { *; }
+-keep class okhttp3.** { *; }
+-keep class com.google.gson.** { *; }
+-keep class net.sqlcipher.** { *; }
+-keep class net.zetetic.** { *; }
+-keep class com.google.firebase.** { *; }
+-keep class androidx.room.** { *; }
+-keep class androidx.work.** { *; }
+
+# КРИТИЧНО за SQLCipher
+-keepclassmembers class net.sqlcipher.database.** {
+    private long mNativeHandle;
+    <fields>;
+}
+-keepclassmembers class net.zetetic.database.** {
+    private long mNativeHandle;
+    <fields>;
+}
+
+# JNI методи
 -keepclasseswithmembernames class * {
     native <methods>;
 }

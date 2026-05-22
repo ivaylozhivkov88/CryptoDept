@@ -20,8 +20,16 @@ data class AccuracyDashboardState(
         ModelStat("FFT Harmonic", 72),
         ModelStat("Monte Carlo", 65),
         ModelStat("Wyckoff Cycle", 70),
-        ModelStat("Elliott Wave", 63)
+        ModelStat("Elliott Wave", 63),
+        ModelStat("Hurst Exponent", 68),
+        ModelStat("Fractal Dimension", 66)
+    ),
+    val regimeStats: List<RegimeStat> = listOf(
+        RegimeStat("Bullish (High Vol)", 74),
+        RegimeStat("Bearish (Extreme Fear)", 61),
+        RegimeStat("Crab (Consolidation)", 55)
     )
 )
 
 data class ModelStat(val name: String, val accuracy: Int)
+data class RegimeStat(val name: String, val accuracy: Int)

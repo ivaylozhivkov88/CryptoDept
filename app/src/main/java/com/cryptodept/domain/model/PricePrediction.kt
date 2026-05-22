@@ -17,6 +17,14 @@ data class PricePrediction(
     val modelsAgreement: Float,
     val dataQuality: Float,
     val calculatedAt: Long = System.currentTimeMillis(),
+    val factors: List<PredictionFactor> = emptyList(), // FEATURE 16
+)
+
+data class PredictionFactor(
+    val label: String,
+    val weightPercent: Int,
+    val direction: Direction,
+    val detail: String,
 )
 
 data class PriceTarget(

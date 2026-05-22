@@ -3,6 +3,7 @@ package com.cryptodept.di
 import com.cryptodept.data.api.CoinCapPriceProvider
 import com.cryptodept.data.api.CoinPaprikaPriceProvider
 import com.cryptodept.data.api.CoinbasePriceProvider
+import com.cryptodept.data.api.FirebasePriceProvider
 import com.cryptodept.data.api.KrakenPriceProvider
 import com.cryptodept.domain.repository.PriceProvider
 import dagger.Binds
@@ -36,4 +37,8 @@ abstract class PriceProvidersModule {
     @Binds
     @IntoSet
     abstract fun bindCoinPaprikaProvider(impl: CoinPaprikaPriceProvider): PriceProvider
+
+    @Binds
+    @IntoSet
+    abstract fun bindFirebaseProvider(impl: FirebasePriceProvider): PriceProvider
 }

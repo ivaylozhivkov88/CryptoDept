@@ -1,0 +1,53 @@
+{
+  "terminal_state": {
+    "lastUpdateTimestamp": 1716174000000,
+    "macroBriefing": {
+      "altcoinSeasonIndex": 65,
+      "btcDominance": 51.2,
+      "ethGasGwei": 18,
+      "fearGreedIndex": 72,
+      "globalMarketCapChange": 2.4,
+      "globalMarketCapUsd": 2450000000000,
+      "liquidations1h": {
+        "longsUsd": 1200000,
+        "shortsUsd": 450000,
+        "totalUsd": 1650000
+      },
+      "liquidations24h": {
+        "longsUsd": 45000000,
+        "shortsUsd": 12000000,
+        "totalUsd": 57000000
+      },
+      "narrative": "CLOUD SYNC ACTIVE: Market showing strong recovery. Whale accumulation detected in BTC and SOL pools. High probability of volatility in next 4h.",
+      "riskScore": 28
+    },
+    "marketData": {
+      "bitcoin": {
+        "currentPrice": 69420.5,
+        "id": "bitcoin",
+        "marketCap": 1350000000000,
+        "priceChange24h": 1200.5,
+        "source": "Cloud-Master",
+        "symbol": "btc",
+        "volume24h": 35000000000,
+        "rsi": 42.5,
+        "trend": "BULLISH",
+        "macdSignal": "BULLISH_CROSS",
+        "riskScore": 25
+      },
+      "ethereum": {
+        "currentPrice": 3450.1,
+        "id": "ethereum",
+        "marketCap": 450000000000,
+        "priceChange24h": 85.2,
+        "source": "Cloud-Master",
+        "symbol": "eth",
+        "volume24h": 15000000000,
+        "rsi": 55.0,
+        "trend": "NEUTRAL",
+        "macdSignal": "POSITIVE",
+        "riskScore": 30
+      }
+    }
+  }
+}

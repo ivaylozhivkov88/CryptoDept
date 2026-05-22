@@ -54,28 +54,21 @@ class MarketsViewModel
             } else {
                 cryptoRepository.getAllCoinPrices().map { coins ->
                     if (coins.isNotEmpty()) {
-                        val limit = if (tier.canAccess(AccessTier.PRO)) 200 else 50
-                        val sortedCoins = coins.sortedByDescending { it.marketCap }.take(limit)
+                        // ULTRA-OPTIMIZED TRAFFIC (M1.3):
+                        // 1. Always include Top 5 by Market Cap (Global)
+                        val top5 = coins.sortedByDescending { it.marketCap }.take(5)
                         
-                        // Task 1.2: Enforce strict 3-star limit for FREE tier in UI state
-                        val processedCoins = if (tier == AccessTier.FREE) {
-                            var trackedCount = 0
-                            sortedCoins.map { coin ->
-                                if (coin.isTracked) {
-                                    if (trackedCount < 3) {
-                                        trackedCount++
-                                        coin
-                                    } else {
-                                        coin.copy(isTracked = false)
-                                    }
-                                } else coin
-                            }
-                        } else sortedCoins
+                        // 2. Include User's Watchlist (Limit 3 Free / 15 Pro)
+                        val limit = if (tier.canAccess(AccessTier.PRO)) 15 else 3
+                        val watchlist = coins.filter { it.isTracked }.take(limit)
+                        
+                        // 3. Combine and Deduplicate
+                        val processedCoins = (top5 + watchlist).distinctBy { it.id }
 
                         MarketsUiState.Success(
                             coins = processedCoins,
                             isProUpgradeNeeded = !tier.canAccess(AccessTier.PRO)
-                        )
+                        ).also { triggerScanLine() }
                     } else MarketsUiState.Loading
                 }
             }
@@ -83,6 +76,8 @@ class MarketsViewModel
 
         private val _searchResults = MutableStateFlow<List<CoinPrice>>(emptyList())
         val searchResults: StateFlow<List<CoinPrice>> = _searchResults.asStateFlow()
+
+        private var top100Cache: List<CoinPrice>? = null
 
         private val _sentimentMap = MutableStateFlow<Map<String, com.cryptodept.domain.usecase.SentimentVerdict>>(emptyMap())
         val sentimentMap: StateFlow<Map<String, com.cryptodept.domain.usecase.SentimentVerdict>> = combine(_sentimentMap, demoMode.demoActiveState) { map, active ->
@@ -93,6 +88,22 @@ class MarketsViewModel
 
         private val _errorChannel = Channel<String>()
         val errorEvents = _errorChannel.receiveAsFlow()
+
+        private val _isRefreshing = MutableStateFlow(false)
+        val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
+        private var isScanLineTriggered = false
+        private fun triggerScanLine() {
+            if (isScanLineTriggered) return
+            isScanLineTriggered = true
+            viewModelScope.launch {
+                _isRefreshing.value = true
+                delay(150L)
+                _isRefreshing.value = false
+                delay(1000L) // Debounce
+                isScanLineTriggered = false
+            }
+        }
 
         init {
             refreshData()
@@ -114,15 +125,23 @@ class MarketsViewModel
         )
 
         fun search(query: String) {
-            if (query.length < 2) {
-                _searchResults.value = emptyList()
-                return
-            }
             viewModelScope.launch(Dispatchers.IO) {
-                cryptoRepository.getAllCoinPrices()
-                    .first()
-                    .filter { it.symbol.contains(query, true) || it.name.contains(query, true) }
-                    .let { _searchResults.value = it }
+                if (query.isBlank()) {
+                    if (top100Cache == null) {
+                        top100Cache = cryptoRepository.getAllCoinPrices()
+                            .first()
+                            .sortedByDescending { it.marketCap }
+                            .take(100)
+                    }
+                    _searchResults.value = top100Cache ?: emptyList()
+                } else if (query.length >= 2) {
+                    val allCoins = cryptoRepository.getAllCoinPrices().first()
+                    _searchResults.value = allCoins.filter {
+                        it.symbol.contains(query, true) || it.name.contains(query, true)
+                    }
+                } else {
+                    _searchResults.value = emptyList()
+                }
             }
         }
 
@@ -133,8 +152,8 @@ class MarketsViewModel
                     val currentTracked = cryptoRepository.getTrackedCoinPrices().first()
                     val isCurrentlyTracked = currentTracked.any { it.id == coinId }
                     
-                    if (!isCurrentlyTracked && currentTracked.size >= 10) {
-                        _errorChannel.trySend("Watchlist limit reached (10 coins). Upgrade to PRO for unlimited.")
+                    if (!isCurrentlyTracked && currentTracked.size >= 3) {
+                        _errorChannel.trySend("Watchlist limit reached (3 coins). Upgrade to PRO for 15 slots.")
                         return@launch
                     }
                 }

@@ -29,12 +29,12 @@ val GreenColorSet =
         secondary = Color(0xFF003B00),
         background = Color(0xFF000000),
         surface = Color(0xFF050505),
-        error = Color(0xFFFF3B30),
-        dimText = Color(0xFF008F11),
-        grid = Color(0xFF003B00),
+        error = Color(0xFFFF3131),
+        dimText = Color(0xFF808080), // MUTED GREY
+        grid = Color(0x2600FF41),    // 15% ALPHA
         amber = Color(0xFFFFB000),
-        danger = Color(0xFFFF3B30),
-        textPrimary = Color(0xFFCCCCCC),
+        danger = Color(0xFFFF3131),
+        textPrimary = Color(0xFFFFFFFF), // PURE WHITE VALUES
         isPhosphor = true,
     )
 

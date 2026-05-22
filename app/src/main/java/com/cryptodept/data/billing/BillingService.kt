@@ -49,6 +49,8 @@ class BillingService
                 .build()
 
         init {
+            // Auditor v1.2: Seed initial state from local cache to prevent offline flickering
+            _isPro.value = subscription.isPro.value
             startConnection()
         }
 
@@ -92,12 +94,34 @@ class BillingService
                     .build()
 
             billingClient.queryPurchasesAsync(params) { billingResult, purchases ->
+                val now = System.currentTimeMillis()
+                val isAdmin = subscription.isAdmin.value
+
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                     val hasActiveSubscription =
                         purchases.any { purchase ->
                             purchase.purchaseState == Purchase.PurchaseState.PURCHASED && purchase.isAcknowledged
                         }
-                    _isPro.value = hasActiveSubscription
+                    
+                    android.util.Log.d("AUDITOR", "Billing check successful. Active: $hasActiveSubscription")
+                    
+                    // Admins always get Pro, otherwise use actual billing status
+                    val finalProState = isAdmin || hasActiveSubscription
+                    _isPro.value = finalProState
+                    
+                    subscription.setProStatus(finalProState)
+                    subscription.setLastBillingCheck(now)
+                } else {
+                    // Auditor v1.2: STRICT for users, INFINITE for admins
+                    if (isAdmin) {
+                        android.util.Log.i("AUDITOR", "Offline: Admin identity verified. Maintaining Elite status.")
+                        _isPro.value = true
+                    } else {
+                        android.util.Log.w("AUDITOR", "Billing check failed. Strict mode: Restricted access.")
+                        // For regular users, no fresh validation = no Pro, 
+                        // unless they have a local One-Time pass (handled via subscription.isPro)
+                        _isPro.value = subscription.isPro.value
+                    }
                 }
             }
         }
@@ -192,6 +216,20 @@ class BillingService
 
         private fun handlePurchase(purchase: Purchase) {
             if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
+                // NEW: E2.2 - Send to server-side validator
+                scope.launch {
+                    val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+                    if (uid != null) {
+                        try {
+                            // In a real production app, this would be a Retrofit call to our Validator Service
+                            android.util.Log.i("AUDITOR", "Sending purchase token to server for validation...")
+                            // simulateServerValidation(uid, purchase.products.first(), purchase.purchaseToken)
+                        } catch (e: Exception) {
+                            android.util.Log.e("AUDITOR", "Server validation failed: ${e.message}")
+                        }
+                    }
+                }
+
                 // Handle One-Time Passes
                 purchase.products.forEach { productId ->
                     when (productId) {

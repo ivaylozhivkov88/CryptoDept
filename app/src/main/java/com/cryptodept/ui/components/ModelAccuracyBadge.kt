@@ -3,6 +3,7 @@ package com.cryptodept.ui.components
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
+import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cryptodept.domain.prediction.HistoricalAccuracy
 import com.cryptodept.ui.prediction.PredictionViewModel
@@ -14,6 +15,8 @@ import com.cryptodept.ui.prediction.PredictionViewModel
 fun ModelAccuracyBadge(
     modelName: String,
     coinId: String,
+    modifier: Modifier = Modifier,
+    timeframe: String = "24h",
     viewModel: PredictionViewModel = hiltViewModel(),
     compact: Boolean = true,
 ) {
@@ -24,6 +27,9 @@ fun ModelAccuracyBadge(
     AccuracyBadge(
         accuracyPercent = accuracy?.accuracyPercent?.toInt(),
         sampleSize = accuracy?.sampleSize,
-        compact = compact
+        compact = compact,
+        coinId = coinId,
+        timeframe = timeframe,
+        modifier = modifier
     )
 }

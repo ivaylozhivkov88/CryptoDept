@@ -89,29 +89,34 @@ class AlertsViewModel
 
         fun getCurrentTier(): AccessTier = tierAccessManager.getCurrentTier()
 
-        suspend fun canCreateNewAlert(): AlertCreationResult {
+        fun canCreateNewAlert(): AlertCreationResult {
             val tier = tierAccessManager.getCurrentTier()
-            
-            if (tier.canAccess(AccessTier.PRO)) {
-                return AlertCreationResult.Allowed
-            }
-            
+            if (tier.canAccess(AccessTier.PRO)) return AlertCreationResult.Allowed
+
             val currentCount = _alerts.value.size
-            
-            return if (currentCount < FREE_TIER_ALERT_LIMIT) {
-                AlertCreationResult.Allowed
-            } else {
-                AlertCreationResult.LimitReached(
+            return when {
+                currentCount >= FREE_TIER_ALERT_LIMIT -> AlertCreationResult.LimitReached(
                     currentCount = currentCount,
                     limit = FREE_TIER_ALERT_LIMIT,
                     tierRequired = AccessTier.PRO,
                 )
+                currentCount == FREE_TIER_ALERT_LIMIT - 1 -> AlertCreationResult.ApproachingLimit(
+                    currentCount = currentCount,
+                    limit = FREE_TIER_ALERT_LIMIT,
+                    remaining = 1,
+                )
+                else -> AlertCreationResult.Allowed
             }
         }
     }
 
 sealed class AlertCreationResult {
     object Allowed : AlertCreationResult()
+    data class ApproachingLimit(
+        val currentCount: Int,
+        val limit: Int,
+        val remaining: Int,
+    ) : AlertCreationResult()
     data class LimitReached(
         val currentCount: Int,
         val limit: Int,

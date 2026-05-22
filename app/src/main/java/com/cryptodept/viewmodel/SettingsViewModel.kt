@@ -113,9 +113,21 @@ class SettingsViewModel
             false
         )
 
+        val tiltProtectionEnabled = settings.tiltProtectionEnabled.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            true
+        )
+
         fun setForceShowAllFeatures(enabled: Boolean) {
             viewModelScope.launch {
                 settings.setForceShowAllFeatures(enabled)
+            }
+        }
+
+        fun setTiltProtectionEnabled(enabled: Boolean) {
+            viewModelScope.launch {
+                settings.setTiltProtectionEnabled(enabled)
             }
         }
 
@@ -155,6 +167,15 @@ class SettingsViewModel
             viewModelScope.launch { session.setOnboardingComplete(false) }
         }
 
+        suspend fun deleteAccount(authService: com.cryptodept.data.auth.AuthService): Result<Unit> {
+            val result = authService.deleteAccount()
+            if (result.isSuccess) {
+                // Clear any other local data if necessary
+                session.setOnboardingComplete(false)
+            }
+            return result
+        }
+
         fun setAdminStatus(isAdmin: Boolean) {
             // Check if security is compromised, but allow bypass for the TEST button (admin = true)
             // if we are in a debuggable state or if it's explicitly allowed.
@@ -170,5 +191,15 @@ class SettingsViewModel
 
         fun setProStatus(enabled: Boolean) {
             viewModelScope.launch { subscription.setProStatus(enabled) }
+        }
+
+        fun forceSyncIdentity(authService: com.cryptodept.data.auth.AuthService) {
+            authService.checkIdentity()
+            viewModelScope.launch {
+                val isAdminNow = authService.currentUser.value?.email?.lowercase()?.trim() in setOf(
+                    "ivaylozhivkov14@gmail.com", "condignia@gmail.com"
+                )
+                subscription.setAdminStatus(isAdminNow)
+            }
         }
     }
