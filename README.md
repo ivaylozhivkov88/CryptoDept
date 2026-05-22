@@ -1,77 +1,81 @@
-# 🧠 CryptoDept Intelligence Terminal
-## Level 1.1 | Multi-Agent Market Orchestration System
+# 📟 CryptoDept Terminal v1.1
+> **The Multi-Agent Intelligence Hub for Digital Assets.**
 
-> "Data is the new liquidity. Hype is the noise. We filter the noise."
+![Android](https://img.shields.io/badge/Platform-Android-00FF41?style=for-the-badge&logo=android&logoColor=black)
+![Kotlin](https://img.shields.io/badge/Language-Kotlin-00FF41?style=for-the-badge&logo=kotlin&logoColor=black)
+![Compose](https://img.shields.io/badge/UI-Jetpack_Compose-00FF41?style=for-the-badge&logo=jetpackcompose&logoColor=black)
+![License](https://img.shields.io/badge/License-Proprietary-red?style=for-the-badge)
 
----
-
-### 📡 SYSTEM STATUS: [MISSION_CRITICAL]
-CryptoDept is not just an application; it is a **synthetic intelligence terminal** for high-frequency market awareness. It combines deep on-chain monitoring with an ensemble of 6 mathematical forecasting engines and real-time AI narrative synthesis.
-
-[![Engine](https://img.shields.io/badge/Intelligence-Multi--Agent_Core-00FF41?style=for-the-badge&logo=android)]()
-[![Security](https://img.shields.io/badge/Database-SQLCipher_Hardened-blue?style=for-the-badge)]()
-[![Network](https://img.shields.io/badge/Feed-Direct_RPC_Link-orange?style=for-the-badge)]()
+**CryptoDept** is not just another tracker. It is a high-performance Android terminal designed for professional traders, powered by a decentralized-style **Multi-Agent Orchestration Framework**. It synthesizes technical analysis, on-chain whale movement, and social sentiment into a single, cohesive market narrative.
 
 ---
 
-### 🛠️ CORE INTELLIGENCE BLOCKS
+## 🚀 Core Features
 
-#### 🕵️ [AGENT-SCOUT] Ghost Whale Monitoring
-Direct RPC integration with Bitcoin, Ethereum, and Solana mainnets.
-*   **Threshold:** $500,000+ USD per transaction.
-*   **Intelligence Base:** Etherscan, Helius, Mempool.space.
-*   **Capabilities:** Identification of "Smart Money" accumulation vs. retail distribution.
+### 🧠 Multi-Agent Intelligence
+The heart of the terminal consists of specialized AI agents:
+*   **[SENTINEL]**: Quantitative Technical Analysis (RSI, MACD, FFT).
+*   **[GHOST WHALE]**: Tracking capital flow via Etherscan & Helius.
+*   **[PULSE]**: Real-time social sentiment analysis.
+*   **[ORACLE]**: Predictive mathematical modeling (Fourier, Monte Carlo).
 
-#### 🔮 [AGENT-QUANT] Multi-Model Oracle
-An ensemble forecasting system that executes 6 independent statistical models:
-*   **FFT Analysis:** Cycle detection in the frequency domain.
-*   **Monte Carlo:** Multi-path probability distribution.
-*   **Wyckoff Logic:** Institutional phase identification.
-*   **Elliott Wave:** Fractal structure validation.
-*   **Hurst Exponent:** Persistence vs. Mean Reversion scoring.
-*   **Linear Regression:** Dynamic trend projection.
-*   *Transparent Accuracy Badges display historical performance for every signal.*
-
-#### 🎙️ [AGENT-NARRATOR] Live Narrative Synthesis
-Powered by **Google Gemini 1.5 Flash**, the system converts billions of data points into a readable, streaming executive briefing. It bridges the gap between raw numbers and actionable strategy.
-
-#### ⚖️ [AGENT-AUDITOR] The Trader's Toolkit
-*   **Position Sizer:** Risk-weighted leverage calculator.
-*   **MTF Analyzer:** Multi-timeframe confluence matrix.
-*   **Psychology Coach:** Automatic terminal lock during periods of detected emotional volatility (Tilt Protection).
-*   **DeFi Intelligence:** Real-time yield monitoring via DefiLlama.
+### ⚡ Professional Trading Tools
+*   **Liquidation Heatmaps**: Visualize where the "pain" is for market participants.
+*   **Whale Feed**: Real-time alerts for large $500k+ swaps.
+*   **Global Market Dashboard**: 3D Gauges for Fear & Greed and Altcoin Season.
+*   **Terminal-Style UX**: Designed for high-density information display.
 
 ---
 
-### 🏗️ TECHNICAL SPECIFICATIONS
+## 🛠 Tech Stack
 
-| Layer | Protocol / Technology |
-| :--- | :--- |
-| **Interface** | Jetpack Compose (CRT-Phosphor Engine) |
-| **Orchestration** | Clean Architecture (Domain-Driven Design) |
-| **Logic Flux** | Kotlin Coroutines + Reactive Flows |
-| **Hardened Vault** | SQLCipher AES-256 Local Encryption |
-| **Market Gateway** | Retrofit + OkHttp + Certificate Pinner |
-| **Stability** | RootBeer + Tamper Detection + Compose Error Boundaries |
+*   **UI**: Jetpack Compose with custom Phosphor/Monospace theme.
+*   **Architecture**: Clean Architecture + MVVM + MVI-lite (Flow-driven).
+*   **Dependency Injection**: Hilt.
+*   **Database**: Room (with encrypted storage for sensitive data).
+*   **Networking**: Retrofit & OKHttp (Multi-source aggregation).
+*   **Real-time**: WebSockets for live price consensus.
 
 ---
 
-### 🛡️ OPERATIONAL CONSTRAINTS (DISCLAIMER)
-1.  **NO FINANCIAL ADVICE:** This terminal provides data-driven insights only.
-2.  **RISK ACKNOWLEDGMENT:** Market forecasting is probabilistic. Past accuracy does not guarantee future results.
-3.  **SOURCE RELIABILITY:** On-chain data is descriptive of historical movement, not a guarantee of future intent.
+## 🔧 Installation & Setup
+
+### Requirements
+*   **Android Studio**: Ladybug (2024.2.1) or newer.
+*   **JDK**: 17+.
+*   **API Level**: 26+ (Android 8.0).
+
+### Local Configuration
+To build the project, you must provide your own API keys. Create a `local.properties` file in the root directory:
+
+```properties
+# D:/CryptoDept/local.properties
+COINGECKO_API_KEY=your_key_here
+COINGLASS_API_KEY=your_key_here
+CRYPTOPANIC_API_KEY=your_key_here
+HELIUS_API_KEY=your_key_here
+```
+
+### Build Instructions
+1. Clone the repository.
+2. Sync Gradle.
+3. Run `:app:assembleDebug`.
 
 ---
 
-### 💳 ACCESS PROTOCOLS
-*   **Level 0 (Free):** Core Dashboard + Market Feed + Daily AI Briefing.
-*   **Pro Operator:** Full access to Whale Tracker, Oracle Ensemble, and the complete Trader Toolkit.
-    *   *Flexible Passes available (1/3/7 days) or full Command Subscriptions (Monthly/Quarterly/Annual).*
+## 🏗 Architecture Overview
+
+The project follows a strict **Layered Clean Architecture**:
+1.  **`:domain`**: Pure Kotlin. Contains Use Cases, Repository Interfaces, and the `MultiAgentCoordinator`.
+2.  **`:data`**: Implementations of repositories, Retrofit APIs, and Room DAOs.
+3.  **`:ui`**: Jetpack Compose screens, ViewModels, and the Phosphor Theme engine.
 
 ---
 
-### 📡 CONNECT
-*   **Terminal Issues:** [GitHub Issue Tracker]
-*   **Direct Link:** [vaylo_zhivkov@abv.bg]
+## 📄 Compliance & Legal
+*   [Privacy Policy](PRIVACY_POLICY.md)
+*   [Delete Account Instructions](DELETE_ACCOUNT.md)
+*   [Intelligence Protocols (AGENTS.MD)](AGENTS.MD)
 
-*"Built by a solo architect using Agentic AI-Assisted Engineering. Optimized for those who trade with intent."*
+---
+*CryptoDept Intelligence Unit — Authorized Access Only*

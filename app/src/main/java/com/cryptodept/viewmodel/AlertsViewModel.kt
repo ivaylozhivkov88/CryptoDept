@@ -87,10 +87,10 @@ class AlertsViewModel
             }
         }
 
-        fun getCurrentTier(): AccessTier = tierAccessManager.getCurrentTier()
+        fun getCachedTier(): AccessTier = tierAccessManager.getCachedTier()
 
         fun canCreateNewAlert(): AlertCreationResult {
-            val tier = tierAccessManager.getCurrentTier()
+            val tier = tierAccessManager.getCachedTier()
             if (tier.canAccess(AccessTier.PRO)) return AlertCreationResult.Allowed
 
             val currentCount = _alerts.value.size

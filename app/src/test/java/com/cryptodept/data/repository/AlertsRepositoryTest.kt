@@ -58,7 +58,7 @@ class AlertsRepositoryTest {
 
         coVerify { alertDao.markAsTriggered(1) }
         coVerify { alertNotificationService.showPriceAlert(any(), 61000.0) }
-        coVerify { hapticService.alert() }
+        verify { hapticService.priceAlert() }
     }
 
     @Test

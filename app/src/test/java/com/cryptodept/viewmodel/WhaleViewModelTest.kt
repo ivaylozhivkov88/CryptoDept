@@ -7,7 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Before
@@ -15,17 +15,18 @@ import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class WhaleViewModelTest {
-    private val repository: WhaleRepository = mockk()
-    private val wsManager: UnifiedWebSocketManager = mockk(relaxed = true)
+    private val aggregator: com.cryptodept.domain.usecase.whale.AggregateWhaleActivityUseCase = mockk()
+    private val demoMode: com.cryptodept.util.DemoModeProvider = mockk(relaxed = true)
+    private val haptic: com.cryptodept.util.HapticService = mockk(relaxed = true)
     private lateinit var viewModel: WhaleViewModel
     private val testDispatcher = UnconfinedTestDispatcher()
 
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
-        every { repository.getWhaleTransactions() } returns flowOf(emptyList())
-        coEvery { repository.refreshWhaleTransactions() } returns Result.success(Unit)
-        every { wsManager.marketEvents } returns flowOf()
+        coEvery { aggregator.execute(any()) } returns emptyList()
+        every { demoMode.demoActiveState } returns MutableStateFlow(false)
+        every { demoMode.isActive() } returns false
     }
 
     @After
@@ -35,7 +36,7 @@ class WhaleViewModelTest {
 
     @Test
     fun `init calls refresh and updates loading state`() = runTest {
-        viewModel = WhaleViewModel(repository, wsManager)
+        viewModel = WhaleViewModel(aggregator, demoMode, haptic)
         
         viewModel.isRefreshing.test {
             assertThat(awaitItem()).isFalse()

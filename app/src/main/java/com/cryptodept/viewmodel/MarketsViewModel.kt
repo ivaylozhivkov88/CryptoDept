@@ -147,7 +147,7 @@ class MarketsViewModel
 
         fun toggleTracking(coinId: String) {
             viewModelScope.launch(Dispatchers.IO) {
-                val tier = tierAccessManager.getCurrentTier()
+                val tier = tierAccessManager.getCachedTier()
                 if (!tier.canAccess(AccessTier.PRO)) {
                     val currentTracked = cryptoRepository.getTrackedCoinPrices().first()
                     val isCurrentlyTracked = currentTracked.any { it.id == coinId }

@@ -55,6 +55,12 @@ This document defines the roles, logic, and communication protocols for the spec
 *   **Output:** `IntegrityReport` (Price variance analysis, cache health).
 *   **Status:** [ACTIVE] Integrated into `MultiAgentCoordinator`.
 
+### ✍️ [AGENT-SCRIBE] Documentation Architect
+*   **Mission:** Converting complex multi-agent logic and Android architecture into world-class documentation.
+*   **Domain:** Technical Writing, Legal Compliance, & Onboarding UX.
+*   **Intelligence Base:** Project codebase, Android SDK standards, Regulatory requirements.
+*   **Output:** `README.md`, `PRIVACY_POLICY.md`, `ARCHITECTURAL_GUIDE.md`.
+
 ### 🎼 [AGENT-CORE] Narrative Orchestrator
 *   **Mission:** Synthesizing all sub-agent reports into a strategic executive summary.
 *   **Domain:** Reasoning & Strategy.

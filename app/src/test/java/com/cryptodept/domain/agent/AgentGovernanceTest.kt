@@ -30,7 +30,8 @@ class AgentGovernanceTest {
     fun `verify integrity agent identity`() {
         val api = io.mockk.mockk<com.cryptodept.data.api.CoinGeckoApi>()
         val repo = io.mockk.mockk<com.cryptodept.domain.repository.CryptoRepository>()
-        val agent = com.cryptodept.domain.agent.DataIntegrityAgent(api, repo)
+        val integrity = io.mockk.mockk<com.cryptodept.domain.manager.SystemIntegrityService>(relaxed = true)
+        val agent = com.cryptodept.domain.agent.DataIntegrityAgent(api, repo, integrity)
         assertEquals("AGENT-INTEGRITY", agent.id)
         assertEquals("DATA_INTEGRITY_UNIT", agent.name)
     }

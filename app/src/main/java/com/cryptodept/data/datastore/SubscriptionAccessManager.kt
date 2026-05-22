@@ -11,7 +11,7 @@ interface SubscriptionAccessManager {
     val isPro: StateFlow<Boolean>
     val isAdmin: StateFlow<Boolean>
 
-    fun isAdmin(): Boolean
+    fun checkIsAdmin(): Boolean
     fun getAdminStatusFlow(): Flow<Boolean>
 
     fun setProStatus(isPro: Boolean)

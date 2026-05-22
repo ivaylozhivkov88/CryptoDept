@@ -32,6 +32,9 @@ class CryptoRepositoryTest {
     private val krakenWS = mockk<KrakenWebSocketService>(relaxed = true)
     private val billingService = mockk<BillingService>(relaxed = true)
     private val alertsRepository = mockk<AlertsRepository>(relaxed = true)
+    private val firebaseDataSource = mockk<com.cryptodept.data.remote.source.FirebaseRemoteDataSource>(relaxed = true)
+    private val subscription = mockk<com.cryptodept.data.datastore.SubscriptionAccessManager>(relaxed = true)
+    private val demoMode = mockk<com.cryptodept.util.DemoModeProvider>(relaxed = true)
 
     @Before
     fun setup() {
@@ -48,6 +51,10 @@ class CryptoRepositoryTest {
 
         every { billingService.isPro } returns MutableStateFlow(false)
         every { coinDao.getTrackedCoins() } returns flowOf(emptyList())
+        every { demoMode.demoActiveState } returns MutableStateFlow(false)
+        every { subscription.isPro } returns MutableStateFlow(false)
+        every { subscription.isAdmin } returns MutableStateFlow(false)
+        coEvery { coinDao.deleteStablecoins() } just Runs
 
         repository =
             CryptoRepositoryImpl(
@@ -59,7 +66,10 @@ class CryptoRepositoryTest {
                 priceHistoryRepository,
                 networkHealthDao,
                 binanceWS,
-                krakenWS
+                krakenWS,
+                firebaseDataSource,
+                subscription,
+                demoMode
             )
         repository.alertsRepository = alertsRepository
     }

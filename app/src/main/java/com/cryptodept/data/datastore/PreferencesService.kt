@@ -225,7 +225,7 @@ class PreferencesService
             }
         }
 
-        override fun isAdmin(): Boolean = _isAdmin.value
+        override fun checkIsAdmin(): Boolean = _isAdmin.value
 
         override fun getAdminStatusFlow(): Flow<Boolean> = _isAdmin.asStateFlow()
 

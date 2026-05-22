@@ -75,4 +75,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindCoinGlassRepository(impl: CoinGlassRepositoryImpl): CoinGlassRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindTierAccessManager(impl: com.cryptodept.domain.tier.TierAccessManagerImpl): com.cryptodept.domain.tier.TierAccessManager
 }

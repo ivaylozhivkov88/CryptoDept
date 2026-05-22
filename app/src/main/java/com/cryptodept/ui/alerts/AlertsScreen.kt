@@ -117,7 +117,7 @@ fun AlertsScreen(
                     fontSize = TerminalConfig.UI.FONT_SIZE_HEADER,
                     fontWeight = FontWeight.Bold,
                 )
-                val tier = viewModel.getCurrentTier()
+                val tier = viewModel.getCachedTier()
                 FeatureHelpIcon(
                     feature = if (tier.canAccess(AccessTier.PRO)) FeatureKey.ALERTS_UNLIMITED else FeatureKey.ALERTS_LIMITED_3
                 )

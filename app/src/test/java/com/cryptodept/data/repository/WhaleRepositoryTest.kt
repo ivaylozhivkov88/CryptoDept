@@ -16,12 +16,14 @@ class WhaleRepositoryTest {
     private val etherscanClient: EtherscanWhaleClient = mockk()
     private val heliusClient: HeliusWhaleClient = mockk()
     private val btcClient: MempoolWhaleClient = mockk()
+    private val firebaseDataSource: com.cryptodept.data.remote.source.FirebaseRemoteDataSource = mockk(relaxed = true)
 
     private lateinit var repository: WhaleRepositoryImpl
 
     @Before
     fun setup() {
-        repository = WhaleRepositoryImpl(etherscanClient, heliusClient, btcClient)
+        io.mockk.every { firebaseDataSource.getTerminalState() } returns kotlinx.coroutines.flow.flowOf(null)
+        repository = WhaleRepositoryImpl(etherscanClient, heliusClient, btcClient, firebaseDataSource)
     }
 
     @Test

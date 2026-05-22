@@ -26,7 +26,8 @@ class SignalsViewModelTest {
     private val getOHLCUseCase: GetOHLCUseCase = mockk()
     private val taEngine: TechnicalAnalysisEngine = mockk(relaxed = true)
     private val alphaEngine: AlphaSignalEngine = mockk()
-    private val preferencesService: PreferencesService = mockk(relaxed = true)
+    private val subscription: com.cryptodept.data.datastore.SubscriptionAccessManager = mockk(relaxed = true)
+    private val demoMode: com.cryptodept.util.DemoModeProvider = mockk(relaxed = true)
 
     private lateinit var viewModel: SignalsViewModel
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -35,8 +36,9 @@ class SignalsViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         every { alphaEngine.signals } returns flowOf(emptyList())
-        every { preferencesService.isPro } returns MutableStateFlow(false)
-        every { preferencesService.isAdmin } returns MutableStateFlow(false)
+        every { subscription.isPro } returns MutableStateFlow(false)
+        every { subscription.isAdmin } returns MutableStateFlow(false)
+        every { demoMode.demoActiveState } returns MutableStateFlow(false)
         coEvery { getOHLCUseCase(any(), any()) } returns flowOf(emptyList())
     }
 
@@ -47,7 +49,7 @@ class SignalsViewModelTest {
 
     @Test
     fun `initial states are correct`() = runTest {
-        viewModel = SignalsViewModel(cryptoRepository, getOHLCUseCase, taEngine, alphaEngine, preferencesService)
+        viewModel = SignalsViewModel(cryptoRepository, getOHLCUseCase, taEngine, alphaEngine, subscription, demoMode)
         
         viewModel.isLoading.test {
             // Might be already false if logic completes fast
@@ -62,7 +64,7 @@ class SignalsViewModelTest {
         coEvery { getOHLCUseCase(any(), any()) } returns flowOf(ohlc)
         every { taEngine.calculateRSI(any()) } returns 50.0
         
-        viewModel = SignalsViewModel(cryptoRepository, getOHLCUseCase, taEngine, alphaEngine, preferencesService)
+        viewModel = SignalsViewModel(cryptoRepository, getOHLCUseCase, taEngine, alphaEngine, subscription, demoMode)
         
         viewModel.signals.test {
             // First item might be empty

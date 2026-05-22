@@ -22,7 +22,9 @@ class AnalysisViewModelTest {
     private val runDeepAnalysis: RunDeepAnalysisUseCase = mockk()
     private val generateReport: GenerateAnalysisReportUseCase = mockk()
     private val observeAnalysisHistory: ObserveAnalysisHistoryUseCase = mockk()
-    private val preferencesService: PreferencesService = mockk(relaxed = true)
+    private val subscription: com.cryptodept.data.datastore.SubscriptionAccessManager = mockk(relaxed = true)
+    private val remoteConfig: com.cryptodept.data.remoteconfig.RemoteConfigService = mockk(relaxed = true)
+    private val demoMode: com.cryptodept.util.DemoModeProvider = mockk(relaxed = true)
 
     private lateinit var viewModel: AnalysisViewModel
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -30,9 +32,12 @@ class AnalysisViewModelTest {
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
-        every { preferencesService.isAdmin } returns MutableStateFlow(false)
-        every { preferencesService.isPro } returns MutableStateFlow(false)
+        every { subscription.isAdmin } returns MutableStateFlow(false)
+        every { subscription.isPro } returns MutableStateFlow(true) // Pro users skip limits
+        coEvery { subscription.getAiReportsCountToday() } returns 0
+        every { remoteConfig.getFreeAiLimitDaily() } returns 10
         every { observeAnalysisHistory() } returns flowOf(emptyList())
+        every { demoMode.demoActiveState } returns MutableStateFlow(false)
     }
 
     @After
@@ -45,7 +50,7 @@ class AnalysisViewModelTest {
         val mockResult = mockk<DeepAnalysisResult>()
         coEvery { runDeepAnalysis.execute(any(), any()) } returns Result.success(mockResult)
         
-        viewModel = AnalysisViewModel(runDeepAnalysis, generateReport, observeAnalysisHistory, preferencesService)
+        viewModel = AnalysisViewModel(runDeepAnalysis, generateReport, observeAnalysisHistory, subscription, remoteConfig, demoMode)
         
         viewModel.analysisState.test {
             // StateFlow might skip Loading and jump to Success in unconfined dispatcher
@@ -64,7 +69,7 @@ class AnalysisViewModelTest {
         val mockResult = mockk<DeepAnalysisResult>()
         coEvery { generateReport.execute(any()) } returns flowOf("Report content")
         
-        viewModel = AnalysisViewModel(runDeepAnalysis, generateReport, observeAnalysisHistory, preferencesService)
+        viewModel = AnalysisViewModel(runDeepAnalysis, generateReport, observeAnalysisHistory, subscription, remoteConfig, demoMode)
         
         viewModel.aiReport.test {
             // Skip initial null
