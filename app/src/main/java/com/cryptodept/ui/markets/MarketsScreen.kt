@@ -32,7 +32,38 @@ import com.cryptodept.ui.theme.LocalTerminalColors
 import com.cryptodept.util.TerminalConfig
 import com.cryptodept.viewmodel.MarketsUiState
 import com.cryptodept.viewmodel.MarketsViewModel
+import androidx.compose.ui.tooling.preview.Preview
+import com.cryptodept.ui.theme.CryptoDeptTheme
 import java.util.Locale
+
+@Preview(showBackground = true, backgroundColor = 0xFF000000)
+@Composable
+fun MarketsListPreview() {
+    val sampleCoins = listOf(
+        CoinPrice(id = "bitcoin", symbol = "BTC", name = "Bitcoin", currentPrice = 64231.5, priceChange24h = 1000.0, priceChangePercentage24h = 1.5, marketCap = 0.0, totalVolume = 0.0, high24h = 0.0, low24h = 0.0, lastUpdated = 0L, isTracked = true),
+        CoinPrice(id = "ethereum", symbol = "ETH", name = "Ethereum", currentPrice = 3450.2, priceChange24h = -50.0, priceChangePercentage24h = -2.1, marketCap = 0.0, totalVolume = 0.0, high24h = 0.0, low24h = 0.0, lastUpdated = 0L, isTracked = false),
+        CoinPrice(id = "solana", symbol = "SOL", name = "Solana", currentPrice = 145.8, priceChange24h = 10.0, priceChangePercentage24h = 5.7, marketCap = 0.0, totalVolume = 0.0, high24h = 0.0, low24h = 0.0, lastUpdated = 0L, isTracked = true),
+        CoinPrice(id = "ripple", symbol = "XRP", name = "Ripple", currentPrice = 0.62, priceChange24h = 0.01, priceChangePercentage24h = 0.5, marketCap = 0.0, totalVolume = 0.0, high24h = 0.0, low24h = 0.0, lastUpdated = 0L, isTracked = false)
+    )
+    
+    val sentimentMap = mapOf(
+        "bitcoin" to com.cryptodept.domain.usecase.SentimentVerdict.BULLISH,
+        "ethereum" to com.cryptodept.domain.usecase.SentimentVerdict.BEARISH
+    )
+
+    CryptoDeptTheme {
+        Box(modifier = Modifier.background(Color.Black).padding(16.dp)) {
+            MarketsList(
+                coins = sampleCoins,
+                isProUpgradeNeeded = true,
+                sentimentMap = sentimentMap,
+                onCoinClick = {},
+                onToggleTracking = {},
+                onUpgradeClick = {}
+            )
+        }
+    }
+}
 
 @Composable
 fun MarketsScreen(

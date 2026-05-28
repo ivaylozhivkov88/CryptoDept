@@ -19,6 +19,11 @@ secrets.properties
 google-services.json
 app/google-services.json
 
+# Kotlin/IDE junk
+.kotlin/
+.idea/appInsightsSettings.xml
+*.salive
+
 # Keystores & Secrets
 *.jks
 *.txt
