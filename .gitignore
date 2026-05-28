@@ -20,10 +20,6 @@ secrets_audit_report.txt
 _project_dump.txt
 *.txt.bak
 
-# Firebase
-google-services.json
-app/google-services.json
-
 # Kotlin/IDE junk
 .kotlin/
 .idea/appInsightsSettings.xml
