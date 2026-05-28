@@ -23,6 +23,8 @@ import com.cryptodept.viewmodel.DashboardUiState
 import com.cryptodept.viewmodel.DashboardViewModel
 import com.cryptodept.domain.tier.AccessTier
 import com.cryptodept.domain.manager.IntegrityLog
+import com.cryptodept.ui.tutorial.tutorialTarget
+import com.cryptodept.domain.tutorial.TutorialTargetId
 
 @Composable
 fun DashboardScreen(
@@ -108,7 +110,10 @@ fun DashboardContent(
                 )
 
                 // 2. [9] SYSTEM STATUS BAR (ORDER #2)
-                AgentStatusLine(agentStatuses)
+                AgentStatusLine(
+                    statuses = agentStatuses,
+                    modifier = Modifier.tutorialTarget(TutorialTargetId.DASH_NETWORK_HEALTH)
+                )
                 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -130,7 +135,8 @@ fun DashboardContent(
                         networkHealth = networkHealth,
                         macroIntelligence = macroIntelligence,
                         pricesLastUpdated = successData.pricesLastUpdated,
-                        onCoinClick = {}
+                        onCoinClick = {},
+                        modifier = Modifier.tutorialTarget(TutorialTargetId.DASH_SENTIMENT_GAUGE)
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -162,7 +168,8 @@ fun DashboardContent(
                     // 8. [5] SENTINEL STRIP (ORDER #8)
                     OracleNarrativeStrip(
                         narrative = aiSummary,
-                        onExpand = { navController.navigate("agent_hub") }
+                        onExpand = { navController.navigate("agent_hub") },
+                        modifier = Modifier.tutorialTarget(TutorialTargetId.DASH_AI_NARRATIVE)
                     )
 
                     Spacer(modifier = Modifier.weight(1f))
@@ -173,7 +180,8 @@ fun DashboardContent(
                         alerts = successData.cloudWhaleAlerts,
                         lastUpdatedMs = successData.whaleDataLastUpdated,
                         navController = navController,
-                        tier = tier
+                        tier = tier,
+                        modifier = Modifier.tutorialTarget(TutorialTargetId.DASH_WHALE_FEED)
                     )
                     
                     Spacer(modifier = Modifier.height(4.dp))

@@ -26,12 +26,13 @@ fun DashboardWhaleSection(
     alerts: List<com.cryptodept.data.remote.model.CloudWhaleAlert>,
     lastUpdatedMs: Long,
     navController: NavController,
-    tier: AccessTier
+    tier: AccessTier,
+    modifier: Modifier = Modifier
 ) {
     val colors = LocalTerminalColors.current
     
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
             .border(0.5.dp, colors.grid.copy(alpha = 0.2f), RectangleShape)

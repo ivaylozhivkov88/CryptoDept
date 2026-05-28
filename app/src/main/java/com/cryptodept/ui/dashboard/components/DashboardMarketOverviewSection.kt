@@ -30,10 +30,11 @@ fun DashboardMarketOverviewSection(
     networkHealth: NetworkHealth?,
     macroIntelligence: MacroIntelligence?,
     pricesLastUpdated: Long,
-    onCoinClick: (String) -> Unit
+    onCoinClick: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally

@@ -45,12 +45,16 @@ fun DashboardNarrativeSection(
 }
 
 @Composable
-fun OracleNarrativeStrip(narrative: String, onExpand: () -> Unit) {
+fun OracleNarrativeStrip(
+    narrative: String,
+    onExpand: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val colors = LocalTerminalColors.current
     val isError = narrative.contains("SIGNAL_LOST")
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(36.dp)
             .border(0.5.dp, if (isError) colors.danger else colors.primary, RectangleShape)

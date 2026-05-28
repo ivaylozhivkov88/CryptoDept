@@ -21,12 +21,15 @@ import com.cryptodept.ui.theme.LocalTerminalColors
 import java.util.Locale
 
 @Composable
-fun AgentStatusLine(agentStatuses: Map<String, AgentStatus>) {
+fun AgentStatusLine(
+    statuses: Map<String, AgentStatus>,
+    modifier: Modifier = Modifier
+) {
     val colors = LocalTerminalColors.current
-    val allActive = agentStatuses.values.all { it == AgentStatus.SUCCESS }
+    val allActive = statuses.values.all { it == AgentStatus.SUCCESS }
     
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
