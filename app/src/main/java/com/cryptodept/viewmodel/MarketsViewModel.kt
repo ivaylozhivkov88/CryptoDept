@@ -33,7 +33,6 @@ class MarketsViewModel
     @Inject
     constructor(
         private val cryptoRepository: CryptoRepository,
-        private val sentimentAnalyzer: com.cryptodept.domain.usecase.SentimentAnalyzer,
         private val errorMapper: com.cryptodept.util.ErrorMessageMapper,
         private val demoMode: com.cryptodept.util.DemoModeProvider,
         private val tierAccessManager: TierAccessManager,

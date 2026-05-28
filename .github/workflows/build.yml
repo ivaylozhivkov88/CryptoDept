@@ -9,6 +9,8 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: actions/checkout@v4
       
@@ -26,11 +28,13 @@ jobs:
           echo "BINANCE_API_KEY=${{ secrets.BINANCE_API_KEY }}" >> local.properties
           echo "ETHERSCAN_API_KEY=${{ secrets.ETHERSCAN_API_KEY }}" >> local.properties
           echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> local.properties
+          echo "GEMINI_API_KEY_ALT=${{ secrets.GEMINI_API_KEY_ALT }}" >> local.properties
           echo "HELIUS_API_KEY=${{ secrets.HELIUS_API_KEY }}" >> local.properties
           echo "CRYPTOPANIC_API_KEY=${{ secrets.CRYPTOPANIC_API_KEY }}" >> local.properties
           echo "COINGLASS_API_KEY=${{ secrets.COINGLASS_API_KEY }}" >> local.properties
           echo "ALPHA_VANTAGE_API_KEY=${{ secrets.ALPHA_VANTAGE_API_KEY }}" >> local.properties
           echo "COINMARKETCAL_API_KEY=${{ secrets.COINMARKETCAL_API_KEY }}" >> local.properties
+          echo "GOOGLE_WEB_CLIENT_ID=${{ secrets.GOOGLE_WEB_CLIENT_ID }}" >> local.properties
 
       - name: Static Analysis (Detekt)
         run: ./gradlew detekt
