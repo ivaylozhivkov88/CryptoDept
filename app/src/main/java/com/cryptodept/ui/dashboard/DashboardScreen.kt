@@ -1,6 +1,5 @@
 package com.cryptodept.ui.dashboard
 
-import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -41,16 +40,6 @@ fun DashboardScreen(
     val broadcastMessage by viewModel.broadcastMessage.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val integrityLogs by viewModel.integrityLogs.collectAsStateWithLifecycle()
-    
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val activity = remember(context) {
-        var currentContext = context
-        while (currentContext is android.content.ContextWrapper) {
-            if (currentContext is android.app.Activity) return@remember currentContext
-            currentContext = currentContext.baseContext
-        }
-        null
-    }
 
     DashboardContent(
         uiState = uiState,
@@ -64,7 +53,6 @@ fun DashboardScreen(
         isRefreshing = isRefreshing,
         integrityLogs = integrityLogs,
         navController = navController,
-        activity = activity,
         onHeroCoinChanged = { viewModel.onHeroCoinChanged(it) }
     )
 }
@@ -82,7 +70,6 @@ fun DashboardContent(
     isRefreshing: Boolean,
     integrityLogs: List<IntegrityLog>,
     navController: NavController,
-    activity: android.app.Activity?,
     onHeroCoinChanged: (CoinPrice) -> Unit
 ) {
     val colors = LocalTerminalColors.current
@@ -100,7 +87,17 @@ fun DashboardContent(
             ) {
                 val currentPrices = successData?.prices ?: emptyList()
 
-                // 1. [2] MARKET_TICKER (ORDER #1)
+                // 0. BROADCAST
+                if (broadcastMessage.isNotEmpty()) {
+                    Text(
+                        text = "BROADCAST: $broadcastMessage",
+                        color = colors.amber,
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                }
+
+                // 1. MARKET_TICKER
                 DashboardTickerSection(
                     currentPrices = currentPrices,
                     networkHealth = networkHealth,
@@ -109,7 +106,7 @@ fun DashboardContent(
                     showVerdict = false
                 )
 
-                // 2. [9] SYSTEM STATUS BAR (ORDER #2)
+                // 2. SYSTEM STATUS
                 AgentStatusLine(
                     statuses = agentStatuses,
                     modifier = Modifier.tutorialTarget(TutorialTargetId.DASH_NETWORK_HEALTH)
@@ -121,7 +118,6 @@ fun DashboardContent(
                     DashboardSkeleton(modifier = Modifier.fillMaxSize())
                 } else if (successData != null) {
                     
-                    // 3. [4] HERO_PRICE_ROTATOR (ORDER #3)
                     HeroPriceRotator(
                         prices = currentPrices,
                         onCoinChanged = onHeroCoinChanged
@@ -129,7 +125,6 @@ fun DashboardContent(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // 4. [7] MARKET_GAUGES (ORDER #4)
                     DashboardMarketOverviewSection(
                         currentPrices = emptyList(),
                         networkHealth = networkHealth,
@@ -141,12 +136,10 @@ fun DashboardContent(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // 5. [3] GLOBAL_VERDICT (ORDER #5)
                     GlobalVerdictStrip(networkHealth)
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // 6. [6] AI_PICK STRIP (ORDER #6)
                     AiPickStrip(
                         symbol = successData.dailyPick?.coinSymbol ?: "BTC",
                         direction = successData.dailyPick?.direction ?: "NEUTRAL",
@@ -157,7 +150,6 @@ fun DashboardContent(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // 7. [1] WATCHLIST_OPERATIVES (ORDER #7)
                     DashboardWatchlistSection(
                         currentPrices = currentPrices,
                         onCoinClick = { navController.navigate(Screen.CoinDetail.createRoute(it)) }
@@ -165,7 +157,6 @@ fun DashboardContent(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // 8. [5] SENTINEL STRIP (ORDER #8)
                     OracleNarrativeStrip(
                         narrative = aiSummary,
                         onExpand = { navController.navigate("agent_hub") },
@@ -174,7 +165,6 @@ fun DashboardContent(
 
                     Spacer(modifier = Modifier.weight(1f))
 
-                    // 9. [8] WHALE_TRACKER_DATA (ORDER #9)
                     DashboardWhaleSection(
                         signal = successData.whaleSignal,
                         alerts = successData.cloudWhaleAlerts,
@@ -183,6 +173,8 @@ fun DashboardContent(
                         tier = tier,
                         modifier = Modifier.tutorialTarget(TutorialTargetId.DASH_WHALE_FEED)
                     )
+
+                    SystemIntegrityFeed(integrityLogs)
                     
                     Spacer(modifier = Modifier.height(4.dp))
                 }

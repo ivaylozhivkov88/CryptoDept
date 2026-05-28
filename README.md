@@ -10,6 +10,14 @@
 
 ---
 
+## 🎁 Pre-registration Rewards
+Join the elite circle of early adopters! Users who pre-register for the **CryptoDept Terminal** on Google Play will receive:
+*   **3-Day Full Intelligence Pass**: Complete access to all Pro-tier agents, whale alerts, and prediction engines.
+*   **Early Bird Status**: Priority access to upcoming experimental features.
+*   *Reward is automatically granted upon your first login after the official launch.*
+
+---
+
 ## 🚀 Version 1.5.0 Intelligence Pass
 
 ### 🌐 Centralized Cloud Heartbeat (v1.5 Exclusive)
