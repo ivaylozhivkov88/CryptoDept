@@ -1,83 +1,34 @@
 package com.cryptodept.data.content
 
-import com.cryptodept.domain.model.AudienceProfile
-import com.cryptodept.viewmodel.ContentTemplate
-
 /**
- * Centralized prompt templates for Content Studio V2.
+ * Centralized prompt templates for Content Factory V2.
+ * Optimized for high-engagement social media output using real market data.
  */
 object PromptTemplates {
 
-    fun buildPrompt(
-        template: ContentTemplate,
-        audience: AudienceProfile,
-        params: Map<String, Any>
-    ): String {
-        val audienceTone = when (audience) {
-            AudienceProfile.DAY_TRADER -> "aggressive, technical, focused on volatility and immediate R:R."
-            AudienceProfile.HODLER -> "calm, fundamental, focused on macro cycles and institutional accumulation."
-            AudienceProfile.DEFI_USER -> "high-energy, risk-tolerant, focused on yields, TVL, and early-stage opportunities."
-            AudienceProfile.CRYPTO_NEWBIE -> "educational, clear, avoiding jargon, focused on risk safety and basic concepts."
-            AudienceProfile.CONTENT_FAN -> "entertaining, viral, using hooks and curiosity-driven language."
-        }
-
-        val baseContext = "Act as a professional marketing strategist for the 'CryptoDept Elite' financial terminal. " +
-                "Target audience tone is $audienceTone\n\n"
-
-        return when (template) {
-            ContentTemplate.DAILY_RECAP -> buildDailyRecap(baseContext, params)
-            ContentTemplate.VIDEO_PROMPT -> buildVideoPrompt(baseContext, params)
-            ContentTemplate.THUMBNAIL -> buildThumbnailPrompt(baseContext, params)
-            ContentTemplate.FACEBOOK_POST -> buildFacebookPrompt(baseContext, params)
-            ContentTemplate.WHALE_NARRATOR -> buildWhalePrompt(baseContext, params)
-            ContentTemplate.WHAT_IF -> buildWhatIfPrompt(baseContext, params)
-            ContentTemplate.COMPARISON -> buildComparisonPrompt(baseContext, params)
-            ContentTemplate.NEWSLETTER -> buildNewsletterPrompt(baseContext, params)
-        }
+    fun buildSocialPostPrompt(scope: String, data: String): String {
+        return "Act as a Lead Quantitative Strategist and crypto influencer. " +
+                "Generate a professional, high-engagement viral technical analysis report for $scope. " +
+                "Market Context: $data. " +
+                "Include: 1. Catchy Hook, 2. Key Technical Findings (RSI, Trends, Liquidity), 3. Strategic Verdict, 4. 5 Relevant Tags. " +
+                "Tone: Cyber-technical, authoritative, and urgency-driven. " +
+                "STRICT RULE: Always end the post with this exact link: " +
+                "Download CryptoDept Terminal: https://play.google.com/store/apps/details?id=com.cryptodept"
     }
 
-    private fun buildDailyRecap(base: String, params: Map<String, Any>): String {
-        val asset = params["asset"] ?: "BTC"
-        return "$base Generate a daily market recap focusing on $asset. Mention Fear & Greed index, top movers, and a technical verdict."
+    fun buildInfographicPrompt(scope: String, data: String): String {
+        return "Act as a Data Visualization Architect. Design a technical 5-panel infographic for $scope based on this analysis: $data. " +
+                "Panel 1: TITLE/PRICE, Panel 2: RSI & TREND STATUS, Panel 3: WHALE FLOW BIAS, Panel 4: RISK SCORE VERDICT, Panel 5: CTA. " +
+                "Instructions: Provide exact text for each panel. Keep it monospaced and professional. " +
+                "Include the keyword 'technical analysis report' in the output description."
     }
 
-    private fun buildVideoPrompt(base: String, params: Map<String, Any>): String {
-        val asset = params["asset"] ?: "BTC"
-        return "$base Generate a cinematic, high-retention 60-second video script for $asset. " +
-                "STRICT RULES: DO NOT include technical status lines like 'STATUS: OPERATIONAL'. " +
-                "DO NOT use flickering digits, scrolling numbers, or changing price digits in descriptions—use static symbols or metaphors instead (e.g., 'a glowing neon ticker frozen in time'). " +
-                "Style: Cyberpunk Noir / High-Tech Minimalist. " +
-                "Scenes: 1. Hook (Dramatic macro shot), 2. The Problem (Market noise), 3. The Solution (CryptoDept Alpha), 4. Evidence (On-chain moves), 5. CTA. " +
-                "Include visual descriptions that are AI-video generator friendly (no temporal inconsistencies)."
-    }
-
-    private fun buildThumbnailPrompt(base: String, params: Map<String, Any>): String {
-        val headline = params["headline"] ?: "CRYPTO SHOCK"
-        return "$base Suggest 3 high-CTR thumbnail concepts and primary text overlays for a video titled '$headline'."
-    }
-
-    private fun buildFacebookPrompt(base: String, params: Map<String, Any>): String {
-        val topic = params["topic"] ?: "Market Update"
-        return "$base Write a engaging Facebook post about $topic. Use relevant emojis and clear calls to action."
-    }
-
-    private fun buildWhalePrompt(base: String, params: Map<String, Any>): String {
-        return "$base Generate a dramatic whale alert script based on recent $500k+ on-chain movements. Explain the likely intent (dump vs accumulation)."
-    }
-
-    private fun buildWhatIfPrompt(base: String, params: Map<String, Any>): String {
-        val asset = params["asset"] ?: "BTC"
-        val price = params["price"] ?: "$100,000"
-        return "$base Create a 'What If' scenario for $asset hitting $price. Discuss market implications and sentiment shift."
-    }
-
-    private fun buildComparisonPrompt(base: String, params: Map<String, Any>): String {
-        val coinA = params["coinA"] ?: "ETH"
-        val coinB = params["coinB"] ?: "SOL"
-        return "$base Compare $coinA vs $coinB based on current technical structure and recent network activity."
-    }
-
-    private fun buildNewsletterPrompt(base: String, params: Map<String, Any>): String {
-        return "$base Draft a weekly newsletter digest highlighting the most critical alpha discovered by CryptoDept agents this week."
+    fun buildCinematicVideoPrompt(scope: String, data: String): String {
+        return "Act as a Cinematic Director for AI Video generation. " +
+                "Create a professional motion prompt for $scope based on these metrics: $data. " +
+                "Visual Scenario: Describe a 10-second ultra-realistic shot of a holographic terminal displaying $scope charts and flow maps. " +
+                "Style: Volumetric green/amber lighting, drifting dust particles, 8k resolution, cinematic blur. " +
+                "Atmosphere: Tense, high-tech, smart money vibes. " +
+                "Ensure the output sounds like a 'technical analysis report' for the AI generator."
     }
 }

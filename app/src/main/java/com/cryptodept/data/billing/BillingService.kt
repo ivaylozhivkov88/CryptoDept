@@ -28,6 +28,7 @@ class BillingService
         @ApplicationContext private val context: Context,
         private val subscription: SubscriptionAccessManager,
         private val analyticsManager: com.cryptodept.util.AnalyticsService,
+        private val auditorRepository: com.cryptodept.domain.repository.AuditorRepository,
     ) : PurchasesUpdatedListener {
         private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
         private var connectionDeferred = CompletableDeferred<Unit>()
@@ -52,6 +53,29 @@ class BillingService
             // Auditor v1.2: Seed initial state from local cache to prevent offline flickering
             _isPro.value = subscription.isPro.value
             startConnection()
+            observeServerTier()
+        }
+
+        private fun observeServerTier() {
+            scope.launch {
+                val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+                if (uid != null) {
+                    auditorRepository.observeUserTier(uid).collect { tier ->
+                        if (tier == "PRO") {
+                            android.util.Log.i("AUDITOR", "Server-side PRO status confirmed for user $uid")
+                            _isPro.value = true
+                            subscription.setProStatus(true)
+                        } else if (tier == "FREE") {
+                            // Only downgrade if not manually overridden or having local pass
+                            // For now, let's keep it simple: if server says FREE, and no local pass, then FREE
+                            if (!subscription.isAdmin.value) {
+                                // checkProStatus handles local expiry
+                                subscription.checkProStatus() 
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         fun startConnection() {
@@ -216,21 +240,24 @@ class BillingService
 
         private fun handlePurchase(purchase: Purchase) {
             if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
-                // NEW: E2.2 - Send to server-side validator
+                // Auditor O-001: Send to server-side validator (Firebase Cloud Functions)
                 scope.launch {
-                    val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
-                    if (uid != null) {
-                        try {
-                            // In a real production app, this would be a Retrofit call to our Validator Service
-                            android.util.Log.i("AUDITOR", "Sending purchase token to server for validation...")
-                            // simulateServerValidation(uid, purchase.products.first(), purchase.purchaseToken)
-                        } catch (e: Exception) {
-                            android.util.Log.e("AUDITOR", "Server validation failed: ${e.message}")
+                    val productId = purchase.products.firstOrNull() ?: return@launch
+                    val result = auditorRepository.validatePurchase(productId, purchase.purchaseToken)
+                    
+                    result.onSuccess { tier ->
+                        android.util.Log.i("AUDITOR", "Server validation SUCCESS. Tier: $tier")
+                        if (tier == "PRO") {
+                            _isPro.value = true
+                            subscription.setProStatus(true)
                         }
+                    }.onFailure { e ->
+                        android.util.Log.e("AUDITOR", "Server validation FAILED: ${e.message}")
+                        // Fallback to local validation for now if needed, but the goal is strict mode
                     }
                 }
 
-                // Handle One-Time Passes
+                // Handle One-Time Passes (Local Logic)
                 purchase.products.forEach { productId ->
                     when (productId) {
                         "pro_1d" -> subscription.setProExpiry(1)

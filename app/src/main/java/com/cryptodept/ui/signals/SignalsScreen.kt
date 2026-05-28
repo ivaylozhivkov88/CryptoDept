@@ -101,7 +101,7 @@ fun AlphaSignalRow(signal: AlphaSignal, isPro: Boolean) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .border(2.dp, colors.amber, RectangleShape)
+            .border(1.dp, colors.amber, RectangleShape)
             .background(if (isPro) colors.amber.copy(alpha = 0.05f) else Color.DarkGray.copy(alpha = 0.2f))
             .padding(12.dp)
     ) {

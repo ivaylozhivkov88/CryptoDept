@@ -14,7 +14,9 @@ import com.cryptodept.ui.theme.LocalTerminalAudioManager
 import com.cryptodept.ui.theme.LocalTerminalColors
 import com.cryptodept.util.TerminalAudioService
 import com.scottyab.rootbeer.RootBeer
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 
 @Composable
 fun BootSequenceScreen(onBootComplete: () -> Unit) {
@@ -47,8 +49,11 @@ fun BootSequenceScreen(onBootComplete: () -> Unit) {
         )
 
     LaunchedEffect(Unit) {
-        val rootBeer = RootBeer(context)
-        isRooted = rootBeer.isRooted
+        val isRootedResult = withContext(Dispatchers.IO) {
+            val rootBeer = RootBeer(context)
+            rootBeer.isRooted
+        }
+        isRooted = isRootedResult
 
         fullLogs.forEach { line ->
             if (line == "[..] INTEGRITY CHECK...........") {

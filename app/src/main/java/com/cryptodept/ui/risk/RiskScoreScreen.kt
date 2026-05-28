@@ -93,7 +93,7 @@ fun RiskContent(
                     Text(
                         text = "GLOBAL_MARKET_SENTINEL",
                         color = colors.amber,
-                        fontSize = 9.sp,
+                        fontSize = 11.sp,
                         fontFamily = com.cryptodept.ui.theme.JetBrainsMono
                     )
                 }
@@ -135,7 +135,7 @@ fun RiskContent(
                 Text(
                     text = "(Aggregated Market Stress Indicator)",
                     color = colors.dimText,
-                    fontSize = 10.sp,
+                    fontSize = 11.sp,
                     fontFamily = com.cryptodept.ui.theme.JetBrainsMono
                 )
                 Spacer(modifier = Modifier.height(TerminalConfig.UI.SPACER_LARGE))
@@ -244,7 +244,7 @@ private fun RiskExplanationItem(label: String, description: String) {
     val colors = LocalTerminalColors.current
     Column(modifier = Modifier.padding(vertical = 4.dp)) {
         Text(text = "[$label]", color = colors.amber, fontSize = 11.sp, fontFamily = com.cryptodept.ui.theme.JetBrainsMono, fontWeight = FontWeight.Bold)
-        Text(text = description, color = colors.textPrimary, fontSize = 10.sp, fontFamily = com.cryptodept.ui.theme.JetBrainsMono, lineHeight = 14.sp)
+        Text(text = description, color = colors.textPrimary, fontSize = 11.sp, fontFamily = com.cryptodept.ui.theme.JetBrainsMono, lineHeight = 14.sp)
     }
 }
 
@@ -275,7 +275,7 @@ fun RiskComponentRow(component: RiskScoreEngine.RiskComponent) {
                 text = if (component.isBearish) "BEARISH_PRESSURE" else "STABLE/BULLISH",
                 color = if (component.isBearish) colors.error else colors.primary,
                 fontFamily = com.cryptodept.ui.theme.JetBrainsMono,
-                fontSize = 9.sp,
+                fontSize = 11.sp,
             )
         }
         Spacer(modifier = Modifier.height(4.dp))

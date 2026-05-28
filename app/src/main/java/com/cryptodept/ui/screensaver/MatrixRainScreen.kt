@@ -79,17 +79,14 @@ fun MatrixRainScreen(
         }
     }
 
-    // Single animation source for 60 FPS
-    val infiniteTransition = rememberInfiniteTransition(label = "MatrixRain")
-    val frame by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(16, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "Frame"
-    )
+    // Optimized frame cycle with explicit 60fps cap (Q-002)
+    var tick by remember { mutableLongStateOf(0L) }
+    LaunchedEffect(Unit) {
+        while(true) {
+            tick++
+            delay(16L) // ~60 FPS
+        }
+    }
 
     Box(
         modifier = modifier
@@ -98,8 +95,8 @@ fun MatrixRainScreen(
             .pointerInput(Unit) { detectTapGestures { onDismiss() } }
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            // Force redraw on each frame
-            val _trigger = frame 
+            // Force redraw on each tick
+            val _trigger = tick
             
             drops.forEach { drop ->
                 // Update position

@@ -33,8 +33,8 @@ class GetLiquidationSummaryUseCaseTest {
             LiquidationLevel(price = 52000.0, liqSize = 250.0, direction = "short")
         )
         val response = LiquidationMapResponse(
-            code = 0,
-            data = LiquidationMapData(liqList = liqLevels)
+            code = "0",
+            data = LiquidationMapData(chartData = null, liqList = liqLevels)
         )
         
         coEvery { repository.getLiquidationMap(symbol) } returns Result.success(response)
@@ -49,17 +49,10 @@ class GetLiquidationSummaryUseCaseTest {
         assertThat(summary.symbol).isEqualTo(symbol)
         assertThat(summary.currentPrice).isEqualTo(currentPrice)
         
-        // Nearest long should be 49000
         assertThat(summary.nearestLongLevel).isEqualTo(49000.0)
-        // Total long = 100 + 200 = 300
         assertThat(summary.totalLongLiquidity).isEqualTo(300.0)
-        
-        // Nearest short should be 51000
         assertThat(summary.nearestShortLevel).isEqualTo(51000.0)
-        // Total short = 150 + 250 = 400
         assertThat(summary.totalShortLiquidity).isEqualTo(400.0)
-        
-        // longDominance = 300 / (300 + 400) = 300 / 700 = 0.428...
         assertThat(summary.longDominance).isWithin(0.01f).of(0.428f)
     }
 
@@ -68,7 +61,7 @@ class GetLiquidationSummaryUseCaseTest {
         // Arrange
         val symbol = "ETH"
         val currentPrice = 3000.0
-        val response = LiquidationMapResponse(code = 0, data = LiquidationMapData(liqList = emptyList()))
+        val response = LiquidationMapResponse(code = "0", data = LiquidationMapData(chartData = null, liqList = emptyList()))
         coEvery { repository.getLiquidationMap(symbol) } returns Result.success(response)
 
         // Act

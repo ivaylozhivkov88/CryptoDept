@@ -75,12 +75,12 @@ fun TerminalInput(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(label, color = TextGray, fontSize = 10.sp) },
+        placeholder = { Text(label, color = TextGray.copy(alpha = 0.5f), fontSize = 12.sp, fontFamily = FontFamily.Monospace) },
         modifier =
             Modifier
                 .fillMaxWidth()
                 .padding(vertical = 4.dp),
-        textStyle = LocalTextStyle.current.copy(color = WallStreetGreen, fontFamily = FontFamily.Monospace),
+        textStyle = LocalTextStyle.current.copy(color = WallStreetGreen, fontFamily = FontFamily.Monospace, fontSize = 14.sp),
         colors =
             OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = WallStreetGreen,
@@ -89,6 +89,7 @@ fun TerminalInput(
                 focusedContainerColor = Color.Black,
                 unfocusedContainerColor = Color.Black,
             ),
+        singleLine = true,
         shape = RectangleShape,
         trailingIcon = trailingIcon,
     )

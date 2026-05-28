@@ -1,55 +1,48 @@
-# 🧠 CryptoDept Intelligence Terminal — Store Listing
+# 📦 GOOGLE PLAY STORE LISTING — CRYPTODEPT v1.5.0 (GLOBAL)
 
-## Short Description
-Elite market awareness terminal. On-chain whale tracking, 6 mathematical prediction engines, and real-time AI executive briefing.
+### **Title:** 
+CryptoDept — AI Market Terminal
 
-## Full Description
-**Filter the noise. Trade with intent.**
+### **Short Description (Max 80 chars):**
+Elite crypto terminal with AI agents, session intel & real-time whale alerts.
 
-CryptoDept is a high-fidelity intelligence terminal designed for high-frequency market awareness. No hype, no "100x" promises—just raw on-chain data, mathematical modeling, and professional-grade trade planning tools.
+### **Full Description:**
+Stop tracking. Start operating.
 
-### 🕵️ GHOST WHALE MONITORING (PRO)
-Direct RPC integration with Bitcoin, Ethereum, and Solana. Track "Smart Money" movements in real-time.
-* **$500,000+ Threshold:** We only track the moves that matter.
-* **Exchange Flows:** Identify accumulation vs. retail distribution phases.
+CryptoDept is the first **time-aware AI terminal** designed to transform market noise into actionable intelligence. While other apps show you what happened, our specialized AI agents tell you **why** it is happening and **what** the "Smart Money" is planning next.
 
-### 🔮 MULTI-MODEL ORACLE (PRO)
-Stop relying on single indicators. Our ensemble forecasting system runs 6 independent statistical models simultaneously:
-1. **FFT Analysis:** Cycle detection in the frequency domain.
-2. **Monte Carlo:** 10,000-path probability distribution.
-3. **Wyckoff Method:** Institutional phase detection.
-4. **Elliott Wave:** Structural fractal validation.
-5. **Hurst Exponent:** Persistence vs. Mean Reversion scoring.
-6. **Linear Regression:** Dynamic trend projection.
-*Transparent Accuracy Badges display historical performance for every engine.*
+Experience a professional-grade environment where technical analysis, on-chain flows, and global sentiment converge into a single, cohesive narrative.
 
-### 🎙️ LIVE NARRATIVE SYNTHESIS
-Powered by Google Gemini AI, the terminal converts billions of data points into a readable, streaming executive briefing. Get the "why" behind the market movement, not just the "what".
+🚀 **CORE INTELLIGENCE SUBSYSTEMS:**
 
-### ⚖️ THE TRADER'S TOOLKIT
-* **Position Sizer:** Calculate exact lot size based on your risk tolerance.
-* **Trade Planner:** Pre-trade checklist with automated R:R validation.
-* **Psychology Lock:** Optional terminal lockout during emotional volatility.
-* **MTF Analyzer:** Multi-timeframe confluence matrix (1H, 4H, Daily).
+🤖 **AGENTIC INFRASTRUCTURE:**
+• **SENTINEL (Quant):** Scans HTF/LTF structures for high-conviction confluences.
+• **SCOUT (Whale):** Tracks institutional capital movement over $500,000 instantly.
+• **ORACLE (Forecast):** Predictive modeling using 7 independent mathematical engines.
+• **PULSE (Sentiment):** Filters social hysteria to find the psychological bottom.
 
-### 🛡️ HONEST ACCESS TIERS
-**FREE OPERATOR:**
-* Live price feed (Top 50 coins).
-* Daily AI Pick (Deterministic 24h rotation).
-* Position Sizer & Basic Trade Planner.
-* Crypto Glossary & News Feed.
-* 3 active price alerts + 1 watchlist.
+⚓ **MISSION CONTROL (NEW):**
+The terminal now synchronizes with your local time. Get specific strategic objectives for the London Open, New York Active Phase, and the Asian Transition. Know your mission before you open your first trade.
 
-**PRO OPERATOR:**
-* Full Whale Tracker (BTC, ETH, SOL).
-* All 6 Oracle Prediction Engines.
-* Full AI Narrative Briefing.
-* Derivatives Data (Funding & Open Interest).
-* Unlimited Alerts & Watchlists.
-* Advanced Strategy Tools.
+🔔 **SMART DATA ALERTS:**
+Receive push notifications that actually matter. Live BTC prices, trend deltas, and "High Alert" session warnings—delivered with real data, zero boilerplate.
+
+⚡ **ULTIMATE PERFORMANCE:**
+• **Centralized Cloud Sync:**中央 ized data harvesting means 40% better battery life.
+• **High-Fidelity UI:** Monospaced typography and phosphor-glow visuals for maximum density and readability.
+• **Pro-Grade Security:** Server-side verification of all Intelligence Passes.
+
+Join the elite circle of data-driven traders. Download the CryptoDept Terminal and claim your edge.
 
 ---
-**OPERATIONAL DISCLAIMER:**
-Cryptocurrency trading carries significant risk. CryptoDept provides statistical estimates and data-driven insights. It does NOT provide financial advice. Past accuracy does not predict future results. Always do your own research.
 
-*"Optimized for those who trade with data, not hype."*
+### **What's New in v1.5.0:**
+*   **Centralized Market Heartbeat:** CENTRALIZED Firebase data streams for lightning-fast updates.
+*   **Mission Control Card:** Session-based strategic advice anchored to your local time.
+*   **High-Alert Mode:** Visual red-vignette warnings during peak NY volatility.
+*   **Real-Data Notifications:** Alerts now include live prices and trend indicators.
+*   **Redeem Protocol:** In-app promo code redemption for 7-day Intelligence Passes.
+
+---
+
+**Keywords:** Crypto AI, Trading Terminal, Whale Tracker, Technical Analysis, Bitcoin Forecast, Market Sentiment, Blockchain Intelligence, Smart Money, Fear and Greed.

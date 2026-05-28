@@ -45,6 +45,7 @@ class PreferencesService
             val SOUNDS_VOLUME = floatPreferencesKey("sounds_volume")
             val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
             val ONBOARDING_COMPLETE = booleanPreferencesKey("onboarding_complete")
+            val PROMO_SNACKBAR_SHOWN = booleanPreferencesKey("promo_snackbar_shown")
             val HAPTIC_ENABLED = booleanPreferencesKey("haptic_enabled")
             val SCREENSAVER_TIMEOUT = intPreferencesKey("screensaver_timeout_min")
             val IS_PRO = booleanPreferencesKey("is_pro")
@@ -360,5 +361,13 @@ class PreferencesService
 
         override suspend fun putString(key: String, value: String) {
             dataStore.edit { it[stringPreferencesKey(key)] = value }
+        }
+
+        suspend fun isPromoSnackbarShown(): Boolean {
+            return dataStore.data.map { it[PROMO_SNACKBAR_SHOWN] ?: false }.first()
+        }
+
+        suspend fun markPromoSnackbarShown() {
+            dataStore.edit { it[PROMO_SNACKBAR_SHOWN] = true }
         }
     }

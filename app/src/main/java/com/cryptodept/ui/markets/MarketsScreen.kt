@@ -95,10 +95,10 @@ fun MarketsScreen(
         AlertDialog(
             onDismissRequest = { showAddDialog = false; searchQuery = "" },
             containerColor = colors.background,
-            modifier = Modifier.border(1.dp, colors.primary, RectangleShape),
-            title = { Text("ADD_NEW_ASSET", color = colors.primary, fontFamily = FontFamily.Monospace) },
+            modifier = Modifier.border(1.dp, colors.primary, RectangleShape).fillMaxWidth().padding(16.dp),
+            title = { Text("ADD_NEW_ASSET", color = colors.primary, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold) },
             text = {
-                Column {
+                Column(modifier = Modifier.fillMaxWidth().heightIn(max = 500.dp)) {
                     com.cryptodept.ui.components.TerminalInput(
                         label = "SEARCH_SYMBOL_OR_NAME",
                         value = searchQuery,
@@ -107,66 +107,75 @@ fun MarketsScreen(
                             viewModel.search(it)
                         }
                     )
+                    
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    if (searchQuery.isEmpty()) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .horizontalScroll(rememberScrollState()),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            listOf("BTC", "ETH", "SOL", "BNB", "XRP", "DOGE", "ADA", "LINK").forEach { sym ->
-                                Surface(
-                                    onClick = {
-                                        searchQuery = sym
-                                        viewModel.search(sym)
-                                    },
-                                    color = colors.surface,
-                                    shape = RectangleShape,
-                                    border = BorderStroke(1.dp, colors.primary.copy(alpha = 0.3f))
-                                ) {
-                                    Text(
-                                        text = sym,
-                                        color = colors.primary,
-                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                        fontSize = 12.sp,
-                                        fontFamily = FontFamily.Monospace
-                                    )
-                                }
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
-                    
-                    LazyColumn(modifier = Modifier.heightIn(max = 400.dp)) {
-                        if (searchQuery.isEmpty() && searchResults.isNotEmpty()) {
-                            item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        listOf("BTC", "ETH", "SOL", "BNB", "XRP").forEach { sym ->
+                            Surface(
+                                onClick = {
+                                    searchQuery = sym
+                                    viewModel.search(sym)
+                                },
+                                color = if (searchQuery.uppercase() == sym) colors.primary.copy(alpha = 0.2f) else colors.surface,
+                                shape = RectangleShape,
+                                border = BorderStroke(1.dp, if (searchQuery.uppercase() == sym) colors.primary else colors.grid)
+                            ) {
                                 Text(
-                                    "--- SUGGESTED_ASSETS ---", 
-                                    color = colors.dimText, 
-                                    fontSize = 11.sp, 
-                                    fontFamily = FontFamily.Monospace,
-                                    modifier = Modifier.padding(bottom = 8.dp)
+                                    text = sym,
+                                    color = if (searchQuery.uppercase() == sym) colors.primary else colors.dimText,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                    fontSize = 11.sp,
+                                    fontFamily = FontFamily.Monospace
                                 )
                             }
                         }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    Text(
+                        text = if (searchQuery.isEmpty()) "--- SUGGESTED ---" else "--- SEARCH_RESULTS ---", 
+                        color = colors.dimText, 
+                        fontSize = 10.sp, 
+                        fontFamily = FontFamily.Monospace,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
 
+                    LazyColumn(
+                        modifier = Modifier.weight(1f, fill = false).fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
                         items(searchResults) { coin ->
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
+                                    .border(0.5.dp, colors.grid)
                                     .clickable { 
                                         viewModel.toggleTracking(coin.id)
                                         showAddDialog = false
                                         searchQuery = ""
                                     }
-                                    .padding(vertical = 8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                    .padding(12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(coin.symbol.uppercase(), color = colors.primary, fontFamily = FontFamily.Monospace)
-                                Text(coin.name, color = colors.dimText, fontSize = 13.sp, fontFamily = FontFamily.Monospace)
-                                Text("+", color = colors.primary, fontWeight = FontWeight.Bold)
+                                Column {
+                                    Text(coin.symbol.uppercase(), color = colors.primary, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                                    Text(coin.name, color = colors.dimText, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+                                }
+                                Text("[ ADD + ]", color = colors.primary, fontFamily = FontFamily.Monospace, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                        
+                        if (searchResults.isEmpty() && searchQuery.isNotEmpty()) {
+                            item {
+                                Text("NO_RESULTS_FOUND", color = colors.danger, fontFamily = FontFamily.Monospace, fontSize = 12.sp, modifier = Modifier.padding(top = 16.dp))
                             }
                         }
                     }

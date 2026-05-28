@@ -235,7 +235,7 @@ fun VerdictView(setup: TradeSetup) {
         modifier =
             Modifier
                 .fillMaxWidth()
-                .border(2.dp, color)
+                .border(1.dp, color)
                 .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {

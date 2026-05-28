@@ -232,7 +232,7 @@ private fun InstallReadyBanner(
     
     Surface(
         color = colors.background,
-        border = BorderStroke(2.dp, colors.primary),
+        border = BorderStroke(1.dp, colors.primary),
         shape = RectangleShape,
         modifier = Modifier.fillMaxWidth().padding(8.dp),
     ) {

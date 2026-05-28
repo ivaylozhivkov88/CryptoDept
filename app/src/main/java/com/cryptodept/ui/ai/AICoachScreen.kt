@@ -53,7 +53,9 @@ fun AICoachScreen(
             Modifier
                 .fillMaxSize()
                 .background(colors.background)
-                .padding(16.dp),
+                .padding(16.dp)
+                .imePadding()
+                .navigationBarsPadding(),
     ) {
         Text(
             text = ">>> AI TRADE COACH [GEMINI]",
@@ -167,6 +169,6 @@ fun QuickActionButton(
                 .clickable { onClick() }
                 .padding(horizontal = 12.dp, vertical = 6.dp),
     ) {
-        Text(label, color = colors.primary, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+        Text(label, color = colors.primary, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
     }
 }

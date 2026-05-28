@@ -143,7 +143,8 @@ fun TutorialTooltip(
                             containerColor = colors.primary,
                             contentColor = colors.background
                         ),
-                        shape = RectangleShape
+                        shape = RectangleShape,
+                        contentPadding = PaddingValues(horizontal = 8.dp)
                     ) {
                         Text(
                             text = stringResource(
@@ -152,7 +153,9 @@ fun TutorialTooltip(
                             ),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Monospace
+                            fontFamily = FontFamily.Monospace,
+                            maxLines = 1,
+                            softWrap = false
                         )
                     }
                 }

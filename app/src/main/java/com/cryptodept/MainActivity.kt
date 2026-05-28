@@ -385,20 +385,22 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        volumeControlStream = android.media.AudioManager.STREAM_MUSIC
-        reviewService.requestReviewIfAppropriate(this)
-        
-        // Check if update was downloaded while app was in background
-        val appUpdateManager = AppUpdateManagerFactory.create(this)
-        appUpdateManager.appUpdateInfo.addOnSuccessListener { info ->
-            if (info.installStatus() == InstallStatus.DOWNLOADED) {
-                // The AppUpdateBanner state machine will handle showing the UI
-                android.util.Log.d("Update", "Update downloaded, ready to install")
+        try {
+            volumeControlStream = android.media.AudioManager.STREAM_MUSIC
+            reviewService.requestReviewIfAppropriate(this)
+            
+            // Check if update was downloaded while app was in background
+            val appUpdateManager = AppUpdateManagerFactory.create(this)
+            appUpdateManager.appUpdateInfo.addOnSuccessListener { info ->
+                if (info.installStatus() == InstallStatus.DOWNLOADED) {
+                    android.util.Log.d("Update", "Update downloaded, ready to install")
+                }
+                if (info.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS) {
+                    android.util.Log.d("Update", "Update in progress, resuming UI")
+                }
             }
-            if (info.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS) {
-                // Resume immediate update flow if it was interrupted
-                android.util.Log.d("Update", "Update in progress, resuming UI")
-            }
+        } catch (e: Exception) {
+            android.util.Log.w("MainActivity", "Google Play Services interaction failed: ${e.message}")
         }
     }
 

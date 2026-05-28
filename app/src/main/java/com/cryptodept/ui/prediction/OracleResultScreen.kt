@@ -3,6 +3,7 @@ package com.cryptodept.ui.prediction
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -94,13 +95,37 @@ fun OracleResultScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = {
-                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                    val clip = android.content.ClipData.newPlainText("FB_REPORT", aiReportState)
-                    clipboard.setPrimaryClip(clip)
-                    showCopyToast = true
-                }) {
-                    Text("COPY FOR FB", color = colors.primary, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    TextButton(
+                        onClick = {
+                            val sendIntent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                putExtra(Intent.EXTRA_TEXT, aiReportState)
+                                type = "text/plain"
+                            }
+                            context.startActivity(Intent.createChooser(sendIntent, "Share Analysis Report"))
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text("SHARE", color = colors.primary, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                    }
+
+                    TextButton(
+                        onClick = {
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                            val clip = android.content.ClipData.newPlainText("FB_REPORT", aiReportState)
+                            clipboard.setPrimaryClip(clip)
+                            showCopyToast = true
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("COPY FOR FB", color = colors.primary, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                    }
                 }
             },
             dismissButton = {
@@ -146,6 +171,51 @@ fun OracleResultScreen(
             // CONSENSUS HEADER
             item {
                 ConsensusHeader(prediction)
+            }
+
+            // PREDICTION CHART (PHASE Z3 - NEW)
+            item {
+                val historicalData by predictionViewModel.historicalData.collectAsState()
+                if (historicalData.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = ">>> QUANT_FORECAST_ENGINE_V4",
+                            color = colors.dimText,
+                            fontSize = 10.sp,
+                            fontFamily = FontFamily.Monospace,
+                        )
+                        IconButton(
+                            onClick = {
+                                val url = predictionViewModel.generateInfographicUrl(prediction)
+                                val sendIntent = Intent().apply {
+                                    action = Intent.ACTION_SEND
+                                    putExtra(Intent.EXTRA_TEXT, ">>> CRYPTODEPT_ALPHA_CHART\n$url")
+                                    type = "text/plain"
+                                }
+                                context.startActivity(Intent.createChooser(sendIntent, "Share Chart"))
+                            },
+                            modifier = Modifier.size(16.dp)
+                        ) {
+                            Icon(Icons.Default.Share, contentDescription = null, tint = colors.primary, modifier = Modifier.size(12.dp))
+                        }
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .border(1.dp, colors.grid)
+                            .padding(12.dp)
+                    ) {
+                        com.cryptodept.ui.components.PredictionChart(
+                            historicalData = historicalData,
+                            prediction = prediction
+                        )
+                    }
+                }
             }
 
             // EXPLAINABILITY PANEL (FEATURE 16)
@@ -260,7 +330,7 @@ fun OracleResultScreen(
             }
         }
 
-        // BOTTOM ACTION BUTTONS
+        // BOTTOM ACTION BUTTONS - PHASE O CONTENT ORCHESTRATOR
         Column(
             modifier =
                 Modifier
@@ -268,8 +338,8 @@ fun OracleResultScreen(
                     .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            if (isAdmin) {
-                // Combined N/FB Button -> Elite Operator Narrative
+            if (isAdmin || isPro) {
+                // 1. NARRATIVE REPORT (TEXT)
                 FloatingActionButton(
                     onClick = {
                         predictionViewModel.generateAIReport(prediction)
@@ -282,7 +352,7 @@ fun OracleResultScreen(
                     Text("N", fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                 }
 
-                // VID BUTTON (Renamed from AI)
+                // 2. VIDEO PROMPT (VID)
                 FloatingActionButton(
                     onClick = {
                         coroutineScope.launch {
@@ -292,8 +362,10 @@ fun OracleResultScreen(
                                 action = Intent.ACTION_SEND
                                 putExtra(Intent.EXTRA_TEXT, videoPrompt)
                                 type = "text/plain"
+                                // Subject hint for Meta AI / Reels
+                                putExtra(Intent.EXTRA_SUBJECT, "CryptoDept Video Script for Meta AI")
                             }
-                            context.startActivity(Intent.createChooser(sendIntent, "Share VID Prompt"))
+                            context.startActivity(Intent.createChooser(sendIntent, "Send to Meta AI / Reels"))
                         }
                     },
                     modifier = Modifier.size(56.dp),
@@ -303,24 +375,29 @@ fun OracleResultScreen(
                 ) {
                     Text("VID", fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, fontSize = 12.sp)
                 }
-            } else if (isPro) {
-                // PUBLIC SHARE BUTTON (Only for non-admin PRO users)
+
+                // 3. INFOGRAPHIC CHART (IMG) - NEW
                 FloatingActionButton(
                     onClick = {
-                        val shareText = predictionViewModel.generateShareText(prediction)
+                        val url = predictionViewModel.generateInfographicUrl(prediction)
+                        val shareText = buildString {
+                            append("📊 CRYPTODEPT QUANT INFOGRAPHIC — ${prediction.coinId.uppercase()}\n")
+                            append("VIEW CHART: $url\n\n")
+                            append(">>> ANALYSIS_SUMMARY: Market showing ${prediction.ensembleConsensus.direction.name.lowercase()} bias with ${(prediction.ensembleConsensus.overallConfidence * 100).toInt()}% conviction.")
+                        }
                         val sendIntent = Intent().apply {
                             action = Intent.ACTION_SEND
                             putExtra(Intent.EXTRA_TEXT, shareText)
                             type = "text/plain"
                         }
-                        context.startActivity(Intent.createChooser(sendIntent, "Share Quant Report"))
+                        context.startActivity(Intent.createChooser(sendIntent, "Share Analysis Infographic"))
                     },
                     modifier = Modifier.size(56.dp),
-                    containerColor = colors.primary.copy(alpha = 0.8f),
+                    containerColor = colors.primary,
                     contentColor = colors.background,
                     shape = RoundedCornerShape(4.dp),
                 ) {
-                    Icon(Icons.Default.Share, contentDescription = "Share", modifier = Modifier.size(24.dp))
+                    Text("IMG", fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, fontSize = 12.sp)
                 }
             }
         }

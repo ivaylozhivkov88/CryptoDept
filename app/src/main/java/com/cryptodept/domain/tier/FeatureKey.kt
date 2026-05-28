@@ -28,7 +28,7 @@ enum class FeatureKey(
         proDescription = "Identifies high-impact assets with the most significant price expansion or contraction in the last 24 hours.",
     ),
     DASHBOARD_WHALE_INSIGHT(
-        requiredTier = AccessTier.FREE,
+        requiredTier = AccessTier.PRO,
         displayName = "Whale Flow Signal",
         proDescription = "A processed indicator derived from raw on-chain movements. Tracks capital flow between wallets and exchanges.",
     ),
@@ -36,6 +36,11 @@ enum class FeatureKey(
         requiredTier = AccessTier.FREE,
         displayName = "Fear & Greed Index",
         proDescription = "A multi-factor psychological barometer based on volatility, volume, and social media dominance.",
+    ),
+    DASHBOARD_ALTCOIN_SEASON(
+        requiredTier = AccessTier.FREE,
+        displayName = "Altcoin Season Index",
+        proDescription = "Analyzes the performance of the top 50 assets vs Bitcoin to identify cyclical capital rotation phases.",
     ),
     DASHBOARD_NETWORK_HEALTH_BASIC(
         requiredTier = AccessTier.FREE,
@@ -68,7 +73,7 @@ enum class FeatureKey(
         proDescription = "Calculate the exact dollar amount and coin quantity you should risk based on your account size and stop-loss.",
     ),
     TRADE_PLANNER_BASIC(
-        requiredTier = AccessTier.FREE,
+        requiredTier = AccessTier.PRO,
         displayName = "Pre-Trade Validator",
         proDescription = "A professional checklist for Entry, Stop-Loss, and Take-Profit levels. Validates Risk:Reward ratio.",
     ),
@@ -78,7 +83,7 @@ enum class FeatureKey(
         proDescription = "A full deep-dive into historical fear and greed trends to identify cyclical bottoms and tops.",
     ),
     DAILY_AI_PICK(
-        requiredTier = AccessTier.FREE,
+        requiredTier = AccessTier.PRO,
         displayName = "Daily AI Pick",
         proDescription = "One algorithmic prediction per 24 hours, rotating between the top 10 assets. Provides entry zones and targets.",
     ),

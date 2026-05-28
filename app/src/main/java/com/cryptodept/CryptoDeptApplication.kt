@@ -50,7 +50,7 @@ class CryptoDeptApplication :
         }
 
         remoteConfigService.fetchAndActivate { }
-        socketLifecycleService.init()
+        // socketLifecycleService.init() // Disabled (Q-001) - Real-time data now provided by Firebase centrally
         createNotificationChannels()
         DailyBriefingWorker.schedule(this)
         CryptoDataSyncWorker.schedule(this)

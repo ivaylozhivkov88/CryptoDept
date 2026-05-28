@@ -237,7 +237,7 @@ fun CalculationResultView(res: PositionSizeResult) {
         modifier =
             Modifier
                 .fillMaxWidth()
-                .border(TerminalConfig.UI.BORDER_WIDTH * 2, gradeColor)
+                .border(TerminalConfig.UI.BORDER_WIDTH, gradeColor)
                 .background(gradeColor.copy(alpha = 0.05f))
                 .padding(TerminalConfig.UI.DEFAULT_PADDING),
     ) {

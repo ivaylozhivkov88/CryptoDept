@@ -71,4 +71,32 @@ class FirebaseRemoteDataSource @Inject constructor(
         ref.addValueEventListener(listener)
         awaitClose { ref.removeEventListener(listener) }
     }
+
+    /**
+     * NEW: Fetch cloud-calculated predictions to save API calls.
+     */
+    suspend fun getCloudPrediction(coinId: String): Map<String, Any>? {
+        return try {
+            val snapshot = com.google.android.gms.tasks.Tasks.await(
+                database.getReference("terminal_state/cloudPredictions/$coinId").get()
+            )
+            @Suppress("UNCHECKED_CAST")
+            snapshot.value as? Map<String, Any>
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /**
+     * GDPR COMPLIANCE: Erases all cloud-stored metadata for the given user.
+     */
+    suspend fun deleteUserData(uid: String): Result<Unit> {
+        return try {
+            val ref = database.getReference("users/$uid")
+            com.google.android.gms.tasks.Tasks.await(ref.removeValue())
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

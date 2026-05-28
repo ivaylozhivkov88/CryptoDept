@@ -250,7 +250,7 @@ fun AssetSelector(
                 modifier =
                     Modifier
                         .border(
-                            width = if (isSelected) 3.dp else 1.dp,
+                            width = 1.dp,
                             color = if (isSelected) colors.primary else colors.grid,
                             shape = RectangleShape,
                         ).background(if (isSelected) colors.primary.copy(alpha = 0.15f) else Color.Transparent)

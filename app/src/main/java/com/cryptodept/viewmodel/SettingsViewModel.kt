@@ -24,6 +24,7 @@ class SettingsViewModel
         private val subscription: SubscriptionAccessManager,
         private val rootDetector: RootDetector,
         val tierAccessManager: com.cryptodept.domain.tier.TierAccessManager,
+        private val firebaseDataSource: com.cryptodept.data.remote.source.FirebaseRemoteDataSource,
     ) : ViewModel() {
         private val _securityWarning = MutableStateFlow<String?>(null)
         val securityWarning: StateFlow<String?> = combine(_securityWarning, subscription.isAdmin) { warning, isAdmin ->
@@ -168,10 +169,19 @@ class SettingsViewModel
         }
 
         suspend fun deleteAccount(authService: com.cryptodept.data.auth.AuthService): Result<Unit> {
+            val user = authService.currentUser.value ?: return Result.failure(Exception("NO_ACTIVE_SESSION"))
+            val uid = user.uid
+            
+            // 1. First wipe cloud metadata (GDPR compliance)
+            firebaseDataSource.deleteUserData(uid)
+            
+            // 2. Then delete the Auth account
             val result = authService.deleteAccount()
+            
             if (result.isSuccess) {
-                // Clear any other local data if necessary
                 session.setOnboardingComplete(false)
+                subscription.setAdminStatus(false)
+                subscription.setProStatus(false)
             }
             return result
         }

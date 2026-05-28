@@ -79,7 +79,6 @@ class AgentHubViewModel @Inject constructor(
 
                     val report = agentCoordinator.runOrchestration(snapshot)
                     
-                    // Save the finding regardless of anomaly score if manual refresh
                     briefingRepository.saveBriefing(
                         IntelligenceBriefingEntity(
                             timestamp = System.currentTimeMillis(),
@@ -91,7 +90,9 @@ class AgentHubViewModel @Inject constructor(
                         )
                     )
                 }
-            } catch (_: Exception) {}
+            } catch (e: Exception) {
+                android.util.Log.e("AgentHub", "Refresh failed", e)
+            }
             _isRefreshing.value = false
         }
     }

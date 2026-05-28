@@ -42,7 +42,7 @@ fun LiquidationHeatmapStrip(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .height(38.dp)
+            .height(44.dp)
             .background(colors.background)
             .drawWithContent {
                 drawContent()
@@ -71,20 +71,20 @@ fun LiquidationHeatmapStrip(
                 Text(
                     text = "◄",
                     color = colors.error.copy(alpha = 0.65f),
-                    fontSize = 8.sp,
+                    fontSize = 11.sp,
                     fontFamily = FontFamily.Monospace
                 )
                 Text(
                     text = summary?.totalLongLiquidity?.toCompactUsd() ?: "$0",
                     color = colors.error.copy(alpha = 0.65f),
-                    fontSize = 9.sp,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Monospace
                 )
                 Text(
                     text = summary?.nearestLongLevel?.let { if (it > 0) "@${it.toPriceLabel()}" else "@--" } ?: "@--",
-                    color = Color.White.copy(alpha = 0.20f),
-                    fontSize = 7.sp,
+                    color = Color.White.copy(alpha = 0.40f),
+                    fontSize = 11.sp,
                     fontFamily = FontFamily.Monospace
                 )
             }
@@ -96,15 +96,15 @@ fun LiquidationHeatmapStrip(
             ) {
                 Text(
                     text = summary?.currentPrice?.let { "$${String.format(Locale.US, "%,.0f", it)}" } ?: "$--",
-                    color = colors.primary.copy(alpha = 0.55f),
-                    fontSize = 10.sp,
+                    color = colors.primary.copy(alpha = 0.85f),
+                    fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Monospace
                 )
                 Text(
                     text = "LIQ LEVELS",
-                    color = colors.primary.copy(alpha = 0.22f),
-                    fontSize = 6.5.sp,
+                    color = colors.primary.copy(alpha = 0.50f),
+                    fontSize = 9.sp,
                     letterSpacing = 1.sp,
                     fontFamily = FontFamily.Monospace
                 )
@@ -118,21 +118,21 @@ fun LiquidationHeatmapStrip(
             ) {
                 Text(
                     text = summary?.nearestShortLevel?.let { if (it > 0) "@${it.toPriceLabel()}" else "@--" } ?: "@--",
-                    color = Color.White.copy(alpha = 0.20f),
-                    fontSize = 7.sp,
+                    color = Color.White.copy(alpha = 0.40f),
+                    fontSize = 11.sp,
                     fontFamily = FontFamily.Monospace
                 )
                 Text(
                     text = summary?.totalShortLiquidity?.toCompactUsd() ?: "$0",
-                    color = colors.primary.copy(alpha = 0.60f),
-                    fontSize = 9.sp,
+                    color = colors.primary.copy(alpha = 0.80f),
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Monospace
                 )
                 Text(
                     text = "►",
-                    color = colors.primary.copy(alpha = 0.40f),
-                    fontSize = 8.sp,
+                    color = colors.primary.copy(alpha = 0.60f),
+                    fontSize = 11.sp,
                     fontFamily = FontFamily.Monospace
                 )
             }

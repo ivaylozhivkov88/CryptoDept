@@ -25,7 +25,7 @@ fun TutorialStartDialog(onStart: () -> Unit, onSkip: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth(0.92f)
                 .wrapContentHeight()
-                .border(2.dp, colors.primary, RectangleShape),
+                .border(1.dp, colors.primary, RectangleShape),
             shape = RectangleShape,
             colors = CardDefaults.cardColors(containerColor = colors.background)
         ) {
@@ -35,7 +35,7 @@ fun TutorialStartDialog(onStart: () -> Unit, onSkip: () -> Unit) {
                     .fillMaxWidth()
             ) {
                 Text(
-                    text = ">>> SYSTEM_TRAINING_AVAILABLE",
+                    text = ">>> ORIENTATION_AVAILABLE",
                     color = colors.primary,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
@@ -47,26 +47,26 @@ fun TutorialStartDialog(onStart: () -> Unit, onSkip: () -> Unit) {
                 
                 Column {
                     Text(
-                        text = "Launch guided walkthrough?",
+                        text = "Begin system walkthrough?",
                         fontFamily = FontFamily.Monospace,
                         color = colors.textPrimary,
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Tour duration: ~3 minutes",
+                        text = "Estimated duration: 2 minutes",
                         fontFamily = FontFamily.Monospace,
                         color = colors.dimText,
                         fontSize = 12.sp,
                     )
                     Text(
-                        text = "Uses sample data for demonstration.",
+                        text = "Configures operative intelligence.",
                         fontFamily = FontFamily.Monospace,
                         color = colors.dimText,
                         fontSize = 12.sp,
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Live data activates after tour.",
+                        text = "Real-time feeds sync after setup.",
                         fontFamily = FontFamily.Monospace,
                         color = colors.amber,
                         fontSize = 12.sp,
@@ -99,10 +99,10 @@ fun TutorialStartDialog(onStart: () -> Unit, onSkip: () -> Unit) {
                             contentColor = colors.background
                         ),
                         shape = RectangleShape,
-                        contentPadding = PaddingValues(horizontal = 16.dp)
+                        contentPadding = PaddingValues(horizontal = 12.dp)
                     ) {
                         Text(
-                            text = "[START_TRAINING]",
+                            text = "[START]",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.Monospace,
@@ -158,7 +158,7 @@ fun TutorialCompletionDialog(onDismiss: () -> Unit) {
         Card(
             modifier = Modifier
                 .fillMaxWidth(0.92f)
-                .border(2.dp, colors.primary, RectangleShape),
+                .border(1.dp, colors.primary, RectangleShape),
             shape = RectangleShape,
             colors = CardDefaults.cardColors(containerColor = colors.background)
         ) {

@@ -138,7 +138,7 @@ fun RuleSection(title: String, rules: List<StrategyRule>, onAdd: () -> Unit) {
 @Composable
 fun BacktestReportView(report: com.cryptodept.domain.usecase.BacktestReport) {
     val colors = LocalTerminalColors.current
-    Column(modifier = Modifier.fillMaxWidth().border(2.dp, colors.primary).padding(16.dp)) {
+    Column(modifier = Modifier.fillMaxWidth().border(1.dp, colors.primary).padding(16.dp)) {
         Text("--- BACKTEST_REPORT ---", color = colors.primary, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
         ReportLine("TOTAL_RETURN", "${String.format(Locale.US, "%.2f", report.totalReturnPercent)}%", if (report.totalReturnPercent >= 0) colors.primary else colors.danger)

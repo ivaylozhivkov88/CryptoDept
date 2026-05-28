@@ -40,15 +40,21 @@ class TechnicalSentinel : CryptoAgent {
     
     override suspend fun analyze(data: MarketDataSnapshot): AgentReport {
         val momentum = if (data.rsi < 40) "BULLISH_RECOVERY" else if (data.rsi > 60) "BEARISH_EXHAUSTION" else "NEUTRAL"
+        
+        // NEW: M2.1 Technical Depth
+        val detector = com.cryptodept.util.CandlePatternDetector()
+        val patterns = detector.detectPatterns(data.ohlc)
+        val patternText = if (patterns.isNotEmpty()) " Patterns: ${patterns.joinToString(", ")}." else ""
+        
         val confluence = "RSI=${data.rsi.toInt()} | EMA50=${data.ema50Signal} | MACD=${data.macdSignal}"
         
         return AgentReport(
             agentId = id,
             agentName = name,
             status = AgentStatus.SUCCESS,
-            summary = "Sentinel identifies $momentum momentum. Confluence detected: $confluence.",
+            summary = "Sentinel identifies $momentum momentum.$patternText Confluence detected: $confluence.",
             confidence = 0.92,
-            details = mapOf("rsi" to data.rsi.toString(), "trend" to data.ema200Signal)
+            details = mapOf("rsi" to data.rsi.toString(), "trend" to data.ema200Signal, "patterns" to patterns.joinToString(","))
         )
     }
 }
@@ -59,15 +65,24 @@ class WhaleScout : CryptoAgent {
     
     override suspend fun analyze(data: MarketDataSnapshot): AgentReport {
         val whaleBias = if (data.riskScore < 45) "AGGRESSIVE_ACCUMULATION" else if (data.riskScore > 55) "DISTRIBUTION_DETECTED" else "STABLE_HOLDING"
+        
+        // NEW: M2.2 Institutional Bias
+        val netFlow = data.exchangeInflowUsd - data.exchangeOutflowUsd
+        val flowText = when {
+            netFlow > 100_000_000 -> "Heavy Exchange Inflow (Selling pressure)."
+            netFlow < -100_000_000 -> "Large Exchange Outflow (Cold storage / OTC accumulation)."
+            else -> "Neutral Institutional flow."
+        }
+
         val liquidity = "Funding: ${data.fundingLevel} | Liqs: ${String.format("%.1f", data.longLiquidations24h + data.shortLiquidations24h)}M"
         
         return AgentReport(
             agentId = id,
             agentName = name,
             status = AgentStatus.SUCCESS,
-            summary = "Whale Scout detects $whaleBias. Liquidity profile: $liquidity.",
+            summary = "Whale Scout detects $whaleBias. $flowText Liquidity profile: $liquidity.",
             confidence = 0.85,
-            details = mapOf("funding" to data.fundingLevel, "risk" to data.riskScore.toString())
+            details = mapOf("funding" to data.fundingLevel, "risk" to data.riskScore.toString(), "net_flow" to netFlow.toString())
         )
     }
 }

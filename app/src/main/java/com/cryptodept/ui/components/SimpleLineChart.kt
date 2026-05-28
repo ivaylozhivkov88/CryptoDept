@@ -48,7 +48,7 @@ fun SimpleLineChart(
 
     val labelStyle = TextStyle(
         color = colors.dimText,
-        fontSize = 8.sp,
+        fontSize = 11.sp,
         fontFamily = JetBrainsMono
     )
 

@@ -28,11 +28,12 @@ fun WhaleInsightCard(
     onLearnMore: () -> Unit,
     onUpgrade: () -> Unit,
     modifier: Modifier = Modifier,
+    showUpgrade: Boolean = true
 ) {
     val colors = LocalTerminalColors.current
     
     Card(
-        modifier = modifier.fillMaxWidth().padding(8.dp),
+        modifier = modifier.fillMaxWidth().padding(vertical = 4.dp),
         colors = CardDefaults.cardColors(containerColor = colors.background),
         border = BorderStroke(1.dp, colors.primary),
     ) {
@@ -52,18 +53,20 @@ fun WhaleInsightCard(
                     )
                     FeatureHelpIcon(feature = FeatureKey.DASHBOARD_WHALE_INSIGHT, iconSize = 12.dp)
                 }
-                Text(
-                    text = "[FREE]",
-                    color = colors.dimText,
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = 11.sp,
-                )
+                if (!showUpgrade) {
+                    Text(
+                        text = "[PRO_ACTIVE]",
+                        color = colors.primary,
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 10.sp,
+                    )
+                }
             }
             
             Spacer(modifier = Modifier.height(12.dp))
             
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = signal.emoji, fontSize = 28.sp) // LARGER
+                Text(text = signal.emoji, fontSize = 28.sp)
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
                     Text(
@@ -99,15 +102,19 @@ fun WhaleInsightCard(
                         color = colors.dimText,
                         fontFamily = FontFamily.Monospace,
                         fontSize = 12.sp,
+                        maxLines = 1
                     )
                 }
-                TextButton(onClick = onUpgrade) {
-                    Text(
-                        text = "[ Live_feed_→ ]",
-                        color = colors.amber,
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 12.sp,
-                    )
+                if (showUpgrade) {
+                    TextButton(onClick = onUpgrade) {
+                        Text(
+                            text = "[ Live_feed_→ ]",
+                            color = colors.amber,
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = 12.sp,
+                            maxLines = 1
+                        )
+                    }
                 }
             }
         }

@@ -1,0 +1,142 @@
+package com.cryptodept.ui.components
+
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.cryptodept.domain.model.OHLCData
+import com.cryptodept.domain.model.PricePrediction
+import com.cryptodept.ui.theme.JetBrainsMono
+import com.cryptodept.ui.theme.LocalTerminalColors
+import java.util.Locale
+
+@Composable
+fun PredictionChart(
+    historicalData: List<OHLCData>,
+    prediction: PricePrediction,
+    modifier: Modifier = Modifier
+) {
+    val colors = LocalTerminalColors.current
+    if (historicalData.isEmpty()) return
+
+    val textMeasurer = rememberTextMeasurer()
+    val labelStyle = TextStyle(
+        color = colors.dimText,
+        fontSize = 8.sp,
+        fontFamily = JetBrainsMono
+    )
+
+    // Prediction targets
+    val targets = listOf(
+        prediction.prediction1h,
+        prediction.prediction4h,
+        prediction.prediction24h,
+        prediction.prediction7d
+    )
+
+    // Combine historical close prices with prediction targets
+    // Prediction targets are mid-prices
+    val allPrices = historicalData.map { it.close } + targets.map { it.mid }
+    val maxPrice = allPrices.maxOrNull() ?: 1.0
+    val minPrice = allPrices.minOrNull() ?: 0.0
+    val range = (maxPrice - minPrice).coerceAtLeast(0.0001)
+
+    Canvas(modifier = modifier.fillMaxSize()) {
+        val labelPadding = 50.dp.toPx()
+        val bottomPadding = 24.dp.toPx()
+        val chartWidth = size.width - labelPadding
+        val chartHeight = size.height - bottomPadding
+
+        val histSize = historicalData.size
+        val predSize = targets.size
+        val totalSize = histSize + predSize
+
+        // 1. Draw Grid
+        val gridCount = 4
+        for (i in 0..gridCount) {
+            val y = (chartHeight / gridCount) * i
+            drawLine(
+                color = colors.grid.copy(alpha = 0.15f),
+                start = Offset(0f, y),
+                end = Offset(chartWidth, y),
+                strokeWidth = 1f
+            )
+        }
+
+        // 2. Draw Historical Line (Solid)
+        val histPath = Path()
+        historicalData.forEachIndexed { index, ohlc ->
+            val x = (index.toFloat() / (totalSize - 1)) * chartWidth
+            val y = chartHeight - (((ohlc.close - minPrice) / range).toFloat() * chartHeight)
+            if (index == 0) histPath.moveTo(x, y) else histPath.lineTo(x, y)
+        }
+        drawPath(path = histPath, color = colors.primary, style = Stroke(width = 2.dp.toPx()))
+
+        // 3. Draw Prediction Line (Dashed)
+        val predPath = Path()
+        val lastHistX = ((histSize - 1).toFloat() / (totalSize - 1)) * chartWidth
+        val lastHistY = chartHeight - (((historicalData.last().close - minPrice) / range).toFloat() * chartHeight)
+        predPath.moveTo(lastHistX, lastHistY)
+
+        targets.forEachIndexed { index, target ->
+            val x = ((histSize + index).toFloat() / (totalSize - 1)) * chartWidth
+            val y = chartHeight - (((target.mid - minPrice) / range).toFloat() * chartHeight)
+            predPath.lineTo(x, y)
+            
+            // Draw Target Points
+            drawCircle(
+                color = if (target.mid >= prediction.currentPrice) colors.primary else colors.error,
+                radius = 3.dp.toPx(),
+                center = Offset(x, y)
+            )
+        }
+
+        drawPath(
+            path = predPath,
+            color = colors.amber,
+            style = Stroke(
+                width = 2.dp.toPx(),
+                pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+            )
+        )
+
+        // 4. Vertical separator between past and future
+        drawLine(
+            color = colors.amber.copy(alpha = 0.5f),
+            start = Offset(lastHistX, 0f),
+            end = Offset(lastHistX, chartHeight),
+            strokeWidth = 1.dp.toPx(),
+            pathEffect = PathEffect.dashPathEffect(floatArrayOf(5f, 5f), 0f)
+        )
+
+        drawText(
+            textMeasurer = textMeasurer,
+            text = "NOW",
+            style = labelStyle.copy(color = colors.amber, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
+            topLeft = Offset(lastHistX - 10.dp.toPx(), chartHeight + 4.dp.toPx())
+        )
+        
+        // Final Target Label
+        val finalTarget = targets.last()
+        val finalX = chartWidth
+        val finalY = chartHeight - (((finalTarget.mid - minPrice) / range).toFloat() * chartHeight)
+        val targetText = String.format(Locale.US, "Target: $%.2f", finalTarget.mid)
+        drawText(
+            textMeasurer = textMeasurer,
+            text = targetText,
+            style = labelStyle.copy(color = colors.amber),
+            topLeft = Offset(finalX - 60.dp.toPx(), finalY - 12.dp.toPx())
+        )
+    }
+}

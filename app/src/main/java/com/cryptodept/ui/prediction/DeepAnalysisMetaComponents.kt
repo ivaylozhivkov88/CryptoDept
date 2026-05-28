@@ -1,0 +1,261 @@
+package com.cryptodept.ui.prediction
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.cryptodept.domain.model.*
+import com.cryptodept.ui.theme.LocalTerminalColors
+import java.util.Locale
+
+@Composable
+fun ConsensusHeader(prediction: PricePrediction) {
+    val colors = LocalTerminalColors.current
+    val direction = prediction.ensembleConsensus.direction
+    val color =
+        when {
+            direction.name.contains("UP") -> colors.primary
+            direction.name.contains("DOWN") -> colors.error
+            else -> colors.amber
+        }
+
+    val verdict =
+        when (direction) {
+            Direction.STRONG_UP -> "Oracle detects high-conviction breakout cluster. Order-flow and fractal harmonics are synchronized for immediate upward expansion."
+            Direction.UP -> "Bullish drift established. Intelligence engines confirm accumulation behavior and weakening overhead resistance."
+            Direction.DOWN -> "Bearish pressure intensifying. Liquidity gravity is pulling the price towards historical support zones."
+            Direction.STRONG_DOWN -> "Critical systemic rejection. Collective models identify high probability of an accelerated downward cascade."
+            Direction.SIDEWAYS -> "Strategic equilibrium. Market participants are in a state of high disagreement. Recommended action: OBSERVE."
+        }
+
+    Box(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .border(2.dp, color, RectangleShape)
+                .background(color.copy(alpha = 0.08f))
+                .padding(24.dp),
+    ) {
+        Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+            // "Digital Scanner" style title
+            Text(
+                text = ">>> ORACLE_SYNTHESIS_V4 <<<", 
+                color = color.copy(0.7f), 
+                fontSize = 11.sp, 
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold
+            )
+            
+            Spacer(modifier = Modifier.height(4.dp))
+            
+            Text(
+                text = direction.name, 
+                color = color, 
+                fontSize = 32.sp, 
+                fontWeight = FontWeight.Black, 
+                fontFamily = FontFamily.Monospace,
+                letterSpacing = 2.sp
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = verdict,
+                color = colors.textPrimary,
+                fontSize = 13.sp,
+                fontFamily = FontFamily.Monospace,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                lineHeight = 18.sp,
+                fontWeight = FontWeight.Medium
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Accuracy score pill
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Surface(
+                    color = color.copy(alpha = 0.2f),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, color),
+                    shape = RectangleShape
+                ) {
+                    Text(
+                        text = " CONVICTION: ${(prediction.ensembleConsensus.overallConfidence * 100).toInt()}% ",
+                        color = color,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+                
+                Spacer(modifier = Modifier.width(12.dp))
+                
+                com.cryptodept.ui.components.ModelAccuracyBadge(
+                    modelName = "ENSEMBLE",
+                    coinId = prediction.coinId,
+                    compact = true
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun DataQualityFooter(prediction: PricePrediction) {
+    val colors = LocalTerminalColors.current
+    Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+        HorizontalDivider(color = colors.primary.copy(alpha = 0.2f), thickness = 1.dp)
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            "PREDICTABILITY_SCORE: ${(prediction.dataQuality * 100).toInt()}%",
+            color = colors.dimText,
+            fontSize = 10.sp,
+            fontFamily = FontFamily.Monospace,
+        )
+        Text(
+            "AGREEMENT_BETWEEN_MODELS: ${(prediction.modelsAgreement * 100).toInt()}%",
+            color = colors.dimText,
+            fontSize = 10.sp,
+            fontFamily = FontFamily.Monospace,
+        )
+    }
+}
+
+@Composable
+fun LiquidityInsightPanel(insight: LiquidityInsight) {
+    val colors = LocalTerminalColors.current
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, colors.grid)
+            .padding(12.dp)
+    ) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Column {
+                Text("OPEN_INTEREST", color = colors.dimText, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+                Text(
+                    text = "$${String.format(Locale.US, "%.1f", insight.openInterest / 1_000_000)}M",
+                    color = colors.textPrimary,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Monospace
+                )
+                Text(
+                    text = "${if (insight.openInterestChange24h >= 0) "+" else ""}${String.format(Locale.US, "%.1f", insight.openInterestChange24h)}% (24H)",
+                    color = if (insight.openInterestChange24h >= 0) colors.primary else colors.error,
+                    fontSize = 10.sp,
+                    fontFamily = FontFamily.Monospace
+                )
+            }
+            Column(horizontalAlignment = Alignment.End) {
+                Text("FUNDING_RATE", color = colors.dimText, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+                Text(
+                    text = "${String.format(Locale.US, "%.4f", insight.fundingRate)}%",
+                    color = if (insight.fundingRate > 0) colors.primary else colors.error,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Monospace
+                )
+                Text(
+                    text = insight.sentimentBias,
+                    color = colors.amber,
+                    fontSize = 9.sp,
+                    fontFamily = FontFamily.Monospace
+                )
+            }
+        }
+        
+        Spacer(Modifier.height(12.dp))
+        HorizontalDivider(color = colors.grid.copy(alpha = 0.3f))
+        Spacer(Modifier.height(8.dp))
+        
+        Text("LONG/SHORT RATIO (RETAIL):", color = colors.dimText, fontSize = 9.sp, fontFamily = FontFamily.Monospace)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(4.dp)
+                .background(colors.surface)
+        ) {
+            Box(Modifier.weight(insight.longShortRatio.toFloat().coerceAtLeast(0.01f)).fillMaxHeight().background(colors.primary))
+            Box(Modifier.weight((1 - insight.longShortRatio).toFloat().coerceAtLeast(0.01f)).fillMaxHeight().background(colors.error))
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text("${(insight.longShortRatio * 100).toInt()}% L", color = colors.primary, fontSize = 8.sp, fontFamily = FontFamily.Monospace)
+            Text("${((1 - insight.longShortRatio) * 100).toInt()}% S", color = colors.error, fontSize = 8.sp, fontFamily = FontFamily.Monospace)
+        }
+    }
+}
+
+@Composable
+fun EvidenceChainPanel(chain: List<EvidenceStep>) {
+    val colors = LocalTerminalColors.current
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, colors.primary.copy(alpha = 0.3f))
+            .padding(12.dp)
+    ) {
+        chain.forEachIndexed { index, step ->
+            val impactColor = when (step.impact) {
+                Direction.UP, Direction.STRONG_UP -> colors.primary
+                Direction.DOWN, Direction.STRONG_DOWN -> colors.error
+                else -> colors.amber
+            }
+            
+            Row(modifier = Modifier.padding(vertical = 8.dp)) {
+                Column(modifier = Modifier.weight(0.1f)) {
+                    Text(
+                        text = (index + 1).toString().padStart(2, '0'),
+                        color = impactColor,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace
+                    )
+                }
+                Column(modifier = Modifier.weight(0.9f)) {
+                    Text(
+                        text = ">>> ${step.title}",
+                        color = impactColor,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Text(
+                        text = step.description,
+                        color = colors.textPrimary.copy(alpha = 0.8f),
+                        fontSize = 11.sp,
+                        fontFamily = FontFamily.Monospace,
+                        lineHeight = 14.sp
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "IMPACT: ${step.impact.name}",
+                            color = impactColor.copy(alpha = 0.6f),
+                            fontSize = 9.sp,
+                            fontFamily = FontFamily.Monospace
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Text(
+                            text = "CONFIDENCE: ${(step.confidence * 100).toInt()}%",
+                            color = colors.dimText,
+                            fontSize = 9.sp,
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
+                }
+            }
+            if (index < chain.size - 1) {
+                HorizontalDivider(color = colors.grid.copy(alpha = 0.2f), modifier = Modifier.padding(vertical = 4.dp))
+            }
+        }
+    }
+}

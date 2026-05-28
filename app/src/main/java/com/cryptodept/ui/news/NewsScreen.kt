@@ -187,7 +187,7 @@ fun NewsHeadlineCard(item: NewsItem, onClick: () -> Unit) {
                 Text(
                     text = item.currencies.firstOrNull()?.uppercase() ?: "MARKET",
                     color = colors.primary,
-                    fontSize = 10.sp,
+                    fontSize = 11.sp,
                     fontWeight = FontWeight.Black
                 )
                 Text(
@@ -199,7 +199,7 @@ fun NewsHeadlineCard(item: NewsItem, onClick: () -> Unit) {
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(text = item.source, color = colors.dimText, fontSize = 10.sp)
+                Text(text = item.source, color = colors.dimText, fontSize = 11.sp)
             }
         }
     }
@@ -218,7 +218,7 @@ fun NewsListItem(item: NewsItem, onClick: () -> Unit) {
                 Text(
                     item.currencies.firstOrNull()?.uppercase() ?: "SYS",
                     color = colors.primary,
-                    fontSize = 10.sp,
+                    fontSize = 11.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.width(6.dp))

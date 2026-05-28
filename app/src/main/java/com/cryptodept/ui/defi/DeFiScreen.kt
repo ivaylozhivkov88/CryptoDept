@@ -112,7 +112,7 @@ fun DeFiContent(
             },
         ) {
             Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }) {
-                Text("PROTOCOLS", modifier = Modifier.padding(8.dp), fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                Text("PROTOCOLS", modifier = Modifier.padding(8.dp), fontSize = 11.sp, fontFamily = FontFamily.Monospace)
             }
             Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }) {
                 Text("YIELDS", modifier = Modifier.padding(8.dp), fontSize = 10.sp, fontFamily = FontFamily.Monospace)

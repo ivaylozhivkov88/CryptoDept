@@ -20,6 +20,9 @@ data class MarketDataSnapshot(
     val btcDominance: Double,
     val sp500Change: Double,
     val dxyChange: Double,
+    val ohlc: List<OHLCData> = emptyList(),
+    val exchangeInflowUsd: Double = 0.0,
+    val exchangeOutflowUsd: Double = 0.0,
 )
 
 data class ParsedReport(

@@ -49,16 +49,18 @@ fun AgentHubScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = ">>> AGENTIC_INTELLIGENCE_HUB",
+                text = ">>> AGENT_HUB", // Shortened even more
                 color = colors.primary,
                 fontFamily = FontFamily.Monospace,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                modifier = Modifier.weight(1f)
             )
             
             if (isRefreshing) {
                 CircularProgressIndicator(
-                    modifier = Modifier.size(16.dp),
+                    modifier = Modifier.size(12.dp),
                     color = colors.primary,
                     strokeWidth = 2.dp
                 )
@@ -68,7 +70,8 @@ fun AgentHubScreen(
                     color = colors.primary,
                     fontSize = 10.sp,
                     fontFamily = FontFamily.Monospace,
-                    modifier = Modifier.clickable { viewModel.refresh() }
+                    modifier = Modifier.clickable { viewModel.refresh() }.padding(start = 4.dp),
+                    maxLines = 1
                 )
             }
         }

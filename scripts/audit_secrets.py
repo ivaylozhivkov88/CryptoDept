@@ -11,7 +11,7 @@ PATTERNS = {
 }
 
 IGNORE_DIRS = {'.git', '.gradle', '.idea', 'build', 'node_modules', 'captures'}
-EXTENSIONS = {'.kt', '.java', '.xml', '.gradle', '.kts', '.properties'}
+EXTENSIONS = {'.kt', '.java', '.xml', '.gradle', '.kts', '.properties', '.json'}
 
 def audit():
     results = []

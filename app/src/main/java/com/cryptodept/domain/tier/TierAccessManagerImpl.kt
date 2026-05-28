@@ -34,32 +34,52 @@ class TierAccessManagerImpl @Inject constructor(
     
     override val currentTier: StateFlow<AccessTier> = combine(
         billingService.isPro,
-        subscription.getAdminStatusFlow(),
         serverTierFlow,
         authService.currentUser
-    ) { localPro, isAdmin, serverTier, user ->
-        resolveTier(localPro = localPro, isAdmin = isAdmin, serverTier = serverTier, user = user)
+    ) { localPro, serverTier, user ->
+        val tier = resolveTier(localPro = localPro, serverTier = serverTier, user = user)
+        subscribeToSessionTopics(tier)
+        tier
     }.stateIn(
         scope = scope,
         started = SharingStarted.Eagerly,
         initialValue = resolveTier(
             localPro = billingService.isPro.value, 
-            isAdmin = subscription.checkIsAdmin(),
             serverTier = null,
             user = authService.currentUser.value
         ),
     )
+
+    private fun subscribeToSessionTopics(tier: AccessTier) {
+        val tierSuffix = if (tier.canAccess(AccessTier.PRO)) "PRO" else "FREE"
+        val oppositeSuffix = if (tier.canAccess(AccessTier.PRO)) "FREE" else "PRO"
+        
+        val sessions = listOf("LONDON_OPEN", "NY_OPEN", "DAILY_REVIEW")
+        val messaging = com.google.firebase.messaging.FirebaseMessaging.getInstance()
+        
+        sessions.forEach { session ->
+            messaging.unsubscribeFromTopic("session_${session}_${oppositeSuffix}")
+            messaging.subscribeToTopic("session_${session}_${tierSuffix}")
+        }
+    }
     
-    private fun resolveTier(localPro: Boolean, isAdmin: Boolean, serverTier: AccessTier?, user: com.google.firebase.auth.FirebaseUser?): AccessTier {
+    private fun resolveTier(localPro: Boolean, serverTier: AccessTier?, user: com.google.firebase.auth.FirebaseUser?): AccessTier {
         val email = user?.email?.lowercase()?.trim()
-        if (email == "ivaylozhivkov14@gmail.com" || email == "condignia@gmail.com") {
+        val adminEmails = setOf(
+            "ivaylozhivkov14@gmail.com",
+            "condignia@gmail.com",
+            "test-reviewer@cryptodept.com"
+        )
+        
+        // ADMIN status is strictly bound to email identity
+        if (email != null && email in adminEmails) {
             return AccessTier.ADMIN
         }
 
-        if (isAdmin || serverTier == AccessTier.ADMIN) return AccessTier.ADMIN
+        // Secondary check via server-side flag (if identity verified)
+        if (serverTier == AccessTier.ADMIN) return AccessTier.ADMIN
         
-        if (TestModeFlag.BYPASS_PAYWALL_IN_DEBUG) return AccessTier.PRO
-        
+        // PRO status depends on billing or server confirmation
         if (serverTier == AccessTier.PRO || localPro) return AccessTier.PRO
         
         return AccessTier.FREE

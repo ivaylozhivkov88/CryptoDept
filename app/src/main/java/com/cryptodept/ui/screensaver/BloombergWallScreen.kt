@@ -30,7 +30,8 @@ fun BloombergWallScreen(
     viewModel: BloombergWallViewModel = hiltViewModel()
 ) {
     val colors = LocalTerminalColors.current
-    val topCoins by viewModel.topCoins.collectAsState()
+    val topCoinsRaw by viewModel.topCoins.collectAsState()
+    val topCoins = remember(topCoinsRaw) { topCoinsRaw.take(30) } // Limit to top 30 for performance (Q-007)
     val lastUpdate by viewModel.lastUpdate.collectAsState()
 
     // Map CoinPrice list to the expected priceData format for existing sub-composables
@@ -92,7 +93,7 @@ fun BloombergWallScreen(
                     text = ">>> REAL-TIME TERMINAL FEEDS ACTIVE <<<",
                     color = colors.primary.copy(alpha = 0.6f),
                     fontFamily = FontFamily.Monospace,
-                    fontSize = 10.sp,
+                    fontSize = 11.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -198,7 +199,7 @@ fun SentimentBar(priceData: Map<String, Pair<Double, Double>>) {
             text = "SENTIMENT: $label (${String.format(Locale.US, "%+.2f", avgChange)}%)",
             color = colors.textPrimary,
             fontFamily = FontFamily.Monospace,
-            fontSize = 10.sp,
+            fontSize = 11.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.align(Alignment.CenterStart).padding(start = 8.dp),
         )
@@ -227,12 +228,12 @@ fun SystemHealth(lastUpdateMillis: Long) {
                     "LAG_DETECTED" -> colors.amber
                     else -> colors.danger
                 }
-            Text("DATA_STREAM: $status", color = statusColor, fontFamily = FontFamily.Monospace, fontSize = 10.sp)
+            Text("DATA_STREAM: $status", color = statusColor, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
             Text(
                 "T: ${String.format(Locale.US, "%tT", Date(lastUpdateMillis))}",
                 color = colors.dimText,
                 fontFamily = FontFamily.Monospace,
-                fontSize = 10.sp,
+                fontSize = 11.sp,
             )
         }
     }
@@ -368,7 +369,7 @@ fun MarketDominanceSection(coins: List<CoinPrice>) {
                                 text = "$symbol: ${String.format(Locale.US, "%.1f", percentage)}%",
                                 color = colors.primary,
                                 fontFamily = FontFamily.Monospace,
-                                fontSize = 9.sp,
+                                fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
                             )
                             Box(
@@ -431,19 +432,19 @@ fun PriceChartStatus(priceData: Map<String, Pair<Double, Double>>) {
                     text = String.format(Locale.US, "%+.2f", change) + "%",
                     color = changeColor,
                     fontFamily = FontFamily.Monospace,
-                    fontSize = 10.sp,
+                    fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                 )
             }
         }
         Spacer(modifier = Modifier.width(8.dp))
         Column(modifier = Modifier.align(Alignment.CenterVertically)) {
-            Text("FEEDS: ENCRYPTED", color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 9.sp)
+            Text("FEEDS: ENCRYPTED", color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
             Text(
                 "SYNC: REAL-TIME SECURE",
                 color = colors.dimText,
                 fontFamily = FontFamily.Monospace,
-                fontSize = 9.sp,
+                fontSize = 11.sp,
             )
         }
     }

@@ -133,7 +133,11 @@ class DerivativesRepositoryImpl
         override suspend fun getLiquidationData(symbol: String): Result<LiquidationData> =
             try {
                 val cgSymbol = resolveCoinglassSymbol(symbol)
-                val heatmap = coinglassApi.getLiquidationHeatmap(cgSymbol)
+                val heatmap = try {
+                    coinglassApi.getLiquidationHeatmap(cgSymbol)
+                } catch (e: Exception) {
+                    null
+                }
                 val summary =
                     try {
                         coinglassApi.getGlobalLiquidations(cgSymbol)
@@ -142,7 +146,7 @@ class DerivativesRepositoryImpl
                     }
 
                 val levels =
-                    heatmap.data?.let { data ->
+                    heatmap?.data?.let { data ->
                         data.pricelevels.mapIndexed { index, price ->
                             val longVal = data.longLiquidations.getOrNull(index) ?: 0.0
                             val shortVal = data.shortLiquidations.getOrNull(index) ?: 0.0

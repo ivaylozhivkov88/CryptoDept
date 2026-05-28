@@ -23,7 +23,7 @@ android {
         minSdk = 26
         targetSdk = 35
         versionCode = 28
-        versionName = "1.1.15"
+        versionName = "1.5.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -192,6 +192,8 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.database) // Ползваме името от libs.versions.toml
+    implementation(libs.firebase.functions)
+    implementation(libs.firebase.analytics)
     implementation(libs.firebase.inapp.messaging)
     implementation(libs.firebase.messaging)
     implementation(libs.firebase.appcheck)

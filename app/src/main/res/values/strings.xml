@@ -35,27 +35,27 @@
     <string name="tutorial_skip">[SKIP_TOUR]</string>
     <string name="tutorial_next">[NEXT &gt;&gt;]</string>
     <string name="tutorial_previous">[&lt;&lt; PREV]</string>
-    <string name="tutorial_finish">[COMPLETE_TOUR]</string>
+    <string name="tutorial_finish">[COMPLETE]</string>
     <string name="tutorial_step_counter">[%1$d/%2$d]</string>
-    <string name="tutorial_skip_confirm">Abort walkthrough? You can replay it from System settings.</string>
-    <string name="tutorial_completed_title">>>> READY_TO_ACCESS</string>
-    <string name="tutorial_completed_message">System orientation complete. You now have access to the full suite of terminal analysis tools.\n\nLog: [ORIENTATION_COMPLETE]</string>
+    <string name="tutorial_skip_confirm">Abort orientation? You can replay it from System settings.</string>
+    <string name="tutorial_completed_title">>>> READY_TO_OPERATE</string>
+    <string name="tutorial_completed_message">System orientation complete. You now have full access to terminal intelligence and data feeds.\n\nLog: [STATUS_OPERATIONAL]</string>
 
     <!-- ============= DASHBOARD (7) ============= -->
     <string name="tutorial_dash_1_title">[01] MARKET_TICKER</string>
-    <string name="tutorial_dash_1_message">Real-time price feed for tracked assets. Select any asset for technical deep-dive.</string>
+    <string name="tutorial_dash_1_message">Real-time price feed for your selected assets. Tap any entry for deep technical analysis.</string>
 
     <string name="tutorial_dash_2_title">[02] SYSTEM_NARRATIVE</string>
-    <string name="tutorial_dash_2_message">Synthesized market report from specialized analysis agents. Updated periodically via cloud sync.</string>
+    <string name="tutorial_dash_2_message">Dynamic market report synthesized from our multi-agent framework. Updated via cloud sync.</string>
 
     <string name="tutorial_dash_3_title">[03] VOLATILITY_SCANNER</string>
-    <string name="tutorial_dash_3_message">Identifies top gainers and losers in the current market cycle.</string>
+    <string name="tutorial_dash_3_message">Identifies top gainers and outliers in the current 24h market cycle.</string>
 
-    <string name="tutorial_dash_5_title">[04] SENTIMENT_BAROMETER</string>
-    <string name="tutorial_dash_5_message">Aggregated social and macro sentiment. Fear &amp; Greed indexed in real-time.</string>
+    <string name="tutorial_dash_5_title">[03] SENTIMENT_BAROMETER</string>
+    <string name="tutorial_dash_5_message">Aggregated social metrics and macro data. Fear &amp; Greed indexed in real-time.</string>
 
-    <string name="tutorial_dash_6_title">[05] NETWORK_MONITOR</string>
-    <string name="tutorial_dash_6_message">On-chain health: Gas fees, mempool status, and validator latency.</string>
+    <string name="tutorial_dash_6_title">[04] NETWORK_MONITOR</string>
+    <string name="tutorial_dash_6_message">Layer 1 health metrics: Gas fees, mempool backlog, and hashrate trends.</string>
 
     <!-- ============= MARKETS (4) ============= -->
     <string name="tutorial_mkt_1_title">[06] GLOBAL_DATA</string>
@@ -91,9 +91,9 @@
     </string>
 
     <!-- ============= ALERTS (Merged) ============= -->
-    <string name="tutorial_merged_alerts_title">[12] MONITORING DAEMONS</string>
+    <string name="tutorial_merged_alerts_title">[04] MONITORING DAEMONS</string>
     <string name="tutorial_merged_alerts_message">
-        • ALERTS: Server-side push notification grid\n
+        • ALERTS: Cloud-side push notification grid\n
         • LOGIC: Composite AND/OR alert builder\n
         • PRIORITY: Critical threshold notification
     </string>
@@ -105,8 +105,8 @@
     <string name="tutorial_set_glossary_title">[14] TERMINOLOGY_DATABASE</string>
     <string name="tutorial_set_glossary_message">Market dictionary with 45+ technical and institutional terms.</string>
 
-    <string name="tutorial_set_tier_title">[15] ACCESS_MANAGEMENT</string>
-    <string name="tutorial_set_tier_message">Manage subscription tier. Administrative accounts have full system privileges.</string>
+    <string name="tutorial_set_tier_title">[05] ACCESS_MANAGEMENT</string>
+    <string name="tutorial_set_tier_message">Configure subscription tiers. Professional accounts unlock elite on-chain data.</string>
 
     <string name="tutorial_set_2_title">[16] SYSTEM_ORIENTATION</string>
     <string name="tutorial_set_2_message">Restart the guided tour of terminal interfaces at any time.</string>

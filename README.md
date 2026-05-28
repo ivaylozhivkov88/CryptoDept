@@ -1,81 +1,53 @@
-# 📟 CryptoDept Terminal v1.1
-> **The Multi-Agent Intelligence Hub for Digital Assets.**
+# 📟 CryptoDept Terminal v1.5.0 — ULTIMATE STABLE
+> **The Multi-Agent Intelligence Hub for Elite Digital Asset Management.**
 
 ![Android](https://img.shields.io/badge/Platform-Android-00FF41?style=for-the-badge&logo=android&logoColor=black)
+![Firebase](https://img.shields.io/badge/Backend-Firebase_Cloud-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
 ![Kotlin](https://img.shields.io/badge/Language-Kotlin-00FF41?style=for-the-badge&logo=kotlin&logoColor=black)
-![Compose](https://img.shields.io/badge/UI-Jetpack_Compose-00FF41?style=for-the-badge&logo=jetpackcompose&logoColor=black)
-![License](https://img.shields.io/badge/License-Proprietary-red?style=for-the-badge)
+![Security](https://img.shields.io/badge/Security-Verified_by_Google_Play-blue?style=for-the-badge)
 
-**CryptoDept** is not just another tracker. It is a high-performance Android terminal designed for professional traders, powered by a decentralized-style **Multi-Agent Orchestration Framework**. It synthesizes technical analysis, on-chain whale movement, and social sentiment into a single, cohesive market narrative.
+**CryptoDept** is a high-performance, time-aware Android terminal. It is not a tracker; it is an **operative partner** that synchronizes with the global market cycle to provide clinical technical analysis, institutional whale monitoring, and AI-driven predictive narratives.
 
 ---
 
-## 🚀 Core Features
+## 🚀 Version 1.5.0 Intelligence Pass
 
-### 🧠 Multi-Agent Intelligence
-The heart of the terminal consists of specialized AI agents:
-*   **[SENTINEL]**: Quantitative Technical Analysis (RSI, MACD, FFT).
-*   **[GHOST WHALE]**: Tracking capital flow via Etherscan & Helius.
-*   **[PULSE]**: Real-time social sentiment analysis.
-*   **[ORACLE]**: Predictive mathematical modeling (Fourier, Monte Carlo).
+### 🌐 Centralized Cloud Heartbeat (v1.5 Exclusive)
+*   **Firebase Core Integration**: Zero-lag data synchronization. We stopped local WebSockets to save your battery—the cloud now handles the heavy lifting 24/7.
+*   **Session Intelligence**: The terminal now understands the 24-hour market cycle. Whether it's the London Open or the NY Volatility Window, the interface adapts its strategy in real-time.
 
-### ⚡ Professional Trading Tools
-*   **Liquidation Heatmaps**: Visualize where the "pain" is for market participants.
-*   **Whale Feed**: Real-time alerts for large $500k+ swaps.
-*   **Global Market Dashboard**: 3D Gauges for Fear & Greed and Altcoin Season.
-*   **Terminal-Style UX**: Designed for high-density information display.
+### 🧠 The Multi-Agent Framework
+*   **[SENTINEL]**: Real-time Technical Confluence (RSI, Trends, Patterns).
+*   **[SCOUT]**: Institutional Flow Monitoring ($500k+ on-chain moves).
+*   **[ORACLE]**: High-fidelity price projections using a 7-model mathematical ensemble.
+*   **[PULSE]**: Psychological barometer and social sentiment filter.
+
+---
+
+## ⚡ New Operative Features
+
+*   **⚓ Mission Control Card**: Dynamic top-bar providing "Strategic Objectives" based on your local time and current market phase.
+*   **🔔 Smart Notifications**: Real-data alerts containing live BTC metrics and trend analysis—no more boilerplate text.
+*   **🛡️ Hardened Billing**: Enterprise-grade server-side validation via Google Play Developer API.
+*   **🎟️ Promo Logic**: Integrated "Redeem" flows for promotional Intelligence Passes.
+*   **🎨 High-Fidelity UX**: Global font audit (11sp+ min) for absolute readability on any device.
 
 ---
 
 ## 🛠 Tech Stack
 
-*   **UI**: Jetpack Compose with custom Phosphor/Monospace theme.
-*   **Architecture**: Clean Architecture + MVVM + MVI-lite (Flow-driven).
-*   **Dependency Injection**: Hilt.
-*   **Database**: Room (with encrypted storage for sensitive data).
-*   **Networking**: Retrofit & OKHttp (Multi-source aggregation).
-*   **Real-time**: WebSockets for live price consensus.
+*   **UI**: Jetpack Compose (Modular Architecture).
+*   **Backend**: Firebase Cloud Functions (Node.js 22) + Realtime DB.
+*   **Security**: Official Google Auth & Play Integrity.
+*   **Performance**: Frame-capped animations (60fps) & centralized data harvesting.
 
 ---
 
-## 🔧 Installation & Setup
-
-### Requirements
-*   **Android Studio**: Ladybug (2024.2.1) or newer.
-*   **JDK**: 17+.
-*   **API Level**: 26+ (Android 8.0).
-
-### Local Configuration
-To build the project, you must provide your own API keys. Create a `local.properties` file in the root directory:
-
-```properties
-# D:/CryptoDept/local.properties
-COINGECKO_API_KEY=your_key_here
-COINGLASS_API_KEY=your_key_here
-CRYPTOPANIC_API_KEY=your_key_here
-HELIUS_API_KEY=your_key_here
-```
-
-### Build Instructions
-1. Clone the repository.
-2. Sync Gradle.
-3. Run `:app:assembleDebug`.
-
----
-
-## 🏗 Architecture Overview
-
-The project follows a strict **Layered Clean Architecture**:
-1.  **`:domain`**: Pure Kotlin. Contains Use Cases, Repository Interfaces, and the `MultiAgentCoordinator`.
-2.  **`:data`**: Implementations of repositories, Retrofit APIs, and Room DAOs.
-3.  **`:ui`**: Jetpack Compose screens, ViewModels, and the Phosphor Theme engine.
-
----
-
-## 📄 Compliance & Legal
-*   [Privacy Policy](PRIVACY_POLICY.md)
-*   [Delete Account Instructions](DELETE_ACCOUNT.md)
-*   [Intelligence Protocols (AGENTS.MD)](AGENTS.MD)
+## 🏗 Modular Architecture
+The project is now fully decoupled for maximum speed:
+1.  **`:ui:dashboard:components`**: Fragmented UI for rapid rendering.
+2.  **`:domain:tier`**: Unified access management for FREE, PRO, and ADMIN tiers.
+3.  **`:functions`**: Centralized market analysis and validator nodes.
 
 ---
 *CryptoDept Intelligence Unit — Authorized Access Only*

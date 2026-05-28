@@ -86,7 +86,7 @@ fun PaywallScreen(
             }
         }
 
-        // === CONTEXTUAL HIGHLIGHT (CHANGE 3) ===
+        // === CONTEXTUAL HIGHLIGHT ===
         featureContext?.let { key ->
             item {
                 Box(
@@ -94,30 +94,33 @@ fun PaywallScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                         .border(1.dp, colors.primary, RectangleShape)
-                        .background(colors.primary.copy(alpha = 0.08f))
-                        .padding(14.dp)
+                        .background(colors.primary.copy(alpha = 0.05f))
+                        .padding(16.dp)
                 ) {
                     Column {
                         Text(
-                            text = ">>> YOU TRIED TO ACCESS",
-                            color = colors.dimText,
-                            fontFamily = FontFamily.Monospace,
-                            fontSize = 10.sp,
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            text = key.displayName,
+                            text = ">>> UNLOCK_REQUIRED",
                             color = colors.primary,
                             fontFamily = FontFamily.Monospace,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp,
+                            fontSize = 10.sp,
+                            letterSpacing = 1.sp
                         )
-                        Spacer(Modifier.height(2.dp))
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            text = key.displayName.uppercase(),
+                            color = Color.White,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Black,
+                            fontSize = 18.sp,
+                        )
+                        Spacer(Modifier.height(4.dp))
                         Text(
                             text = key.proDescription,
-                            color = colors.textPrimary,
+                            color = colors.textPrimary.copy(alpha = 0.8f),
                             fontFamily = FontFamily.Monospace,
-                            fontSize = 11.sp,
+                            fontSize = 12.sp,
+                            lineHeight = 16.sp
                         )
                     }
                 }
@@ -217,8 +220,23 @@ fun PaywallScreen(
                 Spacer(Modifier.height(16.dp))
                 Button(
                     onClick = {
-                        selectedProduct?.let {
-                            viewModel.purchase(context as Activity, it)
+                        selectedProduct?.let { product ->
+                            // Safe Activity extraction for Billing Flow
+                            var currentContext = context
+                            var activity: Activity? = null
+                            while (currentContext is android.content.ContextWrapper) {
+                                if (currentContext is Activity) {
+                                    activity = currentContext
+                                    break
+                                }
+                                currentContext = currentContext.baseContext
+                            }
+
+                            if (activity != null) {
+                                viewModel.purchase(activity, product)
+                            } else {
+                                // Fallback or log error
+                            }
                         }
                     },
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(56.dp),
@@ -258,12 +276,12 @@ fun PaywallScreen(
                     Text(
                         text = "Even without Pro you get:\n" +
                                "• Live prices (top 10 dashboard)\n" +
-                               "• Position Sizer (risk calculator)\n" +
+                               "• Position Sizer (risk architect)\n" +
                                "• Daily AI Pick + market pulse\n" +
                                "• News + sentiment + glossary\n" +
-                               "• 3 alerts + 1 watchlist (3 coins)\n" +
-                               "• Access to top 50 markets\n\n" +
-                               "Upgrade to Pro for 15 watchlist slots.",
+                               "• 3 alerts + 3 watchlist slots\n" +
+                               "• Access to top 30 markets\n\n" +
+                               "Upgrade to Pro for full-scale access.",
                         color = colors.textPrimary,
                         fontFamily = FontFamily.Monospace,
                         fontSize = 11.sp,

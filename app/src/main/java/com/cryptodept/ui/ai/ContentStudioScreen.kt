@@ -1,36 +1,31 @@
 package com.cryptodept.ui.ai
 
 import android.content.Intent
-import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.cryptodept.domain.model.AudienceProfile
 import com.cryptodept.ui.components.TerminalCard
-import com.cryptodept.ui.components.TerminalInput
 import com.cryptodept.ui.theme.LocalTerminalColors
+import com.cryptodept.viewmodel.ContentCategory
 import com.cryptodept.viewmodel.ContentStudioViewModel
-import com.cryptodept.viewmodel.ContentTemplate
 
 @Composable
 fun ContentStudioScreen(
@@ -40,15 +35,8 @@ fun ContentStudioScreen(
 ) {
     val colors = LocalTerminalColors.current
     val uiState by viewModel.uiState.collectAsState()
-    val generatedPrompt by viewModel.generatedPrompt.collectAsState()
-    val aiResponse by viewModel.aiResponse.collectAsState()
-
-    val clipboardManager = LocalClipboardManager.current
+    val favorites by viewModel.favorites.collectAsState()
     val context = LocalContext.current
-    val haptic = LocalHapticFeedback.current
-
-    var lastCopyTime by remember { mutableStateOf(0L) }
-    var showAgentDialog by remember { mutableStateOf(false) }
 
     // Handle pending navigation
     LaunchedEffect(uiState.pendingNavigationToAiCoach) {
@@ -58,329 +46,183 @@ fun ContentStudioScreen(
         }
     }
 
-    var selectedTemplate by remember { mutableStateOf(ContentTemplate.DAILY_RECAP) }
-    var selectedAudience by remember { mutableStateOf(AudienceProfile.DAY_TRADER) }
-
-    // Dynamic parameters depending on template
-    var asset by remember { mutableStateOf("BTC") }
-    var headline by remember { mutableStateOf("CRYPTO SHOCK") }
-    var priceTarget by remember { mutableStateOf("$100,000") }
-    var coinB by remember { mutableStateOf("ETH") }
-
     Column(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .background(colors.background)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colors.background)
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState())
     ) {
+        // Header
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("<", color = colors.primary, modifier = Modifier.clickable { onBack() }.padding(8.dp))
-            Text(
-                ">>> CONTENT GENERATION STUDIO",
-                color = colors.primary,
-                fontFamily = FontFamily.Monospace,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
+            Text(">>> CONTENT_FACTORY_V2", color = colors.primary, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // 1. Scope Selection
+        TerminalCard(title = "SELECT SOURCE") {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                ScopeButton(
+                    text = "GLOBAL MARKET",
+                    isSelected = uiState.isGlobalScope,
+                    modifier = Modifier.weight(1f)
+                ) { viewModel.setScope(true) }
+                
+                Spacer(Modifier.width(8.dp))
+                
+                ScopeButton(
+                    text = "SPECIFIC COIN",
+                    isSelected = !uiState.isGlobalScope,
+                    modifier = Modifier.weight(1f)
+                ) { viewModel.setScope(false) }
+            }
+
+            if (!uiState.isGlobalScope) {
+                Spacer(Modifier.height(16.dp))
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(favorites) { coin ->
+                        FilterChip(
+                            selected = uiState.selectedCoinId == coin.id,
+                            onClick = { viewModel.setSelectedCoin(coin.id) },
+                            label = { Text(coin.symbol.uppercase(), fontFamily = FontFamily.Monospace) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = colors.primary,
+                                selectedLabelColor = colors.background,
+                                containerColor = colors.grid.copy(alpha = 0.2f),
+                                labelColor = colors.textPrimary
+                            )
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // 2. Generation Actions
+        Text("SELECT OUTPUT TYPE", color = colors.dimText, fontSize = 11.sp, modifier = Modifier.padding(bottom = 8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            ActionCard(
+                title = "NARRATIVE",
+                icon = Icons.Default.Description,
+                desc = "Text Post",
+                modifier = Modifier.weight(1f),
+                onClick = { viewModel.generateContent(ContentCategory.TEXT) }
+            )
+            ActionCard(
+                title = "VISUAL",
+                icon = Icons.Default.BarChart,
+                desc = "Infographic",
+                modifier = Modifier.weight(1f),
+                onClick = { viewModel.generateContent(ContentCategory.CHART) }
+            )
+            ActionCard(
+                title = "MOTION",
+                icon = Icons.Default.MovieFilter,
+                desc = "AI Video",
+                modifier = Modifier.weight(1f),
+                onClick = { viewModel.generateContent(ContentCategory.VIDEO) }
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        TerminalCard(title = "1. SELECT TEMPLATE") {
-            ContentTemplate.entries.forEach { template ->
-                Row(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .clickable { selectedTemplate = template }
-                            .padding(vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    RadioButton(
-                        selected = selectedTemplate == template,
-                        onClick = { selectedTemplate = template },
-                        colors = RadioButtonDefaults.colors(selectedColor = colors.primary, unselectedColor = colors.dimText),
-                    )
-                    Text(template.label, color = if (selectedTemplate == template) colors.primary else colors.textPrimary, fontSize = 14.sp)
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        TerminalCard(title = "2. TARGET AUDIENCE") {
-            AudienceProfile.entries.forEach { audience ->
-                Row(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .clickable { selectedAudience = audience }
-                            .padding(vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    RadioButton(
-                        selected = selectedAudience == audience,
-                        onClick = { selectedAudience = audience },
-                        colors = RadioButtonDefaults.colors(selectedColor = colors.primary, unselectedColor = colors.dimText),
-                    )
-                    Text(audience.label, color = if (selectedAudience == audience) colors.primary else colors.textPrimary, fontSize = 14.sp)
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        TerminalCard(title = "3. PARAMETERS") {
-            TerminalInput(label = "MAIN ASSET (Symbol)", value = asset, onValueChange = { asset = it })
-
-            when (selectedTemplate) {
-                ContentTemplate.THUMBNAIL -> {
-                    TerminalInput(label = "HEADLINE", value = headline, onValueChange = { headline = it })
-                }
-                ContentTemplate.WHAT_IF -> {
-                    TerminalInput(label = "PRICE TARGET", value = priceTarget, onValueChange = { priceTarget = it })
-                }
-                ContentTemplate.COMPARISON -> {
-                    TerminalInput(label = "COMPARE WITH", value = coinB, onValueChange = { coinB = it })
-                }
-                else -> {
-                    TerminalInput(label = "TOPIC / CONTEXT", value = headline, onValueChange = { headline = it })
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = {
-                val params =
-                    mapOf(
-                        "asset" to asset,
-                        "headline" to headline,
-                        "topic" to headline,
-                        "price" to priceTarget,
-                        "coinA" to asset,
-                        "coinB" to coinB,
-                    )
-                viewModel.generatePrompt(selectedTemplate, selectedAudience, params)
-            },
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
-            shape = RectangleShape,
-        ) {
-            Text("GENERATE PROMPT", color = colors.background, fontWeight = FontWeight.Bold)
-        }
-
-        if (generatedPrompt.isNotBlank()) {
+        // 3. Output Area
+        if (uiState.isLoading || uiState.generatedOutput.isNotBlank()) {
             Spacer(modifier = Modifier.height(24.dp))
-            TerminalCard(title = "GENERATED PROMPT") {
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .background(colors.background)
-                            .padding(8.dp)
-                            .border(1.dp, colors.dimText),
-                ) {
-                    Text(generatedPrompt, color = colors.dimText, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
-                }
-                
-                // Bonus 2: Character Counter
-                Text(
-                    text = "Characters: ${generatedPrompt.length} | Words: ${generatedPrompt.split("\\s+".toRegex()).size}",
-                    color = colors.dimText,
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = 10.sp,
-                    modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
-                )
-
-                // Action buttons row
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // COPY TEXT button
-                    Button(
-                        onClick = {
-                            val now = System.currentTimeMillis()
-                            if (now - lastCopyTime > 1500) { // Debounce edge case 4
-                                clipboardManager.setText(AnnotatedString(generatedPrompt))
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                Toast.makeText(
-                                    context,
-                                    ">>> PROMPT_COPIED_TO_CLIPBOARD",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                lastCopyTime = now
-                            }
-                        },
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = colors.primary,
-                            contentColor = colors.background
-                        ),
-                        shape = RoundedCornerShape(4.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ContentCopy,
-                            contentDescription = "Copy",
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            text = "COPY TEXT",
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 13.sp
-                        )
-                    }
-
-                    // SEND TO AI COACH button
-                    OutlinedButton(
-                        onClick = {
-                            // Copy to clipboard first
-                            clipboardManager.setText(AnnotatedString(generatedPrompt))
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            showAgentDialog = true
-                        },
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = colors.primary
-                        ),
-                        border = BorderStroke(1.dp, colors.primary),
-                        shape = RoundedCornerShape(4.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.Send,
-                            contentDescription = "Send",
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            text = "SEND TO AI",
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 13.sp
-                        )
-                    }
-
-                    // Bonus 1: Share Intent Button
-                    IconButton(
-                        onClick = {
-                            val sendIntent = Intent().apply {
-                                action = Intent.ACTION_SEND
-                                putExtra(Intent.EXTRA_TEXT, generatedPrompt)
-                                type = "text/plain"
-                            }
-                            context.startActivity(Intent.createChooser(sendIntent, "Share prompt via"))
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Share, 
-                            contentDescription = "Share",
-                            tint = colors.primary
-                        )
-                    }
-                }
-            }
-        }
-
-        if (aiResponse.isNotBlank() || uiState.isLoading) {
-            Spacer(modifier = Modifier.height(24.dp))
-            TerminalCard(title = "AI OUTPUT") {
+            TerminalCard(title = "GENERATED_OUTPUT [${uiState.lastGeneratedType}]") {
                 if (uiState.isLoading) {
                     LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = colors.primary)
-                    Spacer(modifier = Modifier.height(8.dp))
                 }
+                
                 SelectionContainer {
-                    Text(aiResponse, color = colors.textPrimary, fontSize = 13.sp, fontFamily = FontFamily.Monospace)
+                    Text(
+                        text = uiState.generatedOutput,
+                        color = colors.textPrimary,
+                        fontSize = 13.sp,
+                        fontFamily = FontFamily.Monospace,
+                        modifier = Modifier.padding(vertical = 12.dp)
+                    )
+                }
+
+                if (uiState.generatedOutput.isNotBlank()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Button(
+                            onClick = {
+                                val sendIntent = Intent().apply {
+                                    action = Intent.ACTION_SEND
+                                    putExtra(Intent.EXTRA_TEXT, uiState.generatedOutput)
+                                    type = "text/plain"
+                                }
+                                context.startActivity(Intent.createChooser(sendIntent, "Export Content"))
+                            },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
+                            shape = RoundedCornerShape(4.dp)
+                        ) {
+                            Icon(Icons.Default.Share, contentDescription = null, tint = colors.background, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text("SHARE", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        }
+
+                        OutlinedButton(
+                            onClick = { viewModel.sendPromptToAiCoach(uiState.generatedOutput) },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.primary),
+                            border = BorderStroke(1.dp, colors.primary),
+                            shape = RoundedCornerShape(4.dp)
+                        ) {
+                            Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text("AI COACH", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        }
+                    }
                 }
             }
         }
-
-        Spacer(modifier = Modifier.height(32.dp))
     }
+}
 
-    if (showAgentDialog) {
-        AlertDialog(
-            onDismissRequest = { showAgentDialog = false },
-            containerColor = colors.background,
-            modifier = Modifier.border(1.dp, colors.primary, RectangleShape),
-            title = {
-                Text(
-                    ">>> SELECT_PROCESSOR_UNIT",
-                    color = colors.primary,
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                )
-            },
-            text = {
-                Column {
-                    Text(
-                        "PROMPT_COPIED. Select which agent should process this task:",
-                        color = colors.textPrimary,
-                        fontSize = 12.sp,
-                        fontFamily = FontFamily.Monospace,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-                    
-                    AgentSelectRow("AI_STRATEGIC_COACH", "Gemini 1.5 Pro | Expert Analysis") {
-                        showAgentDialog = false
-                        viewModel.sendPromptToAiCoach(generatedPrompt)
-                    }
-                    
-                    AgentSelectRow("MARKETING_STRATEGIST", "Viral Post Engine | Direct Generate") {
-                        showAgentDialog = false
-                        viewModel.sendToAi()
-                    }
-                    
-                    AgentSelectRow("NARRATIVE_ORCHESTRATOR", "Auto-Synthesis | Coming Soon", enabled = false) {}
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showAgentDialog = false }) {
-                    Text("CANCEL", color = colors.dimText, fontFamily = FontFamily.Monospace)
-                }
-            }
+@Composable
+fun ScopeButton(text: String, isSelected: Boolean, modifier: Modifier, onClick: () -> Unit) {
+    val colors = LocalTerminalColors.current
+    Box(
+        modifier = modifier
+            .clickable { onClick() }
+            .border(1.dp, if (isSelected) colors.primary else colors.grid)
+            .background(if (isSelected) colors.primary.copy(alpha = 0.1f) else Color.Transparent)
+            .padding(12.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            color = if (isSelected) colors.primary else colors.dimText,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily.Monospace
         )
     }
 }
 
 @Composable
-fun AgentSelectRow(
-    name: String,
-    desc: String,
-    enabled: Boolean = true,
-    onClick: () -> Unit
-) {
+fun ActionCard(title: String, icon: androidx.compose.ui.graphics.vector.ImageVector, desc: String, modifier: Modifier, onClick: () -> Unit) {
     val colors = LocalTerminalColors.current
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(enabled = enabled) { onClick() }
-            .padding(vertical = 8.dp)
-            .border(
-                width = 0.5.dp, 
-                color = if (enabled) colors.grid else colors.grid.copy(alpha = 0.3f),
-                shape = RectangleShape
-            )
-            .padding(12.dp)
+        modifier = modifier
+            .clickable { onClick() }
+            .border(1.dp, colors.grid)
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "[$name]",
-            color = if (enabled) colors.primary else colors.dimText,
-            fontFamily = FontFamily.Monospace,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            text = desc,
-            color = if (enabled) colors.textPrimary.copy(alpha = 0.7f) else colors.dimText.copy(alpha = 0.5f),
-            fontFamily = FontFamily.Monospace,
-            fontSize = 10.sp
-        )
+        Icon(icon, contentDescription = null, tint = colors.primary, modifier = Modifier.size(32.dp))
+        Spacer(Modifier.height(8.dp))
+        Text(title, color = colors.primary, fontWeight = FontWeight.Bold, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+        Text(desc, color = colors.dimText, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
     }
 }

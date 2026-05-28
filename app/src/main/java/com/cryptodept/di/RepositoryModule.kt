@@ -78,5 +78,9 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
+    abstract fun bindAuditorRepository(impl: AuditorRepositoryImpl): AuditorRepository
+
+    @Binds
+    @Singleton
     abstract fun bindTierAccessManager(impl: com.cryptodept.domain.tier.TierAccessManagerImpl): com.cryptodept.domain.tier.TierAccessManager
 }

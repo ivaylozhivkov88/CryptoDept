@@ -21,9 +21,9 @@ object TestModeFlag {
     /**
      * Set to `false` after production launch (after May 27, 2026).
      * 
-     * Currently: TRUE — during Closed Testing period.
+     * Currently: FALSE — production rules enforced.
      */
-    const val IS_TEST_PERIOD: Boolean = true
+    const val IS_TEST_PERIOD: Boolean = false
     
     /**
      * Shows test purchase button on paywall when both conditions met:
