@@ -15,6 +15,11 @@
 local.properties
 secrets.properties
 
+# Secrets Reports & Dumps
+secrets_audit_report.txt
+_project_dump.txt
+*.txt.bak
+
 # Firebase
 google-services.json
 app/google-services.json
