@@ -43,6 +43,7 @@ fun OracleResultScreen(
     val colors = LocalTerminalColors.current
     val coroutineScope = rememberCoroutineScope()
     var showCopyToast by remember { mutableStateOf(false) }
+    var showImgOptions by remember { mutableStateOf(false) }
 
     val preferencesService = remember { com.cryptodept.data.datastore.PreferencesService(context, com.cryptodept.util.SecurePrefsService(context)) }
     val isAdmin by preferencesService.isAdmin.collectAsState(initial = false)
@@ -206,14 +207,35 @@ fun OracleResultScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(200.dp)
+                            .height(220.dp)
                             .border(1.dp, colors.grid)
                             .padding(12.dp)
                     ) {
-                        com.cryptodept.ui.components.PredictionChart(
-                            historicalData = historicalData,
-                            prediction = prediction
-                        )
+                        Column {
+                            Box(modifier = Modifier.weight(1f)) {
+                                com.cryptodept.ui.components.PredictionChart(
+                                    historicalData = historicalData,
+                                    prediction = prediction
+                                )
+                            }
+                            // Legend/Descriptions under the chart
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(Modifier.size(8.dp, 2.dp).background(colors.primary))
+                                    Spacer(Modifier.width(4.dp))
+                                    Text("PAST_PERFORMANCE", color = colors.dimText, fontSize = 8.sp, fontFamily = FontFamily.Monospace)
+                                }
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(Modifier.size(8.dp, 2.dp).background(colors.amber))
+                                    Spacer(Modifier.width(4.dp))
+                                    Text("QUANT_FORECAST", color = colors.amber, fontSize = 8.sp, fontFamily = FontFamily.Monospace)
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -378,20 +400,7 @@ fun OracleResultScreen(
 
                 // 3. INFOGRAPHIC CHART (IMG) - NEW
                 FloatingActionButton(
-                    onClick = {
-                        val url = predictionViewModel.generateInfographicUrl(prediction)
-                        val shareText = buildString {
-                            append("📊 CRYPTODEPT QUANT INFOGRAPHIC — ${prediction.coinId.uppercase()}\n")
-                            append("VIEW CHART: $url\n\n")
-                            append(">>> ANALYSIS_SUMMARY: Market showing ${prediction.ensembleConsensus.direction.name.lowercase()} bias with ${(prediction.ensembleConsensus.overallConfidence * 100).toInt()}% conviction.")
-                        }
-                        val sendIntent = Intent().apply {
-                            action = Intent.ACTION_SEND
-                            putExtra(Intent.EXTRA_TEXT, shareText)
-                            type = "text/plain"
-                        }
-                        context.startActivity(Intent.createChooser(sendIntent, "Share Analysis Infographic"))
-                    },
+                    onClick = { showImgOptions = true },
                     modifier = Modifier.size(56.dp),
                     containerColor = colors.primary,
                     contentColor = colors.background,
@@ -402,7 +411,61 @@ fun OracleResultScreen(
             }
         }
 
-        if (showCopyToast) {
+        if (showImgOptions) {
+        AlertDialog(
+            onDismissRequest = { showImgOptions = false },
+            containerColor = colors.background,
+            modifier = Modifier.border(1.dp, colors.primary, RectangleShape),
+            title = { Text("SELECT_OUTPUT_METHOD", color = colors.primary, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold) },
+            text = {
+                Column {
+                    Text("Select how you want to generate or share the infographic visual.", color = colors.dimText, fontSize = 12.sp)
+                    Spacer(Modifier.height(16.dp))
+                    Button(
+                        onClick = {
+                            showImgOptions = false
+                            val url = predictionViewModel.generateInfographicUrl(prediction)
+                            val shareText = buildString {
+                                append("📊 CRYPTODEPT QUANT INFOGRAPHIC — ${prediction.coinId.uppercase()}\n")
+                                append("VIEW CHART: $url\n\n")
+                                append(">>> ANALYSIS_SUMMARY: Market showing ${prediction.ensembleConsensus.direction.name.lowercase()} bias with ${(prediction.ensembleConsensus.overallConfidence * 100).toInt()}% conviction.")
+                            }
+                            val sendIntent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                putExtra(Intent.EXTRA_TEXT, shareText)
+                                type = "text/plain"
+                            }
+                            context.startActivity(Intent.createChooser(sendIntent, "Share Chart Link"))
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
+                        shape = RectangleShape
+                    ) {
+                        Text("SHARE QUICKCHART LINK", color = colors.background, fontWeight = FontWeight.Bold)
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    Button(
+                        onClick = {
+                            showImgOptions = false
+                            val aiPrompt = predictionViewModel.generateImagePrompt(prediction)
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            val clip = android.content.ClipData.newPlainText("AI_PROMPT", aiPrompt)
+                            clipboard.setPrimaryClip(clip)
+                            showCopyToast = true
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = colors.amber),
+                        shape = RectangleShape
+                    ) {
+                        Text("COPY AI IMAGE PROMPT", color = colors.background, fontWeight = FontWeight.Bold)
+                    }
+                }
+            },
+            confirmButton = {}
+        )
+    }
+
+    if (showCopyToast) {
             Toast(
                 message = "REPORT COPIED TO CLIPBOARD",
                 modifier =

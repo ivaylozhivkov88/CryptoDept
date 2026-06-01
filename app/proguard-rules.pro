@@ -272,17 +272,31 @@
 -dontwarn org.apache.http.**
 
 # ============================================================
+# MPAndroidChart
+# ============================================================
+-keep class com.github.mikephil.charting.** { *; }
+-dontwarn com.github.mikephil.charting.**
+
+# ============================================================
+# ROOTBEER (Root detection)
+# ============================================================
+-keep class com.scottyab.rootbeer.** { *; }
+
+# ============================================================
 # TOTAL STABILITY CONFIGURATION (NO CUTTING, NO RENAMING)
 # ============================================================
+# Тези правила гарантират, че R8 няма да премахне или преименува нищо
+# от вашия код. Това е най-сигурният режим за Production.
 
 -dontobfuscate
 -dontoptimize
 -dontshrink
 -ignorewarnings
 
-# Запазване на абсолютно целия проект
+# Запазване на абсолютно целия проект (всички класове и методи)
 -keep class com.cryptodept.** { *; }
 -keep interface com.cryptodept.** { *; }
+-keep class com.google.ai.client.generativeai.** { *; }
 
 # Запазване на всички библиотеки (бизнес логика и DTO-та)
 -keep class retrofit2.** { *; }

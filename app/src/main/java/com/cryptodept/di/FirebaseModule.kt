@@ -1,5 +1,6 @@
 package com.cryptodept.di
 
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.functions.FirebaseFunctions
 import dagger.Module
@@ -11,6 +12,10 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object FirebaseModule {
+
+    @Provides
+    @Singleton
+    fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
 
     @Provides
     @Singleton

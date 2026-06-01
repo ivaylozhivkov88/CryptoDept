@@ -19,8 +19,8 @@ class RootDetector
         @ApplicationContext private val context: Context,
     ) {
         companion object {
-            // Production signature hash (SHA-256 Base64) from Tester/Play Store
-            private const val EXPECTED_SIGNATURE_HASH = "R1mQcH5hGH3OrhnXKHlbssyCV5Tjy4/u91f2rzY80V4="
+            // Production signature hash (SHA-256 Base64) from Play Store App Signing
+            private const val EXPECTED_SIGNATURE_HASH = "R1wQcH5hGH30rhnXKHibssyCV5Tiy4/u91f2rzY80V4="
         }
 
         /**

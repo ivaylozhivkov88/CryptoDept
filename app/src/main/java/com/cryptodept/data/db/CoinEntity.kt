@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.cryptodept.domain.model.Coin
 import com.cryptodept.domain.model.CoinPrice
+import com.cryptodept.util.SymbolResolver
 import kotlinx.collections.immutable.persistentListOf
 
 @Entity(tableName = "coins")
@@ -27,16 +28,16 @@ data class CoinEntity(
     fun toDomain() =
         Coin(
             id = id,
-            symbol = symbol.uppercase(), // CoinGecko връща "btc" → ние показваме "BTC"
-            name = name,
+            symbol = SymbolResolver().toDisplayName(id), // Consistent mapping
+            name = SymbolResolver().toCleanName(id, name), // Remove Labs/Foundation
             isTracked = isTracked,
         )
 
     fun toDomainPrice() =
         CoinPrice(
             id = id,
-            symbol = symbol.uppercase(), // Fix: CoinGecko връща lowercase ("btc", "eth", "xrp")
-            name = name,
+            symbol = SymbolResolver().toDisplayName(id), // Consistent mapping
+            name = SymbolResolver().toCleanName(id, name), // Remove Labs/Foundation
             currentPrice = currentPrice,
             priceChange24h = priceChange24h,
             priceChangePercentage24h = priceChangePercentage24h,

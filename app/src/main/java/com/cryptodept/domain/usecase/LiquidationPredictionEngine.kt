@@ -13,6 +13,7 @@ class LiquidationPredictionEngine @Inject constructor() {
         if (currentPrice <= 0) return emptyList()
         
         return data.heatmapLevels
+            .asSequence()
             .filter { it.isSignificant }
             .map { level ->
                 val total = level.longLiquidationUsd + level.shortLiquidationUsd
@@ -26,5 +27,6 @@ class LiquidationPredictionEngine @Inject constructor() {
             }
             .sortedBy { abs(it.distancePercent) }
             .take(3)
+            .toList()
     }
 }

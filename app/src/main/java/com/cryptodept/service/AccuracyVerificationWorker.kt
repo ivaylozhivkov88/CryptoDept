@@ -36,14 +36,14 @@ class AccuracyVerificationWorker
                         .build()
 
                 val request =
-                    PeriodicWorkRequestBuilder<AccuracyVerificationWorker>(6, TimeUnit.HOURS)
+                    PeriodicWorkRequestBuilder<AccuracyVerificationWorker>(1, TimeUnit.HOURS)
                         .setConstraints(constraints)
                         .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 10, TimeUnit.MINUTES)
                         .build()
 
                 WorkManager.getInstance(context).enqueueUniquePeriodicWork(
                     WORK_NAME,
-                    ExistingPeriodicWorkPolicy.KEEP,
+                    ExistingPeriodicWorkPolicy.REPLACE,
                     request,
                 )
             }

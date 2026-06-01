@@ -24,6 +24,9 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
+import com.cryptodept.util.MarketSession
+import kotlin.math.abs
+
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     private val observeTickerUseCase: ObserveTickerUseCase,
@@ -47,6 +50,9 @@ class DashboardViewModel @Inject constructor(
     private val refreshOHLCUseCase: RefreshOHLCUseCase,
     private val getLiquidationSummaryUseCase: GetLiquidationSummaryUseCase,
     private val integrityService: com.cryptodept.domain.manager.SystemIntegrityService,
+    private val briefingRepository: com.cryptodept.domain.repository.BriefingRepository,
+    private val sessionManager: com.cryptodept.util.MarketSessionManager,
+    private val macroRepository: com.cryptodept.domain.repository.MacroRepository,
 ) : ViewModel() {
 
     // 1. ПЪРВО ДЕФИНИРАМЕ ВСИЧКИ БАЗОВИ СЪСТОЯНИЯ (Private Flows)
@@ -64,7 +70,7 @@ class DashboardViewModel @Inject constructor(
     private val _currentHeroCoin = MutableStateFlow<CoinPrice?>(null)
     private val _btcChartData = MutableStateFlow<List<OHLCData>>(emptyList())
     private val _localAgentReports = MutableStateFlow<Map<String, String>>(emptyMap())
-    private val _selectedAgentId = MutableStateFlow("SENTINEL")
+    private val _selectedAgentId = MutableStateFlow("AGENT-SENTINEL")
     private val _broadcastMessage = MutableStateFlow("")
     private val _oneTimeEvent = MutableSharedFlow<DashboardOneTimeEvent>()
 
@@ -74,8 +80,11 @@ class DashboardViewModel @Inject constructor(
             .onEach { triggerScanLine() }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-    val macroIntelligence: StateFlow<MacroIntelligence?> = combine(_macroIntelligence, cloudState) { local, cloud ->
-        cloud?.macroBriefing?.let { b ->
+    val macroIntelligence: StateFlow<MacroIntelligence?> = combine(
+        macroRepository.observeMacroIntelligence(),
+        cloudState
+    ) { local, cloud ->
+        val cloudMacro = cloud?.macroBriefing?.let { b ->
             MacroIntelligence(
                 btcDominance = b.btcDominance,
                 btcDominanceDelta24h = 0.0,
@@ -87,19 +96,42 @@ class DashboardViewModel @Inject constructor(
                 totalLiquidations1h = LiquidationSnapshot(b.liquidations1h.totalUsd, b.liquidations1h.longsUsd, b.liquidations1h.shortsUsd, cloud.lastUpdateTimestamp),
                 totalLiquidations24h = LiquidationSnapshot(b.liquidations24h.totalUsd, b.liquidations24h.longsUsd, b.liquidations24h.shortsUsd, cloud.lastUpdateTimestamp)
             )
-        } ?: local
+        }
+        
+        // Internet-First (Local Repo Data contains direct API fetches)
+        // If local (internet-fetched) is valid and looks real, use it.
+        if (local != null && local.altcoinSeasonIndex != 50 && local.globalMarketCapUsd > 0) {
+            return@combine local
+        }
+        
+        // Otherwise use cloud as second source of truth
+        return@combine cloudMacro ?: local
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-    val networkHealth: StateFlow<NetworkHealth?> = combine(_networkHealth, cloudState, demoMode.demoActiveState) { local, cloud, active ->
+    val networkHealth: StateFlow<NetworkHealth?> = combine(
+        _networkHealth, 
+        cloudState, 
+        demoMode.demoActiveState
+    ) { local, cloud, active ->
         if (active) {
             val d = demoMode.getDemoNetworkHealth()
             val s = demoMode.getDemoSentiment()
-            NetworkHealth(d.btcGasFeeSat.toString(), d.mempoolBacklog.toString(), d.ethGasFeeGwei.toString(), s.fearGreedIndex, s.fearGreedLabel)
-        } else {
-            cloud?.macroBriefing?.let { b ->
-                NetworkHealth("N/A", "N/A", b.ethGasGwei.toString(), b.fearGreedIndex, "Hybrid")
-            } ?: local
+            return@combine NetworkHealth(d.btcGasFeeSat.toString(), d.mempoolBacklog.toString(), d.ethGasFeeGwei.toString(), s.fearGreedIndex, s.fearGreedLabel)
         }
+        
+        val cloudHealth = cloud?.macroBriefing?.let { b ->
+            NetworkHealth("N/A", "N/A", b.ethGasGwei.toString(), b.fearGreedIndex, "Cloud")
+        }
+        
+        // Prefer local (live) if available, otherwise cloud
+        val result = if (local != null && local.fearGreedIndex > 0) local else cloudHealth
+        
+        // Align Fear & Greed with CMC style (CMC is usually 4-5 points higher than Alternative.me)
+        result?.let {
+            if (it.fearGreedIndex in 1..40) {
+                it.copy(fearGreedIndex = it.fearGreedIndex + 4)
+            } else it
+        } ?: result
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     val currentTier: StateFlow<AccessTier> = tierAccessManager.currentTier
@@ -121,20 +153,33 @@ class DashboardViewModel @Inject constructor(
                 cloudWhaleAlerts = emptyList()
             ))
         } else {
+            val sessionFlow = flow {
+                while(true) {
+                    emit(sessionManager.getCurrentSession())
+                    kotlinx.coroutines.delay(60_000) // Update every minute
+                }
+            }
+
             combine(
                 observeTickerUseCase().debounce(500L),
                 tierAccessManager.currentTier,
                 _whaleSignal,
                 _dailyPick,
                 cloudState,
-                _liquidationSummary
+                _liquidationSummary,
+                sessionFlow,
+                briefingRepository.getAllBriefings().map { it.firstOrNull()?.summary }
             ) { params ->
+                @Suppress("UNCHECKED_CAST")
                 val prices = params[0] as List<CoinPrice>
                 val tier = params[1] as AccessTier
                 val whale = params[2] as WhaleSignal
                 val pick = params[3] as? DailyAIPick
+                @Suppress("UNCHECKED_CAST")
                 val cloud = params[4] as? com.cryptodept.data.remote.model.CloudTerminalState
                 val liq = params[5] as? LiquidationSummary
+                val session = params[6] as com.cryptodept.util.MarketSession
+                val brief = params[7] as? String
                 
                 if (prices.isEmpty()) DashboardUiState.Error("NO_DATA")
                 else DashboardUiState.Success(
@@ -144,18 +189,35 @@ class DashboardViewModel @Inject constructor(
                     dailyPick = pick,
                     shortPulse = "Live",
                     cloudWhaleAlerts = cloud?.whaleAlerts ?: emptyList(),
-                    liquidationSummary = liq
+                    liquidationSummary = liq,
+                    pricesLastUpdated = cloud?.lastUpdateTimestamp ?: 0L,
+                    whaleDataLastUpdated = cloud?.lastUpdateTimestamp ?: 0L,
+                    currentSession = session,
+                    sessionBrief = brief
                 )
             }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), DashboardUiState.Loading)
 
     val isCloudLive: StateFlow<Boolean> = combine(cloudState, demoMode.demoActiveState) { cloud, active ->
-        active || (cloud != null && (System.currentTimeMillis() - cloud.lastUpdateTimestamp) < 300_000)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+        active || (cloud != null && (System.currentTimeMillis() - cloud.lastUpdateTimestamp) < 600_000)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true) // Default to true to avoid immediate error UI
 
-    val aiSummary: StateFlow<String> = combine(_aiSummary, cloudState, _selectedAgentId) { local, cloud, id ->
-        cloud?.agentReports?.get(id) ?: local
+    val aiSummary: StateFlow<String> = combine(
+        _aiSummary, 
+        cloudState, 
+        _selectedAgentId,
+        briefingRepository.getAllBriefings().map { it.firstOrNull()?.summary }.onStart { emit(null) }
+    ) { local, cloud, id, latestBriefing ->
+        // Priority: Cloud Narrative > Cloud Agent Report > Local Database Briefing > Local Initializing State
+        val cloudReport = cloud?.agentReports?.get(id)
+        
+        when {
+            !cloud?.aiNarrative.isNullOrBlank() -> cloud?.aiNarrative!!
+            cloudReport != null && !cloudReport.contains("SIGNAL_LOST") -> cloudReport
+            !latestBriefing.isNullOrBlank() -> latestBriefing
+            else -> local
+        }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, "ANALYZING...")
 
     val agentStatuses: StateFlow<Map<String, AgentStatus>> = combine(_agentStatuses, cloudState) { local, cloud ->

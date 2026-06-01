@@ -57,7 +57,7 @@ fun SimpleLineChart(
             .fillMaxSize()
             .pointerInput(sortedData) {
                 detectTapGestures { offset ->
-                    val labelPadding = 50.dp.toPx()
+                    val labelPadding = 60.dp.toPx()
                     val chartWidth = size.width - labelPadding
                     if (offset.x <= chartWidth) {
                         val index = (offset.x / chartWidth * (prices.size - 1)).toInt().coerceIn(0, prices.size - 1)
@@ -66,8 +66,8 @@ fun SimpleLineChart(
                 }
             }
     ) {
-        val labelPadding = 50.dp.toPx() // More space for price labels
-        val bottomPadding = 24.dp.toPx() // More space for time labels
+        val labelPadding = 60.dp.toPx() // More space for price labels
+        val bottomPadding = 32.dp.toPx() // More space for time labels
         
         val chartWidth = size.width - labelPadding
         val chartHeight = size.height - bottomPadding
@@ -76,7 +76,7 @@ fun SimpleLineChart(
         if (pointCount < 2) return@Canvas
 
         // 1. Draw Grid Lines and Price Labels (Right Side)
-        val gridCount = 4
+        val gridCount = if (chartHeight < 150f) 3 else 4
         for (i in 0..gridCount) {
             val y = (chartHeight / gridCount) * i
             drawLine(
@@ -86,12 +86,20 @@ fun SimpleLineChart(
                 strokeWidth = 1f
             )
             val priceLabel = maxPrice - (i * (range / gridCount))
-            val labelText = if (priceLabel >= 1.0) String.format(Locale.US, "$%.2f", priceLabel) else String.format(Locale.US, "$%.4f", priceLabel)
+            val labelText = when {
+                priceLabel >= 100.0 -> String.format(Locale.US, "$%.1f", priceLabel)
+                priceLabel >= 1.0 -> String.format(Locale.US, "$%.2f", priceLabel)
+                else -> String.format(Locale.US, "$%.4f", priceLabel)
+            }
+            
+            val textLayoutResult = textMeasurer.measure(labelText, labelStyle)
+            val textHeight = textLayoutResult.size.height.toFloat()
+            
             drawText(
                 textMeasurer = textMeasurer,
                 text = labelText,
                 style = labelStyle,
-                topLeft = Offset(chartWidth + 8f, y - 6.dp.toPx())
+                topLeft = Offset(chartWidth + 8f, y - (textHeight / 2))
             )
         }
 
@@ -133,19 +141,22 @@ fun SimpleLineChart(
 
         // 4. Draw Time Labels (Bottom Side)
         val timeFormat = SimpleDateFormat("HH:mm", Locale.US)
-        val labelCount = 5
-        val timeStep = (pointCount - 1) / (labelCount - 1).coerceAtLeast(1)
+        val labelCount = if (chartWidth < 300.dp.toPx()) 3 else 5
         
         for (i in 0 until labelCount) {
-            val index = (i * timeStep).coerceAtMost(pointCount - 1)
+            val index = (i.toFloat() / (labelCount - 1) * (pointCount - 1)).toInt()
             val item = sortedData[index]
             val x = (index.toFloat() / (pointCount - 1)) * chartWidth
             val timeStr = timeFormat.format(Date(item.timestamp))
+            
+            val textLayoutResult = textMeasurer.measure(timeStr, labelStyle)
+            val textWidth = textLayoutResult.size.width.toFloat()
+            
             drawText(
                 textMeasurer = textMeasurer,
                 text = timeStr,
                 style = labelStyle,
-                topLeft = Offset(x - 12.dp.toPx(), chartHeight + 6.dp.toPx())
+                topLeft = Offset(x - (textWidth / 2), chartHeight + 8.dp.toPx())
             )
         }
     }

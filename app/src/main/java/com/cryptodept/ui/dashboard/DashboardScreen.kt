@@ -2,6 +2,7 @@ package com.cryptodept.ui.dashboard
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -126,7 +127,7 @@ fun DashboardContent(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     DashboardMarketOverviewSection(
-                        currentPrices = emptyList(),
+                        currentPrices = currentPrices,
                         networkHealth = networkHealth,
                         macroIntelligence = macroIntelligence,
                         pricesLastUpdated = successData.pricesLastUpdated,
@@ -144,7 +145,7 @@ fun DashboardContent(
                         symbol = successData.dailyPick?.coinSymbol ?: "BTC",
                         direction = successData.dailyPick?.direction ?: "NEUTRAL",
                         confidence = ((successData.dailyPick?.confidence ?: 0.5f) * 100).toInt(),
-                        onExpand = { navController.navigate(Screen.Prediction.route) },
+                        onExpand = { navController.navigate(Screen.Prediction.createRoute(successData.dailyPick?.coinId)) },
                         onAccuracyClick = { navController.navigate("accuracy_dashboard") }
                     )
 
@@ -174,7 +175,9 @@ fun DashboardContent(
                         modifier = Modifier.tutorialTarget(TutorialTargetId.DASH_WHALE_FEED)
                     )
 
-                    SystemIntegrityFeed(integrityLogs)
+                    if (tier.isAdmin) {
+                        SystemIntegrityFeed(integrityLogs)
+                    }
                     
                     Spacer(modifier = Modifier.height(4.dp))
                 }

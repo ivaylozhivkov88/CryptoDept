@@ -51,11 +51,11 @@ class DemoModeProvider @Inject constructor(
     """.trimIndent()
 
     fun getDemoAgentStatuses(): Map<String, AgentStatus> = mapOf(
-        "SENTINEL" to AgentStatus.SUCCESS,
-        "PULSE" to AgentStatus.SUCCESS,
-        "SYSTRACE" to AgentStatus.SUCCESS,
-        "QUANT" to AgentStatus.SUCCESS,
-        "FISCAL" to AgentStatus.SUCCESS
+        "AGENT-SENTINEL" to AgentStatus.SUCCESS,
+        "AGENT-PULSE" to AgentStatus.SUCCESS,
+        "AGENT-SYSTRACE" to AgentStatus.SUCCESS,
+        "AGENT-QUANT" to AgentStatus.SUCCESS,
+        "AGENT-AUDITOR" to AgentStatus.SUCCESS
     )
 
     fun getDemoEvents(): List<SystemEvent> = listOf(

@@ -15,7 +15,7 @@ class SymbolResolver @Inject constructor() {
             "ETH", "ETHEREUM" -> "ethereum"
             "BNB", "BINANCECOIN" -> "binancecoin"
             "SOL", "SOLANA" -> "solana"
-            "XRP" -> "ripple"
+            "XRP", "RIPPLE" -> "ripple"
             "DOGE", "DOGECOIN" -> "dogecoin"
             "ADA", "CARDANO" -> "cardano"
             "TRX", "TRON" -> "tron"
@@ -26,7 +26,12 @@ class SymbolResolver @Inject constructor() {
             "LINK", "CHAINLINK" -> "chainlink"
             "UNI", "UNISWAP" -> "uniswap"
             "ATOM", "COSMOS" -> "cosmos"
-            else -> input.lowercase()
+            "XLM", "STELLAR" -> "stellar"
+            "HBAR", "HEDERA" -> "hedera-hashgraph"
+            "SHIB", "SHIBA INU" -> "shiba-inu"
+            "TON", "TONCOIN" -> "the-open-network"
+            "SUI" -> "sui"
+            else -> input.lowercase().replace(" ", "-")
         }
     }
 
@@ -51,7 +56,39 @@ class SymbolResolver @Inject constructor() {
             "matic-network" -> "MATIC"
             "uniswap" -> "UNI"
             "cosmos" -> "ATOM"
-            else -> id.uppercase()
+            "stellar" -> "XLM"
+            "hedera-hashgraph" -> "HBAR"
+            "shiba-inu" -> "SHIB"
+            "the-open-network" -> "TON"
+            else -> id.uppercase().replace("-", "")
+        }
+    }
+
+    /**
+     * Standardizes the Currency Name (Removes company names like "Ripple Labs" or "Stellar Foundation").
+     */
+    fun toCleanName(id: String, originalName: String): String {
+        return when (id.lowercase()) {
+            "bitcoin" -> "Bitcoin"
+            "ethereum" -> "Ethereum"
+            "ripple" -> "XRP"
+            "solana" -> "Solana"
+            "binancecoin" -> "BNB"
+            "dogecoin" -> "Dogecoin"
+            "cardano" -> "Cardano"
+            "tron" -> "Tron"
+            "polkadot" -> "Polkadot"
+            "litecoin" -> "Litecoin"
+            "chainlink" -> "Chainlink"
+            "avalanche-2" -> "Avalanche"
+            "matic-network" -> "Polygon"
+            "uniswap" -> "Uniswap"
+            "cosmos" -> "Cosmos"
+            "stellar" -> "Stellar"
+            "hedera-hashgraph" -> "Hedera"
+            "shiba-inu" -> "Shiba Inu"
+            "the-open-network" -> "TON"
+            else -> originalName.replace(" Labs", "").replace(" Foundation", "").replace(" Network", "").trim()
         }
     }
 
@@ -59,20 +96,25 @@ class SymbolResolver @Inject constructor() {
      * Converts common symbols or names to Binance USDT symbols (e.g. BTCUSDT).
      */
     fun toBinanceSymbol(input: String): String {
-        val base = when (input.uppercase()) {
-            "BITCOIN" -> "BTC"
-            "ETHEREUM" -> "ETH"
-            "LITECOIN" -> "LTC"
-            "RIPPLE" -> "XRP"
-            "BINANCECOIN" -> "BNB"
-            "SOLANA" -> "SOL"
-            "CARDANO" -> "ADA"
-            "DOGECOIN" -> "DOGE"
-            "TRON" -> "TRX"
-            "POLKADOT" -> "DOT"
-            "CHAINLINK" -> "LINK"
-            "AVALANCHE" -> "AVAX"
-            "POLYGON" -> "MATIC"
+        val base = when (input.lowercase()) {
+            "bitcoin" -> "BTC"
+            "ethereum" -> "ETH"
+            "litecoin" -> "LTC"
+            "ripple" -> "XRP"
+            "binancecoin" -> "BNB"
+            "solana" -> "SOL"
+            "cardano" -> "ADA"
+            "dogecoin" -> "DOGE"
+            "tron" -> "TRX"
+            "polkadot" -> "DOT"
+            "chainlink" -> "LINK"
+            "avalanche-2" -> "AVAX"
+            "matic-network" -> "MATIC"
+            "stellar" -> "XLM"
+            "cosmos" -> "ATOM"
+            "hedera-hashgraph" -> "HBAR"
+            "shiba-inu" -> "SHIB"
+            "the-open-network" -> "TON"
             else -> input.uppercase()
         }
         return if (base.endsWith("USDT")) base else "${base}USDT"

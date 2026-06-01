@@ -16,14 +16,14 @@ plugins {
 android {
     namespace = "com.cryptodept"
     compileSdk = 35
-    ndkVersion = "27.0.12077924" // Експлицитно указване на NDK за символите
+    ndkVersion = "29.0.14206865" // Обновена версия спрямо инсталираната в SDK
 
     defaultConfig {
         applicationId = "com.cryptodept"
         minSdk = 26
         targetSdk = 35
-        versionCode = 28
-        versionName = "1.5.0"
+        versionCode = 35
+        versionName = "1.5.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -75,7 +75,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
-            isShrinkResources = false
+            isShrinkResources = true
             ndk {
                 debugSymbolLevel = "full"
             }
@@ -105,8 +105,9 @@ android {
 
     packaging {
         jniLibs {
-            // Гарантира, че дебъг символите на native библиотеките (като SQLCipher) се пазят
-            keepDebugSymbols.add("**/*.so")
+            // Поддръжка за 16 KB memory page sizes
+            useLegacyPackaging = false
+            // Премахваме keepDebugSymbols, за да позволим на Gradle да извлече символите в отделен ZIP файл
         }
     }
 }

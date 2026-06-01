@@ -35,7 +35,7 @@ class MarketsViewModel
         private val cryptoRepository: CryptoRepository,
         private val errorMapper: com.cryptodept.util.ErrorMessageMapper,
         private val demoMode: com.cryptodept.util.DemoModeProvider,
-        private val tierAccessManager: TierAccessManager,
+        val tierAccessManager: TierAccessManager,
     ) : ViewModel() {
         
         @OptIn(ExperimentalCoroutinesApi::class)
@@ -53,16 +53,16 @@ class MarketsViewModel
             } else {
                 cryptoRepository.getAllCoinPrices().map { coins ->
                     if (coins.isNotEmpty()) {
-                        // ULTRA-OPTIMIZED TRAFFIC (M1.3):
-                        // 1. Always include Top 5 by Market Cap (Global)
-                        val top5 = coins.sortedByDescending { it.marketCap }.take(5)
+                        // 1. Get User's Watchlist (Limit 3 Free / 30 Pro)
+                        val watchlistLimit = if (tier.canAccess(AccessTier.PRO)) 30 else 3
+                        val watchlist = coins.filter { it.isTracked }.take(watchlistLimit)
                         
-                        // 2. Include User's Watchlist (Limit 3 Free / 15 Pro)
-                        val limit = if (tier.canAccess(AccessTier.PRO)) 15 else 3
-                        val watchlist = coins.filter { it.isTracked }.take(limit)
-                        
-                        // 3. Combine and Deduplicate
-                        val processedCoins = (top5 + watchlist).distinctBy { it.id }
+                        // 2. Logic: If no favorites, show TOP 5. If favorites exist, show ONLY them.
+                        val processedCoins = if (watchlist.isEmpty()) {
+                            coins.sortedByDescending { it.marketCap }.take(5)
+                        } else {
+                            watchlist
+                        }
 
                         MarketsUiState.Success(
                             coins = processedCoins,
@@ -123,7 +123,14 @@ class MarketsViewModel
             isTracked = true
         )
 
+        @OptIn(ExperimentalCoroutinesApi::class)
+        val trackedCoins: StateFlow<List<CoinPrice>> = cryptoRepository.getTrackedCoinPrices()
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+        private var lastSearchQuery: String = ""
+
         fun search(query: String) {
+            lastSearchQuery = query
             viewModelScope.launch(Dispatchers.IO) {
                 if (query.isBlank()) {
                     if (top100Cache == null) {
@@ -133,13 +140,9 @@ class MarketsViewModel
                             .take(100)
                     }
                     _searchResults.value = top100Cache ?: emptyList()
-                } else if (query.length >= 2) {
-                    val allCoins = cryptoRepository.getAllCoinPrices().first()
-                    _searchResults.value = allCoins.filter {
-                        it.symbol.contains(query, true) || it.name.contains(query, true)
-                    }
                 } else {
-                    _searchResults.value = emptyList()
+                    val results = cryptoRepository.searchCoins(query)
+                    _searchResults.value = results
                 }
             }
         }
@@ -152,13 +155,19 @@ class MarketsViewModel
                     val isCurrentlyTracked = currentTracked.any { it.id == coinId }
                     
                     if (!isCurrentlyTracked && currentTracked.size >= 3) {
-                        _errorChannel.trySend("Watchlist limit reached (3 coins). Upgrade to PRO for 15 slots.")
+                        _errorChannel.trySend("Watchlist limit reached (3 coins). Upgrade to PRO for 30 slots.")
                         return@launch
                     }
                 }
 
                 cryptoRepository
                     .toggleTracking(coinId)
+                    .onSuccess {
+                        // Refresh search results to update labels
+                        if (lastSearchQuery.isNotEmpty()) {
+                            search(lastSearchQuery)
+                        }
+                    }
                     .onFailure { error ->
                         _errorChannel.trySend(errorMapper.map(error))
                     }

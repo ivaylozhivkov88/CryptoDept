@@ -19,6 +19,7 @@ class AICoachViewModelTest {
     private val aiProvider: AIProvider = mockk()
     private val journalRepository: JournalRepository = mockk()
     private val cryptoRepository: CryptoRepository = mockk()
+    private val riskEngine: com.cryptodept.domain.usecase.RiskScoreEngine = mockk(relaxed = true)
     private lateinit var viewModel: AICoachViewModel
     private val testDispatcher = UnconfinedTestDispatcher()
 
@@ -34,7 +35,7 @@ class AICoachViewModelTest {
 
     @Test
     fun `initial message is added on init`() {
-        viewModel = AICoachViewModel(aiProvider, journalRepository, cryptoRepository)
+        viewModel = AICoachViewModel(aiProvider, journalRepository, cryptoRepository, riskEngine)
         assertThat(viewModel.messages).hasSize(1)
         assertThat(viewModel.messages.first().sender).isEqualTo("COACH")
     }
@@ -42,7 +43,7 @@ class AICoachViewModelTest {
     @Test
     fun `sendMessage adds user message and coach response`() = runTest {
         coEvery { aiProvider.sendMessage(any()) } returns flowOf("Response ", "from ", "AI")
-        viewModel = AICoachViewModel(aiProvider, journalRepository, cryptoRepository)
+        viewModel = AICoachViewModel(aiProvider, journalRepository, cryptoRepository, riskEngine)
         
         viewModel.sendMessage("Hello")
         

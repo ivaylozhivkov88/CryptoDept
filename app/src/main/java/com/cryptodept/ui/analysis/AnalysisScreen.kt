@@ -11,8 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -29,7 +27,6 @@ import com.cryptodept.domain.tier.AccessTier
 import com.cryptodept.domain.tier.FeatureKey
 import com.cryptodept.ui.navigation.Screen
 import com.cryptodept.ui.navigation.navigateToPaywall
-import com.cryptodept.ui.prediction.PredictionViewModel
 import com.cryptodept.ui.theme.*
 import com.cryptodept.viewmodel.AnalysisUiState
 import com.cryptodept.viewmodel.AnalysisViewModel
@@ -64,48 +61,11 @@ fun AnalysisScreen(
     }
 
     if (aiReport != null) {
-        AlertDialog(
-            onDismissRequest = { viewModel.dismissAiReport() },
-            containerColor = colors.background,
-            modifier = Modifier.border(1.dp, colors.primary, RectangleShape),
-            title = {
-                Text(
-                    ">>> NARRATIVE AI REPORT",
-                    color = colors.primary,
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                )
-            },
-            text = {
-                Column(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = 500.dp)
-                            .verticalScroll(rememberScrollState()),
-                ) {
-                    StreamingText(
-                        text = aiReport!!,
-                        isStreaming = isAiStreaming,
-                        textColor = colors.textPrimary,
-                        fontSize = 13.sp,
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        shareAnalysis(context, aiReport!!)
-                    }
-                ) {
-                    Text("SHARE", color = colors.primary, fontFamily = FontFamily.Monospace)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { viewModel.dismissAiReport() }) {
-                    Text("CLOSE", color = colors.dimText, fontFamily = FontFamily.Monospace)
-                }
-            },
+        AIReportOverlay(
+            report = aiReport!!,
+            isStreaming = isAiStreaming,
+            onDismiss = { viewModel.dismissAiReport() },
+            onShare = { reportText -> shareAnalysis(context, reportText) }
         )
     }
 
@@ -144,26 +104,6 @@ fun AnalysisScreen(
                     )
 
                     Row {
-                        /*
-                        if (state is AnalysisUiState.Success) {
-                            IconButton(onClick = {
-                                val text = viewModel.generateShareText(state as AnalysisUiState.Success)
-                                shareAnalysis(context, text)
-                            }) {
-                                Icon(imageVector = Icons.Default.Share, contentDescription = "Share", tint = colors.primary, modifier = Modifier.size(20.dp))
-                            }
-
-                            if (isAdmin) {
-                                IconButton(onClick = { viewModel.generateAIReport(state as AnalysisUiState.Success) }) {
-                                    Text("POST", color = colors.primary, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                                }
-
-                                IconButton(onClick = { viewModel.generateVideoTeaser(state as AnalysisUiState.Success) }) {
-                                    Text("VIDEO", color = colors.primary, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                                }
-                            }
-                        }
-                         */
                     }
                 }
 
@@ -212,13 +152,7 @@ fun AnalysisScreen(
 
                         AnalysisContentV2(
                             state = uiState,
-                            navController = navController,
-                            onShowBreakdown = { showBreakdown = true },
-                            onPredictClick = { navController.navigate(Screen.Prediction.route) },
-                            onDeepScanClick = {
-                                viewModel.loadAnalysis(coinId)
-                                viewModel.generateAIReport(uiState.result)
-                            }
+                            onShowBreakdown = { showBreakdown = true }
                         )
                     }
                     is AnalysisUiState.Error -> {
@@ -227,6 +161,79 @@ fun AnalysisScreen(
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun AIReportOverlay(
+    report: String,
+    isStreaming: Boolean,
+    onDismiss: () -> Unit,
+    onShare: (String) -> Unit
+) {
+    val colors = LocalTerminalColors.current
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.9f))
+            .clickable { if (!isStreaming) onDismiss() }
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(1.dp, colors.primary, RectangleShape)
+                .background(Color.Black)
+                .padding(16.dp)
+                .clickable(enabled = false) { } // Consume clicks
+        ) {
+            Text(
+                ">>> ELITE_OPERATOR_REPORT",
+                color = colors.primary,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp
+            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Box(modifier = Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState())) {
+                StreamingText(
+                    text = report,
+                    isStreaming = isStreaming,
+                    textColor = colors.textPrimary,
+                    fontSize = 13.sp
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedButton(
+                    onClick = { onShare(report) },
+                    modifier = Modifier.weight(1f),
+                    shape = RectangleShape,
+                    border = BorderStroke(1.dp, colors.primary),
+                    enabled = !isStreaming
+                ) {
+                    Text("SHARE", color = colors.primary, fontFamily = FontFamily.Monospace)
+                }
+                
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.weight(1f),
+                    shape = RectangleShape,
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
+                    enabled = !isStreaming
+                ) {
+                    Text("CLOSE", color = Color.Black, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                }
             }
         }
     }
@@ -272,15 +279,9 @@ fun AssetSelector(
 @Composable
 fun AnalysisContentV2(
     state: AnalysisUiState.Success,
-    navController: androidx.navigation.NavController,
     onShowBreakdown: () -> Unit,
-    onPredictClick: () -> Unit,
-    onDeepScanClick: () -> Unit,
 ) {
     val colors = LocalTerminalColors.current
-    val settingsViewModel: com.cryptodept.viewmodel.SettingsViewModel = hiltViewModel()
-    val tier by settingsViewModel.tierAccessManager.currentTier.collectAsStateWithLifecycle()
-
     val result = state.result
     val signal = result.compositeSignal
     val signalColor =
@@ -397,40 +398,6 @@ fun AnalysisContentV2(
         Row(modifier = Modifier.fillMaxWidth().padding(vertical = 1.dp), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(level, color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 13.sp)
             Text("$${String.format(Locale.US, "%.2f", price)}", color = colors.amber, fontFamily = FontFamily.Monospace, fontSize = 13.sp)
-        }
-    }
-
-    Spacer(modifier = Modifier.height(24.dp))
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            OutlinedButton(
-                onClick = {
-                    if (tier.canAccess(AccessTier.ADMIN)) {
-                        onPredictClick()
-                    } else {
-                        navController.navigateToPaywall("predictions", FeatureKey.PREDICTION_ENGINES_6)
-                    }
-                },
-                modifier = Modifier.fillMaxWidth().tutorialTarget(TutorialTargetId.ANALYSIS_PREDICTION),
-                shape = RectangleShape,
-                border = BorderStroke(1.dp, colors.primary)
-            ) {
-                Text(stringResource(R.string.analysis_predict_btn), color = colors.primary, fontSize = 12.sp)
-            }
-            FeatureHelpIcon(feature = FeatureKey.PREDICTION_ENGINES_6, modifier = Modifier.align(Alignment.CenterHorizontally))
-        }
-
-        Button(
-            onClick = onDeepScanClick,
-            modifier = Modifier.weight(1f).tutorialTarget(TutorialTargetId.ANALYSIS_DEEP_SCAN),
-            shape = RectangleShape,
-            colors = ButtonDefaults.buttonColors(containerColor = colors.primary)
-        ) {
-            Text(stringResource(R.string.analysis_deep_scan_btn), color = colors.background, fontSize = 12.sp)
         }
     }
 

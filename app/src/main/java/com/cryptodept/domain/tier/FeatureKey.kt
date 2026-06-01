@@ -35,12 +35,12 @@ enum class FeatureKey(
     DASHBOARD_SENTIMENT_GAUGE(
         requiredTier = AccessTier.FREE,
         displayName = "Fear & Greed Index",
-        proDescription = "A multi-factor psychological barometer based on volatility, volume, and social media dominance.",
+        proDescription = "An aggregated psychological barometer sourced from leading market sentiment data providers, tracking volatility and social trends.",
     ),
     DASHBOARD_ALTCOIN_SEASON(
         requiredTier = AccessTier.FREE,
         displayName = "Altcoin Season Index",
-        proDescription = "Analyzes the performance of the top 50 assets vs Bitcoin to identify cyclical capital rotation phases.",
+        proDescription = "Analyzes the performance of the top 100 assets vs Bitcoin to identify cyclical capital rotation phases (CMC Methodology).",
     ),
     DASHBOARD_NETWORK_HEALTH_BASIC(
         requiredTier = AccessTier.FREE,
@@ -259,6 +259,11 @@ enum class FeatureKey(
         requiredTier = AccessTier.PRO,
         displayName = "Unlimited Alerts",
         proDescription = "No caps. AND/OR composite logic. Instant push notifications"
+    ),
+    QUANT_LAB_INDIVIDUAL(
+        requiredTier = AccessTier.PRO,
+        displayName = "Quant Lab Tools",
+        proDescription = "Access individual specialized mathematical engines: Fourier Cycles, Monte Carlo simulations, Hurst Trend analysis, and Linear Regression tunnels."
     ),
     COMPOSITE_ALERTS(
         requiredTier = AccessTier.PRO,

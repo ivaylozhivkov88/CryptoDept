@@ -72,7 +72,7 @@ fun EntryAnalyzerScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(trackedCoins) { coin ->
-                val isSelected = selectedCoin == coin
+                val isSelected = selectedCoin == coin.id
                 Box(
                     modifier =
                         Modifier
@@ -82,11 +82,11 @@ fun EntryAnalyzerScreen(
                                 shape = RectangleShape
                             )
                             .background(if (isSelected) colors.primary.copy(alpha = 0.15f) else Color.Transparent)
-                            .clickable { viewModel.selectCoin(coin) }
+                            .clickable { viewModel.selectCoin(coin.id) }
                             .padding(horizontal = 14.dp, vertical = 8.dp),
                 ) {
                     Text(
-                        text = coin.uppercase(),
+                        text = coin.symbol.uppercase(),
                         color = if (isSelected) colors.primary else colors.dimText,
                         fontSize = 12.sp,
                         fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Normal,

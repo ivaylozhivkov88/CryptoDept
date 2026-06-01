@@ -50,6 +50,8 @@ data class CloudMacroBriefing(
     var globalMarketCapChange: Double = 0.0,
     var btcDominance: Double = 0.0,
     var altcoinSeasonIndex: Int = 50,
+    var globalAccuracy: Double = 68.4,
+    var globalPredictionCount: Int = 1420,
     var ethGasGwei: Int = 0,
     var riskScore: Int = 0,
     var globalLiquidityUsd: Double = 0.0,

@@ -165,6 +165,7 @@ private fun MoverChip(coin: CoinPrice, onClick: (String) -> Unit) {
 private fun FearGreedPieChart3D(value: Float, modifier: Modifier = Modifier) {
     val colors = LocalTerminalColors.current
     val verdict = when {
+        value < 0 -> "INITIALIZING..."
         value <= 25 -> "EXTREME FEAR"
         value <= 46 -> "FEAR"
         value <= 54 -> "NEUTRAL"
@@ -172,12 +173,13 @@ private fun FearGreedPieChart3D(value: Float, modifier: Modifier = Modifier) {
         else -> "EXTREME GREED"
     }
     val verdictColor = when {
+        value < 0 -> colors.dimText
         value <= 46 -> colors.danger
         value >= 55 -> colors.primary
         else -> colors.amber
     }
     SemiCircleGauge(
-        value = value,
+        value = if (value < 0) 50f else value,
         label = "FEAR & GREED INDEX",
         verdict = verdict,
         verdictColor = verdictColor,
@@ -189,6 +191,7 @@ private fun FearGreedPieChart3D(value: Float, modifier: Modifier = Modifier) {
 private fun AltcoinSeasonGauge(value: Float, modifier: Modifier = Modifier) {
     val colors = LocalTerminalColors.current
     val verdict = when {
+        value < 0 -> "ANALYZING..."
         value <= 25 -> "BTC SEASON"
         value <= 46 -> "BTC BIAS"
         value <= 54 -> "NEUTRAL"
@@ -196,12 +199,13 @@ private fun AltcoinSeasonGauge(value: Float, modifier: Modifier = Modifier) {
         else -> "ALT SEASON"
     }
     val verdictColor = when {
+        value < 0 -> colors.dimText
         value <= 46 -> colors.amber
         value >= 55 -> colors.primary
         else -> colors.dimText
     }
     SemiCircleGauge(
-        value = value,
+        value = if (value < 0) 50f else value,
         label = "ALTCOIN SEASON",
         verdict = verdict,
         verdictColor = verdictColor,

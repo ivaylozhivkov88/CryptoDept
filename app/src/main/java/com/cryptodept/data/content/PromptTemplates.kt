@@ -17,18 +17,19 @@ object PromptTemplates {
     }
 
     fun buildInfographicPrompt(scope: String, data: String): String {
-        return "Act as a Data Visualization Architect. Design a technical 5-panel infographic for $scope based on this analysis: $data. " +
-                "Panel 1: TITLE/PRICE, Panel 2: RSI & TREND STATUS, Panel 3: WHALE FLOW BIAS, Panel 4: RISK SCORE VERDICT, Panel 5: CTA. " +
-                "Instructions: Provide exact text for each panel. Keep it monospaced and professional. " +
-                "Include the keyword 'technical analysis report' in the output description."
+        return "Act as an Elite Brand Architect for CryptoDept. Design a high-impact 'Breaking News' style visual for $scope. " +
+                "Market Data: $data. " +
+                "Visual Layout: Large bold typography saying 'BREAKING: $scope ALPHA SCAN'. " +
+                "Style: Intense, high-contrast, professional infographic. Use sharp vector icons (Rockets, Arrows, Charts). " +
+                "Background: Dark futuristic skyline with glowing cyber-green highlights. " +
+                "Instructions: Describe a visual that looks like an institutional trading news blast. High resolution 8k."
     }
 
     fun buildCinematicVideoPrompt(scope: String, data: String): String {
-        return "Act as a Cinematic Director for AI Video generation. " +
-                "Create a professional motion prompt for $scope based on these metrics: $data. " +
-                "Visual Scenario: Describe a 10-second ultra-realistic shot of a holographic terminal displaying $scope charts and flow maps. " +
-                "Style: Volumetric green/amber lighting, drifting dust particles, 8k resolution, cinematic blur. " +
-                "Atmosphere: Tense, high-tech, smart money vibes. " +
-                "Ensure the output sounds like a 'technical analysis report' for the AI generator."
+        return "Act as a Cinematic Director. Imagine a signature CryptoDept lifestyle POV: " +
+                "A first-person view of a professional trader's desk. " +
+                "Include: A luxury car key, a high-end watch, and a laptop displaying $scope quantitative metrics ($data). " +
+                "Atmosphere: Successful, calm, elite wealth. " +
+                "Prompt: Describe a photorealistic 8k cinematic shot with soft morning lighting and sharp UI data."
     }
 }

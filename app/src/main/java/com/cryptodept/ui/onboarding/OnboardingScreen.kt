@@ -88,10 +88,10 @@ private fun SystemBootSlide(onComplete: () -> Unit) {
 private fun AgentDeploymentSlide(onComplete: () -> Unit) {
     val colors = LocalTerminalColors.current
     val agents = listOf(
-        "SENTINEL" to "Technical Analysis & Chart Confluences",
-        "SCOUT" to "On-Chain Whale Movement Tracking",
-        "ORACLE" to "Multi-Model Price Forecasting",
-        "PULSE" to "Social Sentiment & Market Hysteria"
+        "AGENT-SENTINEL" to "Technical Analysis & Chart Confluences",
+        "AGENT-SCOUT" to "On-Chain Whale Movement Tracking",
+        "AGENT-QUANT" to "Multi-Model Price Forecasting",
+        "AGENT-PULSE" to "Social Sentiment & Market Hysteria"
     )
     var deployedCount by remember { mutableStateOf(0) }
 

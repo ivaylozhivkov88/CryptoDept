@@ -29,24 +29,33 @@ class AgentHubViewModel @Inject constructor(
 
     val briefings: StateFlow<List<IntelligenceBriefingEntity>> = combine(
         briefingRepository.getAllBriefings(),
-        firebaseDataSource.getTerminalState()
-    ) { local, cloud ->
+        firebaseDataSource.getAgentReports(),
+        firebaseDataSource.getGlobalState(),
+        firebaseDataSource.getUpdateTimestampFlow(),
+        _isRefreshing
+    ) { local, reports, macro, lastUpdate, refreshing ->
         if (local.isNotEmpty()) {
             local.distinctBy { it.summary }
+        } else if (refreshing) {
+            emptyList()
         } else {
             // Fallback: Map cloud specialized reports to briefing cards if local DB is empty
-            cloud?.agentReports?.values?.distinct()?.map { report ->
+            reports.values.distinct().map { report ->
                 IntelligenceBriefingEntity(
-                    timestamp = cloud.lastUpdateTimestamp,
+                    timestamp = lastUpdate,
                     summary = report,
                     anomalyScore = if (report.contains("SIGNAL_LOST")) 100 else 0,
                     sentiment = "CLOUD_SYNC",
-                    riskScore = cloud.macroBriefing?.riskScore ?: 0,
+                    riskScore = macro?.riskScore ?: 0,
                     evidence = "SOURCE: CLOUD_HARVESTER"
                 )
-            } ?: emptyList()
+            }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    init {
+        refresh()
+    }
 
     fun refresh() {
         viewModelScope.launch {
@@ -55,10 +64,13 @@ class AgentHubViewModel @Inject constructor(
                 val healthResult = getNetworkHealth()
                 if (healthResult.isSuccess) {
                     val health = healthResult.getOrThrow()
+                    val btcData = firebaseDataSource.getCoinData("bitcoin").first()
+                    val macro = firebaseDataSource.getGlobalState().first()
+                    
                     val snapshot = MarketDataSnapshot(
-                        price = 0.0,
-                        rsi = 50.0,
-                        macdSignal = "N/A",
+                        price = btcData?.currentPrice ?: 0.0,
+                        rsi = btcData?.rsi ?: 50.0,
+                        macdSignal = btcData?.macdSignal ?: "N/A",
                         ema50Signal = "N/A",
                         ema200Signal = "N/A",
                         bollingerPosition = "N/A",
@@ -71,8 +83,8 @@ class AgentHubViewModel @Inject constructor(
                         wyckoffPhase = "N/A",
                         elliottWave = "N/A",
                         riskScore = riskEngine.currentScore.value,
-                        priceChange24h = 0.0,
-                        btcDominance = 50.0,
+                        priceChange24h = btcData?.priceChange24h ?: 0.0,
+                        btcDominance = macro?.btcDominance ?: 52.4,
                         sp500Change = 0.0,
                         dxyChange = 0.0,
                     )

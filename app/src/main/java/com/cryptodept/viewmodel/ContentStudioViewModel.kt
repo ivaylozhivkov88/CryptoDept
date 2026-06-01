@@ -51,26 +51,27 @@ class ContentStudioViewModel @Inject constructor(
         val scopeName = if (isGlobal) "GLOBAL_MARKET" else _uiState.value.selectedCoinId.uppercase()
         
         // --- 1. EXTRACT REAL MARKET CONTEXT ---
-        val cloud = cloudState.value
-        val contextData = if (isGlobal) {
-            val fg = cloud?.macroBriefing?.fearGreedIndex ?: 50
-            val risk = cloud?.macroBriefing?.riskScore ?: 50
-            "FearGreed: $fg, RiskScore: $risk, GlobalLiquidity: ${cloud?.macroBriefing?.globalLiquidityUsd ?: "SYNCING"}"
-        } else {
-            val coinData = cloud?.marketData?.get(_uiState.value.selectedCoinId)
-            "Price: $${coinData?.currentPrice}, RSI: ${coinData?.rsi}, Trend: ${coinData?.trend}, Risk: ${coinData?.riskScore}"
-        }
-
-        val prompt = when (type) {
-            ContentCategory.TEXT -> PromptTemplates.buildSocialPostPrompt(scopeName, contextData)
-            ContentCategory.CHART -> PromptTemplates.buildInfographicPrompt(scopeName, contextData)
-            ContentCategory.VIDEO -> PromptTemplates.buildCinematicVideoPrompt(scopeName, contextData)
-        }
-        
         _uiState.update { it.copy(isLoading = true, lastGeneratedType = type, generatedOutput = "") }
         
         viewModelScope.launch {
             try {
+                val cloud = cloudState.value
+                val contextData = if (isGlobal) {
+                    val fg = cloud?.macroBriefing?.fearGreedIndex ?: 50
+                    val risk = cloud?.macroBriefing?.riskScore ?: 50
+                    "FearGreed: $fg, RiskScore: $risk, GlobalLiquidity: ${cloud?.macroBriefing?.globalLiquidityUsd ?: "SYNCING"}"
+                } else {
+                    val coinId = _uiState.value.selectedCoinId
+                    val coinData = firebaseDataSource.getCoinData(coinId).first()
+                    "Price: $${coinData?.currentPrice}, RSI: ${coinData?.rsi}, Trend: ${coinData?.trend}, Risk: ${coinData?.riskScore}"
+                }
+
+                val prompt = when (type) {
+                    ContentCategory.TEXT -> PromptTemplates.buildSocialPostPrompt(scopeName, contextData)
+                    ContentCategory.CHART -> PromptTemplates.buildInfographicPrompt(scopeName, contextData)
+                    ContentCategory.VIDEO -> PromptTemplates.buildCinematicVideoPrompt(scopeName, contextData)
+                }
+
                 var fullResponse = ""
                 aiProvider.sendMessage(prompt).collect { chunk ->
                     fullResponse += chunk

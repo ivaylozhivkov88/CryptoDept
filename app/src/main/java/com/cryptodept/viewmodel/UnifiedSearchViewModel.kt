@@ -36,16 +36,16 @@ class UnifiedSearchViewModel @Inject constructor(
     val isSearching = _isSearching.asStateFlow()
 
     private val agentsList = listOf(
-        AgentSearchItem("SENTINEL", "TECHNICAL_SENTINEL", "Technical Analysis (TA)"),
-        AgentSearchItem("SCOUT", "GHOST_WHALE", "On-chain Intelligence"),
-        AgentSearchItem("PULSE", "SENTIMENT_PULSE", "Social & Macro Sentiment"),
-        AgentSearchItem("QUANT", "THE_ORACLE", "Predictive Analytics"),
-        AgentSearchItem("MARKET", "MARKETING_STRATEGIST", "Content Engineering"),
-        AgentSearchItem("AUDITOR", "FISCAL_TREASURY", "Revenue & Billing Integrity"),
-        AgentSearchItem("SYSTRACE", "SYSTEM_AUDITOR", "System Health & Stability"),
-        AgentSearchItem("INTEGRITY", "DATA_VERIFICATION", "Data Integrity & Verification"),
-        AgentSearchItem("CORE", "ORCHESTRATOR", "Reasoning & Strategy"),
-        AgentSearchItem("NARRATOR", "MARKET_NARRATOR", "Situational Awareness")
+        AgentSearchItem("AGENT-SENTINEL", "TECHNICAL_SENTINEL", "Technical Analysis (TA)"),
+        AgentSearchItem("AGENT-SCOUT", "GHOST_WHALE", "On-chain Intelligence"),
+        AgentSearchItem("AGENT-PULSE", "SENTIMENT_PULSE", "Social & Macro Sentiment"),
+        AgentSearchItem("AGENT-QUANT", "THE_ORACLE", "Predictive Analytics"),
+        AgentSearchItem("AGENT-MARKET", "MARKETING_STRATEGIST", "Content Engineering"),
+        AgentSearchItem("AGENT-AUDITOR", "FISCAL_TREASURY", "Revenue & Billing Integrity"),
+        AgentSearchItem("AGENT-SYSTRACE", "SYSTEM_AUDITOR", "System Health & Stability"),
+        AgentSearchItem("AGENT-INTEGRITY", "DATA_VERIFICATION", "Data Integrity & Verification"),
+        AgentSearchItem("AGENT-CORE", "ORCHESTRATOR", "Reasoning & Strategy"),
+        AgentSearchItem("AGENT-NARRATOR", "MARKET_NARRATOR", "Situational Awareness")
     )
 
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
@@ -59,8 +59,8 @@ class UnifiedSearchViewModel @Inject constructor(
                 _isSearching.value = true
                 combine(
                     cryptoRepository.getAllCoinPrices(),
-                    firebaseDataSource.getTerminalState()
-                ) { coins, cloudState ->
+                    firebaseDataSource.getWhaleAlerts()
+                ) { coins, alerts ->
                     val filteredAssets = coins.filter { 
                         it.symbol.contains(query, true) || it.name.contains(query, true) 
                     }.take(10)
@@ -69,9 +69,9 @@ class UnifiedSearchViewModel @Inject constructor(
                         it.id.contains(query, true) || it.name.contains(query, true) || it.role.contains(query, true)
                     }
 
-                    val filteredWhales = cloudState?.whaleAlerts?.filter {
+                    val filteredWhales = alerts.filter {
                         it.asset.contains(query, true) || it.transactionType.contains(query, true)
-                    }?.take(5) ?: emptyList()
+                    }.take(5)
 
                     SearchResult(
                         assets = filteredAssets,

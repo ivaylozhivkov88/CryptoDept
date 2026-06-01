@@ -8,6 +8,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontFamily
@@ -78,11 +79,15 @@ fun WhaleTrackerScreen(
         Spacer(modifier = Modifier.height(TerminalConfig.UI.SPACER_LARGE))
 
         if (isRefreshing && transactions.isEmpty()) {
-            LazyColumn(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(TerminalConfig.UI.SPACER_MEDIUM),
+            Column(
+                modifier = Modifier.weight(1f).fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                items(5) { WhaleTxSkeleton() }
+                CircularProgressIndicator(color = colors.primary)
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("SCANNING_ON_CHAIN_NODES...", color = colors.primary, fontFamily = FontFamily.Monospace, fontSize = 12.sp)
+                Text("FETCHING_BTC_ETH_SOL_FLOWS", color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 10.sp)
             }
         } else if (transactions.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -102,8 +107,23 @@ fun WhaleTrackerScreen(
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    TextButton(onClick = { viewModel.refresh() }) {
-                        Text("[ FORCE_SCAN ]", color = colors.primary, fontFamily = FontFamily.Monospace)
+                    
+                    val sdf = remember { SimpleDateFormat("HH:mm:ss", Locale.US) }
+                    Text(
+                        "LAST_SCAN: ${sdf.format(Date())}",
+                        color = colors.grid,
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily.Monospace
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+                    
+                    Button(
+                        onClick = { viewModel.refresh() },
+                        shape = RectangleShape,
+                        colors = ButtonDefaults.buttonColors(containerColor = colors.primary, contentColor = Color.Black)
+                    ) {
+                        Text("FORCE_SCAN_NODES", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                     }
                 }
             }

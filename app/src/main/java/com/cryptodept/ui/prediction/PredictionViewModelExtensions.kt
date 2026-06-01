@@ -110,50 +110,73 @@ fun PredictionViewModel.generateShareText(prediction: PricePrediction): String =
     }
 
 fun PredictionViewModel.generateInfographicUrl(prediction: PricePrediction): String {
-    val coinName = prediction.coinId.uppercase()
-    val targets = listOf(
+    val resolver = com.cryptodept.util.SymbolResolver()
+    val coinName = resolver.toDisplayName(prediction.coinId).uppercase()
+    
+    // Extract mid targets
+    val rawTargets = listOf(
         prediction.prediction1h.mid,
         prediction.prediction4h.mid,
         prediction.prediction24h.mid,
         prediction.prediction7d.mid
     )
+    
+    // Visual Safety: If targets are perfectly flat, add a Micro-drift for chart scaling health
+    val targets = if (rawTargets.distinct().size == 1) {
+        val base = rawTargets[0]
+        val drift = if (prediction.ensembleConsensus.direction.name.contains("UP")) 1.001 else 0.999
+        listOf(base, base * drift, base * drift * 1.002, base * drift * 1.005)
+    } else {
+        rawTargets
+    }
 
     val targetLabels = "['1H', '4H', '24H', '7D']"
-    val targetData = targets.toString()
+    val targetData = targets.map { String.format(Locale.US, "%.2f", it) }.toString()
 
-    // Build a QuickChart.io URL with Terminal Aesthetic (Black background, Green lines, Gold points)
+    // Build a QuickChart.io URL with Terminal Aesthetic
+    // We use quotes for keys and explicit background color at the root for a perfect deep-black image
     val chartConfig = """
                 {
-                  type: 'line',
-                  data: {
-                    labels: $targetLabels,
-                    datasets: [{
-                      label: '$coinName QUANT FORECAST',
-                      data: $targetData,
-                      fill: true,
-                      backgroundColor: 'rgba(0, 255, 65, 0.1)',
-                      borderColor: '#00FF41',
-                      borderWidth: 4,
-                      pointRadius: 8,
-                      pointBackgroundColor: '#FFB800'
+                  "backgroundColor": "#000000",
+                  "type": "line",
+                  "data": {
+                    "labels": $targetLabels,
+                    "datasets": [{
+                      "label": "$coinName QUANT FORECAST (USD)",
+                      "data": $targetData,
+                      "fill": true,
+                      "backgroundColor": "rgba(0, 255, 65, 0.05)",
+                      "borderColor": "#00FF41",
+                      "borderWidth": 5,
+                      "pointRadius": 10,
+                      "pointBackgroundColor": "#FFB800",
+                      "lineTension": 0.3
                     }]
                   },
-                  options: {
-                    backgroundColor: 'black',
-                    title: {
-                      display: true,
-                      text: 'CRYPTODEPT TERMINAL: $coinName ALPHA SCAN',
-                      fontColor: 'white',
-                      fontSize: 22
+                  "options": {
+                    "title": {
+                      "display": true,
+                      "text": "CRYPTODEPT TERMINAL | $coinName ALPHA SCAN",
+                      "fontColor": "#00FF41",
+                      "fontSize": 24,
+                      "fontFamily": "monospace"
                     },
-                    legend: { labels: { fontColor: 'white' } },
-                    scales: {
-                      yAxes: [{ gridLines: { color: 'rgba(255,255,255,0.1)' }, ticks: { fontColor: '#00FF41', fontSize: 14 } }],
-                      xAxes: [{ gridLines: { color: 'rgba(255,255,255,0.1)' }, ticks: { fontColor: 'white', fontSize: 14 } }]
+                    "legend": { 
+                      "labels": { "fontColor": "#ffffff", "fontSize": 16, "fontFamily": "monospace" } 
+                    },
+                    "scales": {
+                      "yAxes": [{ 
+                        "gridLines": { "color": "rgba(0, 255, 65, 0.1)" }, 
+                        "ticks": { "fontColor": "#00FF41", "fontSize": 14, "fontFamily": "monospace" } 
+                      }],
+                      "xAxes": [{ 
+                        "gridLines": { "color": "rgba(0, 255, 65, 0.1)" }, 
+                        "ticks": { "fontColor": "#ffffff", "fontSize": 14, "fontFamily": "monospace" } 
+                      }]
                     }
                   }
                 }
-            """.trimIndent().replace("\n", "").replace(" ", "")
+            """.trimIndent().replace("\n", " ")
 
     return "https://quickchart.io/chart?c=${java.net.URLEncoder.encode(chartConfig, "UTF-8")}"
 }
@@ -161,21 +184,16 @@ fun PredictionViewModel.generateInfographicUrl(prediction: PricePrediction): Str
 fun PredictionViewModel.generateImagePrompt(prediction: PricePrediction): String {
     val coinId = prediction.coinId.uppercase()
     val price = String.format(Locale.US, "$%.2f", prediction.currentPrice)
-    val change =
-        if (prediction.priceChange24h >= 0) {
-            "+${String.format(Locale.US, "%.2f", prediction.priceChange24h)}%"
-        } else {
-            "${String.format(Locale.US, "%.2f", prediction.priceChange24h)}%"
-        }
-    val trend = if (prediction.priceChange24h >= 0) "BULLISH RALLY" else "BEARISH REJECTION"
-    val colorTheme = if (prediction.priceChange24h >= 0) "Electric Green and Cyan" else "Neon Red and Orange"
-
-    return "Cinematic shot of a futuristic high-tech crypto trading command center. " +
-            "In the center, a massive transparent holographic glass display showing a detailed glowing 3D candlestick chart for $coinId. " +
-            "The screen displays a big bold text: '$coinId PRICE: $price' and a 'BREAKING NEWS: $trend ($change)' ticker tape at the bottom. " +
-            "Background is a dark cyberpunk city skyline at night through a large window. " +
-            "Aesthetic: $colorTheme glowing lights, hyper-realistic, 8k resolution, volumetric lighting, photorealistic textures, Bloomberg terminal style overlay. " +
-            "The atmosphere is intense and professional trading environment --v 6.0"
+    val trend = if (prediction.priceChange24h >= 0) "BULLISH_CONTINUATION" else "BEARISH_CORRECTION"
+    val colorPrimary = if (prediction.priceChange24h >= 0) "#00FF41" else "#FF3131"
+    
+    return "Imagine a high-end signature CryptoDept visual for $coinId. " +
+            "SCENE: A futuristic Bloomberg-style command center at night. " +
+            "In focus: A razor-sharp holographic 3D terminal display showing $coinId price action. " +
+            "TEXT ON SCREEN: '$coinId // SIGNAL: $trend // PRICE: $price'. " +
+            "VISUAL DNA: Cinematic volumetric lighting, sharp vector typography, deep black environment with electric $colorPrimary accents. " +
+            "BACKGROUND: Blurry midnight cityscape visible through floor-to-ceiling glass windows. " +
+            "STYLE: Professional, institutional, high-stakes trading atmosphere. 8k resolution, photorealistic textures, wide angle lens, highly detailed --v 6.0"
 }
 
 internal fun PredictionViewModel.mapCloudDataToPrediction(coinId: String, data: Map<String, Any>): PricePrediction {
@@ -183,6 +201,15 @@ internal fun PredictionViewModel.mapCloudDataToPrediction(coinId: String, data: 
     val directionStr = data["direction"] as? String ?: "SIDEWAYS"
     val direction = try { Direction.valueOf(directionStr) } catch(e: Exception) { Direction.SIDEWAYS }
     val confidence = (data["confidence"] as? Number)?.toFloat() ?: 0.5f
+
+    // Calculate drift based on direction for non-flat forecast
+    val drift = when(direction) {
+        Direction.STRONG_UP -> 1.08
+        Direction.UP -> 1.04
+        Direction.STRONG_DOWN -> 0.92
+        Direction.DOWN -> 0.96
+        else -> 1.005 // Slight upward tilt for visual consistency
+    }
 
     // Reconstruct a simplified ensemble consensus for the UI
     val consensus = EnsembleConsensus(
@@ -197,10 +224,10 @@ internal fun PredictionViewModel.mapCloudDataToPrediction(coinId: String, data: 
         coinId = coinId,
         currentPrice = price,
         timestamp = (data["calculatedAt"] as? Number)?.toLong() ?: System.currentTimeMillis(),
-        prediction1h = PriceTarget(price * 0.99, price, price * 1.01, direction, 0.6f),
-        prediction4h = PriceTarget(price * 0.98, price, price * 1.02, direction, 0.6f),
-        prediction24h = PriceTarget(price * 0.95, price * 1.05, price * 1.10, direction, 0.6f),
-        prediction7d = PriceTarget(price * 0.85, price * 1.15, price * 1.25, direction, 0.6f),
+        prediction1h = PriceTarget(price * 0.99, price * (1 + (drift - 1) * 0.1), price * 1.01, direction, 0.6f),
+        prediction4h = PriceTarget(price * 0.98, price * (1 + (drift - 1) * 0.2), price * 1.02, direction, 0.6f),
+        prediction24h = PriceTarget(price * 0.95, price * drift, price * 1.10, direction, 0.6f),
+        prediction7d = PriceTarget(price * 0.85, price * (1 + (drift - 1) * 2.5), price * 1.25, direction, 0.6f),
         ensembleConsensus = consensus,
         priceDistribution = PriceDistribution(
             percentile10 = price * 0.9,

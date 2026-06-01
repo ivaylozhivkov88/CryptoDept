@@ -61,7 +61,11 @@ class LiquidityEngine @Inject constructor(
         val vote = ModelVote(
             model = PredictionModel.LIQUIDITY_ENGINE,
             direction = direction,
-            targetPrice = if (direction == Direction.UP || direction == Direction.STRONG_UP) currentPrice * 1.03 else currentPrice * 0.97,
+            targetPrice = when (direction) {
+                Direction.UP, Direction.STRONG_UP -> currentPrice * 1.03
+                Direction.DOWN, Direction.STRONG_DOWN -> currentPrice * 0.97
+                else -> currentPrice
+            },
             confidence = confidence,
             weight = 0.25f,
             reasoning = generateReasoning(insight, direction)

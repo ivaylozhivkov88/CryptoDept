@@ -136,7 +136,7 @@ fun PaywallScreen(
                 "derivatives" -> "📈 See Derivatives Data"
                 "defi" -> "🏦 Access DeFi Yields"
                 "alerts" -> "🔔 Unlimited Alerts"
-                "markets" -> "📋 Top 100 Markets"
+                "markets" -> "📋 Top 200 Markets"
                 "ai_narrative" -> "🤖 Full AI Narrative"
                 "watchlist" -> "⭐ Unlimited Watchlist"
                 else -> ">>> UPGRADE_TO_PRO"
@@ -280,7 +280,7 @@ fun PaywallScreen(
                                "• Daily AI Pick + market pulse\n" +
                                "• News + sentiment + glossary\n" +
                                "• 3 alerts + 3 watchlist slots\n" +
-                               "• Access to top 30 markets\n\n" +
+                               "• Access to top 50 markets\n\n" +
                                "Upgrade to Pro for full-scale access.",
                         color = colors.textPrimary,
                         fontFamily = FontFamily.Monospace,
@@ -411,6 +411,6 @@ private val proValueProps = listOf(
     ValuePropData("🛠️", "Pro Trader Toolkit", "Backtester, MTF analyzer, entry scorer"),
     ValuePropData("🔔", "Unlimited Alerts", "With composite AND/OR logic"),
     ValuePropData("📚", "DeFi + Macro Analysis", "DefiLlama yields, S&P correlation"),
-    ValuePropData("📋", "Top 100 Markets", "50 more coins + advanced filters"),
+    ValuePropData("📋", "Top 200 Markets", "150 more coins + advanced filters"),
     ValuePropData("📓", "Full Trade Journal", "Unlimited entries with detailed analytics"),
 )

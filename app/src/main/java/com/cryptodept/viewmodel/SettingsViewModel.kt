@@ -39,10 +39,7 @@ class SettingsViewModel
             if (rootDetector.isDeviceRooted()) {
                 _securityWarning.value = "WARNING: ROOT ACCESS DETECTED. SECURITY DEGRADED."
             }
-            if (!rootDetector.isSignatureValid()) {
-                val currentHash = rootDetector.getCurrentSignatureHash() ?: "UNKNOWN"
-                _securityWarning.value = "CRITICAL: TAMPER DETECTED. SIGNATURE MISMATCH.\nHASH: $currentHash"
-            }
+            // Signature check removed from UI to prevent false alarms for testers (Task 3.3)
         }
 
         val refreshInterval =
@@ -187,15 +184,6 @@ class SettingsViewModel
         }
 
         fun setAdminStatus(isAdmin: Boolean) {
-            // Check if security is compromised, but allow bypass for the TEST button (admin = true)
-            // if we are in a debuggable state or if it's explicitly allowed.
-            if (isAdmin && rootDetector.isSecurityCompromised()) {
-                if (!rootDetector.isDebuggable()) {
-                    // Log the compromise but still allow admin for the internal "TEST" button
-                    // to prevent locking out the developer/testers.
-                    _securityWarning.value = "ADMIN ACTIVE (SECURITY COMPROMISED)"
-                }
-            }
             viewModelScope.launch { subscription.setAdminStatus(isAdmin) }
         }
 

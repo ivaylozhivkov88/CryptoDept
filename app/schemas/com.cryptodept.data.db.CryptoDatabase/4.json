@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 4,
-    "identityHash": "369fb17e93cc844fbc17837f3eaadc3a",
+    "identityHash": "f1325aefc8a7ed8ecef070ecbe259bf2",
     "entities": [
       {
         "tableName": "coins",
@@ -108,7 +108,7 @@
       },
       {
         "tableName": "price_history",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `coinId` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, `price` REAL NOT NULL, `volume` REAL NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `coinId` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, `open` REAL NOT NULL, `high` REAL NOT NULL, `low` REAL NOT NULL, `price` REAL NOT NULL, `volume` REAL NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -126,6 +126,24 @@
             "fieldPath": "timestamp",
             "columnName": "timestamp",
             "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "open",
+            "columnName": "open",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "high",
+            "columnName": "high",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "low",
+            "columnName": "low",
+            "affinity": "REAL",
             "notNull": true
           },
           {
@@ -746,7 +764,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '369fb17e93cc844fbc17837f3eaadc3a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f1325aefc8a7ed8ecef070ecbe259bf2')"
     ]
   }
 }

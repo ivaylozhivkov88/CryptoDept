@@ -73,16 +73,17 @@ fun MarketsScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val sentimentMap by viewModel.sentimentMap.collectAsStateWithLifecycle()
     val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
+    val trackedCoins by viewModel.trackedCoins.collectAsStateWithLifecycle()
     val errorEvent by viewModel.errorEvents.collectAsState(initial = null)
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val colors = LocalTerminalColors.current
     
-    var showAddDialog by remember { mutableStateOf(false) }
+    var showAddOverlay by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     var showWatchlistLimitDialog by remember { mutableStateOf(false) }
 
-    LaunchedEffect(showAddDialog) {
-        if (showAddDialog) {
+    LaunchedEffect(showAddOverlay) {
+        if (showAddOverlay) {
             viewModel.search("")
         }
     }
@@ -98,8 +99,9 @@ fun MarketsScreen(
             onDismissRequest = { showWatchlistLimitDialog = false },
             title = { Text("Watchlist Limit Reached", fontFamily = FontFamily.Monospace, color = colors.primary) },
             text = { 
+                val limit = if (viewModel.tierAccessManager.getCachedTier().canAccess(com.cryptodept.domain.tier.AccessTier.PRO)) 30 else 3
                 Text(
-                    "Free tier allows up to 10 tracked coins.\n\nUpgrade to Pro for unlimited watchlist capacity.",
+                    "Current limit for your tier is $limit tracked coins.\n\nUpgrade to Pro for 30 slots or Admin for unlimited capacity.",
                     fontFamily = FontFamily.Monospace,
                     color = colors.textPrimary
                 )
@@ -119,104 +121,6 @@ fun MarketsScreen(
             },
             containerColor = colors.background,
             shape = RectangleShape
-        )
-    }
-
-    if (showAddDialog) {
-        AlertDialog(
-            onDismissRequest = { showAddDialog = false; searchQuery = "" },
-            containerColor = colors.background,
-            modifier = Modifier.border(1.dp, colors.primary, RectangleShape).fillMaxWidth().padding(16.dp),
-            title = { Text("ADD_NEW_ASSET", color = colors.primary, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold) },
-            text = {
-                Column(modifier = Modifier.fillMaxWidth().heightIn(max = 500.dp)) {
-                    com.cryptodept.ui.components.TerminalInput(
-                        label = "SEARCH_SYMBOL_OR_NAME",
-                        value = searchQuery,
-                        onValueChange = { 
-                            searchQuery = it
-                            viewModel.search(it)
-                        }
-                    )
-                    
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        listOf("BTC", "ETH", "SOL", "BNB", "XRP").forEach { sym ->
-                            Surface(
-                                onClick = {
-                                    searchQuery = sym
-                                    viewModel.search(sym)
-                                },
-                                color = if (searchQuery.uppercase() == sym) colors.primary.copy(alpha = 0.2f) else colors.surface,
-                                shape = RectangleShape,
-                                border = BorderStroke(1.dp, if (searchQuery.uppercase() == sym) colors.primary else colors.grid)
-                            ) {
-                                Text(
-                                    text = sym,
-                                    color = if (searchQuery.uppercase() == sym) colors.primary else colors.dimText,
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                    fontSize = 11.sp,
-                                    fontFamily = FontFamily.Monospace
-                                )
-                            }
-                        }
-                    }
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    Text(
-                        text = if (searchQuery.isEmpty()) "--- SUGGESTED ---" else "--- SEARCH_RESULTS ---", 
-                        color = colors.dimText, 
-                        fontSize = 10.sp, 
-                        fontFamily = FontFamily.Monospace,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-
-                    LazyColumn(
-                        modifier = Modifier.weight(1f, fill = false).fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        items(searchResults) { coin ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .border(0.5.dp, colors.grid)
-                                    .clickable { 
-                                        viewModel.toggleTracking(coin.id)
-                                        showAddDialog = false
-                                        searchQuery = ""
-                                    }
-                                    .padding(12.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column {
-                                    Text(coin.symbol.uppercase(), color = colors.primary, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                                    Text(coin.name, color = colors.dimText, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
-                                }
-                                Text("[ ADD + ]", color = colors.primary, fontFamily = FontFamily.Monospace, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                            }
-                        }
-                        
-                        if (searchResults.isEmpty() && searchQuery.isNotEmpty()) {
-                            item {
-                                Text("NO_RESULTS_FOUND", color = colors.danger, fontFamily = FontFamily.Monospace, fontSize = 12.sp, modifier = Modifier.padding(top = 16.dp))
-                            }
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showAddDialog = false; searchQuery = "" }) {
-                    Text("CLOSE", color = colors.dimText, fontFamily = FontFamily.Monospace)
-                }
-            }
         )
     }
 
@@ -288,28 +192,170 @@ fun MarketsScreen(
 
             Spacer(modifier = Modifier.height(TerminalConfig.UI.SPACER_LARGE))
 
-            // ADD COIN BUTTON (PRO ONLY)
-            val billingViewModel: com.cryptodept.viewmodel.BillingViewModel = hiltViewModel()
-            val isPro by billingViewModel.billingManager.isPro.collectAsState()
-            
-            if (isPro) {
-                Button(
-                    onClick = { showAddDialog = true },
-                    modifier = Modifier.fillMaxWidth().height(TerminalConfig.Interaction.TOUCH_TARGET_SIZE.dp),
-                    shape = RectangleShape,
-                    colors = ButtonDefaults.buttonColors(containerColor = colors.surface, contentColor = colors.primary),
-                    border = BorderStroke(TerminalConfig.UI.BORDER_WIDTH, colors.primary)
-                ) {
-                    Text("ADD COIN +", fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
-                }
+            // ADD COIN BUTTON (Terminal Refactor)
+            Button(
+                onClick = { showAddOverlay = true },
+                modifier = Modifier.fillMaxWidth().height(TerminalConfig.Interaction.TOUCH_TARGET_SIZE.dp),
+                shape = RectangleShape,
+                colors = ButtonDefaults.buttonColors(containerColor = colors.surface, contentColor = colors.primary),
+                border = BorderStroke(TerminalConfig.UI.BORDER_WIDTH, colors.primary)
+            ) {
+                Text("ADD_COIN [ + ]", fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
             }
 
             Spacer(modifier = Modifier.weight(1f))
         }
 
+        // FULL SCREEN OVERLAY FOR ADDING/MANAGING ASSETS
+        if (showAddOverlay) {
+            AddAssetOverlay(
+                searchQuery = searchQuery,
+                onSearchQueryChange = { 
+                    searchQuery = it
+                    viewModel.search(it)
+                },
+                searchResults = searchResults,
+                trackedCoins = trackedCoins,
+                onToggleTracking = { viewModel.toggleTracking(it) },
+                onDismiss = { showAddOverlay = false; searchQuery = "" },
+                limit = if (viewModel.tierAccessManager.getCachedTier().canAccess(com.cryptodept.domain.tier.AccessTier.PRO)) 30 else 3
+            )
+        }
+
         com.cryptodept.ui.components.ScanLineOverlay(
             modifier = Modifier.fillMaxSize(),
             isScanning = isRefreshing
+        )
+    }
+}
+
+@Composable
+fun SectionHeader(title: String) {
+    val colors = LocalTerminalColors.current
+    Text(
+        text = title,
+        color = colors.amber,
+        fontFamily = FontFamily.Monospace,
+        fontSize = 11.sp,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+    )
+}
+
+@Composable
+fun AddAssetOverlay(
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+    searchResults: List<CoinPrice>,
+    trackedCoins: List<CoinPrice>,
+    onToggleTracking: (String) -> Unit,
+    onDismiss: () -> Unit,
+    limit: Int
+) {
+    val colors = LocalTerminalColors.current
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.95f))
+            .clickable(enabled = false) { } // Consume clicks
+            .padding(16.dp)
+    ) {
+        Column(modifier = Modifier.fillMaxSize().border(1.dp, colors.primary, RectangleShape).padding(16.dp)) {
+            Text(">>> TRACKER_MANAGEMENT_PROTOCOL", color = colors.primary, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            com.cryptodept.ui.components.TerminalInput(
+                label = "SEARCH_GLOBAL_ASSET_NODE",
+                value = searchQuery,
+                onValueChange = onSearchQueryChange
+            )
+            
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // QUICK SUGGESTIONS
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                listOf("BTC", "ETH", "SOL", "BNB", "XRP", "ADA", "TON").forEach { sym ->
+                    Surface(
+                        onClick = { onSearchQueryChange(sym) },
+                        color = if (searchQuery.uppercase() == sym) colors.primary.copy(alpha = 0.2f) else colors.surface,
+                        shape = RectangleShape,
+                        border = BorderStroke(1.dp, if (searchQuery.uppercase() == sym) colors.primary else colors.grid)
+                    ) {
+                        Text(
+                            text = sym,
+                            color = if (searchQuery.uppercase() == sym) colors.primary else colors.dimText,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                            fontSize = 11.sp,
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            LazyColumn(modifier = Modifier.weight(1f)) {
+                if (searchQuery.isNotEmpty()) {
+                    item { SectionHeader("SEARCH_RESULTS") }
+                    items(searchResults) { coin ->
+                        AssetRow(coin, onToggleTracking, colors)
+                    }
+                    if (searchResults.isEmpty()) {
+                        item { Text("NO_MATCHING_NODES_FOUND", color = colors.danger, fontFamily = FontFamily.Monospace, fontSize = 12.sp) }
+                    }
+                } else {
+                    item { SectionHeader("CURRENT_TRACKERS [ ${trackedCoins.size} / $limit ]") }
+                    items(trackedCoins) { coin ->
+                        AssetRow(coin, onToggleTracking, colors)
+                    }
+                    if (trackedCoins.isEmpty()) {
+                        item { Text("NO_ACTIVE_TRACKERS", color = colors.dimText, fontFamily = FontFamily.Monospace, fontSize = 12.sp) }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth().height(48.dp),
+                shape = RectangleShape,
+                colors = ButtonDefaults.buttonColors(containerColor = colors.primary, contentColor = Color.Black)
+            ) {
+                Text("CLOSE_PROTOCOL", fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+            }
+        }
+    }
+}
+
+@Composable
+fun AssetRow(coin: CoinPrice, onToggle: (String) -> Unit, colors: com.cryptodept.ui.theme.TerminalColorSet) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .border(0.5.dp, colors.grid)
+            .clickable { onToggle(coin.id) } // Entire row is now clickable for easier management
+            .padding(12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column {
+            Text(coin.symbol.uppercase(), color = colors.primary, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Text(coin.name, color = colors.dimText, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+        }
+        Text(
+            text = if (coin.isTracked) "[ REMOVE - ]" else "[ ADD + ]",
+            color = if (coin.isTracked) colors.danger else colors.primary,
+            fontFamily = FontFamily.Monospace,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold
         )
     }
 }

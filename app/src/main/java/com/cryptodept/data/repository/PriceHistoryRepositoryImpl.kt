@@ -2,6 +2,7 @@ package com.cryptodept.data.repository
 
 import com.cryptodept.data.db.PriceHistoryDao
 import com.cryptodept.data.db.PriceHistoryEntity
+import com.cryptodept.domain.model.OHLCData
 import com.cryptodept.domain.repository.PriceHistoryRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -18,7 +19,6 @@ class PriceHistoryRepositoryImpl @Inject constructor(
 
     override suspend fun saveDailyPrice(coinId: String, price: Double, volume: Double) {
         val now = System.currentTimeMillis()
-        // Normalize to start of day (UTC)
         val startOfDay = now - (now % (24 * 60 * 60 * 1000))
         
         val entity = PriceHistoryEntity(
@@ -28,6 +28,35 @@ class PriceHistoryRepositoryImpl @Inject constructor(
             volume = volume
         )
         priceHistoryDao.insertPrice(entity)
+    }
+
+    override suspend fun saveOHLCData(coinId: String, data: List<OHLCData>) {
+        data.forEach { ohlc ->
+            val entity = PriceHistoryEntity(
+                coinId = coinId,
+                timestamp = ohlc.timestamp,
+                open = ohlc.open,
+                high = ohlc.high,
+                low = ohlc.low,
+                price = ohlc.close,
+                volume = ohlc.volume
+            )
+            priceHistoryDao.insertPrice(entity)
+        }
+    }
+
+    override suspend fun getOHLCData(coinId: String, days: Int): List<OHLCData> {
+        val since = System.currentTimeMillis() - (days.toLong() * 24 * 60 * 60 * 1000)
+        return priceHistoryDao.getRecentHistory(coinId, since).map { entity ->
+            OHLCData(
+                timestamp = entity.timestamp,
+                open = entity.open,
+                high = entity.high,
+                low = entity.low,
+                close = entity.price,
+                volume = entity.volume
+            )
+        }.reversed() // Dao returns DESC, we want ASC for analysis
     }
 
     override suspend fun getPriceAtTimestamp(coinId: String, timestamp: Long): Double? {

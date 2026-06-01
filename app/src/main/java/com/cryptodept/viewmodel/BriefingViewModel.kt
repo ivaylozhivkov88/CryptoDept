@@ -6,7 +6,11 @@ import com.cryptodept.domain.repository.CryptoRepository
 import com.cryptodept.domain.repository.DerivativesRepository
 import com.cryptodept.domain.usecase.DailyBriefingGenerator
 import com.cryptodept.domain.usecase.RiskScoreEngine
+import com.cryptodept.domain.usecase.GetNetworkHealthUseCase
+import com.cryptodept.domain.usecase.GetMacroIntelligenceUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,6 +25,8 @@ class BriefingViewModel
         private val derivativesRepository: DerivativesRepository,
         private val briefingGenerator: DailyBriefingGenerator,
         private val riskEngine: RiskScoreEngine,
+        private val getNetworkHealth: GetNetworkHealthUseCase,
+        private val getMacroIntelligence: GetMacroIntelligenceUseCase,
     ) : ViewModel() {
         private val _briefingState = MutableStateFlow<BriefingUiState>(BriefingUiState.Loading)
         val briefingState: StateFlow<BriefingUiState> = _briefingState.asStateFlow()
@@ -33,40 +39,45 @@ class BriefingViewModel
             viewModelScope.launch {
                 _briefingState.value = BriefingUiState.Loading
                 try {
-                    val btcPrice = cryptoRepository.getCachedPrice("bitcoin")
-                    val btcChange = cryptoRepository.getCachedChange24h("bitcoin")
-                    val fundingResult = derivativesRepository.getFundingRate("BTC")
-                    val funding =
-                        fundingResult.getOrNull()
-                            ?: throw Exception("FUNDING DATA UNAVAILABLE")
+                    coroutineScope {
+                        val btcPriceDeferred = async { cryptoRepository.getCurrentPrice("bitcoin") }
+                        val btcChangeDeferred = async { cryptoRepository.getCachedChange24h("bitcoin") }
+                        val fundingDeferred = async { derivativesRepository.getFundingRate("BTC") }
+                        val healthDeferred = async { getNetworkHealth() }
+                        val macroDeferred = async { getMacroIntelligence() }
+                        val lsRatioDeferred = async { derivativesRepository.getLongShortRatio("BTC") }
 
-                    val riskScore =
-                        riskEngine.calculate(
-                            rsi = 50.0,
+                        val btcPrice = btcPriceDeferred.await()
+                        val btcChange = btcChangeDeferred.await()
+                        val funding = fundingDeferred.await().getOrNull() ?: throw Exception("DERIVATIVES_OFFLINE")
+                        val health = healthDeferred.await().getOrNull()
+                        val macro = macroDeferred.await().getOrNull()
+                        val lsRatio = lsRatioDeferred.await().getOrNull()?.let { it.first / (it.first + it.second) } ?: 1.0
+
+                        val riskScore = riskEngine.calculate(
+                            rsi = 50.0, // Default to neutral if no history
                             fundingRate = funding.binanceRate,
-                            longShortRatio = 1.5,
-                            fearGreedIndex = 50,
+                            longShortRatio = lsRatio,
+                            fearGreedIndex = health?.fearGreedIndex ?: 50,
                             exchangeInflowChange = 0.0,
                             openInterestChange = 0.0,
                             priceChange24h = btcChange,
-                            // whaleSellingDetected е премахнат тук
                         )
 
-                    val briefing =
-                        briefingGenerator.generate(
+                        val briefing = briefingGenerator.generate(
                             btcPrice = btcPrice,
                             btcChange24h = btcChange,
                             riskScore = riskScore,
                             fundingRate = funding.binanceRate,
-                            fearGreedIndex = 50,
+                            fearGreedIndex = health?.fearGreedIndex ?: 50,
                             exchangeInflowChange = 0.0,
                             upcomingEvents = emptyList(),
                             topLiquidationLevel = null,
-                            // topWhaleAlerts е премахнат тук
                         )
-                    _briefingState.value = BriefingUiState.Success(briefing)
+                        _briefingState.value = BriefingUiState.Success(briefing)
+                    }
                 } catch (e: Exception) {
-                    _briefingState.value = BriefingUiState.Error(e.message ?: "BRIEFING FAILED")
+                    _briefingState.value = BriefingUiState.Error(e.message ?: "BRIEFING_FAILED")
                 }
             }
         }

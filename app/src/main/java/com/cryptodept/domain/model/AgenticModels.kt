@@ -170,29 +170,23 @@ class MarketingStrategist : CryptoAgent {
         """.trimIndent()
 
         val metaAiVideoPrompt = """
-            STRICT_ANIMATION_COMMAND: Create a 5-second STATIC digital terminal display.
+            Imagine a high-end signature CryptoDept cinematic shot for $coin.
             
             SCENE_COMPOSITION: 
-            - BACKGROUND: Solid, non-reflective pitch-black (#000000).
-            - FOREGROUND: Stationary text and a single central logo.
-            - LOGO_TO_RENDER: Place $logoDesc at the top-center.
+            - A low-angle POV shot of a luxury Porsche 911 dashboard merged with a high-tech quant workstation. 
+            - In the foreground: A premium wristwatch and a cup of specialty coffee next to a laptop displaying the $coin market scan.
+            - Background: The soft morning glow of a high-end city street (London/New York aesthetic).
             
-            STRICT_VISUAL_RULES (CRITICAL):
-            1. NO_MOVEMENT: All text, numbers, and symbols must remain at fixed pixel coordinates for the entire duration (0-5s).
-            2. NO_TRANSITIONS: Do not use fades, zooms, or pans.
-            3. NO_RANDOM_DATA: Do not generate random scrolling code or flickering digits.
-            4. ZERO_NOISE: No film grain, no digital glitches, no phosphor scanlines.
+            STRICT_VISUAL_RULES:
+            1. STATIC_FOCUSED: The camera is perfectly stationary.
+            2. COLOR_PALETTE: Muted luxury tones (beige, slate, deep leather) with sharp $coin data highlights.
+            3. ATMOSPHERE: Calm, successful, high-tier quantitative trading lifestyle.
             
-            DATA_TO_RENDER (CENTERED):
-            - ASSET: $coin
-            - PRICE: $price
-            - TARGET: $target
-            - STATUS: OPERATIONAL
+            DATA_HIGHLIGHTS:
+            - ASSET: $coin (TARGET: $target)
+            - STATUS: TRADING_FLOW_ACTIVE
             
-            VISUAL_STYLE: 
-            - RAZOR_SHARP_FOCUS: High-contrast 8K vector-style typography.
-            - COLOR_SCHEME: Electric CRT Green (#00FF41) on black.
-            - FONT: Monospaced terminal font.
+            STYLE: Photorealistic 8k, cinematic shallow depth of field, sharp vector graphics on the screen, premium textures.
         """.trimIndent()
 
         return AgentReport(

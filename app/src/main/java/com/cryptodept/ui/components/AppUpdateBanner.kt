@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -109,61 +110,57 @@ private fun FlexibleUpdateBanner(
         shape = RectangleShape,
         modifier = Modifier.fillMaxWidth().padding(8.dp),
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+        Row(
+            modifier = Modifier.padding(12.dp).fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = "⬇️", fontSize = 18.sp)
+            Spacer(Modifier.width(12.dp))
+            
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "⬇️",
-                        fontSize = 18.sp,
+                        text = ">>> UPDATE_READY",
+                        color = colors.amber,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 11.sp,
+                        maxLines = 1,
                     )
-                    Spacer(Modifier.width(8.dp))
-                    Column {
-                        Text(
-                            text = ">>> UPDATE_AVAILABLE",
-                            color = colors.amber,
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp,
-                        )
-                        Text(
-                            text = "New version ready (${sizeMb}MB)",
-                            color = colors.textPrimary,
-                            fontFamily = FontFamily.Monospace,
-                            fontSize = 10.sp,
-                        )
-                    }
+                    Text(
+                        text = "Build: ${sizeMb}MB",
+                        color = colors.textPrimary,
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 10.sp,
+                        maxLines = 1,
+                    )
                 }
-                
-                Row {
-                    TextButton(
-                        onClick = onDismiss,
-                        modifier = Modifier.padding(end = 4.dp),
-                    ) {
-                        Text(
-                            text = "[LATER]",
-                            color = colors.dimText,
-                            fontFamily = FontFamily.Monospace,
-                            fontSize = 11.sp,
-                        )
-                    }
-                    Button(
-                        onClick = onUpdate,
-                        colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
-                        shape = RectangleShape,
-                    ) {
-                        Text(
-                            text = "[DOWNLOAD]",
-                            color = colors.background,
-                            fontFamily = FontFamily.Monospace,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                        )
-                    }
+            
+            Spacer(Modifier.width(8.dp))
+            
+            Column(horizontalAlignment = Alignment.End) {
+                Button(
+                    onClick = onUpdate,
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
+                    shape = RectangleShape,
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                    modifier = Modifier.height(28.dp)
+                ) {
+                    Text(
+                        text = "[ DOWNLOAD ]",
+                        color = colors.background,
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
                 }
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "[ LATER ]",
+                    color = colors.dimText,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 9.sp,
+                    modifier = Modifier.clickable { onDismiss() }
+                )
             }
         }
     }

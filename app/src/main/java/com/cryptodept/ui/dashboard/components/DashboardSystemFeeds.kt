@@ -54,7 +54,7 @@ fun AgentStatusLine(
 @Composable
 fun SystemIntegrityFeed(logs: List<com.cryptodept.domain.manager.IntegrityLog>) {
     val colors = LocalTerminalColors.current
-    var isExpanded by remember { mutableStateOf(false) }
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     Column(
         modifier = Modifier
@@ -62,7 +62,10 @@ fun SystemIntegrityFeed(logs: List<com.cryptodept.domain.manager.IntegrityLog>) 
             .padding(top = 4.dp, bottom = 4.dp)
             .border(0.5.dp, colors.grid.copy(alpha = 0.3f), RectangleShape)
             .background(Color.Black.copy(alpha = 0.5f))
-            .clickable { isExpanded = !isExpanded }
+            .clickable { 
+                val lastLog = logs.firstOrNull()?.message ?: "AGENT-INTEGRITY: SCANNING_FOR_ANOMALIES..."
+                android.widget.Toast.makeText(context, lastLog, android.widget.Toast.LENGTH_LONG).show()
+            }
             .padding(8.dp)
     ) {
         Row(
@@ -78,35 +81,11 @@ fun SystemIntegrityFeed(logs: List<com.cryptodept.domain.manager.IntegrityLog>) 
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = if (isExpanded) "[-]" else "[+]",
+                text = "[ VIEW ]",
                 color = colors.primary,
                 fontSize = 11.sp,
                 fontFamily = FontFamily.Monospace
             )
-        }
-
-        if (isExpanded) {
-            Spacer(modifier = Modifier.height(4.dp))
-            if (logs.isEmpty()) {
-                Text(
-                    text = "WAITING FOR AGENT-INTEGRITY SCAN...",
-                    color = colors.grid,
-                    fontSize = 8.sp,
-                    fontFamily = FontFamily.Monospace
-                )
-            } else {
-                logs.takeLast(10).forEach { log ->
-                    val timeStr = java.text.SimpleDateFormat("HH:mm:ss", Locale.US).format(java.util.Date(log.timestamp))
-                    Text(
-                        text = "[$timeStr] ${log.message}",
-                        color = if (log.isAnomaly) colors.danger else colors.primary.copy(alpha = 0.7f),
-                        fontSize = 11.sp,
-                        fontFamily = FontFamily.Monospace,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
         }
     }
 }

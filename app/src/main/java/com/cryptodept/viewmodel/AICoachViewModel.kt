@@ -18,6 +18,7 @@ class AICoachViewModel
         private val aiProvider: AIProvider,
         private val journalRepository: JournalRepository,
         private val cryptoRepository: CryptoRepository,
+        private val riskEngine: com.cryptodept.domain.usecase.RiskScoreEngine,
     ) : ViewModel() {
         private val _messages = mutableStateListOf<ChatMessage>()
         val messages: List<ChatMessage> = _messages
@@ -72,12 +73,15 @@ class AICoachViewModel
             viewModelScope.launch {
                 try {
                     val trades = journalRepository.getAllTrades().first()
+                    val btcChange = cryptoRepository.getCachedChange24h("bitcoin")
+                    val marketTrend = if (btcChange > 0.5) "BULLISH" else if (btcChange < -0.5) "BEARISH" else "NEUTRAL"
+                    val currentRisk = riskEngine.currentScore.value
 
                     var responseText = ""
                     _messages.add(ChatMessage("COACH", "SCANNING DATABASE..."))
                     val lastIdx = _messages.size - 1
 
-                    aiProvider.analyzeJournal(trades, 50, "BULLISH").collect { chunk ->
+                    aiProvider.analyzeJournal(trades, currentRisk, marketTrend).collect { chunk ->
                         responseText += chunk
                         _messages[lastIdx] = ChatMessage("COACH", responseText)
                     }

@@ -48,7 +48,7 @@ fun NewsScreen(viewModel: NewsViewModel) {
     val colors = LocalTerminalColors.current
     val context = LocalContext.current
 
-    val filters = listOf("ALL", "BITCOIN", "ETHEREUM", "BULLISH", "BEARISH")
+    val filters = listOf("ALL", "FAVORITES", "BITCOIN", "ETHEREUM", "BULLISH", "BEARISH")
 
     Column(
         modifier =

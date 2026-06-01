@@ -67,7 +67,7 @@ class DerivativesRepositoryImpl
                 coinId = symbol,
                 funding = funding.await(),
                 openInterest = openInterest.await(),
-                liquidations = liquidations.await()
+                liquidations = liquidations.await(),
             )
         }
 
@@ -79,7 +79,7 @@ class DerivativesRepositoryImpl
                 val coinglassResponse =
                     try {
                         coinglassApi.getAggregatedFunding(cgSymbol)
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         null
                     }
 
@@ -141,7 +141,7 @@ class DerivativesRepositoryImpl
                 val summary =
                     try {
                         coinglassApi.getGlobalLiquidations(cgSymbol)
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         null
                     }
 
@@ -198,7 +198,7 @@ class DerivativesRepositoryImpl
                                     val okx = response.data.find { it.exchangeName == "OKX" }?.rate ?: 0.0
                                     val avg = response.data.map { it.rate }.average()
                                     FundingHeatmapItem(symbol, binance, bybit, okx, avg)
-                                } catch (e: Exception) {
+                                } catch (_: Exception) {
                                     null
                                 }
                             }

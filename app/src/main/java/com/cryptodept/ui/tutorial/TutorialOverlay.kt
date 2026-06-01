@@ -5,7 +5,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.Layout
-import com.cryptodept.domain.tutorial.TourStep
 import com.cryptodept.domain.tutorial.TutorialController
 import com.cryptodept.domain.tutorial.TutorialTargetId
 
@@ -17,15 +16,14 @@ import com.cryptodept.domain.tutorial.TutorialTargetId
 @Composable
 fun TutorialOverlay(
     controller: TutorialController,
-    registry: TutorialTargetRegistry
+    registry: TutorialTargetRegistry,
 ) {
     val state by controller.state.collectAsState()
 
-    if (!state.isActive || state.currentStep == null) return
+    if (!(state.isActive) || state.currentStep == null) return
 
     val step = state.currentStep!!
     val targetBounds: Rect? = registry.getBounds(step.target)
-    val isActuallyDemo = state.isActive
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -116,15 +114,4 @@ private fun TooltipPositioner(
             placeable.place(x = centerX, y = safeY)
         }
     }
-}
-
-/**
- * Provides static sample text for key UI elements during the tour.
- */
-private fun getSampleTextForTarget(targetId: TutorialTargetId): String? = when (targetId) {
-    TutorialTargetId.DASH_PRICE_TICKER -> "BTC ${'$'}103,245.50 ▲2.34%   ETH ${'$'}3,425.80 ▲1.85%"
-    TutorialTargetId.DASH_AI_NARRATIVE -> "AI_NARRATIVE: BTC defends critical support. Ensemble confidence: 73%."
-    TutorialTargetId.DASH_SENTIMENT_GAUGE -> "FEAR/GREED: 62 (GREED) | REDDIT: 68% BULLISH"
-    TutorialTargetId.DASH_NETWORK_HEALTH -> "BTC HASH: 12 sat | ETH GAS: 24 gwei | MEMPOOL: 8420 txs"
-    else -> null
 }

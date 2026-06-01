@@ -53,7 +53,22 @@ interface CoinGeckoApi {
 
     @GET("news")
     suspend fun getNews(): CoinGeckoNewsResponse
+
+    @GET("search")
+    suspend fun searchCoins(@Query("query") query: String): SearchResponse
 }
+
+data class SearchResponse(
+    val coins: List<SearchCoin>,
+)
+
+data class SearchCoin(
+    val id: String,
+    val name: String,
+    @SerializedName("api_symbol") val symbol: String,
+    @SerializedName("market_cap_rank") val marketCapRank: Int?,
+    val thumb: String?,
+)
 
 data class CoinGeckoNewsResponse(
     val data: List<CoinGeckoNewsItem>,

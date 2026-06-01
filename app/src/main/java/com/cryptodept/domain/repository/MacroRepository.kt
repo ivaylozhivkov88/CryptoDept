@@ -4,12 +4,15 @@ import com.cryptodept.domain.model.CalendarEvent
 import com.cryptodept.domain.model.MacroCorrelation
 import com.cryptodept.domain.model.MacroData
 import com.cryptodept.domain.model.MacroDataPoint
-import com.cryptodept.domain.model.MacroIntelligence
+import com.cryptodept.domain.model.*
+import kotlinx.coroutines.flow.Flow
 
 interface MacroRepository {
     suspend fun getMacroData(): Result<MacroData>
 
     suspend fun getMacroIntelligence(): Result<MacroIntelligence>
+
+    fun observeMacroIntelligence(): Flow<MacroIntelligence?>
 
     suspend fun getCalendarEvents(): Result<List<CalendarEvent>>
 

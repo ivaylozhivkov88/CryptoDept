@@ -14,8 +14,8 @@ class WhaleRepositoryImpl @Inject constructor(
 ) : WhaleRepository {
 
     override fun getWhaleTransactions(): Flow<List<WhaleTransaction>> = 
-        firebaseDataSource.getTerminalState().map { state ->
-            state?.whaleAlerts?.map { alert ->
+        firebaseDataSource.getWhaleAlerts().map { alerts ->
+            alerts.map { alert ->
                 WhaleTransaction(
                     id = alert.timestamp.toString(),
                     blockchain = when {
@@ -31,7 +31,7 @@ class WhaleRepositoryImpl @Inject constructor(
                     timestamp = alert.timestamp,
                     transactionHash = alert.explorerUrl.split("/").last()
                 )
-            } ?: emptyList()
+            }
         }.map { it.sortedByDescending { tx -> tx.timestamp } }
 
     override suspend fun refreshWhaleTransactions(): Result<Unit> {

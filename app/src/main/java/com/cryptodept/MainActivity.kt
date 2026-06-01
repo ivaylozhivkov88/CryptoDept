@@ -54,12 +54,15 @@ import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import android.net.Uri
 import android.content.Intent
+import java.util.Locale
+import kotlin.math.abs
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontFamily
@@ -145,14 +148,18 @@ class MainActivity : ComponentActivity() {
         }
 
         // --- SUBSCRIBE TO GLOBAL ALERTS ---
-        com.google.firebase.messaging.FirebaseMessaging.getInstance()
-            .subscribeToTopic("market_alerts")
-            .addOnCompleteListener { task ->
+        val fcm = com.google.firebase.messaging.FirebaseMessaging.getInstance()
+        fcm.subscribeToTopic("market_alerts")
+        fcm.subscribeToTopic("session_transitions")
+        fcm.subscribeToTopic("daily_picks")
+        
+        fcm.token.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     android.util.Log.d("FCM", ">>> Subscribed to market_alerts")
                 }
             }
 
+        @OptIn(kotlinx.coroutines.FlowPreview::class)
         setContent {
             val context = LocalContext.current
             val phosphorModeStr by preferencesService.phosphorMode.collectAsState(initial = "GREEN")
@@ -183,6 +190,7 @@ class MainActivity : ComponentActivity() {
 
             var lastInteractionTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
             var isIdle by remember { mutableStateOf(false) }
+            var showBootSequence by remember { mutableStateOf(true) }
 
             val windowInsetsController =
                 remember {
@@ -195,13 +203,25 @@ class MainActivity : ComponentActivity() {
             val btcPriceState by btcPriceFlow.collectAsState(initial = null)
 
             val allPricesState by remember(cryptoRepository) {
-                cryptoRepository.getTrackedCoinPrices().map { list ->
-                    list.map { "${it.symbol.uppercase()} ${it.currentPrice.toCurrency(0)}" }
-                }
+                cryptoRepository.getTrackedCoinPrices()
+                    .sample(60_000L) // Optimization: update once per minute
+                    .map { list ->
+                        list.map { coin ->
+                            val symbol = coin.symbol.uppercase()
+                            val price = if (coin.currentPrice < 1.0) {
+                                String.format(Locale.US, "$%.4f", coin.currentPrice)
+                            } else {
+                                coin.currentPrice.toCurrency(2)
+                            }
+                            val change = coin.priceChangePercentage24h
+                            val sign = if (change >= 0) "▲" else "▼"
+                            "$symbol PRICE: $price $sign${String.format(Locale.US, "%.1f", Math.abs(change))}%"
+                        }
+                    }
             }.collectAsState(initial = emptyList())
 
             val riskScoreState by riskEngine.observeRiskScore().collectAsState(initial = 50)
-            val isOnboardingComplete by preferencesService.isOnboardingComplete.collectAsState(initial = true)
+            val isOnboardingComplete by preferencesService.isOnboardingComplete.collectAsState(initial = null)
             val connectivityStatus by connectivityObserver.observe().collectAsState(initial = ConnectivityObserver.Status.Available)
             
             val mainEntryPoint = remember(context) {
@@ -240,13 +260,20 @@ class MainActivity : ComponentActivity() {
                 CryptoDeptTheme(mode = mode) {
                     if (isUpdateRequired) {
                         ForceUpdateScreen()
-                    } else if (!isOnboardingComplete) {
+                    } else if (isOnboardingComplete == null) {
+                        // SPLASH BUFFER: Wait for state to be read from DataStore to prevent flickering
+                        Box(modifier = Modifier.fillMaxSize().background(Color.Black))
+                    } else if (isOnboardingComplete == false) {
                         OnboardingScreen(
                             onOnboardingComplete = {
                                 lifecycleScope.launch {
                                     preferencesService.setOnboardingComplete(true)
                                 }
                             },
+                        )
+                    } else if (showBootSequence) {
+                        com.cryptodept.ui.components.TerminalBootScreen(
+                            onComplete = { showBootSequence = false }
                         )
                     } else {
                         val navController = rememberNavController()

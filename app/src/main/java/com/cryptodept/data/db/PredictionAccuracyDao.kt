@@ -34,8 +34,11 @@ interface PredictionAccuracyDao {
     @Query("SELECT * FROM prediction_accuracy WHERE model = :model")
     fun getAccuracyByModel(model: String): Flow<List<PredictionAccuracyEntity>>
 
-    @Query("SELECT AVG(CASE WHEN wasCorrect = 1 THEN 1.0 ELSE 0.0 END) FROM prediction_accuracy")
+    @Query("SELECT AVG(CASE WHEN wasCorrect = 1 THEN 1.0 ELSE 0.0 END) FROM prediction_accuracy WHERE wasCorrect IS NOT NULL")
     fun getOverallAccuracy(): Flow<Double?>
+
+    @Query("SELECT COUNT(*) FROM prediction_accuracy WHERE wasCorrect IS NOT NULL")
+    fun getTotalVerifiedCount(): Flow<Int>
 
     @Query("SELECT * FROM prediction_accuracy WHERE verifiedAt IS NULL AND predictedAt < :olderThanMillis")
     suspend fun getUnverifiedOlderThan(olderThanMillis: Long): List<PredictionAccuracyEntity>

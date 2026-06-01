@@ -13,6 +13,7 @@ import com.cryptodept.domain.repository.NewsRepository
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import java.text.SimpleDateFormat
 import java.util.*
@@ -29,6 +30,7 @@ class NewsRepositoryImpl
         private val redditClient: com.cryptodept.data.api.RedditClient,
         private val sentimentScorer: com.cryptodept.domain.algo.LocalSentimentScorer,
         private val newsDao: NewsDao,
+        private val coinDao: com.cryptodept.data.db.CoinDao,
     ) : NewsRepository {
 
         override fun getNews(currencies: String?): Flow<List<NewsItem>> {
@@ -47,11 +49,19 @@ class NewsRepositoryImpl
 
         override suspend fun refreshNews(currencies: String?): Result<Unit> = withContext(Dispatchers.IO) {
             try {
+                // Get Top 30 + User Favorites to build the query
+                val topCoins = coinDao.getTopCoins(30).firstOrNull() ?: emptyList()
+                val favorites = coinDao.getTrackedCoins().firstOrNull() ?: emptyList()
+                val symbolsQuery = (topCoins + favorites)
+                    .map { it.symbol.uppercase() }
+                    .distinct()
+                    .joinToString(",")
+
                 val cryptoPanicDeferred = async {
                     if (BuildConfig.CRYPTOPANIC_API_KEY.isNotBlank()) {
                         runCatching {
                             withTimeout(10000) {
-                                val query = currencies ?: "BTC,ETH,XRP,SOL,ADA"
+                                val query = currencies ?: symbolsQuery
                                 newsApi.getCryptoPanicNews(currencies = query).results.map { res ->
                                     val sentiment = when {
                                         res.votes.positive > res.votes.negative -> NewsSentiment.BULLISH
@@ -145,13 +155,32 @@ class NewsRepositoryImpl
         private fun detectCurrencies(text: String): List<String> {
             val detected = mutableListOf<String>()
             val upper = text.uppercase()
+            
+            // 1. Strict mapping for known major coins
             if (upper.contains("BTC") || upper.contains("BITCOIN")) detected.add("BTC")
             if (upper.contains("ETH") || upper.contains("ETHEREUM")) detected.add("ETH")
             if (upper.contains("XRP") || upper.contains("RIPPLE")) detected.add("XRP")
             if (upper.contains("SOL") || upper.contains("SOLANA")) detected.add("SOL")
             if (upper.contains("ADA") || upper.contains("CARDANO")) detected.add("ADA")
-            if (upper.contains("DOGE")) detected.add("DOGE")
-            return detected
+            if (upper.contains("XLM") || upper.contains("STELLAR")) detected.add("XLM")
+            if (upper.contains("HBAR") || upper.contains("HEDERA")) detected.add("HBAR")
+            if (upper.contains("ATOM") || upper.contains("COSMOS")) detected.add("ATOM")
+            if (upper.contains("TRX") || upper.contains("TRON")) detected.add("TRX")
+            if (upper.contains("BNB") || upper.contains("BINANCE")) detected.add("BNB")
+
+            // 2. Fallback: Catch any standalone 3-5 uppercase words surrounded by non-letters
+            // This prevents catching "COULD" or "SMES" unless they are explicitly tagged
+            val words = upper.split(Regex("[^A-Z]")).filter { word -> 
+                word.length in 3..5 && !isCommonEnglishWord(word)
+            }
+            detected.addAll(words)
+            
+            return detected.distinct()
+        }
+
+        private fun isCommonEnglishWord(word: String): Boolean {
+            val commons = setOf("COULD", "SMES", "WILL", "FROM", "WITH", "THIS", "THAT", "THEY", "HAVE", "BEEN")
+            return commons.contains(word)
         }
 
         private fun parseRssDate(dateStr: String): Long =

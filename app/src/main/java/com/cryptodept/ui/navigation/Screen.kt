@@ -77,7 +77,9 @@ sealed class Screen(
     object WhaleTracker : Screen("whale_tracker")
 
     // BLOCK F: SUPREME MODE
-    object Prediction : Screen("prediction", "PREDICT", "🔮")
+    object Prediction : Screen("prediction?coinId={coinId}", "PREDICT", "🔮") {
+        fun createRoute(coinId: String? = null) = if (coinId != null) "prediction?coinId=$coinId" else "prediction?coinId="
+    }
 
     object Portfolio : Screen("portfolio", "TRACKER", "📁")
 
@@ -96,6 +98,20 @@ sealed class Screen(
     object Achievements : Screen("achievements", "ACHIEVEMENTS", "🏆")
 
     object AgentHub : Screen("agent_hub", "AGENT HUB", "🤖")
+
+    // QUANT LAB SPECIALIZED TOOLS
+    object CycleScanner : Screen("cycle_scanner?coinId={coinId}") {
+        fun createRoute(coinId: String? = null) = if (coinId != null) "cycle_scanner?coinId=$coinId" else "cycle_scanner"
+    }
+    object ProbabilityEngine : Screen("probability_engine?coinId={coinId}") {
+        fun createRoute(coinId: String? = null) = if (coinId != null) "probability_engine?coinId=$coinId" else "probability_engine"
+    }
+    object MarketDynamism : Screen("market_dynamism?coinId={coinId}") {
+        fun createRoute(coinId: String? = null) = if (coinId != null) "market_dynamism?coinId=$coinId" else "market_dynamism"
+    }
+    object RegressionTunnel : Screen("regression_tunnel?coinId={coinId}") {
+        fun createRoute(coinId: String? = null) = if (coinId != null) "regression_tunnel?coinId=$coinId" else "regression_tunnel"
+    }
 
     object Glossary : Screen("glossary")
 

@@ -25,10 +25,9 @@ class EntryAnalyzerViewModel
         private val calculator: OptimalEntryCalculator,
         private val taEngine: TechnicalAnalysisEngine,
     ) : ViewModel() {
-        val trackedCoins: StateFlow<List<String>> =
+        val trackedCoins: StateFlow<List<CoinPrice>> =
             repository
                 .getTrackedCoinPrices()
-                .map { prices -> prices.map { it.id } }
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
         private val _selectedCoin = MutableStateFlow("bitcoin")

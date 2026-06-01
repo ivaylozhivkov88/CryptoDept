@@ -137,7 +137,7 @@ class AnalysisViewModel @Inject constructor(
             flowOf(demoMode.getDemoTrackedCoins())
         } else {
             observeAnalysisHistory().map { list -> 
-                list.ifEmpty { listOf("BTC", "ETH", "SOL", "BNB", "XRP", "DOGE", "ADA", "TRX", "DOT", "LINK", "AVAX", "SHIB", "TON", "XLM", "SUI") }
+                list.ifEmpty { listOf("BTC", "ETH", "SOL", "BNB", "XRP") }
             }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), listOf("BTC", "ETH", "SOL"))

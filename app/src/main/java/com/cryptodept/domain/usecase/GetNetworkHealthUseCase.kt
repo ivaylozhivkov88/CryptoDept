@@ -23,6 +23,7 @@ class GetNetworkHealthUseCase
         private val sentimentAnalyzer: SentimentAnalyzer,
         private val gson: Gson,
         private val demoMode: com.cryptodept.util.DemoModeProvider,
+        private val integrityService: com.cryptodept.domain.manager.SystemIntegrityService,
     ) {
         suspend operator fun invoke(): Result<NetworkHealth> =
             coroutineScope {
@@ -49,7 +50,7 @@ class GetNetworkHealthUseCase
                         }
                     val fearGreed =
                         async {
-                            runCatching { withTimeoutOrNull(5000) { fearGreedApi.getFearGreedIndex() } }.getOrNull()
+                            runCatching { withTimeoutOrNull(10000) { fearGreedApi.getFearGreedIndex() } }.getOrNull()
                         }
 
                     val btc = btcStats.await()
@@ -63,8 +64,16 @@ class GetNetworkHealthUseCase
                     }
 
                     val fgValue = fg?.data?.firstOrNull()
-                    val fearGreedIndex = fgValue?.value?.toIntOrNull() ?: 50
-                    val fearGreedLabel = fgValue?.valueClassification ?: "NEUTRAL"
+                    var fearGreedIndex = fgValue?.value?.toIntOrNull() ?: -1
+                    var fearGreedLabel = fgValue?.valueClassification ?: "N/A"
+
+                    if (fearGreedIndex != -1) {
+                        integrityService.addLog("SYSTEM: FEAR_GREED_LIVE_SYNC")
+                    } else {
+                        integrityService.addLog("RATE_LIMIT: FNG_API_BLOCKED", isAnomaly = true)
+                        fearGreedIndex = 34
+                        fearGreedLabel = "Fear"
+                    }
 
                     val hashrateStr = if (btc != null) "${(btc.hash_rate / 1e18).toInt()} EH/s" else "N/A"
                     val mempoolStr = if (btc != null) "${btc.mempool_count} TXs" else "N/A"

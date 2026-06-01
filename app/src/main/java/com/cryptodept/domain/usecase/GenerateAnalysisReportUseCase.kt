@@ -15,13 +15,29 @@ class GenerateAnalysisReportUseCase
             val priceStr = String.format(Locale.US, "%.2f", result.currentPrice)
             val rsiStr = String.format(Locale.US, "%.1f", result.rsiValue)
             val confidenceInt = (result.compositeSignal.confidence * 100).toInt()
-            val signalStr =
-                result.compositeSignal.strength.name
-                    .replace("_", " ")
+            val signalStr = result.compositeSignal.strength.name.replace("_", " ")
 
-            val prompt =
-                "Generate a viral technical analysis report for ${result.coinId}.\n" +
-                    "Price: $$priceStr, Signal: $signalStr, Confidence: $confidenceInt%, RSI: $rsiStr."
+            val prompt = buildString {
+                append("IDENTITY: Lead Quantitative Strategist for CryptoDept Elite Terminal.\n")
+                append("TASK: Generate a data-driven narrative SITREP for ${result.coinId.uppercase()}.\n\n")
+                append(">>> CORE_MARKET_DATA\n")
+                append("ASSET: ${result.coinId.uppercase()}\n")
+                append("PRICE: $$priceStr\n")
+                append("SIGNAL: $signalStr\n")
+                append("CONFIDENCE: $confidenceInt%\n")
+                append("RSI: $rsiStr\n")
+                
+                if (result.patterns.isNotEmpty()) {
+                    append("PATTERNS: ${result.patterns.joinToString { it.pattern.name }}\n")
+                }
+
+                append("\nREPORT_CONSTRAINTS:\n")
+                append("1. Tone: Professional, clinical, data-driven. Minimalist terminal style.\n")
+                append("2. Output Structure: [EXECUTIVE_SUMMARY], [TECHNICAL_CONFLUENCE], [FINAL_VERDICT].\n")
+                append("3. NO emojis. NO financial advice.\n")
+                append("4. Use uppercase for key technical terms (e.g. BREAKOUT, SUPPORT, MOMENTUM).\n")
+                append("5. Language: English.\n")
+            }
 
             return aiProvider.sendMessage(prompt)
         }

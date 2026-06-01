@@ -177,12 +177,72 @@ fun NavGraphBuilder.addIntelligenceRoutes(navController: NavHostController) {
             com.cryptodept.ui.tools.WhaleTrackerScreen(onBack = { navController.popBackStack() })
         }
     }
+
+    // QUANT LAB SPECIALIZED ROUTES
+    composable(
+        route = Screen.CycleScanner.route,
+        arguments = listOf(navArgument("coinId") { type = NavType.StringType; nullable = true; defaultValue = null })
+    ) { backStackEntry ->
+        val coinId = backStackEntry.arguments?.getString("coinId")
+        ProGate(
+            feature = FeatureKey.QUANT_LAB_INDIVIDUAL,
+            onLocked = { key -> com.cryptodept.ui.paywall.PaywallScreen(reason = "general", featureContext = key, onDismiss = { navController.popBackStack() }) }
+        ) {
+            CycleScannerScreen(initialCoinId = coinId, onBack = { navController.popBackStack() })
+        }
+    }
+
+    composable(
+        route = Screen.ProbabilityEngine.route,
+        arguments = listOf(navArgument("coinId") { type = NavType.StringType; nullable = true; defaultValue = null })
+    ) { backStackEntry ->
+        val coinId = backStackEntry.arguments?.getString("coinId")
+        ProGate(
+            feature = FeatureKey.QUANT_LAB_INDIVIDUAL,
+            onLocked = { key -> com.cryptodept.ui.paywall.PaywallScreen(reason = "general", featureContext = key, onDismiss = { navController.popBackStack() }) }
+        ) {
+            ProbabilityEngineScreen(initialCoinId = coinId, onBack = { navController.popBackStack() })
+        }
+    }
+
+    composable(
+        route = Screen.MarketDynamism.route,
+        arguments = listOf(navArgument("coinId") { type = NavType.StringType; nullable = true; defaultValue = null })
+    ) { backStackEntry ->
+        val coinId = backStackEntry.arguments?.getString("coinId")
+        ProGate(
+            feature = FeatureKey.QUANT_LAB_INDIVIDUAL,
+            onLocked = { key -> com.cryptodept.ui.paywall.PaywallScreen(reason = "general", featureContext = key, onDismiss = { navController.popBackStack() }) }
+        ) {
+            MarketDynamismScreen(initialCoinId = coinId, onBack = { navController.popBackStack() })
+        }
+    }
+
+    composable(
+        route = Screen.RegressionTunnel.route,
+        arguments = listOf(navArgument("coinId") { type = NavType.StringType; nullable = true; defaultValue = null })
+    ) { backStackEntry ->
+        val coinId = backStackEntry.arguments?.getString("coinId")
+        ProGate(
+            feature = FeatureKey.QUANT_LAB_INDIVIDUAL,
+            onLocked = { key -> com.cryptodept.ui.paywall.PaywallScreen(reason = "general", featureContext = key, onDismiss = { navController.popBackStack() }) }
+        ) {
+            RegressionTunnelScreen(initialCoinId = coinId, onBack = { navController.popBackStack() })
+        }
+    }
     
-    composable(Screen.Prediction.route) {
+    composable(
+        route = Screen.Prediction.route,
+        arguments = listOf(navArgument("coinId") { type = NavType.StringType; nullable = true; defaultValue = null })
+    ) { backStackEntry ->
+        val coinId = backStackEntry.arguments?.getString("coinId")
         val settingsViewModel: com.cryptodept.viewmodel.SettingsViewModel = hiltViewModel()
         val tier by settingsViewModel.tierAccessManager.currentTier.collectAsState()
         if (tier == AccessTier.ADMIN) {
-            com.cryptodept.ui.prediction.PredictionHubScreen(onBack = { navController.popBackStack() })
+            com.cryptodept.ui.prediction.PredictionHubScreen(
+                initialCoinId = coinId,
+                onBack = { navController.popBackStack() }
+            )
         } else {
             LaunchedEffect(Unit) { navController.popBackStack() }
         }

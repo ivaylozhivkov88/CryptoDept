@@ -37,18 +37,19 @@ class MonteCarloPredictor
             val sigma = returns.stdDev()
 
             // Drift компонента (средното движение, коригирано с волатилността)
-            // Формула: (mu - sigma^2 / 2)
-            val drift = mu - (sigma.pow(2.0) / 2.0)
+            // Ако волатилността е 0, drift е 0
+            val drift = if (sigma > 0) mu - (sigma.pow(2.0) / 2.0) else 0.0
 
             // 2. Изпълняваме симулациите
             val finalPrices = mutableListOf<Double>()
 
             repeat(SIMULATIONS) {
                 var simulatedPrice = currentPrice
-                repeat(periodsAhead) {
-                    // Геометрично Броуново движение: S_t = S_0 * exp((mu - sigma^2/2)t + sigma*W_t)
-                    val shock = sigma * random.nextGaussian()
-                    simulatedPrice *= exp(drift + shock)
+                if (sigma > 0) {
+                    repeat(periodsAhead) {
+                        val shock = sigma * random.nextGaussian()
+                        simulatedPrice *= exp(drift + shock)
+                    }
                 }
                 finalPrices.add(simulatedPrice)
             }

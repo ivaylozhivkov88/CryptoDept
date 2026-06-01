@@ -131,7 +131,7 @@ fun AiPickStrip(
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.weight(1f).padding(horizontal = 8.dp).clickable { onAccuracyClick() }
+            modifier = Modifier.weight(1f).padding(horizontal = 8.dp).clickable { onExpand() }
         ) {
             Text(
                 text = "$symbol ● ",
@@ -146,13 +146,17 @@ fun AiPickStrip(
                 color = directionColor,
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Monospace
+                fontFamily = FontFamily.Monospace,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f, fill = false)
             )
             Text(
                 text = "  $confidence%",
                 color = Color.White,
                 fontSize = 10.sp,
-                fontFamily = FontFamily.Monospace
+                fontFamily = FontFamily.Monospace,
+                maxLines = 1
             )
         }
 
@@ -161,7 +165,7 @@ fun AiPickStrip(
             color = colors.amber,
             fontSize = 11.sp,
             fontFamily = FontFamily.Monospace,
-            modifier = Modifier.clickable { onExpand() }
+            modifier = Modifier.clickable { onAccuracyClick() }
         )
     }
 }

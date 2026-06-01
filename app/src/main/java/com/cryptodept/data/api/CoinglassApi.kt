@@ -30,7 +30,20 @@ interface CoinglassApi {
         @Query("symbol") symbol: String,       // e.g. "BTC"
         @Query("range") range: String = "12h" // look-ahead/behind window
     ): retrofit2.Response<LiquidationMapResponse>
+
+    // New lightweight endpoint for Altcoin Season Index
+    @GET("api/index/altcoin-season")
+    suspend fun getAltcoinSeasonIndex(): CoinglassAltIndexResponse
 }
+
+data class CoinglassAltIndexResponse(
+    val data: List<AltIndexPoint>?
+)
+
+data class AltIndexPoint(
+    val index: Int,
+    val time: Long
+)
 
 // Base URL: "https://open-api.coinglass.com/"
 // Header: "CG-API-KEY": BuildConfig.COINGLASS_API_KEY

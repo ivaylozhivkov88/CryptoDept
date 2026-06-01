@@ -141,12 +141,35 @@ class PredictionViewModel
                     currentLogs.add("CLOUD_NODE_OFFLINE_OR_MISSING_DATA")
                     currentLogs.add("INITIATING_LOCAL_RESERVE_ENGINE")
 
-                    val history =
-                        withContext(Dispatchers.IO) {
+                    var history = emptyList<com.cryptodept.domain.model.OHLCData>()
+                    var retryCount = 0
+                    val maxRetries = 3
+
+                    while (history.isEmpty() && retryCount < maxRetries) {
+                        if (retryCount > 0) {
+                            currentLogs.add("RETRYING_DATA_ACQUISITION_${retryCount}...")
+                            _uiState.value = PredictUiState.Loading(currentLogs.toList(), 0.2f)
+                            delay(1500) // Wait before retry
+                        }
+
+                        history = withContext(Dispatchers.IO) {
                             repository.getOHLCData(coinId, days = 30)
                         }
+                        
+                        if (history.isEmpty()) {
+                            currentLogs.add("FETCHING_SHORT_TERM_DATA_PACKETS")
+                            history = withContext(Dispatchers.IO) {
+                                repository.getOHLCData(coinId, days = 7)
+                            }
+                        }
+                        
+                        if (history.isEmpty()) {
+                            retryCount++
+                        }
+                    }
+
                     if (history.isEmpty()) {
-                        _uiState.value = PredictUiState.Error("INSUFFICIENT_DATA_FOR_ANALYSIS")
+                        _uiState.value = PredictUiState.Error("INSUFFICIENT_DATA_FOR_ANALYSIS: Node $coinId returned empty history after $maxRetries attempts. Verify API status.")
                         return@launch
                     }
 
@@ -158,15 +181,14 @@ class PredictionViewModel
                         ensembleEngine.generatePrediction(coinId, closes, volumes)
                     }
 
-                    // Animate logs while computation is running
+                    // Animate logs faster for better UX
                     analysisSteps.forEachIndexed { index, step ->
                         currentLogs.add(step)
-                        // Progress reaches 90% through logs, last 10% is for finishing the result
                         val progress = ((index + 1).toFloat() / analysisSteps.size) * 0.9f
                         _uiState.value = PredictUiState.Loading(currentLogs.toList(), progress)
                         
-                        // Slightly faster typing for better UX
-                        val typingDelay = (step.length * 8L) + 80L
+                        // Much faster typing delay
+                        val typingDelay = (step.length * 2L) + 20L
                         delay(typingDelay)
                     }
 

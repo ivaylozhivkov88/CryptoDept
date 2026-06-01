@@ -73,8 +73,8 @@ fun SettingsAccountSection(
                     )
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = if (isPro) "Unlimited Terminal Access (Max 15 Coins)" else "Limited to 3 Tracked Coins",
-                            color = colors.dimText,
+                            text = if (isPro) "Unlimited Terminal Access (Max 30 Coins)" else "Limited to 3 Tracked Coins",
+                            color = if (isPro) colors.primary else colors.dimText,
                             fontFamily = FontFamily.Monospace,
                             fontSize = 12.sp,
                         )

@@ -67,7 +67,7 @@ class CoinGeckoPriceSource @Inject constructor(
 
     override suspend fun getCurrentPrice(coinId: String): Double? {
         return try {
-            val normalizedId = resolveCoinGeckoId(coinId)
+            val normalizedId = symbolResolver.toCoinGeckoId(coinId)
             val response = api.getSimplePrice(normalizedId, "usd")
             response[normalizedId]?.get("usd")
         } catch (e: Exception) {

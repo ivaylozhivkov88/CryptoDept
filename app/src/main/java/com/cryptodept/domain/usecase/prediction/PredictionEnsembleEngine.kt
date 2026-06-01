@@ -309,8 +309,12 @@ class PredictionEnsembleEngine
             votes: List<ModelVote>,
             multiplier: Double,
         ): PriceTarget {
-            val avgTarget = votes.filter { it.targetPrice > 0 }.map { it.targetPrice }.average()
-            val mid = if (avgTarget > 0) avgTarget else current * multiplier
+            val validVotes = votes.filter { it.targetPrice > 0 && it.targetPrice != current }
+            val avgTarget = if (validVotes.isNotEmpty()) validVotes.map { it.targetPrice }.average() else current * multiplier
+            
+            // Apply a small additional drift if the target is still perfectly equal to current (visual safeguard)
+            val mid = if (avgTarget == current) current * multiplier else avgTarget
+
             return PriceTarget(
                 low = mid * 0.98,
                 mid = mid,

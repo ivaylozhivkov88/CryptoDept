@@ -142,30 +142,41 @@ fun MatrixRainScreen(
             }
         }
 
-        // --- OPTIMIZED CLOCK ---
+        // --- OPTIMIZED CLOCK & COIN ROTATION ---
         var currentTime by remember { mutableStateOf(Calendar.getInstance().time) }
+        var currentCoinIndex by remember { mutableIntStateOf(0) }
+        
         LaunchedEffect(Unit) {
             while(true) {
                 currentTime = Calendar.getInstance().time
-                delay(1000) // Update only once per second
+                delay(1000) // Update clock every second
+            }
+        }
+
+        LaunchedEffect(allPrices.size) {
+            if (allPrices.isNotEmpty()) {
+                while(true) {
+                    delay(5000) // Rotate every 5 seconds
+                    currentCoinIndex = (currentCoinIndex + 1) % allPrices.size
+                }
             }
         }
 
         Column(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(bottom = 64.dp, end = 24.dp) // Lifted up (Task fix)
-                .background(Color.Black) // FULL OPAQUE (Task fix)
+                .padding(bottom = 64.dp, end = 24.dp)
+                .background(Color.Black)
                 .border(1.dp, Color(0xFF00FF41).copy(alpha = 0.6f))
                 .padding(16.dp),
             horizontalAlignment = Alignment.End,
-            verticalArrangement = Arrangement.spacedBy(8.dp) // Added spacing (Task fix)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
                 text = java.text.SimpleDateFormat("HH:mm:ss", Locale.US).format(currentTime),
                 color = Color(0xFF00FF41),
                 fontFamily = FontFamily.Monospace,
-                fontSize = 42.sp, // Slightly smaller to avoid wrap
+                fontSize = 42.sp,
                 fontWeight = FontWeight.ExtraBold,
                 style = TextStyle(shadow = Shadow(Color(0xFF00FF41), blurRadius = 8f)),
                 softWrap = false
@@ -173,8 +184,14 @@ fun MatrixRainScreen(
             
             HorizontalDivider(color = Color(0xFF00FF41).copy(alpha = 0.2f), thickness = 0.5.dp)
 
+            val displayCoinInfo = if (allPrices.isNotEmpty()) {
+                allPrices[currentCoinIndex % allPrices.size]
+            } else {
+                "BTC PRICE: $btcPrice"
+            }
+
             Text(
-                text = "BTC PRICE: $btcPrice",
+                text = displayCoinInfo,
                 color = Color(0xFFFFA500),
                 fontFamily = FontFamily.Monospace,
                 fontSize = 13.sp,

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 5,
-    "identityHash": "ded57ce91136d688617f9dd850e31cf4",
+    "identityHash": "abf32fd1461d58cabf21b343647f58d9",
     "entities": [
       {
         "tableName": "coins",
@@ -108,7 +108,7 @@
       },
       {
         "tableName": "price_history",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `coinId` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, `price` REAL NOT NULL, `volume` REAL NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `coinId` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, `open` REAL NOT NULL, `high` REAL NOT NULL, `low` REAL NOT NULL, `price` REAL NOT NULL, `volume` REAL NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -126,6 +126,24 @@
             "fieldPath": "timestamp",
             "columnName": "timestamp",
             "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "open",
+            "columnName": "open",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "high",
+            "columnName": "high",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "low",
+            "columnName": "low",
+            "affinity": "REAL",
             "notNull": true
           },
           {
@@ -150,19 +168,19 @@
         "indices": [
           {
             "name": "index_price_history_coinId_timestamp",
-            "unique": false,
+            "unique": true,
             "columnNames": [
               "coinId",
               "timestamp"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_price_history_coinId_timestamp` ON `${TABLE_NAME}` (`coinId`, `timestamp`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_price_history_coinId_timestamp` ON `${TABLE_NAME}` (`coinId`, `timestamp`)"
           }
         ]
       },
       {
         "tableName": "alerts",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `coinId` TEXT NOT NULL, `coinSymbol` TEXT NOT NULL, `targetPrice` REAL NOT NULL, `direction` TEXT NOT NULL, `isActive` INTEGER NOT NULL, `isTriggered` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `coinId` TEXT NOT NULL, `coinSymbol` TEXT NOT NULL, `targetPrice` REAL NOT NULL, `direction` TEXT NOT NULL, `isActive` INTEGER NOT NULL, `isTriggered` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, `name` TEXT, `conditionsJson` TEXT, `logicOperator` TEXT, `cooldownMinutes` INTEGER NOT NULL, `lastTriggeredAt` INTEGER)",
         "fields": [
           {
             "fieldPath": "id",
@@ -211,6 +229,32 @@
             "columnName": "createdAt",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "conditionsJson",
+            "columnName": "conditionsJson",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "logicOperator",
+            "columnName": "logicOperator",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cooldownMinutes",
+            "columnName": "cooldownMinutes",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastTriggeredAt",
+            "columnName": "lastTriggeredAt",
+            "affinity": "INTEGER"
           }
         ],
         "primaryKey": {
@@ -410,7 +454,37 @@
           "columnNames": [
             "id"
           ]
-        }
+        },
+        "indices": [
+          {
+            "name": "index_prediction_accuracy_coinId_model",
+            "unique": false,
+            "columnNames": [
+              "coinId",
+              "model"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_prediction_accuracy_coinId_model` ON `${TABLE_NAME}` (`coinId`, `model`)"
+          },
+          {
+            "name": "index_prediction_accuracy_verifiedAt",
+            "unique": false,
+            "columnNames": [
+              "verifiedAt"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_prediction_accuracy_verifiedAt` ON `${TABLE_NAME}` (`verifiedAt`)"
+          },
+          {
+            "name": "index_prediction_accuracy_coinId",
+            "unique": false,
+            "columnNames": [
+              "coinId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_prediction_accuracy_coinId` ON `${TABLE_NAME}` (`coinId`)"
+          }
+        ]
       },
       {
         "tableName": "portfolio",
@@ -459,11 +533,286 @@
             "id"
           ]
         }
+      },
+      {
+        "tableName": "custom_signal_rules",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `conditionsJson` TEXT NOT NULL, `operator` TEXT NOT NULL, `action` TEXT NOT NULL, `isActive` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "conditionsJson",
+            "columnName": "conditionsJson",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "operator",
+            "columnName": "operator",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "action",
+            "columnName": "action",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isActive",
+            "columnName": "isActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "news",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `url` TEXT NOT NULL, `source` TEXT NOT NULL, `publishedAt` INTEGER NOT NULL, `sentiment` TEXT NOT NULL, `currencies` TEXT NOT NULL, `imageUrl` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "url",
+            "columnName": "url",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "source",
+            "columnName": "source",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "publishedAt",
+            "columnName": "publishedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sentiment",
+            "columnName": "sentiment",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currencies",
+            "columnName": "currencies",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "imageUrl",
+            "columnName": "imageUrl",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "network_health",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `btcHashrate` TEXT NOT NULL, `btcMempool` TEXT NOT NULL, `ethGas` TEXT NOT NULL, `fearGreedIndex` INTEGER NOT NULL, `fearGreedLabel` TEXT NOT NULL, `socialPulse` INTEGER NOT NULL, `socialPulseLabel` TEXT NOT NULL, `lastUpdated` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "btcHashrate",
+            "columnName": "btcHashrate",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "btcMempool",
+            "columnName": "btcMempool",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ethGas",
+            "columnName": "ethGas",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fearGreedIndex",
+            "columnName": "fearGreedIndex",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fearGreedLabel",
+            "columnName": "fearGreedLabel",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "socialPulse",
+            "columnName": "socialPulse",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "socialPulseLabel",
+            "columnName": "socialPulseLabel",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastUpdated",
+            "columnName": "lastUpdated",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "intelligence_briefings",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `timestamp` INTEGER NOT NULL, `summary` TEXT NOT NULL, `anomalyScore` INTEGER NOT NULL, `sentiment` TEXT NOT NULL, `riskScore` INTEGER NOT NULL, `evidence` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "summary",
+            "columnName": "summary",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "anomalyScore",
+            "columnName": "anomalyScore",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sentiment",
+            "columnName": "sentiment",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "riskScore",
+            "columnName": "riskScore",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "evidence",
+            "columnName": "evidence",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "macro_intelligence",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `btcDominance` REAL NOT NULL, `ethGasGwei` INTEGER NOT NULL, `globalMarketCapUsd` REAL NOT NULL, `altcoinSeasonIndex` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "btcDominance",
+            "columnName": "btcDominance",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ethGasGwei",
+            "columnName": "ethGasGwei",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "globalMarketCapUsd",
+            "columnName": "globalMarketCapUsd",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "altcoinSeasonIndex",
+            "columnName": "altcoinSeasonIndex",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ded57ce91136d688617f9dd850e31cf4')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'abf32fd1461d58cabf21b343647f58d9')"
     ]
   }
 }

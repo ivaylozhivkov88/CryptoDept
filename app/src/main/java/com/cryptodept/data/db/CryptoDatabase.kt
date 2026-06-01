@@ -16,8 +16,9 @@ import androidx.room.TypeConverters
         NewsEntity::class,
         NetworkHealthEntity::class,
         IntelligenceBriefingEntity::class,
+        MacroIntelligenceEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)
@@ -32,6 +33,7 @@ abstract class CryptoDatabase : RoomDatabase() {
     abstract val newsDao: NewsDao
     abstract val networkHealthDao: NetworkHealthDao
     abstract val intelligenceBriefingDao: IntelligenceBriefingDao
+    abstract val macroIntelligenceDao: MacroIntelligenceDao
 
     companion object {
         const val DATABASE_NAME = "crypto_db"

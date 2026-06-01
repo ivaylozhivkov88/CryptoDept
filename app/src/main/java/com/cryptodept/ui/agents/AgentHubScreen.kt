@@ -86,10 +86,11 @@ fun AgentHubScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "NO_ANOMALIES_DETECTED_IN_PREVIOUS_CYCLES",
+                    text = if (isRefreshing) "ESTABLISHING_AGENT_CONNECTION..." else "NO_ANOMALIES_DETECTED_IN_PREVIOUS_CYCLES",
                     color = colors.dimText,
                     fontFamily = FontFamily.Monospace,
-                    fontSize = 12.sp
+                    fontSize = 12.sp,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
                 )
             }
         } else {
@@ -142,9 +143,9 @@ fun BriefingCard(briefing: IntelligenceBriefingEntity) {
             Text(
                 text = briefing.summary,
                 color = colors.textPrimary,
-                fontSize = 12.sp,
+                fontSize = 11.sp,
                 fontFamily = FontFamily.Monospace,
-                lineHeight = 16.sp
+                lineHeight = 14.sp
             )
 
             Spacer(modifier = Modifier.height(12.dp))

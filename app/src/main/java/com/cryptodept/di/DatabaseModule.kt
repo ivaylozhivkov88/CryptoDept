@@ -57,6 +57,12 @@ object DatabaseModule {
         }
     }
 
+    private val MIGRATION_4_5 = object : Migration(4, 5) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("CREATE TABLE IF NOT EXISTS `macro_intelligence` (`id` INTEGER NOT NULL, `btcDominance` REAL NOT NULL, `ethGasGwei` INTEGER NOT NULL, `globalMarketCapUsd` REAL NOT NULL, `altcoinSeasonIndex` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+        }
+    }
+
     private fun buildDatabase(context: Context, factory: net.zetetic.database.sqlcipher.SupportOpenHelperFactory): CryptoDatabase {
         return Room
             .databaseBuilder(
@@ -64,7 +70,7 @@ object DatabaseModule {
                 CryptoDatabase::class.java,
                 CryptoDatabase.DATABASE_NAME,
             ).openHelperFactory(factory)
-            .addMigrations(MIGRATION_2_3, MIGRATION_3_4)
+            .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
             .fallbackToDestructiveMigration(true)
             .build()
     }
@@ -98,4 +104,7 @@ object DatabaseModule {
 
     @Provides
     fun provideIntelligenceBriefingDao(db: CryptoDatabase): IntelligenceBriefingDao = db.intelligenceBriefingDao
+
+    @Provides
+    fun provideMacroIntelligenceDao(db: CryptoDatabase): MacroIntelligenceDao = db.macroIntelligenceDao
 }

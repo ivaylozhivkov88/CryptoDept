@@ -2,6 +2,7 @@ package com.cryptodept.service
 
 import android.content.Context
 import android.util.Log
+import androidx.glance.appwidget.updateAll
 import androidx.hilt.work.HiltWorker
 import androidx.work.*
 import com.cryptodept.data.api.FearGreedApi
@@ -28,7 +29,9 @@ class CryptoDataSyncWorker @AssistedInject constructor(
     private val confluenceDetector: ConfluenceAlertDetector,
     private val alertRepository: AlertsRepository,
     private val notificationHelper: NotificationHelper,
-    private val evaluationEngine: AlertEvaluationEngine
+    private val evaluationEngine: AlertEvaluationEngine,
+    private val predictionEngine: com.cryptodept.domain.usecase.prediction.PredictionEnsembleEngine,
+    private val getMacroIntelligenceUseCase: com.cryptodept.domain.usecase.GetMacroIntelligenceUseCase
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
@@ -38,16 +41,42 @@ class CryptoDataSyncWorker @AssistedInject constructor(
             // 1. Refresh basic prices
             cryptoRepository.refreshPrices()
             
-            // 2. Perform deep analysis for major coins (BTC)
+            // 2. Refresh macro intelligence (Indices)
+            getMacroIntelligenceUseCase()
+
+            // 3. Perform deep analysis and record predictions for major assets
             analyzeMarket()
 
-            // 3. Check Alerts
+            // 3. Record background predictions for accuracy tracking
+            recordBackgroundPredictions()
+
+            // 4. Check Alerts
             checkAllAlerts()
+
+            // 4. Force Widget Update to ensure rotation/sync
+            com.cryptodept.widget.CryptoDeptWidget().updateAll(applicationContext)
             
             Result.success()
         } catch (e: Exception) {
             Log.e("CryptoDataSyncWorker", "Error during sync: ${e.message}")
             if (runAttemptCount < 3) Result.retry() else Result.failure()
+        }
+    }
+
+    private suspend fun recordBackgroundPredictions() {
+        val majorCoins = listOf("bitcoin", "ethereum", "solana")
+        majorCoins.forEach { coinId ->
+            try {
+                val ohlc = cryptoRepository.getOHLCData(coinId, 30)
+                if (ohlc.isNotEmpty()) {
+                    val closes = ohlc.map { it.close }
+                    val volumes = ohlc.map { it.volume }
+                    predictionEngine.generatePrediction(coinId, closes, volumes)
+                    Log.d("CryptoDataSyncWorker", "Recorded background prediction for $coinId")
+                }
+            } catch (e: Exception) {
+                Log.e("CryptoDataSyncWorker", "Failed to record background prediction for $coinId", e)
+            }
         }
     }
 

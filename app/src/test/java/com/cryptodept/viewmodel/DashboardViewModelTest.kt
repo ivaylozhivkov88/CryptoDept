@@ -50,6 +50,7 @@ class DashboardViewModelTest {
     private val refreshOHLCUseCase: RefreshOHLCUseCase = mockk(relaxed = true)
     private val getLiquidationSummaryUseCase: GetLiquidationSummaryUseCase = mockk(relaxed = true)
     private val integrityService: com.cryptodept.domain.manager.SystemIntegrityService = mockk(relaxed = true)
+    private val briefingRepository: com.cryptodept.domain.repository.BriefingRepository = mockk(relaxed = true)
 
     private lateinit var viewModel: DashboardViewModel
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -78,6 +79,7 @@ class DashboardViewModelTest {
         every { firebaseDataSource.getTerminalState() } returns flowOf(null)
         every { logService.events } returns MutableStateFlow(emptyList())
         every { integrityService.logs } returns MutableStateFlow(emptyList())
+        every { briefingRepository.getAllBriefings() } returns flowOf(emptyList())
         
         coEvery { getNetworkHealthUseCase() } returns Result.success(
             NetworkHealth("80 EH/s", "10 vB", "20 Gwei", 50, "Neutral")
@@ -108,7 +110,8 @@ class DashboardViewModelTest {
             getOHLCUseCase,
             refreshOHLCUseCase,
             getLiquidationSummaryUseCase,
-            integrityService
+            integrityService,
+            briefingRepository
         )
     }
 

@@ -39,4 +39,6 @@ interface CryptoRepository {
     fun getNetworkHealth(): Flow<NetworkHealth?>
 
     suspend fun saveNetworkHealth(health: NetworkHealth)
+
+    suspend fun searchCoins(query: String): List<CoinPrice>
 }

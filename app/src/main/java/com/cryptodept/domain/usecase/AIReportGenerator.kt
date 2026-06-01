@@ -107,9 +107,9 @@ class AIReportGenerator
                 return flow { emit(demoMode.getDemoAiNarrative()) }
             }
             val prompt = when(agentId) {
-                "SENTINEL" -> buildSentinelPrompt(data)
-                "PULSE" -> buildPulsePrompt(data)
-                "QUANT" -> buildQuantPrompt(data)
+                "AGENT-SENTINEL" -> buildSentinelPrompt(data)
+                "AGENT-PULSE" -> buildPulsePrompt(data)
+                "AGENT-QUANT" -> buildQuantPrompt(data)
                 else -> buildShortSummaryPrompt(data)
             }
             return callGeminiStream(prompt)

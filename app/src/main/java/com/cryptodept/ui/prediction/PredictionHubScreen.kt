@@ -5,9 +5,11 @@ import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -33,6 +35,7 @@ import com.cryptodept.viewmodel.MarketsViewModel
 
 @Composable
 fun PredictionHubScreen(
+    initialCoinId: String? = null,
     onBack: () -> Unit,
     predictionViewModel: PredictionViewModel = hiltViewModel(),
     marketsViewModel: MarketsViewModel = hiltViewModel()
@@ -42,6 +45,13 @@ fun PredictionHubScreen(
     val marketsState by marketsViewModel.uiState.collectAsStateWithLifecycle()
     
     var searchQuery by remember { mutableStateOf("") }
+    
+    LaunchedEffect(initialCoinId) {
+        val isValidId = initialCoinId != null && !initialCoinId.contains("{")
+        if (isValidId && predictionState is PredictUiState.Idle) {
+            predictionViewModel.startDeepAnalysis(initialCoinId)
+        }
+    }
     
     BackHandler {
         if (predictionState !is PredictUiState.Idle) {
@@ -102,6 +112,30 @@ fun PredictionHubScreen(
                     Text("SELECT_ASSET_FOR_QUANT_SCAN:", color = colors.dimText, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
                     
                     Spacer(modifier = Modifier.height(8.dp))
+
+                    // QUICK ACCESS (FAVORITES)
+                    val trackedCoins = if (marketsState is com.cryptodept.viewmodel.MarketsUiState.Success) {
+                        (marketsState as com.cryptodept.viewmodel.MarketsUiState.Success).coins.filter { it.isTracked }
+                    } else emptyList()
+
+                    if (trackedCoins.isNotEmpty() && searchQuery.isEmpty()) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(bottom = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            trackedCoins.forEach { coin ->
+                                Box(
+                                    modifier = Modifier
+                                        .border(1.dp, colors.primary, RectangleShape)
+                                        .background(colors.primary.copy(alpha = 0.1f))
+                                        .clickable { predictionViewModel.startDeepAnalysis(coin.id) }
+                                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                                ) {
+                                    Text(coin.symbol.uppercase(), color = colors.primary, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                }
+                            }
+                        }
+                    }
                     
                     // ASSET LIST
                     val filteredCoins = if (marketsState is com.cryptodept.viewmodel.MarketsUiState.Success) {

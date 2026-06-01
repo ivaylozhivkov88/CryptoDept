@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -63,8 +64,15 @@ fun ToolsHubScreen(
         ToolItem("PERFORMANCE", "Personal stats", Icons.Default.ThumbUp, Screen.Performance.route, feature = FeatureKey.ACHIEVEMENTS)
     )
 
+    val quantLabTools = listOf(
+        ToolItem("CYCLE SCANNER", "Fourier Cycle analysis", Icons.Default.Refresh, Screen.CycleScanner.createRoute(), feature = FeatureKey.QUANT_LAB_INDIVIDUAL),
+        ToolItem("PROBABILITY", "Monte Carlo engine", Icons.Default.Info, Screen.ProbabilityEngine.createRoute(), feature = FeatureKey.QUANT_LAB_INDIVIDUAL),
+        ToolItem("DYNAMISM", "Hurst & Fractal noise", Icons.Default.Search, Screen.MarketDynamism.createRoute(), feature = FeatureKey.QUANT_LAB_INDIVIDUAL),
+        ToolItem("REGRESSION", "Standard deviation tunnel", Icons.Default.Build, Screen.RegressionTunnel.createRoute(), feature = FeatureKey.QUANT_LAB_INDIVIDUAL)
+    )
+
     val adminTools = listOf(
-        ToolItem("PREDICT ENGINE", "AI Predictions", Icons.Default.Star, Screen.Prediction.route, adminOnly = true, feature = FeatureKey.PREDICTION_ENGINES_6),
+        ToolItem("ORACLE HUB", "AI Predictions", Icons.Default.Star, Screen.Prediction.createRoute(), adminOnly = true, feature = FeatureKey.PREDICTION_ENGINES_6),
         ToolItem("CONTENT STUDIO", "AI Generator", Icons.Default.Create, Screen.ContentStudio.route, adminOnly = true, feature = FeatureKey.CONTENT_STUDIO)
     )
 
@@ -98,8 +106,11 @@ fun ToolsHubScreen(
 
             item { SectionHeader("📊 ANALYSIS & DATA") }
             item { ToolGrid(analysisTools, navController, currentTier) }
+
+            item { SectionHeader("🔬 QUANT LAB (PRO)") }
+            item { ToolGrid(quantLabTools, navController, currentTier) }
             
-            item { SectionHeader("🔬 ADVANCED") }
+            item { SectionHeader("⚙️ ADVANCED") }
             item { ToolGrid(advancedTools, navController, currentTier) }
 
             if (currentTier == AccessTier.ADMIN) {
@@ -169,36 +180,54 @@ fun ToolCard(
     Box(
         modifier = modifier
             .fillMaxWidth()
+            .height(80.dp) // Fixed height for uniform grid (Task 2)
             .border(0.5.dp, if (isLocked) colors.grid.copy(alpha = 0.5f) else colors.grid)
             .background(if (isLocked) colors.background.copy(alpha = 0.5f) else colors.background)
             .let { if (tool.targetId != null) it.tutorialTarget(tool.targetId) else it }
             .clickable { onClick() }
-            .padding(12.dp)
+            .padding(8.dp)
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-            Box(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Text(
                     text = if (isLocked) "🔒 ${tool.name}" else "[${tool.name}]",
                     color = if (isLocked) colors.dimText else colors.primary,
-                    fontSize = 12.sp,
+                    fontSize = 11.sp, // Slightly smaller to prevent crowding
                     fontFamily = JetBrainsMono,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(Alignment.Center)
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false) // Allow text to take only needed space
                 )
+                
                 tool.feature?.let {
+                    Spacer(Modifier.width(4.dp))
                     FeatureHelpIcon(
                         feature = it,
-                        iconSize = 16.dp, // INCREASED SIZE (Task 2.16)
-                        modifier = Modifier.align(Alignment.CenterEnd)
+                        iconSize = 14.dp, // Adjusted size
                     )
                 }
             }
+            
+            Spacer(modifier = Modifier.height(4.dp))
+            
             Text(
                 text = tool.description,
                 color = if (isLocked) colors.dimText.copy(alpha = 0.5f) else colors.dimText,
-                fontSize = 11.sp,
+                fontSize = 10.sp,
                 fontFamily = JetBrainsMono,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                maxLines = 2,
+                lineHeight = 12.sp,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }

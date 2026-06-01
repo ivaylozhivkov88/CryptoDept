@@ -12,10 +12,9 @@ class FirebasePriceProvider @Inject constructor(
 
     override suspend fun fetchPrice(coinGeckoId: String): Result<Double> {
         return try {
-            // Вземаме последния наличен стейт от облака
-            val state = firebaseDataSource.getTerminalState().firstOrNull()
-            // Търсим цената за конкретната монета в облачната мапа
-            val price = state?.marketData?.get(coinGeckoId)?.currentPrice
+            // ОПТИМИЗИРАНО: Вземаме само данните за конкретната монета (пести 95% трафик)
+            val coinData = firebaseDataSource.getCoinData(coinGeckoId).firstOrNull()
+            val price = coinData?.currentPrice
             
             if (price != null && price > 0) {
                 Result.success(price)

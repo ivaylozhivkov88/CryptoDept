@@ -55,8 +55,13 @@ fun AccuracyDashboardScreen(
                 Spacer(Modifier.height(8.dp))
                 Box(Modifier.fillMaxWidth().border(1.dp, colors.grid).padding(16.dp)) {
                     Column {
-                        Text("OVERALL ACCURACY: ${String.format(Locale.US, "%.1f", state.overallAccuracy)}%", color = colors.primary, fontSize = 20.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
-                        Text("Based on ${state.totalSamples} verified predictions", color = colors.dimText, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+                        if (state.totalSamples == 0) {
+                            Text("CALCULATING...", color = colors.amber, fontSize = 20.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                            Text("Awaiting first verified market close", color = colors.dimText, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+                        } else {
+                            Text("OVERALL ACCURACY: ${String.format(Locale.US, "%.1f", state.overallAccuracy)}%", color = colors.primary, fontSize = 20.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                            Text("Based on ${state.totalSamples} verified predictions", color = colors.dimText, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+                        }
                     }
                 }
                 Spacer(Modifier.height(24.dp))

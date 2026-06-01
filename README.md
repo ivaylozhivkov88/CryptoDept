@@ -1,62 +1,67 @@
-# 📟 CryptoDept Terminal v1.5.0 — ULTIMATE STABLE
-> **The Multi-Agent Intelligence Hub for Elite Digital Asset Management.**
+# 🌐 CryptoDept Terminal — Tactical AI Intelligence Unit
 
-![Android](https://img.shields.io/badge/Platform-Android-00FF41?style=for-the-badge&logo=android&logoColor=black)
-![Firebase](https://img.shields.io/badge/Backend-Firebase_Cloud-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
-![Kotlin](https://img.shields.io/badge/Language-Kotlin-00FF41?style=for-the-badge&logo=kotlin&logoColor=black)
-![Security](https://img.shields.io/badge/Security-Verified_by_Google_Play-blue?style=for-the-badge)
-
-**CryptoDept** is a high-performance, time-aware Android terminal. It is not a tracker; it is an **operative partner** that synchronizes with the global market cycle to provide clinical technical analysis, institutional whale monitoring, and AI-driven predictive narratives.
+**Stop watching the market. Start decoding it.** CryptoDept is a high-frequency, multi-agent intelligence terminal designed for those who demand institutional-grade data wrapped in a specialized cyber-interface.
 
 ---
 
-## 🎁 Pre-registration Rewards
-Join the elite circle of early adopters! Users who pre-register for the **CryptoDept Terminal** on Google Play will receive:
-*   **3-Day Full Intelligence Pass**: Complete access to all Pro-tier agents, whale alerts, and prediction engines.
-*   **Early Bird Status**: Priority access to upcoming experimental features.
-*   *Reward is automatically granted upon your first login after the official launch.*
+## ⚡ The Intelligence Core: Assets & Analysis
+
+### 📂 Dynamic Asset Dossier
+Get a full intelligence brief on any coin. Our **Asset Dossier** provides a multi-tabbed breakdown:
+*   **Real-Time Vitals**: Live price action, market cap, and surgical volume metrics.
+*   **Historical Echoes**: Deep-dive into past performance and cycles.
+*   **Market Depth**: See where the liquidity is across major exchanges.
+
+### 🎯 Asset Analysis Node (Instant Verdict)
+For your favorites, the **Analysis Node** provides lightning-fast execution data:
+*   **Summary Verdict**: Instant BUY/SELL/HOLD signals based on agent consensus.
+*   **Confidence Meter**: Know exactly how sure the AI is about the current move.
+*   **Technical Confluence**: Live RSI, MACD, and Fibonacci structures on one screen.
+*   **Sentiment Radar**: Real-time social heat maps for every tracked asset.
 
 ---
 
-## 🚀 Version 1.5.0 Intelligence Pass
-
-### 🌐 Centralized Cloud Heartbeat (v1.5 Exclusive)
-*   **Firebase Core Integration**: Zero-lag data synchronization. We stopped local WebSockets to save your battery—the cloud now handles the heavy lifting 24/7.
-*   **Session Intelligence**: The terminal now understands the 24-hour market cycle. Whether it's the London Open or the NY Volatility Window, the interface adapts its strategy in real-time.
-
-### 🧠 The Multi-Agent Framework
-*   **[SENTINEL]**: Real-time Technical Confluence (RSI, Trends, Patterns).
-*   **[SCOUT]**: Institutional Flow Monitoring ($500k+ on-chain moves).
-*   **[ORACLE]**: High-fidelity price projections using a 7-model mathematical ensemble.
-*   **[PULSE]**: Psychological barometer and social sentiment filter.
+## 🔬 The Quant Lab: Specialized Math Engines
+Go beyond basic indicators. Access 4 independent, high-level mathematical models:
+*   🌀 **[CYCLE SCANNER]**: Fourier Transform analysis to detect hidden market cycles.
+*   🎲 **[PROBABILITY]**: Monte Carlo simulations to calculate potential price outcomes.
+*   📈 **[DYNAMISM]**: Hurst Exponent & Fractal Noise analysis to detect trend strength.
+*   📉 **[REGRESSION]**: Standard Decision Lines to identify overextended price points.
 
 ---
 
-## ⚡ New Operative Features
+## 📱 Seamless Intelligence & Widgets
 
-*   **⚓ Mission Control Card**: Dynamic top-bar providing "Strategic Objectives" based on your local time and current market phase.
-*   **🔔 Smart Notifications**: Real-data alerts containing live BTC metrics and trend analysis—no more boilerplate text.
-*   **🛡️ Hardened Billing**: Enterprise-grade server-side validation via Google Play Developer API.
-*   **🎟️ Promo Logic**: Integrated "Redeem" flows for promotional Intelligence Passes.
-*   **🎨 High-Fidelity UX**: Global font audit (11sp+ min) for absolute readability on any device.
+### 🎪 The Carousel Widget System
+Your home screen, upgraded. Our self-refreshing widgets keep you in the loop without opening the app:
+*   **The 1x1 Compact**: A beautiful, auto-rotating price tracker.
+*   **The 4x1 Carousel Grid**: A multi-coin "Trading Desk" view that rotates through your entire watchlist automatically.
 
----
+### ☁️ Google Cloud Intelligence
+Never lose your setup. Sign in with **Google** to instantly sync your watchlist and favorite configurations across all your devices. Your intelligence profile travels with you.
 
-## 🛠 Tech Stack
-
-*   **UI**: Jetpack Compose (Modular Architecture).
-*   **Backend**: Firebase Cloud Functions (Node.js 22) + Realtime DB.
-*   **Security**: Official Google Auth & Play Integrity.
-*   **Performance**: Frame-capped animations (60fps) & centralized data harvesting.
+### 📰 Live Pulse Feed
+Stay updated with real-time, curated market news and social dominance shifts. If it’s moving the market, it’s on your terminal.
 
 ---
 
-## 🏗 Modular Architecture
-The project is now fully decoupled for maximum speed:
-1.  **`:ui:dashboard:components`**: Fragmented UI for rapid rendering.
-2.  **`:domain:tier`**: Unified access management for FREE, PRO, and ADMIN tiers.
-3.  **`:functions`**: Centralized market analysis and validator nodes.
+## 🖥️ Tactical Aesthetics
+*   **Matrix Screensaver**: Immerse yourself in the data. Activate the legendary **Matrix Code Rain** screensaver—because a terminal should look as powerful as it performs.
+*   **Cyber-Interface**: A custom-built, low-latency UI designed for high-stress market environments.
 
 ---
-*CryptoDept Intelligence Unit — Authorized Access Only*
-<!-- v1.5.0-final-check -->
+
+## 🛡️ Institutional-Grade Security
+*   **Vault-Level Encryption**: All local data is protected by 256-bit SQLCipher encryption.
+*   **Device Integrity**: Military-grade checks to ensure your trading unit is untampered and secure.
+*   **Pro-Tier Access**: Unlock the full power of the AI Council via seamless Google Play integration.
+
+---
+
+## 📈 Join the Elite
+Don't just follow the trend—anticipate it with the most advanced multi-agent terminal on the market.
+
+*Disclaimer: CryptoDept provides data-driven insights. Market participation involves significant risk. Our agents provide data, not financial advice.*
+
+---
+**CryptoDept Intelligence Unit — Authorized Access Only**

@@ -11,6 +11,9 @@ interface PriceHistoryDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPrice(price: PriceHistoryEntity)
 
+    @Query("SELECT * FROM price_history WHERE coinId = :coinId AND timestamp >= :since ORDER BY timestamp DESC")
+    suspend fun getRecentHistory(coinId: String, since: Long): List<PriceHistoryEntity>
+
     @Query("DELETE FROM price_history WHERE timestamp < :threshold")
     suspend fun deleteOldHistory(threshold: Long)
 

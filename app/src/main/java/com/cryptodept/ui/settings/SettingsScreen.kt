@@ -216,7 +216,7 @@ fun SettingsScreen(
                                 ).background(colors.error.copy(alpha = 0.1f))
                                 .padding(12.dp),
                     ) {
-                        Text(warning, color = colors.error, fontFamily = FontFamily.Monospace, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text(warning, color = colors.error, fontFamily = FontFamily.Monospace, fontSize = 11.sp, fontWeight = FontWeight.Bold, lineHeight = 14.sp)
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                 }
@@ -286,7 +286,7 @@ fun SettingsScreen(
                         }
                     },
                     onForceSyncIdentity = { viewModel.forceSyncIdentity(authService) },
-                    onNavigateToPredictionRecord = { navController.navigate(com.cryptodept.ui.navigation.Screen.Prediction.route) },
+                    onNavigateToPredictionRecord = { navController.navigate("accuracy_dashboard") },
                     onSetAdminStatus = viewModel::setAdminStatus,
                     onSetProStatus = viewModel::setProStatus,
                     onOpenPrivacyPolicy = { uriHandler.openUri("https://gist.githubusercontent.com/ivaylozhivkov88/147ca22ec93a2af3dd9224c69466af82/raw/") }

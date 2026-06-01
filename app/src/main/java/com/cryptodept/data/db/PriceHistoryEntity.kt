@@ -12,6 +12,9 @@ data class PriceHistoryEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val coinId: String,
     val timestamp: Long,
-    val price: Double,
+    val open: Double = 0.0,
+    val high: Double = 0.0,
+    val low: Double = 0.0,
+    val price: Double, // Close price
     val volume: Double,
 )
